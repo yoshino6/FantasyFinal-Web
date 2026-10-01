@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import type { PanelEquippedItem, PanelPortrait } from '../api';
-import { portraitBaseAsset } from '../character-assets';
+import { portraitAssetCandidates } from '../character-assets';
 
 const props = withDefaults(defineProps<{
   portrait?: PanelPortrait;
@@ -10,8 +10,12 @@ const props = withDefaults(defineProps<{
   alt?: string;
 }>(), { alt: '人类冒险者立绘' });
 
-const imageFailed = ref(false);
-const baseSrc = computed(() => portraitBaseAsset(props.portrait));
+const assetCandidates = computed(() => portraitAssetCandidates(props.portrait));
+const assetIndex = ref(0);
+const baseSrc = computed(() => assetCandidates.value[assetIndex.value]);
+const imageFailed = computed(() => !baseSrc.value);
+watch(() => assetCandidates.value.join('|'), () => { assetIndex.value = 0; });
+const tryNextAsset = () => { assetIndex.value += 1; };
 
 const slotLabel: Record<string, string> = {
   weapon: '主手', offhand: '副手', shoulder: '头肩', upper: '上装', waist: '腰部', lower: '下装',
@@ -23,7 +27,7 @@ const labelForSlot = (slot?: string) => slot ? (slotLabel[slot] ?? slot) : '装�
 <template>
   <section class="character-portrait" aria-label="人物立绘与穿戴">
     <div class="character-portrait-stage">
-      <img v-if="!imageFailed" class="character-portrait-base" :src="baseSrc" :alt="alt" @error="imageFailed = true" />
+      <img v-if="!imageFailed" class="character-portrait-base" :src="baseSrc" :alt="alt" @error="tryNextAsset" />
       <div v-else class="character-portrait-fallback" role="img" :aria-label="alt"><span>人类<br />冒险者</span></div>
     </div>
     <div v-if="equipment?.length" class="character-portrait-loadout">

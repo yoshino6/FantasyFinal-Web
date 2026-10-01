@@ -21,6 +21,7 @@ export type MapPointAction = {
 
 export type ExploreMapPoint = {
   id: string;
+  code?: string;
   name: string;
   type?: string;
   icon?: string;
@@ -53,6 +54,8 @@ export type MapBounds = {
   maxZ: number;
 };
 
+export type MapActionLock = { title: string; detail: string; countdown?: string; stopLabel?: string; stopDisabled?: boolean };
+
 const props = withDefaults(defineProps<{
   current?: MapPosition;
   bounds?: MapBounds;
@@ -63,6 +66,7 @@ const props = withDefaults(defineProps<{
   subtitle?: string;
   disabled?: boolean;
   loading?: boolean;
+  actionLock?: MapActionLock | null;
 }>(), {
   current: () => ({ x: 0, y: 0, name: '未知区域' }),
   points: () => [],
@@ -72,6 +76,7 @@ const props = withDefaults(defineProps<{
   subtitle: '选择移速范围内的格子移动，点击标记查看互动。',
   disabled: false,
   loading: false,
+  actionLock: null,
 });
 
 const emit = defineEmits<{
@@ -81,6 +86,7 @@ const emit = defineEmits<{
   (event: 'selected', point: ExploreMapPoint | null): void;
   (event: 'open-region-map'): void;
   (event: 'open-auto-battle'): void;
+  (event: 'stop-action'): void;
 }>();
 
 const selectedPoint = ref<ExploreMapPoint | null>(null);
@@ -258,7 +264,7 @@ const defaultInteract = () => {
     <div class="world-map-grid-shell">
       <div class="world-map-coordinate world-map-grid-coordinate"><span>当前坐标</span><strong>({{ current.x }}, {{ current.y }}<template v-if="current.z !== undefined">, {{ current.z }}</template>)</strong></div>
       <div class="world-map-grid-overlay" :style="gridStyle" aria-label="地图快捷设置">
-        <button v-if="mapButtonPlacement" type="button" class="world-map-sidebar-button" :style="mapButtonStyle" :disabled="disabled || loading" aria-label="打开队伍地图" @click="emit('open-region-map')">
+        <button v-if="mapButtonPlacement" type="button" class="world-map-sidebar-button" :style="mapButtonStyle" :disabled="disabled || loading" aria-label="打开世界地图" @click="emit('open-region-map')">
           <span aria-hidden="true">🗺</span><small>地图</small>
         </button>
         <button v-if="autoButtonPlacement" type="button" class="world-map-auto-button" :style="autoButtonStyle" :disabled="disabled || loading" aria-label="打开自动战斗设置" @click="emit('open-auto-battle')">
@@ -294,6 +300,14 @@ const defaultInteract = () => {
         </span>
         <span v-else-if="cell.isMovable" class="move-arrow" aria-hidden="true">＋</span>
       </button>
+      </div>
+      <div v-if="actionLock" class="world-map-action-lock">
+        <div class="world-map-action-card" role="status" aria-live="off">
+          <strong>{{ actionLock.title }}</strong>
+          <span>{{ actionLock.detail }}</span>
+          <p v-if="actionLock.countdown">剩余 <b>{{ actionLock.countdown }}</b></p>
+          <button v-if="actionLock.stopLabel" type="button" :disabled="actionLock.stopDisabled" @click="emit('stop-action')">{{ actionLock.stopLabel }}</button>
+        </div>
       </div>
     </div>
 
@@ -347,6 +361,14 @@ const defaultInteract = () => {
 .legend-dot.movable { background: #d6c9f3; }
 .legend-dot.point { background: #f2c84b; box-shadow: 0 0 0 3px rgba(242, 200, 75, .16); }
 .world-map-grid-shell { position: relative; display: block; width: min(100%, 480px); max-width: 100%; height: auto; min-width: 0; min-height: 0; flex: 0 0 auto; margin: 0 auto; aspect-ratio: 1 / 1; }
+.world-map-action-lock { position: absolute; z-index: 6; inset: 0; display: flex; align-items: flex-start; justify-content: center; padding: clamp(10px, 5vw, 28px); background: rgba(51, 43, 65, .48); border-radius: 14px; backdrop-filter: blur(2px); }
+.world-map-action-card { display: grid; justify-items: center; gap: 7px; width: min(100%, 340px); padding: 15px 12px; color: #463c59; background: rgba(255, 251, 246, .94); border: 1px solid rgba(255, 255, 255, .9); border-radius: 17px; box-shadow: 0 12px 30px rgba(40, 31, 53, .25); text-align: center; }
+.world-map-action-card strong { font-size: clamp(14px, 3vw, 18px); }
+.world-map-action-card span { color: #756a81; font-size: 11px; }
+.world-map-action-card p { margin: 0; font-size: 12px; }
+.world-map-action-card p b { color: #b35476; font-size: clamp(18px, 5vw, 25px); }
+.world-map-action-card button { min-width: 116px; min-height: 38px; padding: 7px 16px; color: white; background: #bd6778; border-radius: 11px; font-weight: 700; }
+.world-map-action-card button:disabled { opacity: .55; }
 .world-map-grid { position: absolute; inset: 0; display: grid; grid-auto-flow: row; grid-auto-rows: minmax(0, 1fr); gap: 3px; width: 100%; height: 100%; min-width: 0; min-height: 0; aspect-ratio: 1 / 1; margin: 0; padding: 4px; background: rgba(243, 233, 226, .62); border: 1px solid rgba(255, 255, 255, .75); border-radius: 14px; }
 .world-map-grid-coordinate { position: absolute; z-index: 3; top: 8px; left: 8px; margin: 0; padding: 4px 7px; color: #7c6a88; background: rgba(255, 252, 248, .84); border-radius: 8px; pointer-events: none; }
 .world-map-grid-coordinate strong { color: #51415f; font-size: 20px; font-weight: 800; }
@@ -387,7 +409,7 @@ const defaultInteract = () => {
 .map-point-visual small { position: absolute; right: 2px; bottom: 2px; left: 2px; z-index: 2; overflow: hidden; color: #6b4b1b; font-size: clamp(9px, 2vw, 15px); font-weight: 800; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
 .move-arrow { color: #aa98da; font-size: clamp(15px, 3vw, 22px); font-weight: 600; opacity: .72; }
 .world-map-loading, .world-map-hint { padding: 7px 0 0; color: var(--muted, #827487); font-size: 10px; text-align: center; }
-.nearby-target-list { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 6px; margin-top: 12px; }
+.nearby-target-list { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 6px; margin-top: 12px; }
 .nearby-target-title { grid-column: 1 / -1; margin: 0 2px 1px; color: #786681; font-size: 12px; font-weight: 700; }
 .nearby-target { display: flex; align-items: center; gap: 7px; min-width: 0; min-height: 42px; padding: 3px 9px; color: var(--ink, #4d4354); background: #fcf5ef; border: 1px solid transparent; border-radius: 11px; text-align: left; }
 .nearby-target-number { display: grid; place-items: center; flex: 0 0 22px; width: 22px; height: 22px; color: #fff; background: #bd86a5; border-radius: 50%; font-size: 11px; font-weight: 700; }
@@ -395,8 +417,8 @@ const defaultInteract = () => {
 .nearby-target-copy { display: grid; flex: 1 1 auto; min-width: 0; gap: 2px; }
 .nearby-target-copy strong { overflow: hidden; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
 .nearby-target-copy small { color: var(--muted, #827487); font-size: 9px; }
-.nearby-target-actions { display: flex; flex: 0 0 auto; align-self: stretch; flex-wrap: wrap; align-items: stretch; justify-content: flex-end; gap: 4px; margin-left: auto; }
-.nearby-target-action { display: grid; place-items: center; width: 36px; min-width: 36px; height: 100%; min-height: 36px; aspect-ratio: 1; padding: 2px; border: 1px solid transparent; border-radius: 8px; font-size: 9px; line-height: 1.1; white-space: normal; }
+.nearby-target-actions { display: flex; flex: 0 1 auto; align-self: center; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 4px; max-width: min(57%, 240px); margin-left: auto; }
+.nearby-target-action { display: grid; place-items: center; flex: 0 0 36px; width: 36px; min-width: 36px; height: 36px; min-height: 36px; padding: 2px; border: 1px solid transparent; border-radius: 8px; font-size: 9px; line-height: 1.1; white-space: normal; }
 .nearby-target-action.tone-primary { color: #fff; background: #df8a78; }
 .nearby-target-action.tone-danger { color: #fff; background: #c96772; }
 .nearby-target-action.tone-soft { color: #5e5070; background: #eee8ff; }

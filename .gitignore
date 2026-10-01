@@ -5,3 +5,15 @@ logs/
 *.log
 alemon.config.yaml
 alemon.yaml
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa
+id_ed25519
+*.tar.gz
+*.tgz
+*.zip
+!*.example

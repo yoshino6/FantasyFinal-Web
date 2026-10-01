@@ -1,7 +1,9 @@
 export type Panel = {
+  pendingStory?: { command?: string; revision?: string | number; messages?: GameActionMessage[] };
   text?: string;
-  buttons?: { label: string; command: string }[];
-  account?: { uid?: string; displayName?: string; hasCharacter?: boolean };
+  buttons?: GameActionButton[];
+  messages?: GameActionMessage[];
+  account?: { uid?: string; loginId?: string; gameUserId?: string; displayName?: string; hasCharacter?: boolean; passwordLoginEnabled?: boolean };
   equipment?: PanelEquippedItem[];
   skills?: PanelSkills;
   evolution?: PanelEvolution;
@@ -22,7 +24,7 @@ export type Panel = {
     equipment?: PanelEquippedItem[];
     portrait?: PanelPortrait;
     movementStep?: number; movementMaximum?: number; perception?: number;
-    activity?: string; travel?: { destination: string; remaining: number };
+    activity?: string; travel?: { destination: string; remaining: number; activityType?: 'move' | 'hunt' };
   };
   mapData?: {
     current?: { name: string; x: number; y: number; z: number };
@@ -109,6 +111,7 @@ export type PanelEquippedItem = {
 export type PanelPortrait = {
   baseKey: string;
   poseKey: string;
+  fallbackKey?: string;
 };
 
 export type PanelSkill = {
@@ -166,6 +169,7 @@ export type PanelBattleMember = {
 export type PanelBattleTarget = {
   id: number;
   name: string;
+  isBoss?: boolean;
   level?: number | null;
   hp: number | string;
   hpMax: number | string;
@@ -174,23 +178,59 @@ export type PanelBattleTarget = {
   defeated?: boolean;
   identified?: boolean;
   statusText?: string;
+  isBossComponent?: boolean;
+  warning?: string | null;
+  breakSummary?: string | null;
 };
 
 export type PanelBattleSnapshot = {
+  sessionId?: string;
+  characterId?: number;
   mode?: string;
+  bonusPhase?: boolean;
   turn?: number;
   canAct?: boolean;
   playerHp?: number;
   playerHpMax?: number;
   playerMp?: number;
   playerMpMax?: number;
+  selectedAllyId?: number | null;
   selectedTargetId?: number | null;
+  selectableEnemyIds?: number[];
+  selectableAllyIds?: number[];
   members?: PanelBattleMember[];
   targets?: PanelBattleTarget[];
   skillSlots?: number[];
   readySkillSlots?: number[];
   itemSlots?: number[];
-  advancedSkills?: { id: number; code: string; name: string; ready?: boolean }[];
+  quickSkills?: { id: number; slot: number; code: string; name: string; baseManaCost: number; targetScope: string; targeting?: 'enemy' | 'ally' | 'none'; targetCount?: number; targetIds?: number[]; disabledSelf?: boolean; cooldownRemaining: number; ready?: boolean; requiresSpecialInput?: boolean }[];
+  quickItems?: { id: number; slot: number; name: string; quantity: number; targeting: 'enemy' | 'ally' | 'none'; targetIds?: number[]; usable: boolean }[];
+  advancedSkills?: { id: number; code: string; name: string; ready?: boolean; baseManaCost?: number; targetScope?: string; targeting?: 'enemy' | 'ally' | 'none'; targetCount?: number; targetIds?: number[]; disabledSelf?: boolean; cooldownRemaining?: number; requiresSpecialInput?: boolean }[];
+  deviceSlots?: { slot: number; instanceId: number; deviceName: string; currentEnergy: number; maxEnergy: number; skills: { code: string; name: string; description?: string; ready?: boolean; targetScope: 'self' | 'ally' | 'enemy' | 'all_allies' | 'all_enemies' | 'any'; energyCost: number; allyTargetIds?: number[]; enemyTargetIds?: number[] }[] }[];
+  canLeafAnchor?: boolean;
+};
+
+export type BattleActionPayload = {
+  sessionId: string;
+  turn: number;
+  bonusPhase: boolean;
+  action: 'attack' | 'defend' | 'escape' | 'skill' | 'item' | 'device' | 'anchor';
+  slot?: number;
+  skillId?: number;
+  deviceSkillCode?: string;
+  target?: { kind: 'member' | 'target'; id: number };
+};
+
+export type BattleActionResult = {
+  ok: true;
+  kind: 'battle_action';
+  text: string;
+  log: string;
+  ended: boolean;
+  waiting: boolean;
+  panel: Panel;
+  refresh: string[];
+  serverTime: string;
 };
 
 /** 当前怪物交涉会话；字段名称与 negotiation.service 的 QQ 端视图保持一致。 */
@@ -247,7 +287,7 @@ export type AutoBattleSkillChoice = { id: number | null; name: string };
 export type AutoBattlePotionChoice = { id: number; name: string };
 
 export type ChatChannel = { id: string; name: string; type: 'world' | 'friend' | 'party'; unreadCount?: number };
-export type ChatMessage = { id: number; senderName: string; senderId?: string; content: string; createdAt: string; own?: boolean };
+export type ChatMessage = { id: number; senderName: string; senderId?: string; content: string; createdAt: string; own?: boolean; recruitmentId?: number; recruitment?: Recruitment };
 export type SocialFriend = { name: string; gameId: number; status: 'friend' | 'oath' | string; affinity: number; stage: string };
 export type SocialSummary = {
   friends: SocialFriend[];
@@ -256,8 +296,11 @@ export type SocialSummary = {
   oathRequests: { id: number; name: string; gameId: number; affinity: number; stage: string; expiresAt: string }[];
   oathReleaseRequests: { id: number; name: string; gameId: number; expiresAt: string }[];
 };
-export type Recruitment = { id: number; partyId: string; partyName: string; title?: string; description?: string; creatorName?: string; targetCount: number; memberCount: number; createdAt: string; expiresAt?: string; own?: boolean; applied?: boolean };
+export type Recruitment = { id: number; partyId: string; partyName: string; title?: string; description?: string; creatorName?: string; leaderGameId?: number; regionCode?: string; regionName?: string; targetCount: number; memberCount: number; openSlots?: number; status?: 'open' | 'closed'; applicationStatus?: 'pending' | 'accepted' | 'rejected' | 'cancelled' | 'expired' | null; createdAt: string; expiresAt?: string; own?: boolean; applied?: boolean };
 export type PartyApplication = { id: number; gameId: number; name: string; message: string; status: string; createdAt: string; respondedAt?: string | null };
+export type WebPartyMember = { id: number; gameId: number; name: string; level: number; isLeader: boolean; isSelf: boolean; regionCode: string; regionName: string; position: { x: number; y: number; z: number } };
+export type WebParty = { id: string; name: string; story: boolean; leaderId: number; leaderGameId: number | null; ownId: number; isLeader: boolean; leader: WebPartyMember | null; members: WebPartyMember[]; memberCount: number; maxMembers: number; regionCode: string; regionName: string; position: { x: number; y: number; z: number } | null; canLeave: boolean; canRename: boolean; canRecruit: boolean; canPublishRecruitment: boolean; recruitment: Recruitment | null; pendingApplicationCount: number };
+export type PartySearchPage = { ok: true; recruitments: Recruitment[]; parties: Recruitment[]; hasMore: boolean; nextCursor: number | null };
 
 /**
  * The schema returned by the web command catalogue.  `revision` and `token`
@@ -299,10 +342,17 @@ export type CommandCatalogResponse = { commands: CommandCatalogItem[] };
 export type CommandActionMode = 'execute' | 'preview' | 'confirm';
 export type CommandActionPayload = { commandId: string; args?: Record<string, string | number>; mode?: CommandActionMode; revision?: string | number; token?: string };
 export type CommandRefreshMeta = { regions?: string[]; [key: string]: unknown };
-export type CommandActionResult = {
+export type IssuedActionButton = { label: string; actionId: string; revision: string; expiresAt?: string; command?: never };
+export type GameActionButton = { label: string; command: string; actionId?: never; revision?: never; expiresAt?: never } | IssuedActionButton;
+export type StoryIllustration = { sceneKey: string; path: string; width: number; height: number; alt: string };
+export type GameActionMessage = { text?: string; markdown?: string; format?: { type?: string; value?: unknown; options?: Record<string, unknown> }[]; storyImage?: StoryIllustration; buttons?: GameActionButton[] };
+export type CommandActionResult = GameActionMessage & {
   ok?: boolean;
+  presentation?: 'story' | 'interaction' | 'page';
+  commerce?: { kind: 'bank' | 'guildShop' | 'bookshop' | 'homeShop'; targetId?: string; mode?: 'buy' | 'sell' };
   text?: string;
-  buttons?: { label: string; command: string }[];
+  buttons?: GameActionButton[];
+  messages?: GameActionMessage[];
   preview?: unknown;
   confirmToken?: string;
   revision?: string | number;
@@ -311,36 +361,93 @@ export type CommandActionResult = {
   [key: string]: unknown;
 };
 
+export type WebNotification = {
+  id: number;
+  category: 'system' | 'command' | 'quest' | 'achievement' | 'battle' | 'party' | 'friend' | 'mail' | 'world';
+  title: string;
+  messages: { text?: string; markdown?: string; format?: { type?: string; value?: unknown; options?: Record<string, unknown> }[]; buttons?: { label: string; command: string }[] }[];
+  isRead: boolean;
+  createdAt: string;
+  readAt: string | null;
+};
+export type WebNotificationPage = { ok: true; items: WebNotification[]; unreadCount: number; hasMore: boolean; nextBeforeId: number | null };
+export type WebNotificationChanges = { ok: true; items: WebNotification[]; unreadCount: number; hasMore: boolean; nextAfterId: number };
+export type GameMailFilter = 'all' | 'unread' | 'attachments';
+export type GameMail = { id: number; title: string; senderName: string; createdAt: string; isRead: boolean; hasAttachments: boolean; claimedAt: string | null; preview: string };
+export type GameMailAttachment = { itemId: number; code: string; name: string; quantity: number; rarity: string; itemType: string };
+export type GameMailDetail = GameMail & { body: string; readAt: string | null; attachments: GameMailAttachment[] };
+export type GameMailPage = { ok: true; items: GameMail[]; unreadCount: number; hasMore: boolean; nextBeforeId: number | null };
+
 const API_BASE = (import.meta.env.VITE_API_BASE ?? '/api/web/v1').replace(/\/$/, '');
 const TOKEN_KEY = 'fantasy-final-web-token';
+const NETWORK_ERROR_MESSAGE = '网络连接异常，未收到服务器响应，请稍后重试。';
+
+export const userFacingErrorMessage = (value: unknown): string => {
+  const message = value instanceof Error ? value.message : typeof value === 'string' ? value : '';
+  const trimmed = message.trim();
+  if (/^(?:TypeError:\s*)?(?:Failed to fetch|NetworkError.*|Load failed|fetch failed)$/i.test(trimmed)) return NETWORK_ERROR_MESSAGE;
+  return /[\u3400-\u9fff]/.test(trimmed) ? trimmed : '操作未完成，请稍后重试。';
+};
+
+const httpErrorMessage = (status: number): string => {
+  if (status === 429) return '请求过于频繁，请稍后重试。';
+  if (status >= 500) return `服务暂时不可用（${status}），请稍后重试。`;
+  return `请求失败（状态码 ${status}），请稍后重试。`;
+};
 
 export const token = () => sessionStorage.getItem(TOKEN_KEY) ?? '';
 export const saveToken = (value: string) => sessionStorage.setItem(TOKEN_KEY, value);
 export const clearToken = () => sessionStorage.removeItem(TOKEN_KEY);
 
-async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+export class ApiRequestError extends Error {
+  constructor(message: string, readonly status: number, readonly code?: string) {
+    super(message);
+    this.name = 'ApiRequestError';
+  }
+}
+
+export async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   const headers = new Headers(init.headers);
   headers.set('Content-Type', 'application/json');
   const accessToken = token();
   if (accessToken) headers.set('Authorization', `Bearer ${accessToken}`);
-  const response = await fetch(`${API_BASE}${path}`, { ...init, headers });
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok || data.ok === false) {
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE}${path}`, { ...init, headers });
+  } catch {
+    throw new Error(path === '/register'
+      ? '网络连接异常，无法确认注册是否成功，请稍后检查账号状态再重试。'
+      : NETWORK_ERROR_MESSAGE);
+  }
+  const parsed: unknown = await response.json().catch(() => null);
+  const data = parsed && typeof parsed === 'object' && !Array.isArray(parsed)
+    ? parsed as Record<string, unknown>
+    : null;
+  if (!response.ok || data?.ok === false) {
     if (response.status === 401 && accessToken && token() === accessToken) {
       clearToken();
       window.dispatchEvent(new Event('fantasy-final-auth-invalidated'));
     }
     const loginRouteMissing = response.status === 404 && (path === '/login' || path === '/register');
+    const serverMessage = typeof data?.message === 'string' ? data.message.trim() : '';
     const message = loginRouteMissing
-      ? '网页登录接口未找到：请确认 server 已重新 npm run build 并重启，同时检查 Nginx/Caddy 是否把 /api 转发到 17117。'
-      : String(data.message ?? `请求失败（${response.status}）`);
-    throw new Error(message);
+      ? '登录或注册接口未找到，请联系管理员检查网页接口配置。'
+      : serverMessage ? userFacingErrorMessage(serverMessage) : httpErrorMessage(response.status);
+    throw new ApiRequestError(message, response.status, typeof data?.code === 'string' ? data.code : undefined);
+  }
+  if (!data || ((path === '/login' || path === '/register') &&
+    (typeof data.accessToken !== 'string' || !data.accessToken || typeof data.uid !== 'string' || (path === '/login' && !data.uid)))) {
+    throw new Error('服务器返回内容异常，请稍后重试。');
   }
   return data as T;
 }
 
-export const register = (displayName: string) => request<{ accessToken: string; uid: string }>('/register', { method: 'POST', body: JSON.stringify({ displayName }) });
-export const login = (gameId: string, password: string) => request<{ accessToken: string; uid: string }>('/login', { method: 'POST', body: JSON.stringify({ gameId, password }) });
+export type AuthResult = { accessToken: string; uid: string; loginId: string; gameUserId: string; account?: { loginId: string; gameUserId: string; passwordLoginEnabled: boolean } };
+export type PasswordResult = { accessToken: string; uid: string; loginId: string; gameUserId: string; passwordLoginEnabled: boolean };
+export const register = (displayName: string, password: string, passwordConfirmation: string) => request<AuthResult>('/register', { method: 'POST', body: JSON.stringify({ displayName, password, passwordConfirmation }) });
+export const login = (loginId: string, password: string) => request<AuthResult>('/login', { method: 'POST', body: JSON.stringify({ loginId, password }) });
+export const setPassword = (newPassword: string, passwordConfirmation: string) => request<PasswordResult>('/password/set', { method: 'POST', body: JSON.stringify({ newPassword, passwordConfirmation }) });
+export const changePassword = (currentPassword: string, newPassword: string, passwordConfirmation: string) => request<PasswordResult>('/password/change', { method: 'POST', body: JSON.stringify({ currentPassword, newPassword, passwordConfirmation }) });
 export const logout = () => request<{ ok: true }>('/logout', { method: 'POST' });
 export const panel = () => request<Panel>('/panel');
 export const autoBattleConfig = (mode: AutoBattleMode = 'pve') => request<AutoBattleConfig>(`/auto-battle/config?mode=${mode}`);
@@ -349,10 +456,12 @@ export const autoBattlePotions = (page = 1, keyword = '') => request<{ items: Au
 export const saveAutoBattleSetting = (payload: { operation: 'enabled' | 'potion' | 'threshold' | 'potion-item' | 'default-action'; mode?: AutoBattleMode; enabled?: boolean; kind?: 'hp' | 'mp'; threshold?: number; itemId?: number | null }) => request<AutoBattleConfig>('/auto-battle/settings', { method: 'POST', body: JSON.stringify(payload) });
 export const saveAutoBattleAction = (payload: { sequence: number; skillId: number | null; mode?: AutoBattleMode }) => request<AutoBattleConfig>('/auto-battle/actions', { method: 'POST', body: JSON.stringify(payload) });
 export const deleteAutoBattleAction = (sequence: number, mode: AutoBattleMode = 'pve') => request<AutoBattleConfig>(`/auto-battle/actions/${sequence}?mode=${mode}`, { method: 'DELETE' });
-export const command = (value: string) => request<Panel>('/command', { method: 'POST', body: JSON.stringify({ command: value }) });
-export const exploreMove = (position: { x: number; y: number; z: number }) => request<{ kind: string; text: string; position: { x: number; y: number; z: number }; interactionTargets?: { type: string; id: string; name: string; description?: string }[]; panel?: Panel }>('/explore/move', { method: 'POST', body: JSON.stringify(position) });
+export const command = (value: string) => request<CommandActionResult>('/command', { method: 'POST', body: JSON.stringify({ command: value }) });
+export const exploreMove = (position: { x: number; y: number; z: number }) => request<CommandActionResult & { kind: string; text: string; position: { x: number; y: number; z: number }; interactionTargets?: { type: string; id: string; name: string; description?: string }[] }>('/explore/move', { method: 'POST', body: JSON.stringify(position) });
 export const mineResource = (resourceId: number) => request<{ kind: string; text: string; resourceId: number; panel?: Panel }>('/explore/mine', { method: 'POST', body: JSON.stringify({ resourceId }) });
 export const exploreTravel = (position: { x: number; y: number; z: number }) => request<{ kind: string; text: string; position: { x: number; y: number; z: number }; remaining?: number; panel?: Panel }>('/explore/travel', { method: 'POST', body: JSON.stringify(position) });
+export const cancelExploreTravel = () => request<{ kind: 'cancelled'; text: string; panel?: Panel }>('/explore/travel/cancel', { method: 'POST' });
+export const settleExploreTravel = () => request<{ kind: string; text: string; remaining: number; panel?: Panel }>('/explore/travel/settle', { method: 'POST' });
 export type NegotiationCommandPayload = {
   type: 'view' | 'talk' | 'gift' | 'leave' | 'fight';
   sessionId?: string;
@@ -363,10 +472,30 @@ export type NegotiationCommandPayload = {
   keyword?: string;
 };
 export const startBattle = (spawnId: number) => request<{ kind: string; text: string; spawnId: number; panel?: Panel }>('/battle/start', { method: 'POST', body: JSON.stringify({ spawnId }) });
+export const submitBattleAction = (payload: BattleActionPayload) => request<BattleActionResult>('/battle/actions', { method: 'POST', body: JSON.stringify(payload) });
 export const avoidEncounter = (spawnId: number) => request<{ kind: string; text: string; spawnId: number; panel?: Panel }>('/encounter/avoid', { method: 'POST', body: JSON.stringify({ spawnId }) });
 export const negotiate = (spawnId: number, command: NegotiationCommandPayload = { type: 'view' }) => request<{ kind: string; text?: string; spawnId: number; negotiation: NegotiationPanel; panel?: Panel }>('/negotiation', { method: 'POST', body: JSON.stringify({ spawnId, ...command }) });
 export const commandCatalog = () => request<CommandCatalogResponse>('/command-catalog');
 export const commandAction = (payload: CommandActionPayload) => request<CommandActionResult>('/command/action', { method: 'POST', body: JSON.stringify(payload) });
+export const interactionAction = (actionId: string, revision: string, idempotencyKey: string) => request<CommandActionResult>('/interactions/actions', { method: 'POST', body: JSON.stringify({ actionId, revision, idempotencyKey }) });
+export const notifications = (beforeId?: number, limit = 20) => {
+  const query = new URLSearchParams({ limit: String(limit) });
+  if (beforeId !== undefined) query.set('beforeId', String(beforeId));
+  return request<WebNotificationPage>(`/notifications?${query.toString()}`);
+};
+export const notificationChanges = (afterId: number, limit = 100) => request<WebNotificationChanges>(`/notifications/changes?afterId=${afterId}&limit=${limit}`);
+export const notificationUnread = () => request<{ ok: true; unreadCount: number }>('/notifications/unread');
+export const markNotificationRead = (id: number) => request<{ ok: true; updated: number; unreadCount: number }>(`/notifications/${id}/read`, { method: 'POST' });
+export const gameMails = (filter: GameMailFilter = 'all', beforeId?: number, limit = 20) => {
+  const query = new URLSearchParams({ filter, limit: String(limit) });
+  if (beforeId !== undefined) query.set('beforeId', String(beforeId));
+  return request<GameMailPage>(`/mail?${query.toString()}`);
+};
+export const gameMailUnread = () => request<{ ok: true; unreadCount: number }>('/mail/unread');
+export const gameMailDetail = (id: number) => request<{ ok: true; item: GameMailDetail; unreadCount: number }>(`/mail/${id}`);
+export const claimGameMail = (id: number) => request<{ ok: true; items: { name: string; quantity: number }[]; unreadCount: number }>(`/mail/${id}/claim`, { method: 'POST' });
+export const claimAllGameMails = () => request<{ ok: true; mailCount: number; items: { name: string; quantity: number }[]; unreadCount: number }>('/mail/claim-all', { method: 'POST' });
+export const deleteGameMail = (id: number) => request<{ ok: true; unreadCount: number }>(`/mail/${id}`, { method: 'DELETE' });
 export const channels = () => request<{ channels: ChatChannel[] }>('/chat/channels');
 export const socialSummary = () => request<SocialSummary>('/social/summary');
 export const realtimeTicket = () => request<{ ticket: string; expiresIn: number }>('/realtime-ticket');
@@ -376,8 +505,13 @@ export const messages = (channelId: string, beforeId?: number, limit = 20) => {
   return request<{ messages: ChatMessage[]; hasMore?: boolean }>(`/chat/channels/${encodeURIComponent(channelId)}/messages?${query.toString()}`);
 };
 export const sendMessage = (channelId: string, content: string) => request<{ message: ChatMessage }>(`/chat/channels/${encodeURIComponent(channelId)}/messages`, { method: 'POST', body: JSON.stringify({ content }) });
+export const currentParty = () => request<{ ok: true; party: WebParty | null }>('/party/current');
+export const createParty = (name: string) => request<{ ok: true; party: WebParty }>('/party/create', { method: 'POST', body: JSON.stringify({ name }) });
+export const leaveParty = () => request<{ ok: true; party: WebParty | null }>('/party/leave', { method: 'POST' });
+export const renameParty = (name: string) => request<{ ok: true; party: WebParty }>('/party/rename', { method: 'POST', body: JSON.stringify({ name }) });
+export const searchParty = (filters: { keyword?: string; region?: string; targetCount?: number; cursor?: number; limit?: number } = {}) => request<PartySearchPage>(`/party/search?${new URLSearchParams(Object.entries(filters).filter(([, value]) => value !== undefined && value !== '').map(([key, value]) => [key, String(value)])).toString()}`);
 export const recruitments = () => request<{ recruitments: Recruitment[] }>('/party/recruitments');
-export const createRecruitment = (summary: string) => request<{ recruitment: Recruitment }>('/party/recruitments', { method: 'POST', body: JSON.stringify({ title: '冒险队伍招募', description: summary, targetCount: 4, expiresMinutes: 60 }) });
+export const createRecruitment = (input: { description: string; targetCount: number; title?: string }) => request<{ ok: true; recruitment: Recruitment }>('/party/recruitments', { method: 'POST', body: JSON.stringify({ ...input, expiresMinutes: 60 }) });
 export const applyRecruitment = (id: number) => request<{ ok: true }>(`/party/recruitments/${id}/apply`, { method: 'POST' });
 export const partyApplications = (id: number) => request<{ applications: PartyApplication[] }>(`/party/recruitments/${id}/applications`);
 export const acceptApplication = (id: number) => request<{ application: PartyApplication }>(`/party/applications/${id}/accept`, { method: 'POST' });

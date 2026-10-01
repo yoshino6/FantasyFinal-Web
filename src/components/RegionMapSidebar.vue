@@ -153,9 +153,10 @@ const selectRegion = (region: RegionOverview) => {
   emit('selected-region', region);
 };
 
-const openSidebar = () => {
+const openSidebar = (regionCode?: string) => {
   if (props.disabled) return;
-  if (!selectedRegionCode.value) selectedRegionCode.value = props.currentRegionCode || props.regions.find((region) => region.isCurrent)?.code || props.regions[0]?.code || '';
+  if (regionCode && props.regions.some(region => region.code === regionCode)) selectedRegionCode.value = regionCode;
+  else if (!selectedRegionCode.value) selectedRegionCode.value = props.currentRegionCode || props.regions.find((region) => region.isCurrent)?.code || props.regions[0]?.code || '';
   open.value = true;
   emit('update:open', true);
 };
@@ -217,11 +218,11 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown));
     </Transition>
 
     <Transition name="region-map-slide">
-      <aside v-if="open" id="region-map-drawer" class="region-map-drawer" aria-label="队伍地图侧栏">
+      <aside v-if="open" id="region-map-drawer" class="region-map-drawer" role="dialog" aria-modal="true" aria-label="世界地图">
         <header class="drawer-header">
           <div>
             <p class="drawer-kicker">WORLD MAP</p>
-            <h2>队伍地图</h2>
+            <h2>世界地图</h2>
           </div>
           <button type="button" class="drawer-close" aria-label="收起地图" @click="closeSidebar">×</button>
         </header>
@@ -260,7 +261,8 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown));
                 :aria-label="`${marker.name} ${formatCoordinate(marker)}`"
                 @click="requestTravel(marker)"
               >
-                <span>{{ marker.icon }}</span>
+                <span class="region-map-marker-icon">{{ marker.icon }}</span>
+                <span class="region-map-marker-name">{{ marker.name }}</span>
               </button>
               <span class="map-axis map-axis-x" aria-hidden="true" />
               <span class="map-axis map-axis-y" aria-hidden="true" />
@@ -318,7 +320,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown));
 .region-map-toggle span { font-size: 20px; line-height: 1; }
 .region-map-toggle small { margin-top: 2px; font-size: 8px; line-height: 1; }
 .region-map-backdrop { position: fixed; z-index: 30; inset: 0; background: rgba(48, 38, 58, .24); backdrop-filter: blur(2px); }
-.region-map-drawer { position: fixed; z-index: 31; top: 0; right: 0; display: flex; flex-direction: column; width: min(94vw, 360px); height: 100dvh; overflow: hidden; color: var(--ink, #4d4354); background: #fffaf4; border-left: 1px solid rgba(255,255,255,.9); box-shadow: -15px 0 44px rgba(58, 45, 69, .2); }
+.region-map-drawer { position: fixed; z-index: 31; top: 50%; left: 50%; display: flex; flex-direction: column; width: min(94vw, 960px); height: min(88dvh, 820px); max-height: calc(100dvh - 24px); overflow: hidden; color: var(--ink, #4d4354); background: #fffaf4; border: 1px solid rgba(255,255,255,.94); border-radius: 22px; box-shadow: 0 24px 70px rgba(58, 45, 69, .28); transform: translate(-50%, -50%); }
 .drawer-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: max(16px, env(safe-area-inset-top, 0px)) 17px 12px; border-bottom: 1px solid #f0e5de; }
 .drawer-kicker { margin: 0 0 3px; color: #a28eb5; font-size: 9px; letter-spacing: .14em; }
 .drawer-header h2 { margin: 0; font-size: 19px; }
@@ -336,7 +338,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown));
 .region-map-card-heading strong { overflow: hidden; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
 .region-map-card-heading small { color: #a08c98; font-size: 9px; }
 .drawer-loading { color: #977db8; font-size: 9px; }
-.region-mini-map { position: relative; height: 190px; overflow: hidden; background: radial-gradient(circle at 50% 46%, rgba(255,255,255,.8), rgba(236,229,248,.64)); border: 1px solid #e3d8ee; border-radius: 12px; }
+.region-mini-map { position: relative; height: clamp(320px, 56vh, 560px); min-height: 320px; overflow: hidden; background: radial-gradient(circle at 50% 46%, rgba(255,255,255,.8), rgba(236,229,248,.64)); border: 1px solid #e3d8ee; border-radius: 15px; }
 .region-mini-map::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(170,153,196,.14) 1px, transparent 1px), linear-gradient(90deg, rgba(170,153,196,.14) 1px, transparent 1px); background-size: 20% 20%; }
 .map-axis { position: absolute; z-index: 1; opacity: .45; background: #bda9cc; }
 .map-axis-x { top: 50%; left: 7%; width: 86%; height: 1px; }
@@ -344,9 +346,10 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown));
 .map-axis-label { position: absolute; z-index: 1; color: #a993ad; font-size: 8px; }
 .map-axis-label-x { right: 6px; top: calc(50% + 3px); }
 .map-axis-label-y { left: calc(50% + 4px); top: 5px; }
-.region-map-marker { position: absolute; z-index: 2; display: grid; place-items: center; width: 27px; height: 27px; padding: 0; border: 2px solid rgba(255,255,255,.95); border-radius: 50%; box-shadow: 0 3px 8px rgba(71, 52, 86, .18); transform: translate(-50%, -50%); transition: transform .15s ease, filter .15s ease; }
+.region-map-marker { position: absolute; z-index: 2; display: grid; place-items: center; width: 34px; height: 34px; padding: 0; border: 2px solid rgba(255,255,255,.95); border-radius: 50%; box-shadow: 0 3px 8px rgba(71, 52, 86, .18); transform: translate(-50%, -50%); transition: transform .15s ease, filter .15s ease; }
 .region-map-marker:hover { z-index: 3; filter: brightness(1.04); transform: translate(-50%, -50%) scale(1.1); }
-.region-map-marker span { font-size: 12px; line-height: 1; }
+.region-map-marker-icon { display: grid; place-items: center; font-size: 14px; line-height: 1; }
+.region-map-marker-name { position: absolute; bottom: calc(100% + 5px); left: 50%; max-width: 150px; padding: 3px 6px; overflow: hidden; color: #5e5168; background: rgba(255,250,245,.94); border: 1px solid rgba(226,214,230,.9); border-radius: 7px; box-shadow: 0 2px 7px rgba(71, 52, 86, .12); font-size: 10px; font-weight: 600; line-height: 1.2; text-overflow: ellipsis; white-space: nowrap; pointer-events: none; transform: translateX(-50%); }
 .marker-member { color: #fff; background: linear-gradient(145deg, #e98778, #ce6f82); }
 .marker-landmark { color: #fff9e9; background: linear-gradient(145deg, #b995d2, #8e78b6); }
 .region-map-hint { margin: 7px 1px 0; color: #9a8a96; font-size: 9px; line-height: 1.4; }
@@ -375,7 +378,13 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown));
 .confirm-button:disabled { opacity: .5; }
 .region-map-fade-enter-active, .region-map-fade-leave-active, .region-map-dialog-enter-active, .region-map-dialog-leave-active { transition: opacity .18s ease; }
 .region-map-fade-enter-from, .region-map-fade-leave-to, .region-map-dialog-enter-from, .region-map-dialog-leave-to { opacity: 0; }
-.region-map-slide-enter-active, .region-map-slide-leave-active { transition: transform .22s ease; }
-.region-map-slide-enter-from, .region-map-slide-leave-to { transform: translateX(100%); }
-@media (max-width: 420px) { .region-map-drawer { width: min(94vw, 340px); } .region-mini-map { height: 170px; } }
+.region-map-slide-enter-active, .region-map-slide-leave-active { transition: opacity .22s ease, transform .22s ease; }
+.region-map-slide-enter-from, .region-map-slide-leave-to { opacity: 0; transform: translate(-50%, -50%) scale(.96) translateY(10px); }
+@media (max-width: 640px) {
+  .region-map-drawer { width: calc(100vw - 24px); height: min(88dvh, 760px); border-radius: 18px; }
+  .drawer-header { padding-inline: 14px; }
+  .drawer-content { padding-inline: 10px; }
+  .region-mini-map { height: clamp(270px, 54vh, 460px); min-height: 270px; }
+  .region-map-marker-name { max-width: 120px; font-size: 9px; }
+}
 </style>

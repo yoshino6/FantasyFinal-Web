@@ -4,6 +4,8 @@
  * 怪物专属怪材数量很大，网页只按最终提纯后的五类锻材归并贴图；
  * `_t2`～`_t5` 保留阶级信息，但复用同一类贴图，避免为每只怪物维护资源。
  */
+import { gameAssetUrl } from './game-assets';
+
 export type ItemAssetInput = {
   code?: string;
   codexId?: string;
@@ -12,7 +14,7 @@ export type ItemAssetInput = {
   itemCategory?: string;
 };
 
-const asset = (name: string) => `/assets/items/${name}.png`;
+const asset = (name: string) => gameAssetUrl(`/assets/items/${name}.png`);
 
 const refinedByCode: Record<string, string> = {
   spellcloth_bolt: 'material-spellcloth',
@@ -28,6 +30,49 @@ const rawMonsterSuffix: Record<string, string> = {
   bone: 'material-bone-steel',
   shell: 'material-shell',
   scale: 'material-scale',
+};
+
+const monsterMaterialByCode: Record<string, string> = {
+  wolf_fang: 'material-bone-steel',
+  beast_meat: 'material-meat',
+  beast_bone: 'material-bone-steel',
+  beast_hide: 'material-leather',
+  beast_tendon: 'material-leather',
+  beast_core: 'material-beast-core',
+  magic_wool: 'material-spellcloth',
+  magic_tusk: 'material-bone-steel',
+  magic_scale: 'material-scale',
+  magic_claw: 'material-bone-steel',
+  magic_heartcore: 'material-beast-core',
+  magic_blood: 'material-beast-core',
+  magic_eye: 'material-beast-core',
+  magic_horn: 'material-bone-steel',
+  goblin_ear: 'material-leather',
+  refined_beast_bone: 'material-bone-steel',
+  refined_beast_hide: 'material-leather',
+  refined_beast_tendon: 'material-leather',
+  refined_beast_core: 'material-beast-core',
+  refined_magic_wool: 'material-spellcloth',
+  refined_magic_tusk: 'material-bone-steel',
+  refined_magic_scale: 'material-scale',
+  refined_magic_claw: 'material-bone-steel',
+  refined_magic_heartcore: 'material-beast-core',
+};
+
+const monsterMaterialAssetFor = (code: string, text: string): string | undefined => {
+  const exact = monsterMaterialByCode[code] ?? monsterMaterialByCode[code.replace(/_lv\d+$/i, '')];
+  if (exact) return asset(exact);
+  const raw = code.match(/^monster_.+_(hair|gel_skin|bone|shell|scale)(?:_l\d+)?$/);
+  if (raw) return asset(rawMonsterSuffix[raw[1]]);
+  if (/怪材/.test(text)) {
+    if (/肉|肉块/.test(text)) return asset('material-meat');
+    if (/兽核|心核|血|眼/.test(text)) return asset('material-beast-core');
+    if (/绒|毛|羽|布|缨|发|鬃|影布/.test(text)) return asset('material-spellcloth');
+    if (/皮|革|筋|耳|膜/.test(text)) return asset('material-leather');
+    if (/鳞|鳞片/.test(text)) return asset('material-scale');
+    if (/骨|牙|獠|爪|角/.test(text)) return asset('material-bone-steel');
+  }
+  return undefined;
 };
 
 /**
@@ -200,7 +245,7 @@ const potionAssetFor = (code: string, text: string, type: string): string | unde
   }
 
   if (/(?:ward|fury|swift|clarity|focus|evasion|crit|sharpening|guard|wind_charge|quick_chant|berserk|thorns|shed|reflect|resistance|overflow|clean_shield|harmony|regeneration|mana_flow|study|gather|experience|drop)/.test(code)
-    || /增益|护体|守护|战意|风行|锐化|明眸|轻灵|静心|狂战|反刺|护心|抗性|调和|蓄势|速咏|护佑|清浊|再生|坚壳|迅行|阅历|寻获|经验|掉率/.test(text)) {
+    || /增益|护体|守护|战意|风行|锐化|明眸|轻灵|静心|狂战|反刺|护心|抗性|调和|蓄势|速咏|护佑|清浊|再生|坚壳|迅行|阅历|寻获|经验|掉率|幸运/.test(text)) {
     return asset('potion-common-buff');
   }
 
@@ -216,6 +261,40 @@ const catalogAssetFor = (code: string, type: string): string | undefined => {
   return asset(`catalog/${code}`);
 };
 
+/**
+ * A small set of identity assets must win over both the potion matcher and
+ * equipment-name heuristics.  For example, “芽辉护符” contains “护符” and
+ * “星誓之环” contains “环”, but neither item is wearable equipment in the
+ * inventory.  Keeping these identities explicit also prevents food, water,
+ * and cards from silently falling through to a bottle illustration.
+ */
+const directItemAssetFor = (code: string, text: string): string | undefined => {
+  if (code === 'opening_last_ration' || /面包/.test(text)) return asset('catalog/opening_last_ration');
+  if (code === 'opening_mineral_water' || /矿泉水/.test(text)) return asset('catalog/opening_mineral_water');
+  if (code === 'opening_companion_feed' || /灵契饲料/.test(text)) return asset('catalog/opening_companion_feed');
+  if (code === 'hearty_meat_stew' || /暖胃兽肉炖菜|兽肉炖菜/.test(text)) return asset('catalog/hearty_meat_stew');
+  if (code === 'mushroom_cream_soup' || /森林蘑菇浓汤|蘑菇浓汤/.test(text)) return asset('catalog/mushroom_cream_soup');
+  if (code === 'honey_roast_rabbit' || /蜜烤球兔肉/.test(text)) return asset('catalog/honey_roast_rabbit');
+  if (code === 'adventurer_platter' || /冒险者能量拼盘/.test(text)) return asset('catalog/adventurer_platter');
+  if (code === 'healing_herb' || /微光草药/.test(text)) return asset('catalog/healing_herb');
+
+  if (code === 'rename_card' || code === 'gender_change_card' || code === 'adventurer_card'
+    || /改名卡|改性卡|冒险者卡片/.test(text) || /(?:^|_)(?:rename|gender_change|adventurer)_card(?:_|$)/.test(code)) {
+    return asset('player-card');
+  }
+  if (code === 'heart_bouquet' || /心意花束/.test(text)) return asset('heart-bouquet');
+  if (code === 'resonance_fruit' || /共鸣果实/.test(text)) return asset('resonance-fruit');
+  if (code.endsWith('_gift') || /赠礼|礼物/.test(text)) return asset('gift-box');
+  if (code.startsWith('skill_book_') || /技能书/.test(text)) return asset('skill-book');
+  if (code === 'starter_device_blueprint_box' || code === 'advanced_device_blueprint_box' || /异械盲盒/.test(text)) return asset('chest');
+  if (code === 'demon_breaker_teleporter') return asset('teleporter');
+  if (code === 'star_oath_ring' || /星誓之环/.test(text)) return asset('star-oath-ring');
+  if (code === 'worldtree_bud_charm' || /芽辉护符/.test(text)) return asset('worldtree-bud-charm');
+  if (code === 'evolution_seed' || /进化之种/.test(text)) return asset('evolution-seed');
+  if (code === 'forge_repair_kit' || /锻造维修包/.test(text)) return asset('forge-repair-kit');
+  return undefined;
+};
+
 /** Returns a stable PNG path for every item the inventory can display. */
 export const itemAssetFor = (input: ItemAssetInput): string => {
   const code = String(input.code ?? '').trim().toLowerCase();
@@ -223,12 +302,21 @@ export const itemAssetFor = (input: ItemAssetInput): string => {
   const text = `${input.name ?? ''} ${input.itemCategory ?? ''}`.toLowerCase();
   const type = String(input.itemType ?? '').toLowerCase();
 
+  const directAsset = directItemAssetFor(code, text);
+  if (directAsset) return directAsset;
+
   // Resolve non-equipment identities before equipment-name heuristics.  Map
   // names such as “世界树草原环带” contain the character “环”, which would
   // otherwise be mistaken for a ring by the generic equipment matcher.
   if (/地图|卷轴|地图册/.test(text) || code.startsWith('map_')) return asset('map-scroll');
   if (/怪物卡片|卡片/.test(text) || code.includes('monster_card')) return asset('monster-card');
   if (/任务|徽章|令牌|勋章/.test(text)) return asset('quest-token');
+
+  // Monster drops are intentionally grouped into the final purified material
+  // families.  This keeps a large monster catalogue from producing unrelated
+  // crystal or bottle silhouettes for a fang, hide, core, or scale.
+  const monsterMaterialAsset = monsterMaterialAssetFor(code, text);
+  if (monsterMaterialAsset) return monsterMaterialAsset;
 
   const equipmentAsset = equipmentFamilyAsset(code, text);
   if (equipmentAsset && (type === 'equipment' || /装备|武器|剑|刀|匕首|弓|杖|枪|斧|锤|刃|甲|铠|胸|衣|袍|护腕|护臂|护肩|披风|头盔|头冠|帽|盔|鞋|靴|足具|戒|环|项链|护符|耳环|饰品|吊坠/.test(text))) {
