@@ -1,0 +1,310 @@
+/* Original painted raster skins. Text, hit areas and state stay in live DOM. */
+:root {
+  --game-ui-paper: url('/assets/light-anime/game-ui-v2/button-paper.webp');
+  --game-ui-teal: url('/assets/light-anime/game-ui-v2/button-teal.webp');
+  --game-ui-coral: url('/assets/light-anime/game-ui-v2/button-coral.webp');
+  --game-ui-gold: url('/assets/light-anime/game-ui-v2/button-gold.webp');
+  --game-ui-panel: url('/assets/light-anime/game-ui-v2/panel-parchment.webp');
+  --game-ui-journal: url('/assets/light-anime/game-ui-v2/panel-journal.webp');
+  --game-ui-journal-slice: 360;
+  --game-ui-ink: #535366;
+  --game-ui-muted: #736c78;
+  --game-ui-primary-ink: #245664;
+  --game-ui-danger-ink: #703846;
+  --game-ui-gold-ink: #735632;
+  --game-ui-line: #c9bda4;
+  --game-ui-surface: #fffaf2;
+  --game-ui-explore-surface: linear-gradient(180deg, #fffdf4 0%, #faf2df 52%, #f0e1c0 100%);
+  --game-ui-resource-panel: url('/assets/light-anime/explore-resource-v1/resource-paper-v1.png');
+  --game-ui-focus: #337c94;
+  --game-ui-shadow: 0 8px 24px #3a627621;
+}
+
+/* All four page rails use the same spacing and painted button slices. */
+.app-shell[data-visual='light-anime'][data-viewport-layout] nav.main-section-tabs:is(.character-tabs,.inventory-tabs,.social-section-tabs,.world-section-tabs) {
+  padding:0;
+  gap:0;
+  border-width:2px;
+  border-image:url('/assets/light-anime/main-tabs-paper-v1.webp') 40 64 fill / 12px stretch;
+  align-items:stretch;
+}
+.app-shell[data-visual='light-anime'][data-viewport-layout] nav.main-section-tabs:is(.character-tabs,.inventory-tabs,.social-section-tabs,.world-section-tabs) > button {
+  height:100%;
+  min-height:0;
+  margin:0;
+  padding:0 3px;
+  gap:7px;
+  border:2px solid transparent;
+  border-image:var(--game-ui-paper) 144 fill / 7px 10px stretch;
+  transform:scale(1);
+  transform-origin:50% 50%;
+  transition:transform .12s ease;
+}
+.app-shell[data-visual='light-anime'][data-viewport-layout] nav.main-section-tabs:is(.character-tabs,.inventory-tabs,.social-section-tabs,.world-section-tabs) > button.active {
+  border-image:var(--game-ui-teal) 144 fill / 7px 10px stretch;
+  transform:scale(1);
+}
+.app-shell[data-visual='light-anime'][data-viewport-layout] nav.main-section-tabs:is(.character-tabs,.inventory-tabs,.social-section-tabs,.world-section-tabs) > button:not(:disabled):active {
+  transform:scale(.98);
+}
+@media(max-width:600px) {
+  .app-shell[data-visual='light-anime'][data-viewport-layout] nav.main-section-tabs:is(.character-tabs,.inventory-tabs,.social-section-tabs,.world-section-tabs) > button {
+    padding:0;
+    gap:2px;
+    font-size:clamp(13px,3.6vw,16px);
+  }
+}
+@media(max-height:450px) {
+  .app-shell[data-visual='light-anime'][data-viewport-layout] nav.main-section-tabs:is(.character-tabs,.inventory-tabs,.social-section-tabs,.world-section-tabs) {
+    height:28px;
+    border-block-width:1px;
+  }
+  .app-shell[data-visual='light-anime'][data-viewport-layout] nav.main-section-tabs:is(.character-tabs,.inventory-tabs,.social-section-tabs,.world-section-tabs) > button { font-size:16px; line-height:1; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .app-shell[data-visual='light-anime'][data-viewport-layout] nav.main-section-tabs:is(.character-tabs,.inventory-tabs,.social-section-tabs,.world-section-tabs) > button { transition:none; }
+}
+
+/* Existing illustrated labels keep their geometry; their old white outline
+   belonged to dark tabs and must follow the new light button ink. */
+.app-shell[data-visual='light-anime'][data-viewport-layout] nav.character-tabs > button > span:last-child,
+.app-shell[data-visual='light-anime'][data-viewport-layout] nav.inventory-tabs > button > span.inventory-category-label:last-child {
+  color: var(--game-ui-ink);
+  text-shadow: none;
+  -webkit-text-stroke: 0;
+  paint-order: normal;
+}
+
+.app-shell[data-visual='light-anime'][data-viewport-layout] nav.character-tabs > button.active > span:last-child,
+.app-shell[data-visual='light-anime'][data-viewport-layout] nav.inventory-tabs > button.active > span.inventory-category-label:last-child {
+  color: var(--game-ui-primary-ink);
+}
+
+/* Preserve the bag artwork's transparent outer contour. */
+.app-shell[data-visual='light-anime'][data-viewport-layout][data-page='inventory'] .inventory-page .inventory-paper-panel {
+  background: transparent;
+}
+
+/* Authentication has its own illustrated controls. */
+.app-shell[data-visual='light-anime']:not([data-page='login']):not([data-page='register']) :is(.primary-button, .soft-button, .danger-button, .ghost-button),
+.anime-growth-commerce.anime-growth-commerce :is(.primary-button, .soft-button, .danger-button),
+.inbox-dialog.anime-adventure :is(.primary-button, .soft-button, .danger-button) {
+  border: 8px solid transparent;
+  border-image: var(--game-ui-paper) 144 fill / 8px 11px stretch;
+  border-radius: 0;
+  background: transparent;
+  color: var(--game-ui-ink);
+  box-shadow: 0 2px 4px #3a627618;
+  font-weight: 700;
+  text-shadow: none;
+  transition: filter .15s ease, transform .12s ease;
+}
+
+.app-shell[data-visual='light-anime']:not([data-page='login']):not([data-page='register']) .primary-button,
+.anime-growth-commerce.anime-growth-commerce .primary-button,
+.inbox-dialog.anime-adventure .primary-button {
+  border-image-source: var(--game-ui-teal);
+  color: var(--game-ui-primary-ink);
+  text-shadow: none;
+}
+
+.app-shell[data-visual='light-anime']:not([data-page='login']):not([data-page='register']) .danger-button,
+.anime-growth-commerce.anime-growth-commerce .danger-button,
+.inbox-dialog.anime-adventure .danger-button {
+  border-image-source: var(--game-ui-coral);
+  color: var(--game-ui-danger-ink);
+  text-shadow: none;
+}
+
+.app-shell[data-visual='light-anime'] :is(.primary-button, .soft-button, .danger-button, .ghost-button):disabled,
+.anime-growth-commerce :is(.primary-button, .soft-button, .danger-button):disabled {
+  opacity: .7;
+  filter: saturate(.45);
+  box-shadow: none;
+}
+
+/* Keep already painted portrait, equipment, inventory and scene containers clear. */
+.app-shell[data-visual='light-anime'][data-viewport-layout] .character-page :is(.equipment-slot, .equipment-preview-card) {
+  border-image-source: var(--game-ui-panel);
+  border-image-slice: 144 fill;
+  background: var(--game-ui-surface);
+  background-clip: padding-box;
+}
+
+.app-shell[data-visual='light-anime'] :is(.account-onboarding, .catalog-intro, .interaction-choice, .auto-battle-dialog, .inventory-item-dialog, .command-catalog-list, .command-workbench, .team-info-panel).card-surface,
+.inbox-dialog.anime-adventure,
+.bank-dialog.anime-growth-commerce,
+.skill-dialog.skill-journal.anime-growth-commerce {
+  border: 12px solid transparent;
+  border-image: var(--game-ui-panel) 144 fill / 12px stretch;
+  border-radius: 0;
+  background: var(--game-ui-surface);
+  background-clip: padding-box;
+  box-shadow: var(--game-ui-shadow);
+}
+
+.app-shell[data-visual='light-anime'] .anime-status-ribbon .stat-card {
+  position: relative;
+  isolation: isolate;
+  min-height: 38px;
+  padding-top: 3px;
+  padding-bottom: 6px;
+  row-gap: 1px;
+  border: 1px solid transparent;
+  border-image: none;
+  border-radius: 8px;
+  background: transparent;
+  box-shadow: 0 2px 6px #2643301a;
+}
+
+/* Share the selected paper texture; tint only its sliced outer frame. */
+.app-shell[data-visual='light-anime'] .anime-status-ribbon .stat-card::before,
+.app-shell[data-visual='light-anime'] .anime-status-ribbon .stat-card::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  pointer-events: none;
+  border: 8px solid transparent;
+  border-image: var(--game-ui-resource-panel) 140 fill / 8px stretch;
+}
+
+.app-shell[data-visual='light-anime'] .anime-status-ribbon .stat-card::after {
+  border-image-slice: 140;
+  filter: var(--resource-frame-filter, none);
+}
+
+.app-shell[data-visual='light-anime'] .anime-status-ribbon .stat-card:has(> .anime-icon[data-ui-icon='heart']) {
+  --resource-frame-filter: hue-rotate(290deg) saturate(1.35);
+}
+
+.app-shell[data-visual='light-anime'] .anime-status-ribbon .stat-card:has(> .anime-icon[data-ui-icon='mana']) {
+  --resource-frame-filter: hue-rotate(115deg) saturate(1.4);
+}
+
+.app-shell[data-visual='light-anime'] .anime-status-ribbon .stat-card > .anime-icon {
+  grid-column: 1;
+  grid-row: 1;
+  width: 18px;
+  height: 18px;
+  align-self: center;
+}
+
+.app-shell[data-visual='light-anime'] .anime-status-ribbon .stat-card > span:not(.anime-icon) {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: center;
+  line-height: 1.2;
+}
+
+@media (min-width: 761px) {
+  .app-shell[data-visual='light-anime'] .anime-status-ribbon .stat-card { grid-template-columns: 18px auto 1fr; }
+}
+
+@media (orientation: landscape) and (max-height: 500px) and (max-width: 1179px) {
+  .app-shell[data-visual='light-anime'] .anime-status-ribbon .stat-card { grid-template-columns: 18px auto 1fr; grid-template-rows: auto 9px; }
+  .app-shell[data-visual='light-anime'] .anime-status-ribbon .stat-card > strong { grid-column: 3; grid-row: 1; text-align: right; }
+  .app-shell[data-visual='light-anime'] .anime-status-ribbon .stat-card > i { grid-column: 1 / -1; grid-row: 2; }
+}
+
+.app-shell[data-visual='light-anime'] .anime-status-ribbon .stat-card > i {
+  height: 9px;
+  border: 0;
+  border-radius: 2px;
+  background: var(--game-ui-paper) center / 100% 100% no-repeat;
+  box-shadow: inset 0 1px 2px #765f3b55;
+}
+
+.app-shell[data-visual='light-anime'] .anime-status-ribbon .stat-card > i b {
+  background: var(--game-ui-coral) center / 100% 100% no-repeat;
+  border-radius: 2px;
+}
+
+.app-shell[data-visual='light-anime'] .anime-status-ribbon .stat-card > i.mana b {
+  background-image: var(--game-ui-teal);
+  filter: hue-rotate(25deg) saturate(1.15);
+}
+
+.app-shell[data-visual='light-anime'] .anime-status-ribbon .stat-card > i.stamina b {
+  background-image: var(--game-ui-teal);
+  filter: hue-rotate(-40deg);
+}
+
+.app-shell[data-visual='light-anime'] :is(.character-tabs, .inventory-tabs, .social-section-tabs, .floating-social-tabs, .auto-battle-mode-tabs) > button,
+.anime-growth-commerce :is(.skill-tabs, .evolution-tabs, .market-tabs, .bank-tabs, .guild-shop-tabs, .bookshop-tabs) > button {
+  border: 7px solid transparent;
+  border-image: var(--game-ui-paper) 144 fill / 7px 10px stretch;
+  border-radius: 0;
+  background: transparent;
+  color: var(--game-ui-ink);
+  box-shadow: none;
+  text-shadow: none;
+}
+
+.app-shell[data-visual='light-anime'] :is(.character-tabs, .inventory-tabs, .social-section-tabs, .floating-social-tabs, .auto-battle-mode-tabs) > button.active,
+.anime-growth-commerce :is(.skill-tabs, .evolution-tabs, .market-tabs, .bank-tabs, .guild-shop-tabs, .bookshop-tabs) > button.active {
+  border-image-source: var(--game-ui-teal);
+  color: var(--game-ui-primary-ink);
+  text-shadow: none;
+}
+
+.app-shell[data-visual='light-anime'] :is(.anime-social-refinement, .anime-social-chat) .social-ui-button {
+  border: 6px solid transparent;
+  border-image: var(--game-ui-paper) 144 fill / 6px 9px stretch;
+  border-radius: 0;
+  background: transparent;
+  color: var(--game-ui-ink);
+  padding: 3px 7px 4px;
+}
+
+.app-shell[data-visual='light-anime'] :is(.anime-social-refinement, .anime-social-chat) .social-button-teal {
+  border-image-source: var(--game-ui-teal);
+  color: var(--game-ui-primary-ink);
+  text-shadow: none;
+}
+
+.app-shell[data-visual='light-anime'] :is(.anime-social-refinement, .anime-social-chat) .social-button-red {
+  border-image-source: var(--game-ui-coral);
+  color: var(--game-ui-danger-ink);
+}
+
+.app-shell[data-visual='light-anime'] .anime-social-refinement :is(.social-paper, .social-person-card, .social-add-friend, .social-request-row) {
+  border-image: var(--game-ui-panel) 144 fill / 9px stretch;
+  border-radius: 0;
+  background: transparent;
+}
+
+.app-shell[data-visual='light-anime'] .viewport-pagination > button,
+.anime-growth-commerce .viewport-pagination > button {
+  border: 5px solid transparent;
+  border-image: var(--game-ui-paper) 144 fill / 5px 8px stretch;
+  border-radius: 0;
+  background: transparent;
+  padding: 2px 5px;
+  color: var(--game-ui-ink);
+}
+
+@media (hover: hover) {
+  .app-shell[data-visual='light-anime'] :is(.primary-button, .soft-button, .danger-button, .ghost-button):not(:disabled):hover,
+  .app-shell[data-visual='light-anime'] .social-ui-button:not(:disabled):hover {
+    filter: brightness(1.035);
+    transform: translateY(-1px);
+  }
+}
+
+@media (max-width: 760px) {
+  .app-shell[data-visual='light-anime'] .anime-status-ribbon .stat-card > span:not(.anime-icon) {
+    font-size: 11px;
+  }
+}
+
+.app-shell[data-visual='light-anime'] :is(.primary-button, .soft-button, .danger-button, .ghost-button, .social-ui-button):not(:disabled):active {
+  transform: translateY(1px);
+  filter: brightness(.97);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-shell[data-visual='light-anime'] :is(.primary-button, .soft-button, .danger-button, .ghost-button, .social-ui-button) {
+    transition: none;
+  }
+}

@@ -1,10 +1,14 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import AnimeIcon from './AnimeIcon.vue';
+import AnimeAdventureArt from './AnimeAdventureArt.vue';
+import './anime-adventure.css';
 
 type ManualSection = 'tasks' | 'footprints' | 'codex' | 'warrants';
 type DockPosition = { x: number; y: number };
 
-const props = withDefaults(defineProps<{ sections?: ManualSection[] }>(), {
+const props = withDefaults(defineProps<{ sections?: ManualSection[]; inline?: boolean }>(), {
+  inline: false,
   sections: () => ['tasks', 'footprints', 'codex', 'warrants']
 });
 const emit = defineEmits<{
@@ -174,12 +178,13 @@ onBeforeUnmount(() => {
 
 <template>
   <nav
-    class="adventure-manual-dock"
-    :class="{ 'is-expanded': expanded, 'is-dragging': dragging }"
-    :style="dockStyle"
+    class="adventure-manual-dock anime-adventure"
+    :class="{ 'is-expanded': expanded || inline, 'is-dragging': dragging && !inline, 'is-inline': inline }"
+    :style="inline ? undefined : dockStyle"
     aria-label="冒险手册"
   >
     <button
+      v-if="!inline"
       class="manual-circle manual-main"
       type="button"
       :aria-expanded="expanded"
@@ -193,11 +198,11 @@ onBeforeUnmount(() => {
       @keydown="moveWithKeyboard"
       @click="toggle"
     >
-      <img class="manual-art" src="/assets/ui/manual/manual.png" alt="" />
+      <AnimeIcon class="manual-art" name="book" :size="38" />
       <span class="manual-label">手册</span>
     </button>
     <Transition name="manual-actions">
-      <div v-show="expanded && actions.length" id="adventure-manual-actions" class="manual-actions">
+      <div v-show="(expanded || inline) && actions.length" id="adventure-manual-actions" class="manual-actions">
         <button
           v-for="action in actions"
           :key="action.key"
@@ -207,7 +212,7 @@ onBeforeUnmount(() => {
           :aria-label="action.description"
           @click="select(action.key)"
         >
-          <img class="manual-art" :src="action.image" alt="" />
+          <AnimeAdventureArt class="manual-art" :name="action.key" :size="41" />
           <span class="manual-label">{{ action.label }}</span>
         </button>
       </div>

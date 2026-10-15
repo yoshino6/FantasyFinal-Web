@@ -1,0 +1,60 @@
+/* Painted signs and header actions share one compact baseline above the tabs. */
+.app-shell[data-visual='light-anime'][data-viewport-layout] .topbar {
+  height:78px;
+  gap:8px;
+  align-items:start;
+}
+.app-shell[data-visual='light-anime'][data-viewport-layout] .page-context {
+  --title-width:260px;
+}
+.app-shell[data-visual='light-anime'][data-viewport-layout] .page-context>strong {
+  font-size:28px;
+}
+.app-shell[data-visual='light-anime'][data-viewport-layout] .page-brand {
+  align-self:start;
+  margin-top:12px;
+}
+.app-shell[data-visual='light-anime'][data-viewport-layout] .original-game-logo {
+  width:min(160px,100%);
+  min-height:0;
+  height:50px;
+}
+.app-shell[data-visual='light-anime'][data-viewport-layout] .page-brand .original-game-logo>img {
+  width:100%;
+  height:100%;
+  object-fit:contain;
+}
+.app-shell[data-visual='light-anime'][data-viewport-layout] .top-actions {
+  display:flex;
+  align-items:center;
+  flex-wrap:nowrap;
+  align-self:start;
+  margin-top:20px;
+  gap:6px;
+}
+.app-shell[data-visual='light-anime'][data-viewport-layout] :is(.inbox-button,.settings-button) {
+  width:34px;
+  height:34px;
+  min-width:0;
+  min-height:0;
+}
+@media(max-width:760px) {
+  .app-shell[data-visual='light-anime'][data-viewport-layout] .topbar { height:52px; gap:4px; }
+  .app-shell[data-visual='light-anime'][data-viewport-layout] .page-context { --title-width:clamp(124px,40vw,154px); }
+  .app-shell[data-visual='light-anime'][data-viewport-layout] .page-context>strong { font-size:23px; letter-spacing:1px; }
+  .app-shell[data-visual='light-anime'][data-viewport-layout] .page-brand { margin-top:4px; }
+  .app-shell[data-visual='light-anime'][data-viewport-layout] .original-game-logo { width:min(94px,100%); height:34px; }
+  .app-shell[data-visual='light-anime'][data-viewport-layout] .top-actions { margin-top:7px; gap:3px; }
+  .app-shell[data-visual='light-anime'][data-viewport-layout] :is(.inbox-button,.settings-button) { width:28px; height:28px; }
+}
+@media(max-height:450px) {
+  .app-shell[data-visual='light-anime'][data-viewport-layout] .topbar { height:38px; }
+  .app-shell[data-visual='light-anime'][data-viewport-layout] .page-context { --title-width:110px; }
+  .app-shell[data-visual='light-anime'][data-viewport-layout] .page-context>strong { font-size:19px; }
+  .app-shell[data-visual='light-anime'][data-viewport-layout] .page-brand { margin-top:2px; }
+  .app-shell[data-visual='light-anime'][data-viewport-layout] .original-game-logo { width:min(82px,100%); height:26px; }
+  .app-shell[data-visual='light-anime'][data-viewport-layout] .top-actions { margin-top:4px; gap:3px; }
+  .app-shell[data-visual='light-anime'][data-viewport-layout] :is(.inbox-button,.settings-button) { width:24px; height:24px; }
+  .app-shell[data-visual='light-anime'][data-viewport-layout][data-character-scene='profile'] .page-context { --title-width:100px; }
+  .app-shell[data-visual='light-anime'][data-viewport-layout] .connection-dot { padding:2px 6px; font-size:10px; }
+}

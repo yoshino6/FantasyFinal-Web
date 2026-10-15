@@ -2,6 +2,8 @@
 import { ref, watch } from 'vue';
 import type { GameActionButton, GameActionMessage } from '../api';
 import { storyImageUrl } from '../story-assets';
+import AnimeIcon from './AnimeIcon.vue';
+import './anime-adventure.css';
 
 type FormatNode = NonNullable<GameActionMessage['format']>[number];
 type RenderedMessage = { text: string; images: string[]; imageAlt: string; buttons: GameActionButton[] };
@@ -112,10 +114,10 @@ watch(() => props.messages, (messages, _previous, onCleanup) => {
 </script>
 
 <template>
-  <div class="story-guide-content" :aria-busy="busy">
-    <article v-for="(message, index) in renderedMessages" :key="index" class="story-message">
+  <div class="story-guide-content anime-adventure" :aria-busy="busy">
+    <article v-for="(message, index) in renderedMessages" :key="index" class="story-message" :class="{ 'has-art': message.images.length > 0 }">
       <img v-for="(src, imageIndex) in message.images" :key="imageIndex" class="story-image" :src="src" :alt="message.imageAlt" referrerpolicy="no-referrer" />
-      <p v-if="message.text" class="story-guide-text">{{ message.text }}</p>
+      <div v-if="message.text" class="story-narration"><AnimeIcon class="story-narration-mark" name="scroll" :size="26" /><p class="story-guide-text">{{ message.text }}</p></div>
       <div v-if="message.buttons.length" class="story-actions">
         <button v-for="(button, buttonIndex) in message.buttons" :key="button.actionId ?? buttonIndex" class="soft-button" type="button" :disabled="busy" @click="selectButton(button)">{{ button.label }}</button>
       </div>

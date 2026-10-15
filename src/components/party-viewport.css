@@ -1,0 +1,59 @@
+/* Party lists use the page's available height; full details keep fixed actions. */
+.party-popup.anime-party-refinement.party-viewport-panel { display:flex; flex-direction:column; flex:1 1 0; height:100%; min-height:0; gap:5px; padding:0; overflow:hidden; }
+.party-popup.anime-party-refinement.party-viewport-panel :is(button,input,select,textarea) { margin:0; }
+.party-viewport-panel .party-toolbar { flex:none; min-height:32px; gap:4px; }
+.party-viewport-panel .party-toolbar > span { min-width:0; }
+.party-viewport-panel .party-toolbar strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:210px; }
+.party-viewport-panel .party-toolbar small { flex:none; white-space:nowrap; }
+.party-viewport-panel .party-toolbar-actions { display:flex; flex:none; gap:3px; }
+.party-viewport-panel :is(.party-toolbar-actions,.party-viewport-actions) button { min-height:30px; padding:4px 8px; font-size:12px; }
+.party-viewport-panel :is(.party-state,.party-error) { flex:none; margin:0; padding:3px 6px; font-size:11px; }
+.party-viewport-tabs { display:flex; flex:none; gap:4px; }
+.party-viewport-tabs button { flex:1; min-width:0; min-height:30px; padding:3px; border:1px solid #c9ad82; border-radius:6px; color:#6a5038; background:#fff5df; font-size:12px; }
+.party-viewport-tabs button[aria-selected=true] { color:#fffaf1; background:#258f91; border-color:#1c7d80; }
+.party-viewport-panel .party-search-form { flex:none; display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,.8fr) 54px 42px; gap:4px; }
+.party-viewport-panel .party-search-form label { gap:2px; font-size:10px; }
+.party-viewport-panel .party-search-form :is(input,select,button) { min-height:29px; height:29px; padding:3px 5px; font-size:11px; }
+.party-viewport-panel .party-list-viewport { flex:1 1 0; min-height:0; overflow:hidden; }
+.party-viewport-panel .party-viewport-list { display:grid; grid-auto-rows:108px; gap:6px; margin:0; padding:0; }
+.party-viewport-panel .party-viewport-row { display:flex; align-items:center; height:108px; min-height:0; gap:9px; padding:5px 8px; border:5px solid transparent; border-image:url('/assets/light-anime/social-v1/social-request-frame.svg') 24 fill / 5px / 0 stretch; margin:0; overflow:hidden; }
+.party-viewport-panel .party-viewport-row > .social-avatar { flex:none; width:58px!important; height:58px!important; }
+.party-viewport-panel .party-row-copy { display:flex; flex:1; flex-direction:column; min-width:0; gap:4px; padding:0; border:0; background:transparent; color:#26344b; text-align:left; box-shadow:none; }
+.party-viewport-panel .party-row-copy > * { display:block; width:100%; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+.party-viewport-panel .party-row-copy strong { font-size:15px; }
+.party-viewport-panel .party-row-copy span { font-size:11px; }
+.party-viewport-panel .party-row-copy small { color:#7c6a57; font-size:11px; }
+.party-viewport-panel .party-viewport-actions { flex:none; display:flex; flex-wrap:wrap; justify-content:center; gap:4px; }
+.party-viewport-panel .party-viewport-actions:empty { display:none; }
+.party-dialog-backdrop { position:fixed; top:var(--app-viewport-top,0); left:var(--app-viewport-left,0); z-index:130; display:grid; place-items:center; width:var(--app-viewport-width,100vw); height:var(--app-viewport-height,100dvh); padding:12px; background:#23372d88; color:#26344b; }
+.party-viewport-dialog { display:flex; flex-direction:column; width:min(580px,100%); max-height:100%; min-height:0; padding:12px; border:8px solid #dec49d; border-radius:12px; background:#fff8e9; box-shadow:0 10px 50px #18392a66; }
+.party-viewport-dialog > header { display:flex; flex:none; align-items:center; justify-content:space-between; gap:8px; }
+.party-viewport-dialog > header h3 { font-size:19px; }
+.party-viewport-dialog :is(.party-dialog-form) { display:flex; flex:1 1 auto; flex-direction:column; min-height:0; }
+.party-viewport-dialog .party-dialog-body { display:grid; flex:1 1 auto; min-height:0; gap:10px; padding:12px 0; overflow:auto; overflow-wrap:anywhere; }
+.party-viewport-dialog .party-dialog-body label { display:grid; gap:4px; font-size:13px; }
+.party-viewport-dialog .party-dialog-body :is(input,select,textarea) { width:100%; min-width:0; padding:8px; border:1px solid #b8a084; border-radius:6px; color:#26344b; background:#fffdf5; font-size:14px; }
+.party-viewport-dialog textarea { resize:vertical; min-height:80px; }
+.party-viewport-dialog footer { display:flex; flex:none; justify-content:flex-end; gap:8px; padding-top:8px; }
+.party-viewport-dialog :is(header,footer) button { min-height:34px; padding:5px 12px; font-size:14px; }
+.team-info-panel:has(.party-viewport-panel) { display:flex; flex-direction:column; overflow:hidden; height:min(680px,calc(var(--app-viewport-height,100dvh) - 32px)); }
+.team-info-panel:has(.party-viewport-panel) > header { flex:none; }
+@media(max-width:360px) { .party-viewport-panel .party-toolbar strong { max-width:105px; } }
+@media(max-height:450px) {
+ .party-popup.anime-party-refinement.party-viewport-panel { gap:3px; }
+ .party-viewport-panel .party-toolbar { min-height:28px; }
+ .party-viewport-panel :is(.party-toolbar-actions,.party-viewport-actions) button { min-height:28px; height:28px; }
+ .party-viewport-panel .party-viewport-tabs button { min-height:28px; height:28px; }
+ .party-viewport-panel .party-search-form label { display:flex; align-items:center; gap:3px; }
+ .party-viewport-panel .party-search-form label > span { flex:none; }
+ .party-viewport-panel .party-search-form :is(input,select) { flex:1; min-width:0; }
+ .party-popup.anime-party-refinement.party-viewport-panel > .viewport-pagination { height:28px; min-height:28px; padding:0; }
+ .party-popup.anime-party-refinement.party-viewport-panel > .viewport-pagination :is(button,select) { min-height:26px; height:26px; padding:3px 7px; }
+ .party-viewport-panel .party-viewport-list { grid-auto-rows:76px; }
+ .party-viewport-panel .party-viewport-row { height:76px; padding:3px 6px; gap:6px; }
+ .party-viewport-panel .party-viewport-row > .social-avatar { width:40px!important; height:40px!important; }
+ .party-viewport-panel .party-row-copy { gap:2px; }
+ .party-viewport-panel .party-row-copy strong { font-size:13px; }
+ .party-viewport-dialog { padding:7px; border-width:5px; }
+ .party-viewport-dialog .party-dialog-body { padding:7px 0; gap:6px; }
+}

@@ -1,0 +1,181 @@
+/* 001/053/062/067/072. These surfaces are exclusive to exploration. */
+.anime-exploration-refinement, .exploration-auto-layer, .anime-location-refinement {
+  --exploration-paper: url('/assets/light-anime/explore-v1/explore-paper-frame.svg');
+  --exploration-ornate: url('/assets/light-anime/explore-v1/explore-request-frame.svg');
+  --exploration-teal: url('/assets/light-anime/explore-v1/explore-button-teal.svg');
+  --exploration-neutral: url('/assets/light-anime/explore-v1/explore-button-paper.svg');
+  --exploration-red: url('/assets/light-anime/explore-v1/explore-button-red.svg');
+  --exploration-tab: url('/assets/light-anime/explore-v1/explore-tab-paper.svg');
+  --exploration-active: url('/assets/light-anime/explore-v1/explore-tab-active.svg');
+  --exploration-ribbon: url('/assets/light-anime/explore-v1/explore-section-ribbon.svg');
+  --exploration-wood: url('/assets/light-anime/explore-v1/explore-wood-ribbon.svg');
+  color: #584536;
+}
+.app-shell[data-page='explore'] { background: linear-gradient(#fff4d340, #edf4e483 430px, #f8f0e6ed 1000px), var(--explore-terrain) center top / cover fixed; }
+.app-shell[data-page='explore']:has(.world-map-action-lock) .floating-social-dock { display: none; }
+.app-shell[data-page='explore'] .anime-status-ribbon { gap: 7px; }
+.app-shell[data-page='explore'] .anime-status-ribbon .stat-card { border: 8px solid transparent; border-image: url('/assets/light-anime/explore-v1/explore-stat-frame.svg') 24 fill / 8px stretch; border-radius: 0; background: transparent; box-shadow: 0 3px 0 #76563417; }
+.app-shell[data-page='explore'] .anime-status-ribbon .stat-card > strong { color: #554b3d; }
+.app-shell .anime-exploration-refinement { min-width: 0; }
+.app-shell .anime-exploration-refinement .explore-frame { padding: 0; overflow: visible; background: transparent; border: 0; border-image: none; box-shadow: none; }
+.app-shell .anime-exploration-refinement .exploration-social-rail { gap: 14px; margin-top: 13px; min-width: 0; }
+.app-shell .anime-exploration-refinement :is(.desktop-chat-paper, .desktop-party-paper) { min-width: 0; padding: 3px 4px 7px; border: 10px solid transparent; border-image: var(--exploration-paper) 24 fill / 10px stretch; border-radius: 0; background: transparent; }
+.app-shell .anime-exploration-refinement .exploration-social-rail header { display: flex; gap: 6px; min-height: 45px; padding: 7px 14px 8px; margin: -21px -7px 0; color: #fff2d0; border: 0; background: var(--exploration-wood) center / 100% 100% no-repeat; text-shadow: 0 1px #6b4c36; }
+.app-shell .anime-exploration-refinement .exploration-social-rail header strong { color: inherit; font-family: KaiTi, STKaiti, serif; font-size: 19px; }
+.app-shell .anime-exploration-refinement .exploration-social-rail header .ghost-button { min-height: 28px; padding: 3px 9px; color: #fff4d8; border: 0; border-image: none; border-radius: 0; background: #684b352c; font-size: 11px; }
+.app-shell .anime-exploration-refinement .desktop-message-list { gap: 10px; min-height: 140px; max-height: 235px; padding: 11px 2px 6px; }
+.app-shell .anime-exploration-refinement .desktop-message { display: grid; grid-template-columns: 29px minmax(0, 1fr); align-items: start; gap: 6px; padding-bottom: 6px; border-bottom: 1px solid #d5c19b66; }
+.app-shell .anime-exploration-refinement .desktop-message-copy { min-width: 0; display: grid; gap: 3px; }
+.app-shell .anime-exploration-refinement .desktop-message-copy > strong { color: #477e6a; font-size: 11px; }
+.app-shell .anime-exploration-refinement .desktop-message.own .desktop-message-copy > strong { color: #a67742; }
+.app-shell .anime-exploration-refinement .desktop-message-copy > p { margin: 0; color: #63503d; font-size: 11px; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; }
+.app-shell .anime-exploration-refinement .desktop-message-copy > time { color: #a18c70; font-size: 9px; }
+.app-shell .anime-exploration-refinement .desktop-chat-input { display: grid; grid-template-columns: minmax(0, 1fr) 60px; gap: 5px; padding-top: 6px; border-top-color: #bca57c; }
+.app-shell .anime-exploration-refinement .desktop-chat-input input { width: 100%; min-height: 37px; padding: 6px 8px; color: #64513f; background: #fff9e8; border: 1px solid #c6aa7e; border-radius: 5px 3px 7px 4px; font-size: 11px; }
+.app-shell .anime-exploration-refinement .desktop-chat-input .primary-button { min-height: 37px; padding: 6px; border: 0; border-image: none; border-radius: 0; background: var(--exploration-teal) center / 100% 100% no-repeat; color: #fff7df; font-size: 12px; }
+.app-shell .anime-exploration-refinement .desktop-party-name { color: #5e4a34; padding: 9px 4px 7px; }
+.app-shell .anime-exploration-refinement .desktop-party-members { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; padding: 0 2px; }
+.app-shell .anime-exploration-refinement .desktop-party-members > span { display: flex; gap: 4px; min-width: 0; padding: 5px 3px; border: 0; background: transparent; font-size: 11px; overflow-wrap: anywhere; }
+.app-shell .anime-exploration-refinement .desktop-social-empty { display: flex; align-items: center; gap: 9px; padding: 8px 6px; color: #9a8367; font-size: 11px; }
+.app-shell .anime-exploration-refinement .desktop-social-empty > svg { flex: 0 0 auto; opacity: .65; }
+
+/* 062: selection is a preview; only the final button invokes the existing command. */
+.app-shell .anime-exploration-refinement .exploration-nearby-layer { z-index: 85; padding: 14px; background: #25382970; backdrop-filter: blur(2px); }
+.app-shell .anime-exploration-refinement .exploration-nearby-layer .interaction-choice { position: relative; width: min(440px, 100%); max-height: calc(100dvh - 28px); overflow-y: auto; padding: 13px 10px 14px; color: #5b4837; border: 15px solid transparent; border-image: var(--exploration-ornate) 24 fill / 15px stretch; border-radius: 0; background: transparent; box-shadow: 0 18px 55px #1e291c50; }
+.app-shell .anime-exploration-refinement .exploration-nearby-layer .dialog-close { position: absolute; top: 1px; right: 1px; width: 30px; min-width: 30px; height: 30px; color: #87643f; background: #fff2d7; border: 1.5px solid #b99b6b; border-radius: 50%; }
+.app-shell .anime-exploration-refinement .exploration-dialog-heading { display: flex; align-items: center; gap: 8px; padding: 0 15px 9px 1px; border-bottom: 1px solid #d5be94; }
+.app-shell .anime-exploration-refinement .exploration-dialog-heading > svg { flex: 0 0 auto; color: #b08c5d; }
+.app-shell .anime-exploration-refinement .exploration-dialog-heading h3 { margin: 0; color: #5d452e; font-family: KaiTi, STKaiti, serif; font-size: 23px; }
+.app-shell .anime-exploration-refinement .exploration-dialog-heading p { margin: 3px 0 0; color: #a18a69; font-size: 10px; }
+.app-shell .anime-exploration-refinement .nearby-encounter-preview { position: relative; display: flex; align-items: center; gap: 13px; min-height: 104px; padding: 9px 12px; }
+.app-shell .anime-exploration-refinement .encounter-illustration { display: grid; place-items: center; flex: 0 0 84px; width: 84px; height: 84px; filter: drop-shadow(0 5px 2px #876c3d22); }
+.app-shell .anime-exploration-refinement .encounter-target-art { display: block; width: 100%; height: 100%; object-fit: contain; }
+.app-shell .anime-exploration-refinement .encounter-row-icon .encounter-target-art { width: 40px; height: 48px; }
+.app-shell .anime-exploration-refinement .nearby-encounter-detail > div > .encounter-target-art { width: 67px; height: 76px; }
+.app-shell .anime-exploration-refinement .nearby-encounter-preview > div { display: grid; gap: 7px; min-width: 0; }
+.app-shell .anime-exploration-refinement .nearby-encounter-preview small { color: #9d845e; font-size: 11px; }
+.app-shell .anime-exploration-refinement .nearby-encounter-preview strong { color: #665037; font-size: 17px; overflow-wrap: anywhere; }
+.app-shell .anime-exploration-refinement .encounter-paw { position: absolute; right: 0; bottom: 15px; color: #c6ac76; opacity: .16; transform: rotate(-18deg); }
+.app-shell .anime-exploration-refinement .interaction-choice-list { display: grid; gap: 6px; }
+.app-shell .anime-exploration-refinement .interaction-choice-list .soft-button { display: grid; grid-template-columns: 42px minmax(0, 1fr) 18px; gap: 8px; min-height: 72px; width: 100%; padding: 4px; color: #6c553b; text-align: left; border: 7px solid transparent; border-image: var(--exploration-paper) 24 fill / 7px stretch; border-radius: 0; background: transparent; box-shadow: none; text-shadow: none; }
+.app-shell .anime-exploration-refinement .interaction-choice-list .soft-button.selected { border-image-source: var(--exploration-paper); filter: drop-shadow(0 0 1px #278f83) drop-shadow(0 0 1px #278f83); }
+.app-shell .anime-exploration-refinement .interaction-choice-list .soft-button > span { min-width: 0; }
+.app-shell .anime-exploration-refinement .interaction-choice-list .soft-button > span:not(.encounter-row-icon) { display: grid; gap: 5px; }
+.app-shell .anime-exploration-refinement .encounter-row-icon { display: grid; place-items: center; background: #dde7cb72; border-radius: 6px 3px 7px 4px; }
+.app-shell .anime-exploration-refinement .interaction-choice-list strong { color: #6a4e2e; font-size: 14px; }
+.app-shell .anime-exploration-refinement .interaction-choice-list small { color: #9a835f; font-size: 10px; line-height: 1.5; white-space: normal; overflow-wrap: anywhere; }
+.app-shell .anime-exploration-refinement .nearby-encounter-detail { padding-top: 5px; margin-top: 8px; }
+.app-shell .anime-exploration-refinement .nearby-encounter-detail h4 { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 39px; margin: 0 0 4px; padding: 7px 21px; color: #7f633f; background: var(--exploration-ribbon) center / 100% 100% no-repeat; font-size: 14px; }
+.app-shell .anime-exploration-refinement .nearby-encounter-detail > div { display: grid; grid-template-columns: 67px minmax(0, 1fr); align-items: center; gap: 10px; padding: 9px 9px 12px; }
+.app-shell .anime-exploration-refinement .nearby-encounter-detail p { margin: 0; color: #977e5a; font-size: 12px; line-height: 1.7; overflow-wrap: anywhere; }
+.app-shell .anime-exploration-refinement .nearby-encounter-detail .primary-button { display: flex; width: 100%; min-height: 47px; border: 0; border-image: none; border-radius: 0; background: var(--exploration-teal) center / 100% 100% no-repeat; font-size: 17px; }
+
+/* 053: irregular paper controls retain the live configuration API. */
+.app-shell .exploration-auto-layer { z-index: 85; padding: 15px; background: #28372679; backdrop-filter: blur(2px); }
+.app-shell .exploration-auto-layer .auto-battle-dialog { width: min(540px, 100%); max-height: calc(100dvh - 30px); overflow-y: auto; padding: 13px 12px 16px; color: #71583b; border: 16px solid transparent; border-image: var(--exploration-ornate) 24 fill / 16px stretch; border-radius: 0; background: transparent; box-shadow: 0 20px 60px #1a291c50; }
+.app-shell .exploration-auto-layer .dialog-close { position: absolute; top: 1px; right: 1px; width: 30px; min-width: 30px; height: 30px; border-radius: 50%; background: #fff4dc; color: #8d6841; border: 1.5px solid #b99b6b; }
+.app-shell .exploration-auto-layer .auto-battle-heading { display: flex; gap: 8px; justify-content: space-between; padding: 3px 16px 9px 0; margin-bottom: 10px; border-bottom: 1px solid #cfb990; }
+.app-shell .exploration-auto-layer .auto-battle-heading h2 { display: flex; align-items: center; gap: 8px; margin: 0; color: #614b34; font-family: KaiTi, STKaiti, serif; font-size: 25px; }
+.app-shell .exploration-auto-layer .auto-battle-heading h2 > svg { color: #ab8859; }
+.app-shell .exploration-auto-layer .auto-battle-state { flex: 0 0 auto; padding: 4px 9px; font-size: 10px; color: #a77256; border: 1px solid #d7bc95; background: #f3e7cf; border-radius: 14px; }
+.app-shell .exploration-auto-layer .auto-battle-state.enabled { color: #5d895d; background: #e3edcd; border-color: #b8c99f; }
+.app-shell .exploration-auto-layer .auto-battle-content { display: grid; gap: 10px; }
+.app-shell .exploration-auto-layer .auto-battle-mode-tabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; padding: 0; margin-bottom: 2px; background: transparent; border-radius: 0; box-shadow: none; }
+.app-shell .exploration-auto-layer .auto-battle-mode-tabs button { display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 47px; padding: 7px 10px 11px; color: #8d7250; background: var(--exploration-tab) center / 100% 100% no-repeat; border: 0; border-image: none; border-radius: 0; box-shadow: none; font-size: 14px; }
+.app-shell .exploration-auto-layer .auto-battle-mode-tabs button.active { color: #fff6df; background-image: var(--exploration-active); text-shadow: 0 1px #237578; }
+.app-shell .exploration-auto-layer .auto-battle-switches { display: grid; gap: 7px; }
+.app-shell .exploration-auto-layer .auto-battle-toggle-row { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: 9px; padding: 7px 6px; border: 7px solid transparent; border-image: var(--exploration-paper) 24 fill / 7px stretch; border-radius: 0; background: transparent; }
+.app-shell .exploration-auto-layer .auto-battle-toggle-row > span { display: grid; gap: 5px; margin: 0; }
+.app-shell .exploration-auto-layer .auto-battle-toggle-row strong { color: #765b38; font-size: 14px; }
+.app-shell .exploration-auto-layer .auto-battle-toggle-row small { color: #a18b6b; font-size: 10px; line-height: 1.5; }
+.app-shell .exploration-auto-layer .toggle-button { position: relative; display: flex; align-items: center; justify-content: end; min-width: 70px; min-height: 30px; padding: 3px 7px 3px 25px; color: #9b8669; background: #e0d6be; border: 1px solid #bca985; border-radius: 18px; font-size: 10px; font-weight: 700; box-shadow: inset 0 2px 3px #7b6b4a20; }
+.app-shell .exploration-auto-layer .toggle-button i { position: absolute; left: 3px; width: 23px; height: 23px; border: 1px solid #c8b991; border-radius: 50%; background: #fff9e5; box-shadow: 0 1px 2px #71603f40; }
+.app-shell .exploration-auto-layer .toggle-button.active { justify-content: start; padding: 3px 25px 3px 7px; color: #fff7df; background: #8fb983; border-color: #6c9765; }
+.app-shell .exploration-auto-layer .toggle-button.active i { left: auto; right: 3px; }
+.app-shell .exploration-auto-layer .auto-battle-default { display: grid; gap: 8px; padding: 9px 7px; border: 7px solid transparent; border-image: var(--exploration-paper) 24 fill / 7px stretch; border-radius: 0; background: transparent; }
+.app-shell .exploration-auto-layer .auto-battle-default > span { display: flex; align-items: center; gap: 7px; color: #82603c; font-size: 13px; font-weight: 700; }
+.app-shell .exploration-auto-layer .auto-battle-default-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.app-shell .exploration-auto-layer .auto-battle-default-actions button { display: flex; align-items: center; justify-content: center; gap: 5px; min-width: 0; min-height: 38px; padding: 7px 9px; color: #95754d; background: var(--exploration-neutral) center / 100% 100% no-repeat; border: 0; border-radius: 0; font-size: 12px; }
+.app-shell .exploration-auto-layer .auto-battle-default-actions button.active { color: #fff8df; background: var(--exploration-teal) center / 100% 100% no-repeat; }
+.app-shell .exploration-auto-layer .auto-battle-default-actions button.active:disabled { cursor: default; opacity: 1; filter: none; }
+.app-shell .exploration-auto-layer .auto-battle-potion-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
+.app-shell .exploration-auto-layer .auto-battle-potion-grid label { display: grid; grid-template-columns: minmax(0, 1fr); gap: 7px; padding: 9px 8px; border: 7px solid transparent; border-image: var(--exploration-paper) 24 fill / 7px stretch; border-radius: 0; background: transparent; }
+.app-shell .exploration-auto-layer .auto-battle-potion-grid label > span:first-child { display: flex; align-items: center; gap: 7px; color: #896b45; font-size: 13px; font-weight: 700; }
+.app-shell .exploration-auto-layer .auto-battle-potion-grid label > span:first-child b { margin-left: auto; color: #b96a59; font-size: 17px; font-variant-numeric: tabular-nums; }
+.app-shell .exploration-auto-layer .auto-battle-potion-grid input[type='range'] { display: block; appearance: none; width: 100%; min-height: 18px; margin: 0; padding: 0; accent-color: #91b883; background: transparent; border: 0; box-shadow: none; }
+.app-shell .exploration-auto-layer .auto-battle-potion-grid input[type='range']::-webkit-slider-runnable-track { height: 8px; background: #e6ddbd; border: 1px solid #b8a77d; border-radius: 6px; box-shadow: inset 0 1px 2px #7d6a3d1a; }
+.app-shell .exploration-auto-layer .auto-battle-potion-grid input[type='range']::-webkit-slider-thumb { appearance: none; width: 17px; height: 17px; margin-top: -5.5px; background: #a4c08b; border: 1.5px solid #749464; border-radius: 50%; box-shadow: inset 0 1px #e2edcd, 0 1px 2px #695b3440; }
+.app-shell .exploration-auto-layer .auto-battle-potion-grid input[type='range']::-moz-range-track { height: 6px; background: #e6ddbd; border: 1px solid #b8a77d; border-radius: 6px; }
+.app-shell .exploration-auto-layer .auto-battle-potion-grid input[type='range']::-moz-range-thumb { width: 15px; height: 15px; background: #a4c08b; border: 1.5px solid #749464; border-radius: 50%; }
+.app-shell .exploration-auto-layer .auto-battle-select-label { color: #a38b68; font-size: 10px; }
+.app-shell .exploration-auto-layer .auto-battle-potion-grid select { width: 100%; min-height: 34px; padding: 5px 9px; color: #806441; background: #fff8e5; border: 1px solid #c8ad7f; border-radius: 5px 3px 7px 4px; font-size: 12px; }
+.app-shell .exploration-auto-layer .auto-battle-actions { padding: 8px 7px 7px; border: 8px solid transparent; border-image: var(--exploration-paper) 24 fill / 8px stretch; background: transparent; }
+.app-shell .exploration-auto-layer .auto-battle-actions-heading { display: grid; gap: 5px; padding: 0 0 9px; }
+.app-shell .exploration-auto-layer .auto-battle-actions-heading strong { display: flex; align-items: center; gap: 7px; color: #8a6b44; font-size: 15px; }
+.app-shell .exploration-auto-layer .auto-battle-actions-heading small { color: #a79170; font-size: 10px; line-height: 1.4; }
+.app-shell .exploration-auto-layer .auto-battle-action-row { display: grid; grid-template-columns: 23px 34px minmax(0, 1fr) auto; gap: 6px; align-items: center; min-height: 44px; padding: 3px; border: 0; border-radius: 0; border-bottom: 1px solid #dcc49b7a; background: transparent; }
+.app-shell .exploration-auto-layer .auto-battle-action-row:last-child { border-bottom: 0; }
+.app-shell .exploration-auto-layer .auto-battle-action-row > b { display: grid; place-items: center; width: 23px; height: 23px; color: #fff4da; background: #bc9b67; border: 1px solid #987a4c; border-radius: 50%; font-size: 12px; }
+.app-shell .exploration-auto-layer .auto-battle-action-row:nth-child(3n) > b { background: #87a47b; border-color: #66805e; }
+.app-shell .exploration-auto-layer .auto-battle-action-row:nth-child(3n + 1) > b { background: #809eaf; border-color: #667f8b; }
+.app-shell .exploration-auto-layer .auto-battle-action-row select { width: 100%; min-height: 35px; padding: 4px 5px; color: #816440; background: #fff7e1; border: 1px solid #c9b084; border-radius: 5px 3px 6px 4px; font-size: 12px; }
+.app-shell .exploration-auto-layer .auto-battle-action-row .ghost-button { display: flex; gap: 3px; align-items: center; min-height: 30px; padding: 3px 6px; color: #9b805d; border: 0; border-radius: 0; background: var(--exploration-neutral) center / 100% 100% no-repeat; font-size: 10px; }
+.app-shell .exploration-auto-layer .auto-battle-load-error { min-height: 100px; padding: 18px 10px; border: 0; background: transparent; }
+.app-shell .exploration-auto-layer .auto-battle-load-error .soft-button { margin-top: 10px; }
+
+/* 072: opt-in appearance; manual, story and battle-result instances retain their styles. */
+.anime-location-refinement.manual-backdrop { z-index: 91; padding: 14px; background: #2b3a2c77; backdrop-filter: blur(2px); }
+.anime-location-refinement .manual-dialog.location-paper-dialog { position: relative; width: min(660px, 100%); height: auto; max-height: calc(100dvh - 28px); overflow: visible; padding: 1px 4px 4px; color: #6b5134; border: 14px solid transparent; border-image: var(--exploration-ornate) 24 fill / 14px stretch; border-radius: 0; background: transparent; box-shadow: 0 20px 60px #162a1b55; }
+.anime-location-refinement .location-paper-dialog .manual-header { position: relative; flex: 0 0 auto; min-height: 82px; padding: 9px 26px 13px; margin: -18px -6px 0; background: var(--exploration-ribbon) center / 100% 100% no-repeat; border: 0; }
+.anime-location-refinement .manual-dialog.location-paper-dialog .manual-heading-group { display: flex; align-items: center; gap: 11px; min-width: 0; padding: 0; border: 0; border-image: none; background: transparent; }
+.anime-location-refinement .location-paper-dialog .manual-mark { flex: 0 0 41px; width: 41px; height: 45px; background: transparent; border: 0; border-radius: 0; }
+.anime-location-refinement .location-paper-dialog .manual-heading-group > div { display: flex; flex-direction: column-reverse; gap: 4px; min-width: 0; }
+.anime-location-refinement .location-paper-dialog .manual-heading-group h2 { color: #765a35; font-family: KaiTi, STKaiti, serif; font-size: 26px; line-height: 1.3; }
+.anime-location-refinement .location-paper-dialog .manual-heading-group p { margin: 0; color: #a48b61; font-size: 10px; letter-spacing: .05em; }
+.anime-location-refinement .location-paper-dialog .manual-close { position: absolute; top: 5px; right: -3px; display: grid; place-items: center; width: 31px; height: 31px; color: #a27d4e; background: #fff4d8; border: 1.5px solid #b99a66; border-radius: 50%; }
+.anime-location-refinement .location-paper-dialog .manual-close > svg { width: 19px; height: 19px; }
+.anime-location-refinement .location-paper-dialog .manual-body { flex: 1 1 auto; min-height: 0; max-height: calc(100dvh - 140px); overflow-y: auto; padding: 4px 3px 8px; }
+.anime-location-refinement .location-paper-dialog .manual-messages { gap: 10px; }
+.anime-location-refinement .location-paper-dialog .manual-message { display: flex; flex-direction: column; padding: 8px 9px; background: transparent; border: 8px solid transparent; border-image: var(--exploration-paper) 24 fill / 8px stretch; border-radius: 0; }
+.anime-location-refinement .location-paper-dialog .manual-message.has-art { padding: 0; border: 0; border-image: none; }
+.anime-location-refinement .location-paper-dialog .manual-image { order: 0; width: 100%; max-height: min(42dvh, 360px); height: auto; margin: 0 0 6px; object-fit: contain; border-radius: 5px 8px 3px 6px; }
+.anime-location-refinement .location-paper-dialog .manual-text { order: 1; padding: 5px 3px; color: #8e7451; font-size: 13px; line-height: 1.8; white-space: pre-wrap; overflow-wrap: anywhere; }
+.anime-location-refinement .location-paper-dialog .manual-message.has-art .manual-text { padding: 8px 11px; border: 7px solid transparent; border-image: var(--exploration-paper) 24 fill / 7px stretch; background: transparent; }
+.anime-location-refinement .location-paper-dialog .manual-actions { order: 2; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 95px), 1fr)); gap: 5px; margin: 8px 0 0; }
+.anime-location-refinement .location-paper-dialog .manual-actions button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px; min-width: 0; min-height: 75px; padding: 9px 8px 12px; color: #95764c; background: var(--exploration-tab) center / 100% 100% no-repeat; border: 0; border-image: none; border-radius: 0; font-size: 12px; line-height: 1.45; overflow-wrap: anywhere; }
+.anime-location-refinement .location-paper-dialog .manual-actions button:only-child { flex-direction: row; min-height: 45px; background-image: var(--exploration-teal); color: #fff8df; font-size: 16px; }
+.anime-location-refinement .location-paper-dialog .manual-state { padding: 24px 10px; color: #9a825e; }
+.anime-location-refinement .location-paper-dialog .manual-error { color: #ae6d55; background: #f7e5cd; border: 1px solid #d6b08b; border-radius: 5px 3px 8px 4px; }
+@media (max-width: 420px) {
+  .app-shell[data-page='explore'] .anime-status-ribbon { gap: 4px; }
+  .app-shell[data-page='explore'] .anime-status-ribbon .stat-card { border-width: 5px; border-image-width: 5px; min-height: 59px; }
+  .app-shell .exploration-auto-layer { padding: 9px; }
+  .app-shell .exploration-auto-layer .auto-battle-dialog { max-height: calc(100dvh - 18px); padding: 9px 5px 11px; border-width: 12px; border-image-width: 12px; }
+  .app-shell .exploration-auto-layer .auto-battle-heading { padding-right: 34px; }
+  .app-shell .exploration-auto-layer .auto-battle-heading h2 { gap: 6px; font-size: 21px; }
+  .app-shell .exploration-auto-layer .auto-battle-heading h2 > svg { width: 22px; height: 22px; }
+  .app-shell .exploration-auto-layer .auto-battle-state { padding: 3px 6px; font-size: 9px; }
+  .app-shell .exploration-auto-layer .auto-battle-toggle-row { gap: 5px; grid-template-columns: 25px minmax(0, 1fr) auto; padding: 6px 3px; border-width: 6px; border-image-width: 6px; }
+  .app-shell .exploration-auto-layer .auto-battle-toggle-row > svg { width: 25px; height: 25px; }
+  .app-shell .exploration-auto-layer .auto-battle-toggle-row strong { font-size: 13px; }
+  .app-shell .exploration-auto-layer .auto-battle-toggle-row small { font-size: 9px; }
+  .app-shell .exploration-auto-layer .toggle-button { min-width: 63px; font-size: 9px; }
+  .app-shell .exploration-auto-layer .auto-battle-action-row { grid-template-columns: 21px 30px minmax(0, 1fr) auto; gap: 4px; }
+  .app-shell .exploration-auto-layer .auto-battle-action-row select { font-size: 11px; }
+  .app-shell .exploration-auto-layer .auto-battle-action-row .ghost-button { padding: 3px 5px; }
+  .app-shell .exploration-auto-layer .auto-battle-action-row .ghost-button > span { display: none; }
+  .app-shell .anime-exploration-refinement .exploration-nearby-layer { padding: 9px; }
+  .app-shell .anime-exploration-refinement .exploration-nearby-layer .interaction-choice { padding: 11px 5px 10px; max-height: calc(100dvh - 18px); border-width: 12px; border-image-width: 12px; }
+  .app-shell .anime-exploration-refinement .exploration-dialog-heading h3 { font-size: 21px; }
+  .app-shell .anime-exploration-refinement .nearby-encounter-preview { min-height: 88px; padding: 6px 8px; gap: 8px; }
+  .app-shell .anime-exploration-refinement .encounter-illustration { flex-basis: 70px; width: 70px; height: 70px; }
+  .app-shell .anime-exploration-refinement .encounter-illustration > svg { width: 64px; height: 64px; }
+  .app-shell .anime-exploration-refinement .interaction-choice-list .soft-button { gap: 6px; padding: 3px; grid-template-columns: 37px minmax(0, 1fr) 16px; }
+  .anime-location-refinement.manual-backdrop { padding: 9px; }
+  .anime-location-refinement .manual-dialog.location-paper-dialog { border-width: 11px; border-image-width: 11px; max-height: calc(100dvh - 18px); padding: 1px 2px 3px; }
+  .anime-location-refinement .location-paper-dialog .manual-header { min-height: 76px; padding: 8px 22px 12px; margin-top: -15px; }
+  .anime-location-refinement .location-paper-dialog .manual-heading-group h2 { font-size: 23px; }
+  .anime-location-refinement .location-paper-dialog .manual-actions { grid-template-columns: repeat(auto-fit, minmax(min(100%, 65px), 1fr)); gap: 3px; }
+  .anime-location-refinement .location-paper-dialog .manual-actions button { min-height: 76px; padding: 8px 5px 13px; font-size: 10px; }
+  .anime-location-refinement .location-paper-dialog .manual-body { max-height: calc(100dvh - 120px); }
+}

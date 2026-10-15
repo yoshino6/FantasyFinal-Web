@@ -33,7 +33,7 @@ export const achievementRewards = () => get<AchievementRewards>('/handbook/achie
 export const openAchievementBox = (boxKey: string, requestId: string, quantity: number) =>
   post<BoxOpenResult>(`/handbook/achievements/rewards/${encodeURIComponent(boxKey)}/open`, { requestId, quantity });
 
-export type CodexEntry = { id: number; name: string; category: string; detailId: string };
+export type CodexEntry = { id: number; code?: string; name: string; category: string; detailId: string };
 export type CodexPage = Page<CodexEntry> & {
   kind: CodexKind; category: string; keyword: string; kinds: readonly CodexKind[];
   categories: { label: string; value: string }[]; pageSize: number; scope: 'discovered_only';

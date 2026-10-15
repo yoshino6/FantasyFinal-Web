@@ -1,4 +1,4 @@
-const VERSION = 'ff-web-v9';
+const VERSION = 'ff-web-v11-light-anime';
 const STATIC_CACHE = `${VERSION}-static`;
 const RUNTIME_CACHE = `${VERSION}-runtime`;
 const RESOURCE_CACHE = 'ff-game-assets-v2';
@@ -70,7 +70,12 @@ self.addEventListener('fetch', event => {
         const cached = await resourceCache.match(request.url);
         if (cached) return rangeResponse(request, cached);
       }
-      return fetch(request);
+      const response = await fetch(request);
+      if (response.ok && response.status === 200
+        && !response.headers.get('Content-Type')?.includes('text/html')) {
+        await resourceCache.put(request.url, response.clone()).catch(() => undefined);
+      }
+      return response;
     })());
     return;
   }

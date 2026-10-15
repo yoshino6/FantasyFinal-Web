@@ -1,0 +1,298 @@
+/* Commerce ledgers: reuse painted skins without changing list/card geometry. */
+.shop-ledger-painted.shop-ledger-painted.anime-growth-commerce.anime-growth-commerce {
+  --gc-ink: var(--game-ui-ink, #535366);
+  --gc-muted: var(--game-ui-muted, #736c78);
+  color: var(--gc-ink);
+  border-image: var(--game-ui-panel) 144 fill / 8px stretch;
+  border-radius: 0;
+  background: #fffcf4;
+  background-clip: padding-box;
+  box-shadow: 0 8px 24px #59697b1a;
+}
+
+.shop-ledger-painted.shop-ledger-painted.anime-growth-commerce.anime-growth-commerce.bookshop-panel {
+  border-image-source: var(--game-ui-journal);
+  border-image-slice: var(--game-ui-journal-slice) fill;
+}
+
+.shop-ledger-painted.shop-ledger-painted.anime-growth-commerce.anime-growth-commerce :is(.bank-header, .guild-shop-header, .bookshop-header) {
+  background: transparent;
+  border-bottom-color: #cbd3d566;
+}
+
+.shop-ledger-painted.shop-ledger-painted.anime-growth-commerce.anime-growth-commerce :is(.bank-mark, .guild-shop-emblem, .bookshop-mark, .deposit-symbol, .product-icon) {
+  border: 0;
+  border-image: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.shop-ledger-painted.shop-ledger-painted.anime-growth-commerce.anime-growth-commerce :is(h2, h3) {
+  color: var(--game-ui-ink, #535366);
+  font-family: KaiTi, STKaiti, 'Noto Serif SC', serif;
+}
+
+.shop-ledger-painted.shop-ledger-painted.anime-growth-commerce.anime-growth-commerce :is(.bank-tabs, .segment, .guild-shop-tabs, .bookshop-tabs) > button,
+.shop-ledger-painted.shop-ledger-painted.anime-growth-commerce.anime-growth-commerce :is(.guild-shop-search > button, .bookshop-search > button, .guild-shop-pager > button, .bookshop-pager > button, .guild-shop-close, .bookshop-close, .bookshop-refresh, .bookshop-retry, .bank-header > button, .gate-state > button, .shortcuts > button, .detail-close, .confirm-actions > button, .primary-button, .guild-shop-primary, .bookshop-primary) {
+  box-sizing: border-box;
+  border: 4px solid transparent;
+  border-image: var(--game-ui-paper) 144 fill / 4px 7px stretch;
+  border-radius: 0;
+  background: transparent;
+  color: var(--game-ui-ink, #535366);
+  font-weight: 700;
+  text-shadow: none;
+  box-shadow: none;
+}
+
+.shop-ledger-painted.shop-ledger-painted.anime-growth-commerce.anime-growth-commerce :is(.bank-tabs, .segment, .guild-shop-tabs, .bookshop-tabs) > button.active,
+.shop-ledger-painted.shop-ledger-painted.anime-growth-commerce.anime-growth-commerce :is(.guild-shop-search > button[type='submit'], .bookshop-search > button[type='submit'], .primary-button, .guild-shop-primary, .bookshop-primary) {
+  border-image-source: var(--game-ui-teal);
+  background: transparent;
+  color: var(--game-ui-primary-ink, #245664);
+  text-shadow: none;
+}
+
+.shop-ledger-painted.shop-ledger-painted.anime-growth-commerce.anime-growth-commerce :is(.quote-card, .guild-shop-quote, .bookshop-quote) button:is(.primary-button, .guild-shop-primary, .bookshop-primary) {
+  border-image-source: var(--game-ui-coral);
+  color: var(--game-ui-danger-ink, #793f4a);
+  text-shadow: none;
+}
+
+.shop-ledger-painted.shop-ledger-painted.anime-growth-commerce.anime-growth-commerce :is(.bank-header > button, .guild-shop-close, .bookshop-close) {
+  display: grid;
+  place-items: center;
+  padding: 0;
+}
+
+.shop-ledger-painted.shop-ledger-painted.anime-growth-commerce.anime-growth-commerce .detail-close {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 5px;
+}
+
+.shop-ledger-painted.shop-ledger-painted.anime-growth-commerce.anime-growth-commerce :is(.guild-shop-search, .bookshop-search) {
+  position: relative;
+  align-items: center;
+}
+
+.shop-ledger-painted.shop-ledger-painted.anime-growth-commerce.anime-growth-commerce .shop-ledger-search-art {
+  position: absolute;
+  top: 50%;
+  left: 10px;
+  z-index: 1;
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.shop-ledger-painted.shop-ledger-painted.anime-growth-commerce.anime-growth-commerce :is(.guild-shop-search input, .bookshop-search input, .guild-shop-quantity input, .bookshop-quantity input, .transfer-card input) {
+  box-sizing: border-box;
+  border: 3px solid transparent;
+  border-image: var(--game-ui-panel) 144 fill / 3px 5px stretch;
+  border-radius: 0;
+  background: #fffcf4;
+  background-clip: padding-box;
+  color: var(--game-ui-ink, #535366);
+  box-shadow: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.shop-ledger-painted.shop-ledger-painted.anime-growth-commerce.anime-growth-commerce :is(.guild-shop-search input, .bookshop-search input) {
+  padding-left: 32px;
+}
+
+.shop-ledger-painted.shop-ledger-painted.anime-growth-commerce.anime-growth-commerce :is(.guild-shop-balance, .bookshop-wallet, .location-tag) {
+  border: 0;
+  border-radius: 0;
+  background: var(--game-ui-gold) center / 100% 100% no-repeat;
+  color: var(--game-ui-gold-ink, #735632);
+  box-shadow: none;
+}
+
+.shop-ledger-painted.shop-ledger-painted.anime-growth-commerce.anime-growth-commerce :is(.guild-shop-balance, .bookshop-wallet) {
+  display: grid;
+  gap: 2px;
+  padding: 7px 10px;
+}
+
+.shop-ledger-painted.shop-ledger-painted.anime-growth-commerce.anime-growth-commerce :is(.guild-shop-balance strong, .bookshop-wallet strong, .balances strong) {
+  color: var(--game-ui-primary-ink, #245664);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Retain existing border widths, padding and row min-heights from each component. */
+.shop-ledger-painted.shop-ledger-painted.anime-growth-commerce.anime-growth-commerce :is(.guild-shop-item, .bookshop-item, .deposit-list > button, .product-list > button),
+.shop-ledger-painted.shop-ledger-painted.anime-growth-commerce.anime-growth-commerce :is(.guild-shop-item, .bookshop-item, .deposit-list > button, .product-list > button):hover:not(:disabled) {
+  border-style: solid;
+  border-color: transparent;
+  border-image: var(--game-ui-panel) 144 fill / 4px 7px stretch;
+  border-radius: 0;
+  background: #fffcf4;
+  background-clip: padding-box;
+  box-shadow: none;
+}
+
+.shop-ledger-painted.shop-ledger-painted.anime-growth-commerce.anime-growth-commerce :is(.guild-shop-item, .bookshop-item, .deposit-list > button, .product-list > button).selected,
+.shop-ledger-painted.shop-ledger-painted.anime-growth-commerce.anime-growth-commerce :is(.guild-shop-item, .bookshop-item, .deposit-list > button, .product-list > button).selected:hover:not(:disabled) {
+  border-image-source: var(--game-ui-teal);
+  background: transparent;
+  box-shadow: none;
+}
+
+.shop-ledger-painted.shop-ledger-painted.anime-growth-commerce.anime-growth-commerce :is(.guild-shop-item, .bookshop-item, .guild-shop-picked, .bookshop-picked) .inventory-art-wrap {
+  border: 0;
+  border-image: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.shop-ledger-painted.shop-ledger-painted.anime-growth-commerce.anime-growth-commerce :is(.guild-shop-item-text strong, .bookshop-item strong, .deposit-list strong, .product-list strong) {
+  color: var(--game-ui-ink, #535366);
+}
+
+.shop-ledger-painted.shop-ledger-painted.anime-growth-commerce.anime-growth-commerce .shop-price {
+  display: inline;
+  color: var(--game-ui-primary-ink, #245664);
+  font-weight: 800;
+  font-size: inherit;
+  font-variant-numeric: tabular-nums;
+}
+
+/* A single document surface surrounds facts; avoid another frame around details. */
+.shop-ledger-painted.shop-ledger-painted.anime-growth-commerce.anime-growth-commerce :is(.guild-shop-detail, .bookshop-detail, .deposit-detail) {
+  border-color: transparent;
+  border-image: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.shop-ledger-painted.shop-ledger-painted.anime-growth-commerce.anime-growth-commerce :is(.guild-shop-picked h3, .bookshop-picked h3, .deposit-detail h3) {
+  white-space: normal;
+  overflow: visible;
+  overflow-wrap: anywhere;
+  text-overflow: clip;
+}
+
+.shop-ledger-painted.shop-ledger-painted.anime-growth-commerce.anime-growth-commerce :is(.guild-shop-facts > div, .bookshop-facts > div) {
+  border-color: #cbd3d566;
+}
+
+.shop-ledger-painted.shop-ledger-painted.anime-growth-commerce.anime-growth-commerce :is(.guild-shop-facts dt, .bookshop-facts dt, .facts > span) {
+  color: var(--game-ui-muted, #736c78);
+}
+
+.shop-ledger-painted.shop-ledger-painted.anime-growth-commerce.anime-growth-commerce :is(.guild-shop-facts dd, .bookshop-facts dd, .facts strong) {
+  color: var(--game-ui-primary-ink, #245664);
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+}
+
+.shop-ledger-painted.shop-ledger-painted.anime-growth-commerce.anime-growth-commerce :is(.transfer-card, .shortcuts, .balances > div) {
+  border-color: transparent;
+  border-image: var(--game-ui-panel) 144 fill / 4px 6px stretch;
+  border-radius: 0;
+  background: #fffcf4;
+  background-clip: padding-box;
+  box-shadow: none;
+}
+
+.shop-ledger-painted.shop-ledger-painted.anime-growth-commerce.anime-growth-commerce .deposit-detail .facts > span {
+  border: 0;
+  border-radius: 0;
+  border-bottom: 1px solid #bca37b55;
+  background: transparent;
+}
+
+.shop-ledger-painted.shop-ledger-painted.anime-growth-commerce.anime-growth-commerce :is(.quote-card, .guild-shop-quote, .bookshop-quote) {
+  border: 6px solid transparent;
+  border-image: var(--game-ui-panel) 144 fill / 6px stretch;
+  border-radius: 0;
+  background: transparent;
+  color: var(--game-ui-gold-ink, #735632);
+  box-shadow: none;
+}
+
+.shop-ledger-painted.shop-ledger-painted.anime-growth-commerce.anime-growth-commerce :is(.quote-card h3, .guild-shop-quote > strong, .bookshop-quote > strong) {
+  color: var(--game-ui-gold-ink, #735632);
+  padding-bottom: 7px;
+  border-bottom: 1px solid #a9854e4a;
+}
+
+.shop-ledger-painted.shop-ledger-painted.anime-growth-commerce.anime-growth-commerce :is(.quote-card p, .guild-shop-quote p, .bookshop-quote p) {
+  color: var(--game-ui-ink, #535366);
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+}
+
+.shop-ledger-painted.shop-ledger-painted.anime-growth-commerce.anime-growth-commerce :is(.guild-shop-quote b, .bookshop-quote b) {
+  color: var(--game-ui-primary-ink, #245664);
+  font-size: 1.2em;
+  font-weight: 800;
+}
+
+.shop-ledger-painted.shop-ledger-painted.anime-growth-commerce.anime-growth-commerce :is(.notice, .error, .guild-shop-notice, .guild-shop-error, .bookshop-notice, .bookshop-error) {
+  border: 3px solid transparent;
+  border-image: var(--game-ui-panel) 144 fill / 3px 5px stretch;
+  border-radius: 0;
+  background: #fffcf4;
+  background-clip: padding-box;
+  box-shadow: none;
+}
+
+.shop-ledger-painted.shop-ledger-painted.anime-growth-commerce.anime-growth-commerce :is(.error, .guild-shop-error, .bookshop-error) {
+  color: var(--game-ui-danger-ink, #793f4a);
+}
+
+.shop-ledger-painted.shop-ledger-painted.anime-growth-commerce.anime-growth-commerce .shop-gate-art {
+  display: inline-block;
+  line-height: 1;
+}
+
+.shop-ledger-painted.shop-ledger-painted.anime-growth-commerce.anime-growth-commerce button:disabled {
+  opacity: .7;
+  filter: saturate(.35);
+  cursor: not-allowed;
+}
+
+.shop-ledger-painted.shop-ledger-painted.anime-growth-commerce.anime-growth-commerce :is(button, input):focus-visible {
+  outline: 2px solid #268c94;
+  outline-offset: 2px;
+}
+
+@media (max-width: 600px) {
+  .shop-ledger-painted.shop-ledger-painted.anime-growth-commerce.anime-growth-commerce.bookshop-panel[data-side='buy'] .bookshop-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 370px) {
+  .shop-ledger-painted.shop-ledger-painted.anime-growth-commerce.anime-growth-commerce :is(.guild-shop-balance, .bookshop-wallet) {
+    padding: 6px 7px;
+    min-width: 0;
+    max-width: 88px;
+  }
+  .shop-ledger-painted.shop-ledger-painted.anime-growth-commerce.anime-growth-commerce :is(.guild-shop-balance strong, .bookshop-wallet strong) {
+    font-size: 11px;
+    overflow-wrap: anywhere;
+    white-space: normal;
+    text-overflow: clip;
+  }
+  .shop-ledger-painted.shop-ledger-painted.anime-growth-commerce.anime-growth-commerce .confirm-actions {
+    flex-wrap: wrap;
+  }
+  .shop-ledger-painted.shop-ledger-painted.anime-growth-commerce.anime-growth-commerce .confirm-actions > button {
+    flex: 1 1 110px;
+    white-space: normal;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shop-ledger-painted.shop-ledger-painted.anime-growth-commerce.anime-growth-commerce button {
+    transition: none;
+  }
+}

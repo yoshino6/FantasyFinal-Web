@@ -1,39 +1,143 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { computed, defineAsyncComponent, defineComponent, h, nextTick, onBeforeUnmount, onMounted, ref, watch, type Component } from 'vue';
 import * as api from './api';
 import type { AutoBattleConfig, AutoBattleSkillChoice, ChatChannel, ChatMessage, Panel, Recruitment, PartyApplication, WebParty, SocialSummary, CommandActionResult, CommandCatalogItem, PanelInventoryStack, PanelInventoryInstance, PanelEquippedItem, WebNotification, GameMail, GameMailDetail, GameMailFilter, GameActionButton, GameActionMessage } from './api';
 import CommandCatalog from './components/CommandCatalog.vue';
 import AdventureManualDock from './components/AdventureManualDock.vue';
 import AdventureManualPanel, { type ManualCategory, type ManualMessage } from './components/AdventureManualPanel.vue';
-import HandbookContent from './components/HandbookContent.vue';
 import type { HandbookSection } from './handbook-api';
 import StoryDialog from './components/StoryDialog.vue';
 import { createIdempotencyKey } from './idempotency-key';
-import NotificationInbox from './components/NotificationInbox.vue';
-import PartyPopup from './components/PartyPopup.vue';
-import MarketPanel from './components/MarketPanel.vue';
-import SkillPanel from './components/SkillPanel.vue';
-import BankPanel from './components/BankPanel.vue';
-import HomePanel from './components/HomePanel.vue';
-import GuildShopPanel from './components/GuildShopPanel.vue';
-import BookshopPanel from './components/BookshopPanel.vue';
-import HomePurchasePanel from './components/HomePurchasePanel.vue';
-import EvolutionPanel from './components/EvolutionPanel.vue';
-import AdvancedProfessionPanel from './components/AdvancedProfessionPanel.vue';
+import ExploreChatPanel, { type ExploreChatTab } from './components/ExploreChatPanel.vue';
+import LazyPanelState from './components/LazyPanelState.vue';
 import type { AdvancedMentor, AdvancedTrialStarted } from './advanced-profession-api';
 import type { HomePurchaseSiteTarget } from './home-purchase-api';
-import WorldMapPanel, { type ExploreMapPoint, type MapActionLock, type MapBounds, type MapPointAction, type MapPosition } from './components/WorldMapPanel.vue';
+import type { ExploreMapPoint, MapActionLock, MapBounds, MapPointAction, MapPosition, MapHeading } from './components/WorldMapPanel.vue';
+import type { EnvironmentObjectView } from './map-environment';
 import RegionMapSidebar, { type RegionTravelRequest } from './components/RegionMapSidebar.vue';
-import TurnBattlePanel, { type BattleAction, type BattleState } from './components/TurnBattlePanel.vue';
-import NegotiationPanel from './components/NegotiationPanel.vue';
+import type { BattleAction, BattleState } from './components/TurnBattlePanel.vue';
 import InventoryItemIcon from './components/InventoryItemIcon.vue';
+import { normalizeItemRarity } from './item-rarity';
+import { vItemRaritySparkle } from './item-rarity-sparkle';
+import EquipmentDetailSections from './components/EquipmentDetailSections.vue';
+import './anime-inventory-panel.css';
 import CharacterPortrait from './components/CharacterPortrait.vue';
+import CharacterInfoPanel from './components/CharacterInfoPanel.vue';
+import AnimeIcon from './components/AnimeIcon.vue';
+import GameUiFeedbackArt from './components/GameUiFeedbackArt.vue';
+import TabArtIcon, { type TabArtKey } from './components/TabArtIcon.vue';
+import SocialAvatar from './components/SocialAvatar.vue';
+import SocialGlyph from './components/SocialGlyph.vue';
+import './anime-social-refinement.css';
+import ExplorePotionGlyph from './components/ExplorePotionGlyph.vue';
+import './anime-exploration-refinement.css';
+import './anime-exploration-canvas.css';
+import './game-ui-world.css';
+import { knownExplorationRoute, useExplorationRoute } from './exploration-route';
+import { adjacentVision, committedReplayVision } from './exploration-vision';
+import { useExplorationViewport } from './exploration-viewport';
+import { useExplorationTravelMotion } from './exploration-travel-motion';
+import { useExplorationTravelVision } from './exploration-travel-vision';
+import { compactStepPanel } from './exploration-compact-step';
+import { useCommittedExplorationMotion } from './exploration-committed-motion';
+import { stoppedMovementPointIds, isCurrentEncounterBlock, isTargetMovementStop, type MapTargetPopupRequest, type MovementStopResult } from './exploration-target-popup';
+import AuthGlyph from './components/AuthGlyph.vue';
+import AuthTabFrame from './components/AuthTabFrame.vue';
+import GearSlotIcon from './components/GearSlotIcon.vue';
+import { ANIME_AUTH_ART, ANIME_LOGO, ANIME_MAIN_SCENES, ANIME_NAV_ART, ANIME_SCENES } from './anime-assets';
+import { portraitBaseAsset } from './character-assets';
+import { terrainForRegion, mapTargetArt } from './exploration-assets';
+import { useDialogNavigation } from './dialog-navigation';
+import { useCharacterSceneFraming, type CharacterScene } from './scene-framing';
 import { BgmPlayer, type BgmScene } from './bgm';
+import { useAppViewport } from './useAppViewport';
+import { useViewportPagination } from './useViewportPagination';
+import ViewportPagination from './components/ViewportPagination.vue';
+
+// Keep unopened gameplay screens out of the login module graph. A failed code
+// download waits for an explicit page reload and never repeats a gameplay action.
+function lazyPanel<T extends Component>(loader: () => Promise<{ default: T }>, waitForOpen = false,
+  reload = () => window.location.reload()): T {
+  const createPanel = (visible = () => true, close?: () => void) => {
+    const failed = ref(false);
+    const loadingState = defineComponent({
+      inheritAttrs: false,
+      setup: () => () => visible() ? h(LazyPanelState, {
+        failed: failed.value,
+        overlay: waitForOpen,
+        onClose: close,
+        onReload: reload
+      }) : null
+    });
+    return defineAsyncComponent<T>({
+      loader,
+      loadingComponent: loadingState,
+      delay: 120,
+      // Browsers retain failed dynamic imports in their module map. Keep the
+      // error visible; only the player's explicit page reload resets that map.
+      onError: () => { failed.value = true; }
+    });
+  };
+  if (!waitForOpen) return createPanel();
+  return defineComponent({
+    inheritAttrs: false,
+    setup: (_props, { attrs, slots }) => {
+      const activated = ref(Boolean(attrs.open));
+      watch(() => attrs.open, open => { if (open) activated.value = true; });
+      const panel = createPanel(() => Boolean(attrs.open), () => {
+        if (typeof attrs.onClose === 'function') attrs.onClose();
+      });
+      // Once opened, preserve the panel's existing close/watch/state lifecycle.
+      return () => activated.value ? h(panel, attrs, slots) : null;
+    }
+  }) as T;
+}
+
+const WorldMapPanel = lazyPanel(() => import('./components/WorldMapPanel.vue'));
+const SkillPanel = lazyPanel(() => import('./components/SkillPanel.vue'));
+const SkillIcon = defineComponent({
+  inheritAttrs: false,
+  setup(_props, { attrs }) {
+    // Vue only passes `error` to errorComponent. Capture this icon's size so
+    // both pending and failed downloads retain the same compact PNG fallback.
+    const fallback = defineComponent({
+      inheritAttrs: false,
+      setup: () => () => {
+        const size = Number(attrs.size) || 64;
+        return h('img', {
+          class: 'skill-icon', src: '/assets/light-anime/skills-imagegen-v2/__fallback.png',
+          alt: '通用技能', width: size, height: size,
+          style: { display: 'block', width: `${size}px`, height: `${size}px`, flex: '0 0 auto', objectFit: 'contain' }
+        });
+      }
+    });
+    const icon = defineAsyncComponent({
+      loader: () => import('./components/SkillIcon.vue'),
+      loadingComponent: fallback, errorComponent: fallback, delay: 0
+    });
+    return () => h(icon, attrs);
+  }
+});
+const MarketPanel = lazyPanel(() => import('./components/MarketPanel.vue'));
+const HomePanel = lazyPanel(() => import('./components/HomePanel.vue'));
+const GuildShopPanel = lazyPanel(() => import('./components/GuildShopPanel.vue'));
+const HomePurchasePanel = lazyPanel(() => import('./components/HomePurchasePanel.vue'));
+const EvolutionPanel = lazyPanel(() => import('./components/EvolutionPanel.vue'));
+const AdvancedProfessionPanel = lazyPanel(() => import('./components/AdvancedProfessionPanel.vue'));
+const PartyPopup = lazyPanel(() => import('./components/PartyPopup.vue'));
+const TurnBattlePanel = lazyPanel(() => import('./components/TurnBattlePanel.vue'));
+const NegotiationPanel = lazyPanel(() => import('./components/NegotiationPanel.vue'));
+const BookshopPanel = lazyPanel(() => import('./components/BookshopPanel.vue'), true);
+const BankPanel = lazyPanel(() => import('./components/BankPanel.vue'), true);
+const HandbookContent = lazyPanel(() => import('./components/HandbookContent.vue'), true);
+const NotificationInbox = lazyPanel(() => import('./components/NotificationInbox.vue'), true);
+
+useDialogNavigation();
 
 type Tab = 'character' | 'inventory' | 'explore' | 'social' | 'world';
 type SocialSection = 'friends' | 'oath' | 'party';
 type WorldSection = 'overview' | 'market' | 'home';
-type CharacterSection = 'profile' | 'equipment' | 'skills' | 'evolution';
+type CharacterSection = 'profile' | 'equipment' | 'skills' | 'evolution' | 'advancedProfession';
 type StoryGuide = { text: string; buttons: GameActionButton[]; messages: GameActionMessage[] };
 const tab = ref<Tab>('explore');
 const socialSection = ref<SocialSection>('friends');
@@ -71,9 +175,23 @@ const passwordConfirmation = ref('');
 const showPasswordConfirmation = ref(false);
 const registrationLoginId = ref('');
 const loggedIn = ref(Boolean(api.token()));
+const appShell = ref<HTMLElement | null>(null);
+const appViewportStyle = useAppViewport();
+const characterScene = computed<CharacterScene | undefined>(() => loggedIn.value && tab.value === 'character'
+  && (characterSection.value === 'profile' || characterSection.value === 'equipment' || characterSection.value === 'evolution')
+  ? characterSection.value : undefined);
+const { sceneFramingStyle, sceneFramed } = useCharacterSceneFraming(appShell, characterScene);
 const displayName = ref('');
 const channels = ref<ChatChannel[]>([]);
 const socialSummary = ref<SocialSummary>({ friends: [], friendRequests: [], oath: null, oathRequests: [], oathReleaseRequests: [] });
+const socialFriendView = ref<'friends' | 'requests'>('friends');
+const socialOathView = ref<'partner' | 'requests' | 'release'>('partner');
+const socialViewport = ref<HTMLElement | null>(null);
+const socialPagingOptions = { container: socialViewport, rowHeight: () => window.innerHeight < 450 ? 108 : 152, gap: 6 };
+const friendPaging = useViewportPagination(() => socialSummary.value.friends, socialPagingOptions);
+const friendRequestPaging = useViewportPagination(() => socialSummary.value.friendRequests, socialPagingOptions);
+const oathRequestPaging = useViewportPagination(() => socialSummary.value.oathRequests, socialPagingOptions);
+const oathReleasePaging = useViewportPagination(() => socialSummary.value.oathReleaseRequests, socialPagingOptions);
 const socialGameId = ref('');
 const activeChannel = ref('world');
 const messages = ref<ChatMessage[]>([]);
@@ -97,6 +215,8 @@ let partyRequestVersion = 0;
 const catalog = ref<CommandCatalogItem[]>([]);
 const commandCatalogRef = ref<{ showInteractionResult: (result: CommandActionResult) => void; showInteractionError: (error: unknown) => void } | null>(null);
 const catalogOpen = ref(false);
+const exploreCanvasActive = computed(() => loggedIn.value && tab.value === 'explore' && !panel.value?.inBattle && !negotiation.value && !catalogOpen.value);
+const explorationViewportStyle = useExplorationViewport(appShell, exploreCanvasActive);
 const catalogLoaded = ref(false);
 const manualOpen = ref(false);
 const handbookOpen = ref(false);
@@ -105,7 +225,6 @@ const guildShopTargetId = ref<string | null>(null);
 const bookshopOpen = ref(false);
 const homePurchaseMode = ref<'purchase' | 'shop' | null>(null);
 const homePurchaseSiteTarget = ref<HomePurchaseSiteTarget | null>(null);
-const advancedProfessionOpen = ref(false);
 const advancedMentorTarget = ref<AdvancedMentor | null>(null);
 const homePanelRef = ref<{ refresh: () => void } | null>(null);
 const handbookSection = ref<HandbookSection>('footprints');
@@ -165,10 +284,10 @@ const showSettingsCurrentPassword = ref(false);
 const showSettingsNewPassword = ref(false);
 const showSettingsPasswordConfirmation = ref(false);
 const settingsAvatarOptions = [
-  { id: 'compass', label: '星图', icon: '✦' },
-  { id: 'flame', label: '火花', icon: '✹' },
-  { id: 'leaf', label: '叶灵', icon: '❧' },
-  { id: 'moon', label: '月影', icon: '☾' }
+  { id: 'compass', label: '星图', icon: 'star' },
+  { id: 'flame', label: '火花', icon: 'flame' },
+  { id: 'leaf', label: '叶灵', icon: 'leaf' },
+  { id: 'moon', label: '月影', icon: 'moon' }
 ] as const;
 const persistLocalSetting = (key: string, value: string | number | boolean) => {
   try { localStorage.setItem(`fantasy-final.${key}`, String(value)); } catch { /* 浏览器禁用存储时仍可继续使用页面 */ }
@@ -193,21 +312,132 @@ const inventoryEquipmentGroup = ref<InventoryEquipmentGroup>('全部');
 // 装备筛选只保留三个装备大类；“全部”仍作为内部默认筛选值，避免打开装备页时丢失其他部位。
 const inventoryEquipmentGroups = ['武器', '防具', '首饰'] as const;
 const inventorySubcategory = ref('全部');
+const inventoryKeyword = ref('');
+const inventoryPreviewKey = ref('');
 const selectedInventoryItem = ref<InventoryDisplayItem | null>(null);
+const inventoryUsePreview = ref(false);
+watch(selectedInventoryItem, () => { inventoryUsePreview.value = false; });
+watch(inventoryUsePreview, value => setCriticalPending('inventoryUse', value));
 const feedbackToastKey = ref(0);
 const pendingInteractions = ref<{ type: string; id: string; name: string; description?: string }[]>([]);
+const pendingInteractionSelection = ref('');
+const selectedPendingInteraction = computed(() => pendingInteractions.value.find(target => `${target.type}:${target.id}` === pendingInteractionSelection.value) ?? pendingInteractions.value[0]);
+const openSelectedPendingInteraction = () => {
+  const target = selectedPendingInteraction.value;
+  if (!target || busy.value) return;
+  pendingInteractions.value = [];
+  void runCommand(`/坐标互动 ${target.type} ${target.id}`, { surface: 'interaction', title: target.name });
+};
+const pendingInteractionArtwork = (target: { type: string; id: string; name: string }) => {
+  const point = panel.value?.nearby?.points?.find(point => point.interaction?.type === target.type && point.interaction.id === target.id);
+  const type = ({ resource: '资源', player: '玩家', npc: '域民', entrance: '入口' } as Record<string, string>)[target.type] ?? target.type;
+  return mapTargetArt(point ?? { type, name: target.name }).src;
+};
+const interactionTypeName = (type: string) => ({ resource: '资源', building: '建筑', player: '玩家', npc: '人物', entrance: '入口', landmark: '地标' }[type] ?? type);
 const realtime = ref<WebSocket | null>(null);
 let refreshTimer: number | undefined;
 let actionCountdownTimer: number | undefined;
 let feedbackToastTimer: number | undefined;
 let authGeneration = 0;
+const currentAuthRequest = () => ({ generation: authGeneration, token: api.token() });
+const isCurrentAuthRequest = (request: { generation: number; token: string }) => request.generation === authGeneration && request.token !== '' && api.token() === request.token;
 const CHAT_PAGE_SIZE = 20;
 let loadedMessagesChannelId: string | null = null;
+let chatChannelVersion = 0;
 let chatOldestMessageId: number | null = null;
 let chatNewestMessageId: number | null = null;
 const miningRemaining = ref(0);
 const travelRemaining = ref(0);
 const travelPlanningTarget = ref('');
+const localExplorationMap = ref<api.ExploreLocalMap>();
+const committedMapSnapshot = ref<api.ExploreLocalMap>();
+let committedVisionRequest: AbortController | undefined;
+const routeVisionStep = ref<api.ExploreRouteStep>();
+const routeVisionMap = ref<Omit<api.ExploreLocalMap, 'ok'>>();
+const environmentRemaining = ref(0);
+let environmentSettlement: { generation: number; token: string; jobId: string } | null = null;
+let nextEnvironmentSettleAt = 0;
+let localMapRequestVersion = 0;
+let mapRouteRefreshNeeded = false;
+const mapTargetPopupRequest = ref<MapTargetPopupRequest>();
+let mapTargetPopupId = 0;
+let mapRouteStoppedResult: MovementStopResult | undefined;
+const mapRoute = useExplorationRoute({
+  current: () => mapCurrent.value,
+  session: () => currentAuthRequest(),
+  isCurrentSession: request => isCurrentAuthRequest(request),
+  active: () => loggedIn.value && tab.value === 'explore' && !panel.value?.inBattle && !negotiation.value && !storyGuide.value && !catalogOpen.value,
+  localPreview: to => knownExplorationRoute(localExplorationMap.value, mapCurrent.value, to, localExplorationMap.value?.nearby?.points ?? panel.value?.nearby?.points ?? []),
+  preview: api.exploreRoutePreview,
+  step: api.exploreRouteStep,
+  vision: (result, previous) => {
+    const snapshot = result?.localMap;
+    routeVisionStep.value = result?.moved && snapshot && ['x', 'y', 'z', 'regionId'].every(key =>
+      snapshot.origin[key as keyof api.ExploreRoutePosition] === result.position[key as keyof api.ExploreRoutePosition]) ? result : undefined;
+    routeVisionMap.value = routeVisionStep.value && snapshot ? adjacentVision(previous?.localMap ?? localExplorationMap.value, snapshot, performance.now()) : undefined;
+  },
+  apply: async (result, show) => {
+    const request = currentAuthRequest();
+    const compact = compactStepPanel(panel.value, result);
+    if (result.panel) panel.value = result.panel;
+    else if (compact) { panel.value = compact; mapRouteRefreshNeeded = true; }
+    else {
+      // Preserve the confirmed landing even if a follow-up panel read fails.
+      if (panel.value?.summary) panel.value = { ...panel.value, summary: { ...panel.value.summary, position: result.position }, mapData: panel.value.mapData ? { ...panel.value.mapData, current: { name: mapCurrent.value.name ?? '未知区域', ...result.position } } : undefined };
+      if (mapRoute.replaying.value) mapRouteRefreshNeeded = true;
+      else await loadPanel();
+    }
+    if (!isCurrentAuthRequest(request)) return;
+    if (result.localMap && result.moved && ['x', 'y', 'z', 'regionId'].every(key =>
+      result.localMap!.origin[key as keyof api.ExploreRoutePosition] === result.position[key as keyof api.ExploreRoutePosition])) {
+      localMapRequestVersion += 1;
+      localExplorationMap.value = { ok: true, ...result.localMap };
+    }
+    pendingInteractions.value = [];
+    if (show && result.presentation === 'story') { showStoryResult(result); notice.value = ''; }
+    else if (show) notice.value = result.text;
+    if (show) mapRouteStoppedResult = result;
+    if (!result.localMap && !mapRoute.replaying.value) void loadLocalExplorationMap();
+  },
+  failed: async value => {
+    if (isCurrentEncounterBlock(value)) mapRouteStoppedResult = { message: api.userFacingErrorMessage(value), position: { ...mapCurrent.value }, regionCode: regionMap.value.currentRegionCode };
+    setError(value); await loadPanel();
+  }
+});
+const committedMapMotion = useCommittedExplorationMotion();
+const mapRestingHeading = ref<MapHeading>('down');
+const mapMovePending = computed(() => mapRoute.pending.value || committedMapMotion.pending.value);
+const mapMovementTarget = computed(() => mapRoute.target.value ?? committedMapMotion.target.value ?? travelVisual.value?.target);
+const travelVisual = computed(() => panel.value?.summary?.travel?.activityType !== 'hunt' ? panel.value?.summary?.travel?.visual : undefined);
+const mapTravelMotion = useExplorationTravelMotion(travelVisual, computed(() => loggedIn.value && tab.value === 'explore' && !panel.value?.inBattle && !negotiation.value));
+const travelMapVision = useExplorationTravelVision({
+  visual: travelVisual, frame: mapTravelMotion,
+  enabled: computed(() => loggedIn.value && tab.value === 'explore' && !panel.value?.inBattle && !negotiation.value && !mapMovePending.value),
+  session: () => currentAuthRequest(), isCurrentSession: session => isCurrentAuthRequest(session),
+  load: signal => api.exploreLocalMap(signal, 'travel')
+});
+const travelMapSnapshot = computed(() => travelVisual.value?.id && travelMapVision.snapshot.value?.travelView?.id === travelVisual.value.id
+  ? travelMapVision.snapshot.value : undefined);
+const mapSceneMotion = computed(() => committedMapMotion.frame.value ?? mapTravelMotion.value);
+const mapDisplayPosition = computed(() => mapRoute.displayPosition.value ?? mapSceneMotion.value?.position);
+const mapTravelVisualCenter = computed(() => {
+  const position = mapSceneMotion.value?.position;
+  return !mapRoute.pending.value && position ? { x: Math.round(position.x), y: Math.round(position.y), z: position.z, name: position.regionName, regionCode: position.regionCode } : undefined;
+});
+const mapMovementHeading = computed(() => mapRoute.pending.value ? undefined : mapSceneMotion.value?.heading ?? mapRestingHeading.value);
+const mapMovementSpeed = computed(() => mapRoute.pending.value ? mapRoute.speed.value : mapSceneMotion.value?.speed);
+const mapAuthoritativeMovementSpeed = computed(() => [panel.value?.movement?.speed, panel.value?.summary?.movement?.speed, panel.value?.movement?.maximum, panel.value?.summary?.movementMaximum].find(value => typeof value === 'number' && Number.isFinite(value) && value > 0) ?? 1);
+const clearMapMoveAnimation = () => { mapTargetPopupRequest.value = undefined; mapRouteStoppedResult = undefined; mapRestingHeading.value = 'down'; mapRoute.reset(); committedMapMotion.reset(); travelMapVision.reset(); committedVisionRequest?.abort(); committedMapSnapshot.value = undefined; };
+let mapNavigationVersion = 0;
+watch(tab, () => { mapNavigationVersion += 1; mapTargetPopupRequest.value = undefined; catalogOpen.value = false; }, { flush: 'sync' });
+watch([tab, loggedIn], ([nextTab, authenticated]) => {
+  if (!authenticated) { clearMapMoveAnimation(); localExplorationMap.value = undefined; travelPlanningTarget.value = ''; travelAutoSettling = false; travelRemaining.value = 0; }
+  else if (nextTab !== 'explore' && mapMovePending.value) { mapRoute.cancel(); committedMapMotion.cancel(); }
+}, { flush: 'sync' });
+const mapAvatarMoving = computed(() => {
+  if (tab.value !== 'explore' || !loggedIn.value || panel.value?.inBattle || negotiation.value || panel.value?.mining) return false;
+  return mapRoute.animating.value || Boolean(mapSceneMotion.value?.moving);
+});
 let miningAutoSettling = false;
 let travelAutoSettling = false;
 let nextTravelSettleAt = 0;
@@ -215,12 +445,17 @@ const autoBattleOpen = ref(false);
 const autoBattleBusy = ref(false);
 const autoBattleMode = ref<api.AutoBattleMode>('pve');
 const autoBattleSettings = ref<AutoBattleConfig | null>(null);
+const autoBattleLoadError = ref('');
 const autoBattleSkillChoices = ref<AutoBattleSkillChoice[]>([]);
 const autoBattlePotionChoices = ref<{ id: number; name: string }[]>([]);
 const autoBattleHpThreshold = ref(30);
 const autoBattleMpThreshold = ref(30);
-type FloatingSocialPanel = 'chat' | 'party' | 'friend';
+type FloatingSocialPanel = 'chat' | 'party' | 'team' | 'friend' | 'system';
 const floatingSocialOpen = ref<FloatingSocialPanel | null>(null);
+const chatDrafts = new Map<string, string>();
+const lastFriendChatChannel = ref('');
+const exploreChatTabs: Record<FloatingSocialPanel, ExploreChatTab> = { chat: 'world', party: 'recruitment', team: 'team', friend: 'friend', system: 'system' };
+const exploreChatTab = computed(() => exploreChatTabs[floatingSocialOpen.value ?? 'chat']);
 const teamPopupOpen = ref(false);
 const floatingDockExpanded = ref(false);
 const floatingDockRef = ref<HTMLElement | null>(null);
@@ -243,6 +478,27 @@ const recruitmentChannel = computed(() => channels.value.find(item => item.id ==
 const currentPartyChannel = computed(() => channels.value.find(item => item.type === 'party' && item.id !== 'party:lobby'));
 const isInParty = computed(() => Boolean(currentParty.value || currentPartyChannel.value));
 const friendChannels = computed(() => channels.value.filter(item => item.type === 'friend'));
+const exploreChatCanSend = computed(() => {
+  const selected = floatingSocialOpen.value;
+  if (!selected || selected === 'system') return false;
+  if (selected === 'chat') return activeChannel.value === 'world' && channels.value.some(channel => channel.id === 'world');
+  if (selected === 'party') return activeChannel.value === recruitmentChannel.value?.id;
+  if (selected === 'team') return Boolean(currentPartyChannel.value && activeChannel.value === currentPartyChannel.value.id);
+  return friendChannels.value.some(channel => channel.id === activeChannel.value);
+});
+const exploreChatChannelName = computed(() => {
+  if (floatingSocialOpen.value === 'chat') return '世界频道';
+  if (floatingSocialOpen.value === 'party') return '招募频道';
+  if (floatingSocialOpen.value === 'team') return currentPartyChannel.value?.name || '队伍频道';
+  if (floatingSocialOpen.value === 'friend') return friendChannels.value.find(channel => channel.id === activeChannel.value)?.name || '好友私信';
+  return '系统通知';
+});
+const exploreChatStatusText = computed(() => {
+  if (floatingSocialOpen.value === 'team' && !currentPartyChannel.value) return '加入或创建队伍后，就能和队友在这里聊天。';
+  if (floatingSocialOpen.value === 'friend' && !friendChannels.value.length) return '还没有可私信的好友，结识伙伴后再来聊聊吧。';
+  if (floatingSocialOpen.value === 'system') return '冒险旅途中的通知与消息，会收录在这里。';
+  return exploreChatCanSend.value ? '' : '频道暂时不可用，请稍后重试。';
+});
 
 const floatingDockStyle = computed(() => ({
   '--float-x': `${floatingDockOffset.value.x}px`,
@@ -426,24 +682,29 @@ const stopSocialResize = (event: PointerEvent) => {
   window.removeEventListener('pointercancel', stopSocialResize);
 };
 const focusFloatingChannel = (panelName: FloatingSocialPanel) => {
-  if (panelName === 'chat') {
-    selectChannel('world');
-    return;
-  }
-  const channel = panelName === 'party'
-    ? recruitmentChannel.value
-    : channels.value.find(item => item.type === 'friend');
-  if (channel) selectChannel(channel.id);
-  else messages.value = [];
+  if (panelName === 'system') return;
+  const channelId = panelName === 'chat' ? 'world'
+    : panelName === 'party' ? recruitmentChannel.value?.id
+    : panelName === 'team' ? currentPartyChannel.value?.id
+    : friendChannels.value.find(channel => channel.id === activeChannel.value)?.id
+      ?? friendChannels.value.find(channel => channel.id === lastFriendChatChannel.value)?.id
+      ?? friendChannels.value[0]?.id;
+  if (activeChannel.value !== (channelId ?? '')) selectChannel(channelId ?? '');
 };
 const openFloatingSocial = (panelName: FloatingSocialPanel) => {
   floatingSocialOpen.value = panelName;
+  teamPopupOpen.value = false;
   if (panelName === 'party') floatingDockExpanded.value = true;
-  if (panelName === 'party') void refreshPartyData();
+  if (panelName === 'party' || panelName === 'team') void refreshPartyData();
+  if (panelName === 'system') { void loadNotifications(); return; }
   focusFloatingChannel(panelName);
   void loadSocial().then(() => {
     if (floatingSocialOpen.value === panelName) focusFloatingChannel(panelName);
   });
+};
+const selectExploreChatTab = (selected: ExploreChatTab) => {
+  const panels: Record<ExploreChatTab, FloatingSocialPanel> = { world: 'chat', recruitment: 'party', team: 'team', friend: 'friend', system: 'system' };
+  openFloatingSocial(panels[selected]);
 };
 const toggleFloatingSocial = (panelName: 'chat' | 'party') => {
   if (suppressFloatingClick) {
@@ -501,14 +762,13 @@ const toggleFloatingDock = () => {
   void constrainFloatingDock();
 };
 
-const currentChannel = computed(() => channels.value.find(channel => channel.id === activeChannel.value) ?? channels.value[0]);
-const title = computed(() => ({ character: '角色档案', inventory: '我的背包', explore: '探索世界', social: '社交', world: '世界' }[tab.value]));
-const pageEyebrow = computed(() => ({ character: 'ADVENTURER', inventory: 'INVENTORY', explore: 'EXPLORATION', social: 'SOCIAL', world: 'WORLD' }[tab.value]));
-const characterSections: { id: CharacterSection; label: string; icon: string }[] = [
-  { id: 'profile', label: '角色', icon: '♙' },
-  { id: 'equipment', label: '装备', icon: '⚔' },
-  { id: 'skills', label: '技能', icon: '✦' },
-  { id: 'evolution', label: '进化', icon: '◇' }
+const title = computed(() => ({ character: '角色', inventory: '背包', explore: '探索', social: '社交', world: '世界' }[tab.value]));
+const characterSections: { id: CharacterSection; label: string; icon: TabArtKey }[] = [
+  { id: 'profile', label: '角色', icon: 'profile' },
+  { id: 'equipment', label: '装备', icon: 'equipment' },
+  { id: 'skills', label: '技能', icon: 'skills' },
+  { id: 'evolution', label: '进化', icon: 'evolution' },
+  { id: 'advancedProfession', label: '职业', icon: 'advanced-profession' }
 ];
 type CharacterEquipmentEntry = PanelEquippedItem;
 type CharacterSkillEntry = {
@@ -544,8 +804,21 @@ const characterData = computed(() => {
     portrait: source?.summary?.portrait
   };
 });
+const socialOwnPortrait = computed(() => characterData.value.portrait);
+const socialPortraitFor = (person: api.SocialIdentity) => person.portrait;
+const socialIdentityText = (person: api.SocialIdentity) => [person.gender, person.level === undefined ? undefined : `Lv.${person.level}`, person.profession].filter(Boolean).join(' · ');
+const socialMessagePortrait = (message: api.ChatMessage) => message.senderPortrait ?? (message.own ? socialOwnPortrait.value : undefined);
+const socialAffinityProgress = (person: { affinity: number; affinityProgress?: { min: number; nextMin: number | null; toNext: number } }) => {
+  const progress = person.affinityProgress;
+  if (!progress || progress.nextMin === null || progress.nextMin <= progress.min) return undefined;
+  return { percent: Math.max(0, Math.min(100, (person.affinity - progress.min) / (progress.nextMin - progress.min) * 100)), ...progress };
+};
+const socialDateText = (value: string) => {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? '时间未知' : date.toLocaleString('zh-CN', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+};
 const equipmentSlotDefinitions = [
-  { id: 'weapon', label: '主手', icon: '⚔' },
+  { id: 'weapon', label: '武器', icon: '⚔' },
   { id: 'offhand', label: '副手', icon: '◈' },
   { id: 'shoulder', label: '头肩', icon: '◇' },
   { id: 'upper', label: '上装', icon: '▣' },
@@ -557,15 +830,27 @@ const equipmentSlotDefinitions = [
   { id: 'ring', label: '戒指', icon: '◌' }
 ];
 const equipmentForSlot = (slot: string) => characterData.value.equipment.find(item => item.slot === slot);
-const equipmentRarityClass = (item?: CharacterEquipmentEntry) => {
-  const rarityClass: Record<string, string> = {
-    普通: 'common', 优秀: 'excellent', 精良: 'fine', 稀有: 'rare', 传说: 'legendary', 史诗: 'epic', 神器: 'artifact'
-  };
-  return `equipment-rarity-${rarityClass[String(item?.rarity ?? '')] ?? (item ? 'common' : 'empty')}`;
-};
-const equipmentArmorSlots = equipmentSlotDefinitions.filter(item => ['shoulder', 'upper', 'waist', 'lower', 'feet'].includes(item.id));
-const equipmentCombatSlots = equipmentSlotDefinitions.filter(item => ['weapon', 'offhand', 'necklace', 'bracelet', 'ring'].includes(item.id));
+const equipmentRarityClass = (item?: CharacterEquipmentEntry) => `equipment-rarity-${item ? normalizeItemRarity(item.rarity) : 'empty'}`;
+const equipmentLeftSlots = ['shoulder', 'upper', 'waist', 'lower', 'feet'].map(id => equipmentSlotDefinitions.find(slot => slot.id === id)!);
+const equipmentRightSlots = ['weapon', 'offhand', 'necklace', 'bracelet', 'ring'].map(id => equipmentSlotDefinitions.find(slot => slot.id === id)!);
 const selectedEquipment = ref<CharacterEquipmentEntry | null>(null);
+const selectedEquipmentDetails = ref<api.EquippedEquipmentDetails | null>(null);
+const equipmentDetailsLoading = ref(false);
+const equipmentDetailsError = ref('');
+let equipmentDetailsVersion = 0;
+let equipmentDetailsRequest: AbortController | null = null;
+const selectedEquipmentCategory = computed(() => {
+  const item = selectedEquipment.value;
+  if (!item) return '';
+  const category = item.itemCategory || '装备';
+  const slot = equipmentSlotDefinitions.find(slot => slot.id === item.slot)?.label;
+  return slot && slot !== category ? `${category} · ${slot}` : category;
+});
+watch([() => panel.value?.account?.uid, () => panel.value?.account?.gameUserId], () => { selectedEquipment.value = null; }, { flush: 'sync' });
+watch(() => characterData.value.equipment, equipment => {
+  const selected = selectedEquipment.value;
+  if (selected) selectedEquipment.value = equipment.find(item => item.slot === selected.slot && item.id === selected.id && item.code === selected.code) ?? null;
+});
 const activeAttributeHelp = ref<string | null>(null);
 const combatStatDefinitions = [
   { key: 'physicalAttack', label: '物攻' }, { key: 'magicAttack', label: '魔攻' },
@@ -647,6 +932,15 @@ const extraAttributeEntries = computed(() => Object.entries(panel.value?.summary
   const actual = meta.inverse ? -Number(value) : Number(value);
   return { key, label: meta.label, value: actual, unit: meta.unit };
 }));
+const profileViewportGroups = computed(() => [
+  { id: 'base', label: '六维', entries: baseAttributeDefinitions.map(stat => ({ key: stat.key, label: stat.label, value: formatAttributeValue(baseAttributeValue(stat.key)), help: attributeHelpText(stat.key) })) },
+  { id: 'attributes', label: '属性', entries: [
+    ...combatStatDefinitions.map(stat => ({ key: stat.key, label: stat.label, value: combatStatValue(stat.key), help: attributeHelpText(stat.key) })),
+    ...extraAttributeEntries.value.map(item => ({ key: item.key, label: `额外 · ${item.label}`, value: `${item.value > 0 ? '+' : ''}${item.value}${item.unit}`, help: attributeHelpText(item.key) }))
+  ] },
+  { id: 'mastery', label: '元素精通', help: attributeHelpText('elementMastery'), entries: elementMasteryEntries.value.map(([element, value]) => ({ key: `mastery-${element}`, label: element, value, help: attributeHelpText('elementMastery') })) },
+  { id: 'resistance', label: '抗性', help: attributeHelpText('elementResistance'), entries: elementResistanceEntries.value.map(([element, value]) => ({ key: `resistance-${element}`, label: element, value, help: attributeHelpText('elementResistance') })) }
+]);
 const showStoryGuide = computed(() => Boolean(storyGuide.value));
 const hpPercent = computed(() => panel.value?.summary ? Math.min(100, Math.max(0, panel.value.summary.hp.current / Math.max(1, panel.value.summary.hp.max) * 100)) : 0);
 const mpPercent = computed(() => panel.value?.summary ? Math.min(100, Math.max(0, panel.value.summary.mp.current / Math.max(1, panel.value.summary.mp.max) * 100)) : 0);
@@ -673,7 +967,26 @@ const formatMiningDuration = (seconds: number) => {
   return rest ? `${minutes} 分 ${rest} 秒` : `${minutes} 分钟`;
 };
 const mapActionLock = computed<MapActionLock | null>(() => {
+  if (committedMapMotion.pending.value) return {
+    title: '正在沿路线前往',
+    detail: `${Math.floor((committedMapMotion.frame.value?.progress ?? 0) * committedMapMotion.distance.value)} / ${committedMapMotion.distance.value} 格`,
+    stopLabel: '停止前往'
+  };
+  if (mapMovePending.value) return {
+    title: mapRoute.cancelling.value ? '正在停止移动' : mapRoute.animating.value ? '正在沿路线前往' : '正在确认路线',
+    detail: mapRoute.total.value ? `${mapRoute.completed.value} / ${mapRoute.total.value} 格` : '按当前可感知、可移动范围规划',
+    stopLabel: '停止前往',
+    stopDisabled: mapRoute.cancelling.value
+  };
   const mining = panel.value?.mining;
+  const environmentJob = localExplorationMap.value?.environmentJob;
+  if (environmentJob) return {
+    title: `正在清理：${environmentJob.objectName}`,
+    detail: '清理完成后通路将打开，掉落物品放入背包。',
+    countdown: formatMiningDuration(environmentRemaining.value),
+    stopLabel: '停止清理',
+    stopDisabled: busy.value
+  };
   if (mining) return {
     title: `正在开采：${mining.name}`,
     detail: `${mining.kind} · 同坐标资源采尽后会自动继续`,
@@ -695,10 +1008,14 @@ const mapActionLock = computed<MapActionLock | null>(() => {
   };
   return null;
 });
+const mapActionArtwork = computed(() => {
+  const mining = panel.value?.mining;
+  return mining && ['植被', '矿脉', '资源'].includes(mining.kind) ? mapTargetArt({ type: mining.kind, name: mining.name }).src : '';
+});
 const mapPoints = computed<ExploreMapPoint[]>(() => {
   const guildShopCodes = new Set(['guild_counter', 'world_tree_adventurer_guild', 'windbranch_guild', 'dragon_inn_counter']);
   const seenResourceCoordinates = new Set<string>();
-  const points = (panel.value?.nearby?.points ?? []).filter(point => {
+  const points = (travelMapSnapshot.value?.nearby?.points ?? committedMapSnapshot.value?.nearby?.points ?? routeVisionStep.value?.stepState?.nearby.points ?? (routeVisionStep.value?.panel ?? panel.value)?.nearby?.points ?? []).filter(point => {
     if (point.type !== '矿脉' && point.type !== '植被' && point.type !== '资源') return true;
     const key = `${point.type}:${point.code ?? point.name}:${point.x}:${point.y}:${point.z ?? mapCurrent.value.z}`;
     if (seenResourceCoordinates.has(key)) return false;
@@ -708,16 +1025,17 @@ const mapPoints = computed<ExploreMapPoint[]>(() => {
   return points.map(point => {
   const icon = point.type === '怪物' ? '◆' : point.type === 'NPC' || point.type === '域民' ? '☻' : point.type === '建筑' ? '⌂' : point.type === '资源' || point.type === '矿脉' ? '✦' : '•';
   const z = point.z;
-  const atCurrent = point.x === mapCurrent.value.x && point.y === mapCurrent.value.y && (z === undefined || z === mapCurrent.value.z);
+  const observedRegionId = mapRenderSnapshot.value?.origin.regionId;
+  const acrossRegion = point.regionId !== undefined && observedRegionId !== undefined ? point.regionId !== observedRegionId
+    : Boolean(point.regionCode && mapVisionRegionCode.value && point.regionCode !== mapVisionRegionCode.value);
+  const observedOnly = point.observedOnly === true || acrossRegion;
+  const atCurrent = !observedOnly && point.x === mapCurrent.value.x && point.y === mapCurrent.value.y && (z === undefined || z === mapCurrent.value.z);
   const actions: ExploreMapPoint['actions'] = [];
   if (point.type === '怪物' && point.code) {
     if (!atCurrent) {
-      if (point.observedOnly) {
-        // 装备提供的额外感知只允许观察；先规划前往目标格，再从正常感知范围交互。
-        actions.push({ id: 'travel', label: '前往', position: { x: point.x, y: point.y, z }, tone: 'primary' });
-      } else {
+      if (!observedOnly) {
         actions.push(
-          { id: 'approach', label: '前往', command: `/前往目标 ${point.code}`, tone: 'primary' },
+          { id: 'move', label: '前往', position: { x: point.x, y: point.y, z }, tone: 'primary' },
           { id: 'attack', label: '攻击', tone: 'danger' },
         );
       }
@@ -733,7 +1051,7 @@ const mapPoints = computed<ExploreMapPoint[]>(() => {
   } else {
     if (!atCurrent) {
       const distance = Math.abs(point.x - mapCurrent.value.x) + Math.abs(point.y - mapCurrent.value.y);
-      actions.push({ id: point.observedOnly || distance > mapMoveRange.value ? 'travel' : 'move', label: '前往', position: { x: point.x, y: point.y, z }, tone: 'primary' });
+      if (!observedOnly && distance <= mapMoveRange.value) actions.push({ id: 'move', label: '前往', position: { x: point.x, y: point.y, z }, tone: 'primary' });
     }
     if (point.type === '资源' || point.type === '矿脉' || point.type === '植被') {
       // Nearby resource `code` is the item code (for display); the mine command
@@ -763,29 +1081,74 @@ const mapPoints = computed<ExploreMapPoint[]>(() => {
   return {
     id: `${point.type}:${point.code ?? point.name}:${point.x}:${point.y}:${point.z ?? mapCurrent.value.z}`,
     code: point.code,
+    templateCode: point.templateCode,
+    portrait: point.portrait,
+    ...(typeof point.level === 'number' && Number.isFinite(point.level) ? { level: point.level } : {}),
     name: point.name,
     type: point.type,
     icon,
     x: point.x,
     y: point.y,
     z,
+    regionId: point.regionId,
+    regionCode: point.regionCode,
+    interaction: point.interaction,
     distance: point.distance,
-    discovered: point.observedOnly !== true,
+    discovered: !observedOnly,
     interactable: actions.length > 0,
-    description: point.observedOnly ? '这个目标还在感知边缘，可先规划路线前往。' : `位于 ${point.x}, ${point.y}，距离 ${point.distance} 格。${point.type === '建筑' && point.code && guildShopCodes.has(point.code) && point.code !== 'guild_counter' ? '首次使用公会商店，请先点“进入”登记到访。' : ''}`,
+    description: observedOnly ? acrossRegion ? '目标位于相邻地图，目前只能观察；进入对应地图后才能互动。' : '目标位于额外感知范围内，目前只能观察。' : `位于 ${point.x}, ${point.y}，距离 ${point.distance} 格。${point.type === '建筑' && point.code && guildShopCodes.has(point.code) && point.code !== 'guild_counter' ? '首次使用公会商店，请先点“进入”登记到访。' : ''}`,
     ...(actions.length ? { actions } : {})
   };
   });
 });
-const mapMoveRange = computed(() => Math.max(1, Number(panel.value?.movement?.step ?? panel.value?.summary?.movementStep ?? 1)));
-const mapSightRange = computed(() => Math.max(0, Number(panel.value?.nearby?.range ?? 0)));
+const localMapMatchesCurrent = computed(() => localExplorationMap.value && ['x', 'y', 'z'].every(key => localExplorationMap.value!.origin[key as 'x' | 'y' | 'z'] === (mapCurrent.value[key as 'x' | 'y' | 'z'] ?? 0)));
+// An ongoing committed walk may keep its previously observed scenery. Actions
+// remain locked during that replay; an idle mismatched map never enables input.
+const localMapVisibleSnapshot = computed(() => localMapMatchesCurrent.value || Boolean(mapMovePending.value
+  && localExplorationMap.value && localExplorationMap.value.origin.z === mapCurrent.value.z));
+const mapRenderSnapshot = computed(() => travelMapSnapshot.value ?? committedMapSnapshot.value ?? routeVisionMap.value ?? (localMapVisibleSnapshot.value ? localExplorationMap.value : undefined));
+const mapVisionCurrent = computed<MapPosition>(() => travelMapSnapshot.value
+  ? { ...travelMapSnapshot.value.origin, name: travelMapSnapshot.value.travelView?.position.regionName ?? mapCurrent.value.name }
+  : routeVisionStep.value?.localMap
+  ? { ...routeVisionStep.value.localMap.origin, name: routeVisionStep.value.stepState?.region ?? routeVisionStep.value.panel?.summary?.region ?? mapCurrent.value.name }
+  : mapCurrent.value);
+const mapVisionRegionCode = computed(() => mapRenderSnapshot.value?.cells?.find(cell => cell.x === mapVisionCurrent.value.x && cell.y === mapVisionCurrent.value.y && cell.z === mapVisionCurrent.value.z)?.regionCode ?? regionMap.value.currentRegionCode);
+const mapCells = computed(() => mapRenderSnapshot.value?.cells);
+const mapEnvironment = computed(() => mapRenderSnapshot.value?.environment ?? []);
+const mapSurfaceScene = computed(() => mapRenderSnapshot.value?.surfaceScene);
+const mapGroundWindow = computed(() => mapRenderSnapshot.value?.groundWindow);
+const requestStoppedMapTarget = async (result: MovementStopResult | undefined, request: ReturnType<typeof currentAuthRequest>, navigationVersion: number) => {
+  if (!result || !isTargetMovementStop(result)) return;
+  await nextTick();
+  const canOpen = () => isCurrentAuthRequest(request) && navigationVersion === mapNavigationVersion && tab.value === 'explore'
+    && !(busy.value || mapMovePending.value || mapActionLock.value || panel.value?.inBattle || panel.value?.pendingStory
+    || storyGuide.value || negotiation.value || interactionOpen.value || pendingInteractions.value.length
+    || catalogOpen.value || manualOpen.value || handbookOpen.value || bankOpen.value || bookshopOpen.value
+    || homePurchaseMode.value || guildShopTargetId.value || autoBattleOpen.value);
+  if (!canOpen()) return;
+  // A timed arrival may have left the old origin's ground window behind. Read
+  // only the actual current window before enabling its existing target sheet.
+  if (!localMapMatchesCurrent.value || mapVisionRegionCode.value !== regionMap.value.currentRegionCode) {
+    await loadLocalExplorationMap();
+    await nextTick();
+    if (!canOpen() || !localMapMatchesCurrent.value || mapVisionRegionCode.value !== regionMap.value.currentRegionCode) return;
+  }
+  const playerKey = panel.value?.account?.uid ?? panel.value?.account?.gameUserId;
+  const regionCode = regionMap.value.currentRegionCode;
+  if (!playerKey || !regionCode) return;
+  const current = { ...mapCurrent.value, regionId: localExplorationMap.value?.origin.regionId, regionCode };
+  const pointIds = stoppedMovementPointIds(result, current, mapPoints.value);
+  if (pointIds.length) mapTargetPopupRequest.value = { id: ++mapTargetPopupId, pointIds, playerKey, regionCode, position: { ...mapCurrent.value } };
+};
+const mapMoveRange = computed(() => Math.max(0, Math.min(Number(panel.value?.movement?.step ?? panel.value?.summary?.movementStep ?? 1), Number(localMapMatchesCurrent.value ? localExplorationMap.value!.actionRange : panel.value?.nearby?.actionRange ?? panel.value?.nearby?.range ?? 0))));
+const mapSightRange = computed(() => Math.max(0, Number(mapRenderSnapshot.value?.range ?? panel.value?.nearby?.range ?? 0)));
 const regionMap = computed(() => {
   const source = panel.value?.regionMap;
   const map = panel.value?.mapData;
   const current = map?.current;
-  const members = source?.members ?? (map?.partyMembers ?? []).map(member => ({ id: String(member.id), name: member.name, x: member.x, y: member.y, z: member.z, regionCode: member.regionCode, regionName: member.regionName, isCurrent: member.isSelf }));
-  const landmarks = [...(source?.landmarks ?? (map?.landmarks ?? []).map(landmark => ({ id: landmark.code, name: landmark.name, x: landmark.x, y: landmark.y, z: landmark.z, regionCode: landmark.regionCode, regionName: landmark.regionName, type: landmark.type })))];
-  const regions = [...(source?.regions ?? (map?.maps ?? []).map(item => ({ code: item.code, name: item.name, danger: item.danger, isCurrent: item.isCurrent, current: item.isCurrent && current ? { x: current.x, y: current.y, z: current.z } : undefined })))];
+  const members = source?.members ?? (map?.partyMembers ?? []).map(member => ({ id: String(member.id), name: member.name, x: member.x, y: member.y, z: member.z, regionCode: member.regionCode, regionName: member.regionName, isCurrent: member.isSelf, portrait: member.portrait }));
+  const landmarks = [...(source?.landmarks ?? (map?.landmarks ?? []).map(landmark => ({ id: landmark.code, code: landmark.code, name: landmark.name, x: landmark.x, y: landmark.y, z: landmark.z, regionCode: landmark.regionCode, regionName: landmark.regionName, type: landmark.type })))];
+  const regions = [...(source?.regions ?? (map?.maps ?? []).map(item => ({ code: item.code, name: item.name, danger: item.danger, isCurrent: item.isCurrent, bounds: item.bounds, current: item.isCurrent && current ? { x: current.x, y: current.y, z: current.z } : undefined })))];
   const purchaseTarget = homePurchaseSiteTarget.value;
   if (purchaseTarget) {
     if (!regions.some(region => region.code === purchaseTarget.regionCode)) regions.push({ code: purchaseTarget.regionCode, name: purchaseTarget.regionName });
@@ -854,8 +1217,20 @@ const inventoryItems = computed<InventoryDisplayItem[]>(() => {
   const withSubcategory = (item: InventoryFilterItem) => matches(item) && (subcategory === '全部' || inventoryEquipmentSubtypeFor(item) === subcategory);
   const stacked = (inventory.stacked ?? []).filter(withSubcategory).map(item => ({ ...item, instance: false as const }));
   const instances = (inventory.instances ?? []).filter(item => (category === '全部' || category === '装备') && withSubcategory(item)).map(item => ({ ...item, quantity: 1, instance: true as const }));
-  return [...stacked, ...instances];
+  const keyword = inventoryKeyword.value.trim().toLocaleLowerCase();
+  return [...stacked, ...instances].filter(item => !keyword || item.name.toLocaleLowerCase().includes(keyword) || item.code?.toLocaleLowerCase().includes(keyword));
 });
+const inventoryItemKey = (item: InventoryDisplayItem) => `${item.instance ? 'instance' : 'stack'}:${item.id ?? item.name}`;
+const inventoryRarity = (item: InventoryDisplayItem) => normalizeItemRarity(item.rarity);
+const inventoryViewport = ref<HTMLElement | null>(null);
+const inventoryColumns = () => Math.max(1, Math.min(10, Math.floor(((inventoryViewport.value?.clientWidth ?? 320) + 6) / 78)));
+const inventoryRowHeight = () => ((inventoryViewport.value?.clientWidth ?? 320) - (inventoryColumns() - 1) * 6) / inventoryColumns() + 26;
+const inventoryPaging = useViewportPagination(() => inventoryItems.value, {
+  container: inventoryViewport, rowHeight: inventoryRowHeight, gap: 6, columns: inventoryColumns
+});
+watch([inventoryCategory, inventoryEquipmentGroup, inventorySubcategory, inventoryKeyword], inventoryPaging.reset);
+const inventoryPreviewItem = computed(() => inventoryItems.value.find(item => inventoryItemKey(item) === inventoryPreviewKey.value) ?? inventoryItems.value[0] ?? null);
+watch(() => panel.value?.account?.uid, () => { inventoryPreviewKey.value = ''; });
 const inventorySubcategories = computed(() => {
   const inventory = panel.value?.inventory;
   if (!inventory || inventoryCategory.value === '全部') return ['全部'];
@@ -876,9 +1251,11 @@ const battleState = computed<BattleState | null>(() => {
   const asIds = (values?: number[]) => values?.map(String);
   const ownMember = source.members?.find(member => member.id === source.characterId);
   const allies = (source.members ?? []).map(member => ({
+    portrait: member.id === source.characterId ? portraitBaseAsset(characterData.value.portrait) : undefined,
     id: String(member.id), name: member.name, role: member.companion ? '伙伴' : '冒险者', hp: { current: Number(member.hp), max: Number(member.hpMax) }, mp: { current: Number(member.mp ?? 0), max: Number(member.mpMax ?? 0) }, defeated: Boolean(member.defeated), active: member.id === source.characterId && !member.pending && !member.defeated, status: member.statusText ? [member.statusText] : []
   }));
   const enemies = (source.targets ?? []).map(target => ({
+    portrait: mapTargetArt({ type: source.mode === 'pvp' || source.mode === 'spar' ? '玩家' : '怪物', name: target.name }).src,
     id: String(target.id), name: target.name, level: target.level ?? undefined, role: target.identified === false ? '未知目标' : target.isBossComponent ? '首领部位' : target.isBoss ? '首领' : '敌对目标', hp: { current: Number.isFinite(Number(target.hp)) ? Number(target.hp) : 0, max: Number.isFinite(Number(target.hpMax)) ? Number(target.hpMax) : 1 }, mp: { current: Number.isFinite(Number(target.mp)) ? Number(target.mp) : 0, max: Number.isFinite(Number(target.mpMax)) ? Number(target.mpMax) : 0 }, unknownHp: target.identified === false || typeof target.hp === 'string', defeated: Boolean(target.defeated), active: Number(source.selectedTargetId ?? 0) === Number(target.id), status: target.identified === false ? [] : [target.warning, target.breakSummary, target.statusText].filter((value): value is string => Boolean(value))
   }));
   const actions: BattleAction[] = [
@@ -889,24 +1266,24 @@ const battleState = computed<BattleState | null>(() => {
   for (const skill of source.quickSkills ?? []) {
     const targeting = skill.targeting ?? 'enemy';
     const targetIds = skill.targetIds ?? (targeting === 'ally' ? source.selectableAllyIds : source.selectableEnemyIds);
-    actions.push({ id: `skill:${skill.slot}`, label: `${'①②③④'[skill.slot - 1] ?? skill.slot} ${skill.name}`, category: 'skill', icon: '✧', targeting, allowedTargets: { [targeting === 'ally' ? 'ally' : 'enemy']: asIds(targetIds) }, cost: skill.requiresSpecialInput ? undefined : `基础 ${skill.baseManaCost} MP${(skill.targetCount ?? 0) > 1 ? ' · 其余目标自动选取' : ''}`, cooldown: skill.cooldownRemaining, description: skill.requiresSpecialInput ? '需要专用选择，暂不可在此施放' : undefined, disabled: skill.cooldownRemaining > 0 || Boolean(skill.requiresSpecialInput) || (targeting !== 'none' && targetIds?.length === 0) });
+    actions.push({ id: `skill:${skill.slot}`, label: `${'①②③④'[skill.slot - 1] ?? skill.slot} ${skill.name}`, category: 'skill', icon: '✧', skillCode: skill.code, targeting, allowedTargets: { [targeting === 'ally' ? 'ally' : 'enemy']: asIds(targetIds) }, cost: skill.requiresSpecialInput ? undefined : `基础 ${skill.baseManaCost} MP${(skill.targetCount ?? 0) > 1 ? ' · 其余目标自动选取' : ''}`, cooldown: skill.cooldownRemaining, description: skill.requiresSpecialInput ? '需要专用选择，暂不可在此施放' : undefined, disabled: skill.cooldownRemaining > 0 || Boolean(skill.requiresSpecialInput) || (targeting !== 'none' && targetIds?.length === 0) });
   }
   for (const skill of source.advancedSkills ?? []) {
     const targeting = skill.targeting ?? 'enemy';
     const targetIds = skill.targetIds ?? (targeting === 'ally' ? source.selectableAllyIds : source.selectableEnemyIds);
-    actions.push({ id: `advanced:${skill.id}`, label: skill.name, category: 'skill', icon: '✦', targeting, allowedTargets: { [targeting === 'ally' ? 'ally' : 'enemy']: asIds(targetIds) }, cost: skill.requiresSpecialInput ? undefined : `基础 ${skill.baseManaCost ?? 0} MP${(skill.targetCount ?? 0) > 1 ? ' · 其余目标自动选取' : ''}`, cooldown: skill.cooldownRemaining, description: skill.requiresSpecialInput ? '需要专用选择，暂不可在此施放' : undefined, disabled: (skill.cooldownRemaining ?? 0) > 0 || Boolean(skill.requiresSpecialInput) || (targeting !== 'none' && targetIds?.length === 0) });
+    actions.push({ id: `advanced:${skill.id}`, label: skill.name, category: 'skill', icon: '✦', skillCode: skill.code, targeting, allowedTargets: { [targeting === 'ally' ? 'ally' : 'enemy']: asIds(targetIds) }, cost: skill.requiresSpecialInput ? undefined : `基础 ${skill.baseManaCost ?? 0} MP${(skill.targetCount ?? 0) > 1 ? ' · 其余目标自动选取' : ''}`, cooldown: skill.cooldownRemaining, description: skill.requiresSpecialInput ? '需要专用选择，暂不可在此施放' : undefined, disabled: (skill.cooldownRemaining ?? 0) > 0 || Boolean(skill.requiresSpecialInput) || (targeting !== 'none' && targetIds?.length === 0) });
   }
   if (source.mode !== 'spar') {
     for (const item of source.quickItems ?? []) actions.push({ id: `item:${item.slot}`, label: `${'①②③④'[item.slot - 1] ?? item.slot} ${item.name}`, category: 'item', icon: '✚', targeting: item.targeting, allowedTargets: { [item.targeting === 'ally' ? 'ally' : 'enemy']: asIds(item.targetIds) }, description: `持有 ${item.quantity}`, disabled: !item.usable || (item.targeting !== 'none' && item.targetIds?.length === 0) });
     for (const device of source.deviceSlots ?? []) for (const skill of device.skills) {
       const needsCharge = device.currentEnergy < skill.energyCost;
       const targeting = needsCharge || ['self', 'all_allies', 'all_enemies'].includes(skill.targetScope) ? 'none' : skill.targetScope === 'any' ? 'any' : skill.targetScope === 'ally' ? 'ally' : 'enemy';
-      actions.push({ id: `device:${device.slot}:${skill.code}`, label: `${device.deviceName}·${skill.name}`, category: 'special', icon: '✺', targeting, allowedTargets: { ally: asIds(skill.allyTargetIds), enemy: asIds(skill.enemyTargetIds) }, description: needsCharge ? `能量 ${device.currentEnergy}/${device.maxEnergy}，本回合充能` : `消耗 ${skill.energyCost} 能量`, disabled: !skill.ready || (targeting !== 'none' && !skill.allyTargetIds?.length && !skill.enemyTargetIds?.length) });
+      actions.push({ id: `device:${device.slot}:${skill.code}`, label: `${device.deviceName}·${skill.name}`, category: 'special', icon: '✺', skillCode: skill.code, targeting, allowedTargets: { ally: asIds(skill.allyTargetIds), enemy: asIds(skill.enemyTargetIds) }, description: needsCharge ? `能量 ${device.currentEnergy}/${device.maxEnergy}，本回合充能` : `消耗 ${skill.energyCost} 能量`, disabled: !skill.ready || (targeting !== 'none' && !skill.allyTargetIds?.length && !skill.enemyTargetIds?.length) });
     }
   }
   if (source.canLeafAnchor) actions.push({ id: 'anchor', label: '重新锚定', category: 'special', icon: '✥', targeting: 'none', description: '本场仅可使用一次' });
   const waiting = ownMember?.pending || source.canAct === false;
-  return { revision: `${source.sessionId ?? ''}:${source.turn ?? 0}:${Boolean(source.bonusPhase)}`, title: source.mode === 'pvp' ? '玩家对战' : source.mode === 'spar' ? '切磋' : '野外遭遇战', round: Number(source.turn ?? 1), phase: waiting ? 'waiting' : 'player', turnLabel: ownMember?.pending ? '已提交行动，等待队友' : waiting ? '等待战斗推进' : '轮到你行动', statusText: '选择行动；需要指定目标时，再点击队伍卡片。', allies, enemies, actions, log: battleLog.value };
+  return { revision: `${source.sessionId ?? ''}:${source.turn ?? 0}:${Boolean(source.bonusPhase)}`, title: source.mode === 'pvp' ? '玩家对战' : source.mode === 'spar' ? '切磋' : '野外遭遇战', round: Number(source.turn ?? 1), phase: waiting ? 'waiting' : 'player', turnLabel: ownMember?.pending ? '已提交行动，等待队友' : waiting ? '等待战斗推进' : '轮到你行动', statusText: '选择下方行动；需要指定目标时，再点击场上高亮的立绘。', allies, enemies, actions, log: battleLog.value };
 });
 watch(() => panel.value?.battle?.sessionId, (next, previous) => { if (next !== previous) battleLog.value = []; });
 
@@ -917,8 +1294,6 @@ const setError = (value: unknown) => {
     panel.value = null;
   }
 };
-const currentAuthRequest = () => ({ generation: authGeneration, token: api.token() });
-const isCurrentAuthRequest = (request: { generation: number; token: string }) => request.generation === authGeneration && request.token !== '' && api.token() === request.token;
 const loadPanel = async () => {
   const request = currentAuthRequest();
   if (!request.token) return;
@@ -977,7 +1352,7 @@ const loadNotifications = async () => {
       notificationBeforeId.value = page.nextBeforeId;
     }
   } catch (e) {
-    if (isCurrentAuthRequest(request) && notificationOpen.value) notificationError.value = api.userFacingErrorMessage(e);
+    if (isCurrentAuthRequest(request) && (notificationOpen.value || floatingSocialOpen.value === 'system')) notificationError.value = api.userFacingErrorMessage(e);
   } finally {
     if (isCurrentAuthRequest(request)) notificationLoading.value = false;
   }
@@ -1018,7 +1393,7 @@ const syncNotificationChanges = async () => {
       if (!result.hasMore) break;
     }
   } catch (e) {
-    if (isCurrentAuthRequest(request) && notificationOpen.value) notificationError.value = api.userFacingErrorMessage(e);
+    if (isCurrentAuthRequest(request) && (notificationOpen.value || floatingSocialOpen.value === 'system')) notificationError.value = api.userFacingErrorMessage(e);
   } finally { notificationSyncing = false; }
 };
 const loadNotificationUnread = async () => {
@@ -1275,6 +1650,10 @@ const loadMoreParties = async () => {
 watch([tab, socialSection], ([selectedTab, selectedSection]) => {
   if (selectedTab === 'social' && selectedSection === 'party') void refreshPartyData();
 });
+const desktopExploreVisible = () => tab.value === 'explore' && window.matchMedia('(min-width: 1180px)').matches;
+watch([tab, () => panel.value?.account?.uid], ([selectedTab, uid]) => {
+  if (uid && selectedTab === 'explore' && desktopExploreVisible() && panel.value?.account?.hasCharacter !== false && !partyLoading.value) void refreshPartyData();
+});
 const loadSocial = async () => {
   const request = currentAuthRequest();
   if (!request.token) return;
@@ -1286,7 +1665,8 @@ const loadSocial = async () => {
     if (!isCurrentAuthRequest(request)) return;
     channels.value = result.channels;
     socialSummary.value = summary;
-    if (!channels.value.some(item => item.id === activeChannel.value)) activeChannel.value = channels.value[0]?.id ?? 'world';
+    if (floatingSocialOpen.value && floatingSocialOpen.value !== 'system') focusFloatingChannel(floatingSocialOpen.value);
+    else if (!channels.value.some(item => item.id === activeChannel.value)) selectChannel(channels.value[0]?.id ?? 'world');
     await loadMessages();
     if (!isCurrentAuthRequest(request)) return;
   } catch (e) { if (isCurrentAuthRequest(request)) setError(e); }
@@ -1313,12 +1693,13 @@ const handleChatScroll = () => {
 const loadMessages = async (options: { reset?: boolean; forceLatest?: boolean } = {}) => {
   const request = currentAuthRequest();
   const channelId = activeChannel.value;
+  const channelVersion = chatChannelVersion;
   if (!channelId) return;
   if (!request.token) return;
   try {
     const shouldReset = options.reset === true || loadedMessagesChannelId !== channelId;
     const result = await api.messages(channelId, undefined, CHAT_PAGE_SIZE);
-    if (!isCurrentAuthRequest(request) || activeChannel.value !== channelId) return;
+    if (!isCurrentAuthRequest(request) || activeChannel.value !== channelId || chatChannelVersion !== channelVersion) return;
     if (shouldReset) {
       loadedMessagesChannelId = channelId;
       messages.value = result.messages;
@@ -1337,7 +1718,7 @@ const loadMessages = async (options: { reset?: boolean; forceLatest?: boolean } 
     if (options.forceLatest === true || chatAtLatest.value) await scrollChatToLatest();
     else if (incomingNew) chatHasNewMessages.value = true;
   }
-  catch (e) { if (isCurrentAuthRequest(request)) setError(e); }
+  catch (e) { if (isCurrentAuthRequest(request) && activeChannel.value === channelId && chatChannelVersion === channelVersion) setError(e); }
 };
 const refreshRecruitmentChatCard = async (messageId: number) => {
   if (activeChannel.value !== 'party:lobby') return;
@@ -1357,6 +1738,7 @@ const refreshRecruitmentChatCard = async (messageId: number) => {
 const loadEarlierMessages = async () => {
   const request = currentAuthRequest();
   const channelId = activeChannel.value;
+  const channelVersion = chatChannelVersion;
   const beforeId = chatOldestMessageId ?? messages.value[0]?.id ?? null;
   if (!request.token || !channelId || !beforeId || chatLoadingEarlier.value || !chatHasEarlier.value) return;
   const list = chatMessageListRef.value;
@@ -1365,7 +1747,7 @@ const loadEarlierMessages = async () => {
   chatLoadingEarlier.value = true;
   try {
     const result = await api.messages(channelId, beforeId, CHAT_PAGE_SIZE);
-    if (!isCurrentAuthRequest(request) || activeChannel.value !== channelId) return;
+    if (!isCurrentAuthRequest(request) || activeChannel.value !== channelId || chatChannelVersion !== channelVersion) return;
     messages.value = mergeChatMessages(result.messages, messages.value);
     chatOldestMessageId = messages.value[0]?.id ?? chatOldestMessageId;
     chatHasEarlier.value = result.hasMore ?? result.messages.length >= CHAT_PAGE_SIZE;
@@ -1373,27 +1755,38 @@ const loadEarlierMessages = async () => {
     const nextList = chatMessageListRef.value;
     if (nextList) nextList.scrollTop = nextList.scrollHeight - previousHeight + previousTop;
   } catch (e) {
-    if (isCurrentAuthRequest(request)) setError(e);
+    if (isCurrentAuthRequest(request) && activeChannel.value === channelId && chatChannelVersion === channelVersion) setError(e);
   } finally {
-    chatLoadingEarlier.value = false;
+    if (isCurrentAuthRequest(request) && chatChannelVersion === channelVersion) chatLoadingEarlier.value = false;
   }
 };
 const jumpToLatestMessages = async () => {
   await loadMessages({ forceLatest: true });
-  await scrollChatToLatest();
 };
 const selectChannel = (channelId: string) => {
+  chatChannelVersion += 1;
   activeChannel.value = channelId;
   loadedMessagesChannelId = null;
   messages.value = [];
   chatOldestMessageId = null;
   chatNewestMessageId = null;
   chatHasEarlier.value = false;
+  chatLoadingEarlier.value = false;
   chatHasNewMessages.value = false;
   chatAtLatest.value = true;
   void loadMessages({ reset: true });
-  if (realtime.value?.readyState === WebSocket.OPEN) realtime.value.send(JSON.stringify({ type: 'subscribe', channelId }));
+  if (channelId && realtime.value?.readyState === WebSocket.OPEN) realtime.value.send(JSON.stringify({ type: 'subscribe', channelId }));
 };
+watch(activeChannel, (channelId, previousId) => {
+  if (previousId) chatDrafts.set(previousId, messageDraft.value);
+  messageDraft.value = chatDrafts.get(channelId) ?? '';
+  if (channelId.startsWith('friend:')) lastFriendChatChannel.value = channelId;
+}, { flush: 'sync' });
+watch(() => panel.value?.account?.uid, () => {
+  chatDrafts.clear();
+  messageDraft.value = '';
+  lastFriendChatChannel.value = '';
+});
 const connectRealtime = async () => {
   const request = currentAuthRequest();
   if (!request.token) return;
@@ -1442,6 +1835,49 @@ const storyGuideFrom = (result: GameActionMessage & { messages?: GameActionMessa
     messages
   };
 };
+const loadLocalExplorationMap = async () => {
+  const request = currentAuthRequest();
+  if (!request.token || tab.value !== 'explore' || !panel.value?.summary) return;
+  const version = ++localMapRequestVersion;
+  try {
+    const result = await api.exploreLocalMap();
+    if (isCurrentAuthRequest(request) && version === localMapRequestVersion && result.origin.x === mapCurrent.value.x && result.origin.y === mapCurrent.value.y && result.origin.z === mapCurrent.value.z) localExplorationMap.value = result;
+  } catch (value) { if (isCurrentAuthRequest(request) && version === localMapRequestVersion) { localExplorationMap.value = undefined; setError(value); } }
+};
+const performEnvironmentAction = async (operation: 'clear' | 'cancel' | 'settle', object?: EnvironmentObjectView) => {
+  const request = currentAuthRequest();
+  if (!request.token || busy.value || criticalPending.value) return;
+  const job = localExplorationMap.value?.environmentJob;
+  if (operation === 'clear' && (!object || !localMapMatchesCurrent.value || job
+    || !mapEnvironment.value.some(item => item.id === object.id && item.canClear))) return;
+  if (operation !== 'clear' && !job) return;
+  busy.value = true; error.value = ''; notice.value = '';
+  panelRequestVersion += 1; localMapRequestVersion += 1;
+  try {
+    const result = operation === 'clear' ? await api.clearEnvironment(object!.id)
+      : operation === 'cancel' ? await api.cancelEnvironment() : await api.settleEnvironment(job!.objectId);
+    if (!isCurrentAuthRequest(request)) return;
+    if (result.panel) panel.value = result.panel;
+    if (localExplorationMap.value) localExplorationMap.value = { ...localExplorationMap.value, environmentJob: result.job ?? null };
+    notice.value = result.text || result.message || (operation === 'cancel' ? '已停止清理。' : '环境状态已更新。');
+    // Panel includes the inventory; server settlement owns all rewards.
+    if (!result.panel) await loadPanel();
+  } catch (value) { if (isCurrentAuthRequest(request)) setError(value); }
+  finally {
+    if (isCurrentAuthRequest(request)) { await loadLocalExplorationMap(); if (isCurrentAuthRequest(request)) busy.value = false; }
+  }
+};
+const runClearEnvironment = (object: EnvironmentObjectView) => { void performEnvironmentAction('clear', object); };
+const settleDueEnvironment = async () => {
+  const request = currentAuthRequest(), job = localExplorationMap.value?.environmentJob;
+  if (busy.value || !job || !request.token || (environmentSettlement?.generation === request.generation
+    && environmentSettlement.token === request.token && environmentSettlement.jobId === job.id)) return;
+  const settlement = { ...request, jobId: job.id };
+  environmentSettlement = settlement;
+  try { await performEnvironmentAction('settle'); }
+  finally { if (environmentSettlement === settlement) environmentSettlement = null; }
+};
+watch(() => [tab.value, loggedIn.value, mapCurrent.value.x, mapCurrent.value.y, mapCurrent.value.z, panel.value?.nearby?.range, panel.value?.nearby?.actionRange], () => { if (!mapRoute.replaying.value) void loadLocalExplorationMap(); }, { flush: 'post' });
 const isStoryCommand = (command: string) => /^\/(?:注册|询问|选择去向|天堂|天赋目录|天赋详情|选择恩赐|初行选择|初章|继续剧情)(?:\s|$)/.test(command.trim());
 type CommandSurface = 'story' | 'manual' | 'interaction' | 'catalog';
 const showStoryResult = (result: CommandActionResult) => {
@@ -1457,9 +1893,67 @@ const leaveStory = () => {
   storyGuide.value = null;
   storyError.value = '';
 };
+const prepareExplorationMovement = async (result: { movementVisual?: api.ExploreCommittedMovement; panel?: Panel; travel?: { visual?: api.ExploreTravelVisual } }, request: ReturnType<typeof currentAuthRequest>, previousTravelId = travelVisual.value?.id, navigationVersion = mapNavigationVersion) => {
+  const startsTravel = (result.travel?.visual ?? result.panel?.summary?.travel?.visual)?.id;
+  if (!result.movementVisual && (!startsTravel || startsTravel === previousTravelId)) return false;
+  // A committed command is replayed once; it must never send local step writes.
+  panelRequestVersion += 1;
+  const showMovement = navigationVersion === mapNavigationVersion;
+  if (showMovement) {
+    catalogOpen.value = false;
+    manualOpen.value = false;
+    interactionOpen.value = false;
+    handbookOpen.value = false;
+    regionMapSidebarRef.value?.closeSidebar();
+    leaveStory();
+    pendingInteractions.value = [];
+    tab.value = 'explore';
+  }
+  if (result.movementVisual) {
+    try {
+      if (showMovement) {
+        const before = localExplorationMap.value, movement = result.movementVisual;
+        const controller = new AbortController(); committedVisionRequest?.abort(); committedVisionRequest = controller;
+        const animation = committedMapMotion.run(movement, mapAuthoritativeMovementSpeed.value);
+        // The command has already committed its target. Read that authorized
+        // window while replaying, rather than waiting for the animation to end.
+        void api.exploreLocalMap(controller.signal).then(snapshot => {
+          if (committedVisionRequest !== controller || !isCurrentAuthRequest(request) || navigationVersion !== mapNavigationVersion || !committedMapMotion.pending.value) return;
+          const merged = committedReplayVision(before, snapshot, movement, performance.now());
+          if (merged) committedMapSnapshot.value = { ok: true, ...merged, nearby: result.panel?.nearby?.points ? { points: result.panel.nearby.points, range: snapshot.range, actionRange: snapshot.actionRange } : undefined };
+        }).catch(() => {});
+        try { await animation; }
+        finally { if (committedVisionRequest === controller) { controller.abort(); committedVisionRequest = undefined; committedMapSnapshot.value = undefined; } }
+      }
+    }
+    catch (value) { if (isCurrentAuthRequest(request)) setError(value); }
+    if (!isCurrentAuthRequest(request)) return true;
+    if (!result.panel && panel.value?.summary) {
+      const target = result.movementVisual.target;
+      panel.value = { ...panel.value, summary: { ...panel.value.summary, position: target, region: target.regionName, travel: undefined }, mapData: panel.value.mapData ? { ...panel.value.mapData, current: { ...target, name: target.regionName }, maps: panel.value.mapData.maps.map(map => ({ ...map, isCurrent: map.code === target.regionCode })) } : undefined, regionMap: panel.value.regionMap ? { ...panel.value.regionMap, currentRegionCode: target.regionCode } : undefined };
+    }
+  }
+  if (result.panel && isCurrentAuthRequest(request)) panel.value = result.panel;
+  return true;
+};
 const presentCommandResult = (result: CommandActionResult, surface: CommandSurface) => {
   const nextMessages = commandMessages(result);
   if (result.presentation === 'story') { showStoryResult(result); return; }
+  if (result.presentation === 'page') {
+    leaveStory();
+    manualOpen.value = false;
+    interactionOpen.value = false;
+    catalogOpen.value = false;
+    handbookOpen.value = false;
+    if (result.destination === 'evolution') {
+      tab.value = 'character';
+      characterSection.value = 'evolution';
+    } else if (result.destination === 'advancedProfession') {
+      tab.value = 'character';
+      characterSection.value = 'advancedProfession';
+    } else if (result.destination) tab.value = result.destination;
+    return;
+  }
   if (result.commerce) {
     commerceSide.value = result.commerce.mode ?? 'buy';
     leaveStory();
@@ -1478,10 +1972,11 @@ const presentCommandResult = (result: CommandActionResult, surface: CommandSurfa
     return;
   }
   if (surface === 'story') {
-    if (result.presentation !== 'page') { showStoryResult(result); return; }
-    leaveStory();
-    const destination = result.destination;
-    if (destination === 'character' || destination === 'inventory' || destination === 'explore') tab.value = destination;
+    if (result.presentation === 'interaction' && panel.value?.account?.hasCharacter && !panel.value?.pendingStory) {
+      leaveStory();
+      interactionMessages.value = nextMessages as ManualMessage[];
+      interactionOpen.value = true;
+    } else showStoryResult(result);
     return;
   }
   if (surface === 'manual') manualMessages.value = nextMessages as ManualMessage[];
@@ -1493,6 +1988,8 @@ const presentCommandResult = (result: CommandActionResult, surface: CommandSurfa
 };
 const runIssuedAction = async (action: { actionId: string; revision: string }, surface: 'story' | 'manual' | 'interaction' | 'catalog' = 'interaction') => {
   const request = currentAuthRequest();
+  const previousTravelId = travelVisual.value?.id;
+  const navigationVersion = mapNavigationVersion;
   if (!request.token || busy.value) return;
   const idempotencyKey = issuedActionRetryKeys.get(action.actionId) ?? createIdempotencyKey();
   issuedActionRetryKeys.set(action.actionId, idempotencyKey);
@@ -1505,9 +2002,14 @@ const runIssuedAction = async (action: { actionId: string; revision: string }, s
     const result = await api.interactionAction(action.actionId, action.revision, idempotencyKey);
     if (!isCurrentAuthRequest(request)) return;
     issuedActionRetryKeys.delete(action.actionId);
+    let moved = await prepareExplorationMovement(result, request, previousTravelId, navigationVersion);
+    if (!isCurrentAuthRequest(request)) return;
     await loadPanel();
     if (!isCurrentAuthRequest(request)) return;
-    presentCommandResult(result, surface);
+    if (!moved) moved = await prepareExplorationMovement({ panel: panel.value ?? undefined }, request, previousTravelId, navigationVersion);
+    if (!isCurrentAuthRequest(request)) return;
+    if (moved && (result.presentation !== 'story' || tab.value !== 'explore')) notice.value = result.text ?? '已前往目标地点。';
+    else presentCommandResult(result, surface);
   } catch (e) {
     if (!isCurrentAuthRequest(request)) return;
     const message = api.userFacingErrorMessage(e);
@@ -1530,8 +2032,9 @@ const loadRegistrationGuide = async () => {
   try {
     const result = await api.command('/注册');
     if (!isCurrentAuthRequest(request) || version !== storyRequestVersion) return;
-    showStoryResult(result);
     await loadPanel();
+    if (!isCurrentAuthRequest(request) || version !== storyRequestVersion) return;
+    presentCommandResult(result, 'story');
   } catch (e) {
     if (isCurrentAuthRequest(request) && version === storyRequestVersion) {
       storyGuide.value ??= { text: '', buttons: [], messages: [] };
@@ -1548,10 +2051,12 @@ const refreshStoryGuide = async () => {
     if (!isCurrentAuthRequest(request)) return;
     const snapshot = panel.value?.pendingStory;
     if (snapshot?.messages?.length) showStoryResult({ messages: snapshot.messages });
+    else if (panel.value?.account?.hasCharacter) leaveStory();
     else await loadRegistrationGuide();
   } finally { if (isCurrentAuthRequest(request)) busy.value = false; }
 };
 const submitAuth = async () => {
+  if (busy.value) return;
   const mode = loginMode.value;
   if (mode === 'register') {
     if (password.value.length < 8 || password.value.length > 64 || !password.value.trim()) {
@@ -1585,6 +2090,11 @@ const submitAuth = async () => {
 };
 const runCommand = async (command: string, options: { silent?: boolean; surface?: CommandSurface; title?: string } = {}) => {
   const request = currentAuthRequest();
+  const previousTravelId = travelVisual.value?.id;
+  const navigationVersion = mapNavigationVersion;
+  const departure = { ...mapCurrent.value };
+  const departureRegionCode = regionMap.value.currentRegionCode;
+  let stopped: MovementStopResult | undefined;
   if (!request.token || busy.value) return;
   const surface = options.surface ?? (isStoryCommand(command) || panel.value?.account?.hasCharacter === false ? 'story' : undefined);
   if (surface === 'interaction') {
@@ -1596,23 +2106,39 @@ const runCommand = async (command: string, options: { silent?: boolean; surface?
   try {
     const result = await api.command(command);
     if (!isCurrentAuthRequest(request)) return;
+    let moved = await prepareExplorationMovement(result, request, previousTravelId, navigationVersion);
+    if (!isCurrentAuthRequest(request)) return;
+    await loadPanel();
+    if (!isCurrentAuthRequest(request)) return;
+    if (!moved) moved = await prepareExplorationMovement({ panel: panel.value ?? undefined }, request, previousTravelId, navigationVersion);
+    if (!isCurrentAuthRequest(request)) return;
     if (!options.silent) {
       const nextMessages = commandMessages(result);
       const hasButtons = nextMessages.some(message => message.buttons?.length);
-      if (surface || result.presentation === 'story') presentCommandResult(result, surface ?? 'story');
+      if (moved && (result.presentation !== 'story' || tab.value !== 'explore')) notice.value = result.text ?? '已前往目标地点。';
+      else if (surface || result.presentation === 'story' || result.presentation === 'page') presentCommandResult(result, surface ?? 'interaction');
       else if (hasButtons || nextMessages.length > 1) {
         interactionTitle.value = '互动';
         interactionError.value = '';
         presentCommandResult(result, 'interaction');
       } else notice.value = result.text ?? '操作完成。';
     }
-    await loadPanel();
   } catch (e) {
     if (!isCurrentAuthRequest(request)) return;
+    if (isCurrentEncounterBlock(e)) {
+      stopped = { message: api.userFacingErrorMessage(e), position: departure, regionCode: departureRegionCode };
+      await loadPanel();
+      if (!isCurrentAuthRequest(request)) return;
+    }
     if (surface === 'story') storyError.value = api.userFacingErrorMessage(e);
     else if (surface === 'interaction') interactionError.value = api.userFacingErrorMessage(e);
     else setError(e);
-  } finally { if (isCurrentAuthRequest(request)) busy.value = false; }
+  } finally {
+    if (isCurrentAuthRequest(request)) {
+      busy.value = false;
+      await requestStoppedMapTarget(stopped, request, navigationVersion);
+    }
+  }
 };
 const runInteractionCommand = (command: string) => runCommand(command, { surface: 'interaction' });
 watch([() => panel.value?.pendingStory, busy, storyLoading], ([pending, pendingAction, loading]) => {
@@ -1685,50 +2211,94 @@ const locateHomePurchaseSite = async (target: HomePurchaseSiteTarget) => {
 };
 const locateAdvancedMentor = async (mentor: AdvancedMentor) => {
   advancedMentorTarget.value = mentor;
-  advancedProfessionOpen.value = false;
   tab.value = 'explore';
   await nextTick();
   regionMapSidebarRef.value?.openSidebar(mentor.regionCode);
 };
 const handleAdvancedTrialStarted = (result: AdvancedTrialStarted) => {
-  if (!loggedIn.value || !advancedProfessionOpen.value || !result.panel?.inBattle) return;
+  if (!loggedIn.value || characterSection.value !== 'advancedProfession' || !result.panel?.inBattle) return;
   panel.value = result.panel;
   negotiation.value = null;
   pendingInteractions.value = [];
-  advancedProfessionOpen.value = false;
   tab.value = 'explore';
   notice.value = '导师试炼已开始，请在战斗面板选择行动。';
 };
-const handleCatalogRefresh = async (regions: string[]) => {
-  if (regions.length === 0 || regions.some(region => ['summary', 'map', 'battle', 'inventory', 'equipment', 'skills'].includes(region))) await loadPanel();
+const catalogResultSessions = new WeakMap<CommandActionResult, ReturnType<typeof currentAuthRequest>>();
+const presentedCatalogMovements = new WeakSet<CommandActionResult>();
+const refreshedCatalogPanels = new WeakSet<CommandActionResult>();
+const catalogResultIsCurrent = (result: CommandActionResult) => {
+  const request = catalogResultSessions.get(result);
+  return !request || isCurrentAuthRequest(request);
+};
+const executeCatalogAction: typeof api.commandAction = async payload => {
+  const request = currentAuthRequest();
+  const previousTravelId = travelVisual.value?.id;
+  const navigationVersion = mapNavigationVersion;
+  if (!request.token || busy.value) throw new Error('请等待当前操作完成。');
+  busy.value = true;
+  const ignoredResult: CommandActionResult = {};
+  catalogResultSessions.set(ignoredResult, request);
+  try {
+    const result = await api.commandAction(payload);
+    catalogResultSessions.set(result, request);
+    if (!isCurrentAuthRequest(request)) return ignoredResult;
+    let moved = await prepareExplorationMovement(result, request, previousTravelId, navigationVersion);
+    if (!isCurrentAuthRequest(request)) return ignoredResult;
+    const regions = Array.isArray(result.refresh) ? result.refresh : result.refresh?.regions ?? catalog.value.find(item => item.id === payload.commandId)?.refresh ?? [];
+    if (moved || payload.mode !== 'preview' && regions.some(region => ['summary', 'map', 'battle', 'inventory', 'equipment', 'skills'].includes(region))) {
+      await loadPanel();
+      if (!isCurrentAuthRequest(request)) return ignoredResult;
+      refreshedCatalogPanels.add(result);
+      if (!moved) moved = await prepareExplorationMovement({ panel: panel.value ?? undefined }, request, previousTravelId, navigationVersion);
+      if (!isCurrentAuthRequest(request)) return ignoredResult;
+    }
+    if (moved) {
+      if (result.presentation === 'story' && tab.value === 'explore') presentCommandResult(result, 'interaction');
+      else notice.value = result.text ?? '已前往目标地点。';
+      presentedCatalogMovements.add(result);
+    }
+    return result;
+  } catch (value) {
+    if (!isCurrentAuthRequest(request)) return ignoredResult;
+    throw value;
+  } finally { if (isCurrentAuthRequest(request)) busy.value = false; }
+};
+const handleCatalogRefresh = async (regions: string[], result: CommandActionResult) => {
+  if (!catalogResultIsCurrent(result) || presentedCatalogMovements.has(result)) return;
+  if (!refreshedCatalogPanels.has(result) && (regions.length === 0 || regions.some(region => ['summary', 'map', 'battle', 'inventory', 'equipment', 'skills'].includes(region)))) await loadPanel();
   if (regions.some(region => ['party', 'mail', 'social'].includes(region))) await loadSocial();
 };
 const handleCatalogResult = (result: CommandActionResult) => {
+  if (!catalogResultIsCurrent(result) || presentedCatalogMovements.has(result)) return;
   if (result.text) notice.value = result.text;
   if (result.panel && typeof result.panel === 'object') panel.value = result.panel;
 };
 const runMapMove = async (position: MapPosition) => {
-  const z = panel.value?.summary?.position?.z ?? position.z ?? mapCurrent.value.z ?? 0;
+  if (busy.value || criticalPending.value || mapActionLock.value) return;
   const request = currentAuthRequest();
+  const navigationVersion = mapNavigationVersion;
   if (!request.token) return;
   busy.value = true;
+  panelRequestVersion += 1;
+  mapRouteRefreshNeeded = false;
+  mapRouteStoppedResult = undefined;
+  mapTargetPopupRequest.value = undefined;
   error.value = '';
-  // 先反馈点击动作，避免连续移动时必须等待接口和面板刷新后才看到提示。
-  // 服务端返回的结果文本随后会覆盖这条临时提示，失败时由错误提示覆盖。
-  notice.value = `正在移动到 ${position.x}, ${position.y}…`;
+  notice.value = '';
   try {
-    const result = await api.exploreMove({ x: position.x, y: position.y, z });
-    if (!isCurrentAuthRequest(request)) return;
-    if (result.panel) panel.value = result.panel;
-    else await loadPanel();
-    if (result.presentation === 'story') {
-      showStoryResult(result);
-      notice.value = '';
-    } else notice.value = result.text || `已移动到 ${position.x}, ${position.y}。`;
-    pendingInteractions.value = result.panel?.inBattle ? [] : (result.interactionTargets?.slice(0, 6) ?? []);
-  } catch (e) { if (isCurrentAuthRequest(request)) setError(e); }
-  finally { busy.value = false; }
+    await mapRoute.run(position);
+  } finally {
+    if (isCurrentAuthRequest(request)) {
+      if (mapRouteRefreshNeeded) await loadPanel();
+      if (isCurrentAuthRequest(request)) {
+        void loadLocalExplorationMap(); busy.value = false;
+        const stopped = mapRouteStoppedResult; mapRouteStoppedResult = undefined;
+        await requestStoppedMapTarget(stopped, request, navigationVersion);
+      }
+    }
+  }
 };
+const runAnimatedMapMove = runMapMove;
 const startBattleAtPoint = async (point: ExploreMapPoint) => {
   const spawnId = Number(point.id.split(':')[1] || 0);
   const request = currentAuthRequest();
@@ -1890,23 +2460,41 @@ const runMapAction = (payload: { point: ExploreMapPoint; action: MapPointAction 
     ? { surface: 'interaction', title: payload.point.name }
     : {});
 };
+const runAnimatedMapAction = (payload: { point: ExploreMapPoint; action: MapPointAction }) => {
+  if (payload.action.id === 'move' && payload.action.position) {
+    interactionBuildingCode.value = payload.point.type === '建筑' ? payload.point.code ?? null : null;
+    void runAnimatedMapMove(payload.action.position);
+    return;
+  }
+  runMapAction(payload);
+};
 const openAutoBattle = async () => {
   if (autoBattleBusy.value) return;
+  const auth = currentAuthRequest();
   autoBattleOpen.value = true;
   error.value = '';
+  autoBattleLoadError.value = '';
+  autoBattleSettings.value = null;
   autoBattleBusy.value = true;
   try {
     // 先读取主设置，技能与药剂列表失败时仍然保留可用的设置面板。
     const config = await api.autoBattleConfig(autoBattleMode.value);
+    if (!isCurrentAuthRequest(auth)) return;
     autoBattleSettings.value = config;
     autoBattleHpThreshold.value = config.settings.hpThreshold;
     autoBattleMpThreshold.value = config.settings.mpThreshold;
     const [skills, potions] = await Promise.allSettled([api.autoBattleSkills(), api.autoBattlePotions()]);
+    if (!isCurrentAuthRequest(auth)) return;
     if (skills.status === 'fulfilled') autoBattleSkillChoices.value = skills.value.choices;
     else setError(skills.reason);
     if (potions.status === 'fulfilled') autoBattlePotionChoices.value = potions.value.items;
     else setError(potions.reason);
-  } catch (e) { setError(e); } finally { autoBattleBusy.value = false; }
+  } catch (e) {
+    if (isCurrentAuthRequest(auth)) {
+      autoBattleLoadError.value = api.userFacingErrorMessage(e);
+      setError(e);
+    }
+  } finally { if (isCurrentAuthRequest(auth)) autoBattleBusy.value = false; }
 };
 const closeAutoBattle = () => { if (!autoBattleBusy.value) autoBattleOpen.value = false; };
 const switchAutoBattleMode = async (mode: api.AutoBattleMode) => {
@@ -1951,12 +2539,27 @@ const autoBattleActionSlots = computed(() => {
   const max = Math.min(30, Math.max(5, (autoBattleSettings.value?.actions.length ?? 0) + 1));
   return Array.from({ length: max }, (_, index) => index + 1);
 });
+const autoBattleSlotSkill = (sequence: number) => {
+  const skillId = autoBattleSettings.value?.actions.find(action => action.sequence === sequence)?.skillId;
+  return skillId ? panel.value?.skills?.skills?.find(skill => skill.id === skillId) : undefined;
+};
 const cancelMining = () => {
   if (!panel.value?.mining || busy.value) return;
   void runCommand('/取消开采');
 };
+const applyTravelFallback = (position: api.ExploreRoutePosition | undefined, travel?: NonNullable<Panel['summary']>['travel']) => {
+  const current = panel.value;
+  if (!current?.summary) return;
+  const target = current.summary.travel?.visual?.target;
+  const arrived = target && position && target.x === position.x && target.y === position.y && target.z === position.z && target.regionId === position.regionId;
+  const name = arrived ? target.regionName : current.mapData?.current?.name ?? current.summary.region ?? '未知区域';
+  panel.value = { ...current, summary: { ...current.summary, travel, ...(position ? { position, region: name } : {}) }, mapData: position && current.mapData ? { ...current.mapData, current: { name, ...position }, maps: arrived ? current.mapData.maps.map(map => ({ ...map, isCurrent: map.code === target.regionCode })) : current.mapData.maps } : current.mapData, regionMap: arrived && current.regionMap ? { ...current.regionMap, currentRegionCode: target.regionCode } : current.regionMap };
+};
 const stopMapAction = async () => {
+  if (committedMapMotion.pending.value) { committedMapMotion.cancel(); return; }
+  if (mapMovePending.value) { mapRoute.cancel(); return; }
   if (busy.value) return;
+  if (localExplorationMap.value?.environmentJob) { await performEnvironmentAction('cancel'); return; }
   if (panel.value?.mining) { cancelMining(); return; }
   if (!panel.value?.summary?.travel) return;
   const request = currentAuthRequest();
@@ -1967,23 +2570,37 @@ const stopMapAction = async () => {
     const result = await api.cancelExploreTravel();
     if (!isCurrentAuthRequest(request)) return;
     if (result.panel) panel.value = result.panel;
-    else await loadPanel();
+    else { applyTravelFallback(result.position); await loadPanel(); }
+    if (!isCurrentAuthRequest(request)) return;
     notice.value = result.text || '本次前往已停止。';
   } catch (e) { if (isCurrentAuthRequest(request)) setError(e); }
-  finally { busy.value = false; }
+  finally { if (isCurrentAuthRequest(request)) busy.value = false; }
 };
 const settleDueMapTravel = async () => {
   const request = currentAuthRequest();
+  const navigationVersion = mapNavigationVersion;
   if (!request.token || !panel.value?.summary?.travel || travelAutoSettling || busy.value) return;
   travelAutoSettling = true;
+  let stopped: MovementStopResult | undefined;
   try {
     const result = await api.settleExploreTravel();
     if (!isCurrentAuthRequest(request)) return;
     if (result.panel) panel.value = result.panel;
-    else await loadPanel();
+    else {
+      const travel = result.kind === 'pending' ? result.travel ? { destination: result.travel.destination ?? panel.value?.summary?.travel?.destination ?? '目的地', remaining: result.remaining, activityType: result.travel.activityType ?? 'move', visual: result.travel.visual } : panel.value?.summary?.travel : undefined;
+      applyTravelFallback(result.position, travel);
+      await loadPanel();
+    }
+    if (!isCurrentAuthRequest(request)) return;
     if (!panel.value?.summary?.travel && result.text) notice.value = result.text;
+    if (!panel.value?.summary?.travel) stopped = result;
   } catch (e) { if (isCurrentAuthRequest(request)) setError(e); }
-  finally { travelAutoSettling = false; }
+  finally {
+    if (isCurrentAuthRequest(request)) {
+      travelAutoSettling = false;
+      await requestStoppedMapTarget(stopped, request, navigationVersion);
+    }
+  }
 };
 const runCommands = async (commands: string[]) => {
   for (const command of commands) {
@@ -2036,10 +2653,21 @@ const runBattleAction = async (payload: { action: BattleAction; targetId?: strin
   } finally { busy.value = false; }
 };
 const sendChat = async () => {
-  const content = messageDraft.value.trim();
-  if (!content || !activeChannel.value) return;
+  const draft = messageDraft.value;
+  const content = draft.trim();
+  const channelId = activeChannel.value;
+  const request = currentAuthRequest();
+  if (!content || !channelId || !request.token || busy.value || criticalPending.value || !channels.value.some(channel => channel.id === channelId) || (floatingSocialOpen.value && !exploreChatCanSend.value)) return;
   busy.value = true;
-  try { await api.sendMessage(activeChannel.value, content); messageDraft.value = ''; await loadMessages({ forceLatest: true }); } catch (e) { setError(e); } finally { busy.value = false; }
+  try {
+    await api.sendMessage(channelId, content);
+    if (!isCurrentAuthRequest(request)) return;
+    if (activeChannel.value === channelId) {
+      if (messageDraft.value === draft) messageDraft.value = '';
+      await loadMessages({ forceLatest: true });
+    } else if (chatDrafts.get(channelId) === draft) chatDrafts.delete(channelId);
+  } catch (e) { if (isCurrentAuthRequest(request)) setError(e); }
+  finally { if (isCurrentAuthRequest(request)) busy.value = false; }
 };
 const runPartyMutation = async (operation: () => Promise<unknown>, successMessage: string) => {
   const request = currentAuthRequest();
@@ -2171,6 +2799,7 @@ const logout = () => {
   if (criticalPending.value) return;
   const hadToken = Boolean(api.token());
   authGeneration += 1;
+  busy.value = false;
   realtime.value?.close();
   realtime.value = null;
   if (hadToken) void api.logout().catch(() => undefined);
@@ -2183,6 +2812,7 @@ const logout = () => {
   settingsPasswordConfirmation.value = '';
   loggedIn.value = false;
   panel.value = null;
+  inventoryKeyword.value = '';
   negotiation.value = null;
   storyGuide.value = null;
   channels.value = [];
@@ -2221,7 +2851,6 @@ const logout = () => {
   bookshopOpen.value = false;
   homePurchaseMode.value = null;
   homePurchaseSiteTarget.value = null;
-  advancedProfessionOpen.value = false;
   advancedMentorTarget.value = null;
   interactionOpen.value = false;
   interactionMessages.value = [];
@@ -2232,6 +2861,8 @@ const logout = () => {
   worldSection.value = 'overview';
   autoBattleOpen.value = false;
   autoBattleSettings.value = null;
+  autoBattleLoadError.value = '';
+  autoBattleBusy.value = false;
   floatingSocialOpen.value = null;
   teamPopupOpen.value = false;
   floatingDockExpanded.value = false;
@@ -2247,16 +2878,20 @@ const logout = () => {
   socialSummary.value = { friends: [], friendRequests: [], oath: null, oathRequests: [], oathReleaseRequests: [] };
   pendingInteractions.value = [];
   selectedInventoryItem.value = null;
+  selectedEquipment.value = null;
+  messageDraft.value = '';
   error.value = '';
   notice.value = '';
   tab.value = 'explore';
 };
 const handleAuthInvalidated = () => {
   authGeneration += 1;
+  busy.value = false;
   realtime.value?.close();
   realtime.value = null;
   loggedIn.value = false;
   panel.value = null;
+  inventoryKeyword.value = '';
   negotiation.value = null;
   storyGuide.value = null;
   storyError.value = '';
@@ -2278,7 +2913,6 @@ const handleAuthInvalidated = () => {
   bookshopOpen.value = false;
   homePurchaseMode.value = null;
   homePurchaseSiteTarget.value = null;
-  advancedProfessionOpen.value = false;
   advancedMentorTarget.value = null;
   interactionOpen.value = false;
   interactionMessages.value = [];
@@ -2289,6 +2923,8 @@ const handleAuthInvalidated = () => {
   worldSection.value = 'overview';
   autoBattleOpen.value = false;
   autoBattleSettings.value = null;
+  autoBattleLoadError.value = '';
+  autoBattleBusy.value = false;
   floatingSocialOpen.value = null;
   teamPopupOpen.value = false;
   floatingDockExpanded.value = false;
@@ -2304,6 +2940,8 @@ const handleAuthInvalidated = () => {
   partyRequestVersion += 1;
   pendingInteractions.value = [];
   selectedInventoryItem.value = null;
+  selectedEquipment.value = null;
+  messageDraft.value = '';
   error.value = '登录已失效，请重新登录。';
 };
 const usePanelButton = (command: string) => void runCommand(command);
@@ -2313,17 +2951,73 @@ const selectCharacterSection = (section: CharacterSection) => {
   characterSection.value = section;
   if (section === 'equipment') void runCommand('/装备', { silent: true });
 };
+const resetEquipmentDetails = () => {
+  equipmentDetailsVersion += 1;
+  equipmentDetailsRequest?.abort();
+  equipmentDetailsRequest = null;
+  selectedEquipmentDetails.value = null;
+  equipmentDetailsLoading.value = false;
+  equipmentDetailsError.value = '';
+};
+const loadSelectedEquipmentDetails = async () => {
+  resetEquipmentDetails();
+  const item = selectedEquipment.value;
+  if (!item || tab.value !== 'character' || characterSection.value !== 'equipment') return;
+  const auth = currentAuthRequest();
+  if (!auth.token) return;
+  const version = equipmentDetailsVersion;
+  const account = `${panel.value?.account?.uid ?? ''}:${panel.value?.account?.gameUserId ?? ''}`;
+  const controller = new AbortController();
+  equipmentDetailsRequest = controller;
+  const matches = (entry?: CharacterEquipmentEntry | null) => entry?.slot === item.slot && entry.id === item.id && entry.code === item.code;
+  const isCurrent = () => version === equipmentDetailsVersion && !controller.signal.aborted && isCurrentAuthRequest(auth)
+    && account === `${panel.value?.account?.uid ?? ''}:${panel.value?.account?.gameUserId ?? ''}`
+    && tab.value === 'character' && characterSection.value === 'equipment'
+    && matches(selectedEquipment.value) && matches(equipmentForSlot(item.slot));
+  equipmentDetailsLoading.value = true;
+  try {
+    const result = await api.equippedEquipmentDetail(item.slot, controller.signal);
+    if (!isCurrent()) return;
+    if (result.slot !== item.slot) throw new Error('当前穿戴装备已变化，请重新选择。');
+    if (!result.detail && result.id === null && result.code === null) {
+      selectedEquipment.value = null;
+      return;
+    }
+    if (result.id !== item.id || result.code !== item.code || !result.detail) throw new Error('当前穿戴装备已变化，请重新选择。');
+    selectedEquipmentDetails.value = result.detail;
+  } catch (cause) {
+    if (isCurrent()) equipmentDetailsError.value = api.userFacingErrorMessage(cause);
+  } finally {
+    if (isCurrent()) {
+      equipmentDetailsLoading.value = false;
+      equipmentDetailsRequest = null;
+    }
+  }
+};
+watch(selectedEquipment, item => {
+  if (item) void loadSelectedEquipmentDetails();
+  else resetEquipmentDetails();
+}, { flush: 'sync' });
+watch([tab, characterSection], ([activeTab, section]) => {
+  if (activeTab !== 'character' || section !== 'equipment') {
+    selectedEquipment.value = null;
+    resetEquipmentDetails();
+  }
+}, { flush: 'sync' });
+onBeforeUnmount(resetEquipmentDetails);
 const inspectCharacterEquipment = (item: CharacterEquipmentEntry) => {
-  selectedEquipment.value = item;
+  if (selectedEquipment.value === item) void loadSelectedEquipmentDetails();
+  else selectedEquipment.value = item;
 };
 const closeCharacterEquipment = () => { selectedEquipment.value = null; };
 const unequipSelectedEquipment = async () => {
   const item = selectedEquipment.value;
-  if (!item) return;
+  if (!item || busy.value) return;
   closeCharacterEquipment();
   await runCommand(`/卸下装备 ${item.slot}`);
 };
 const replaceSelectedEquipment = () => {
+  if (busy.value) return;
   closeCharacterEquipment();
   tab.value = 'inventory';
   inventoryCategory.value = '装备';
@@ -2350,7 +3044,7 @@ const inspectInventoryItem = (item: InventoryDisplayItem) => {
 const closeInventoryItem = () => { selectedInventoryItem.value = null; };
 const useSelectedInventoryItem = async () => {
   const item = selectedInventoryItem.value;
-  if (!item || item.instance || item.itemType !== 'consumable' || !item.id) return;
+  if (!inventoryUsePreview.value || busy.value || !item || item.instance || item.itemType !== 'consumable' || !item.id || item.quantity < 1) return;
   closeInventoryItem();
   await runCommand(`/使用道具 ${item.id}`);
 };
@@ -2364,19 +3058,44 @@ const runRegionTravel = async (request: RegionTravelRequest) => {
   if (busy.value || panel.value?.summary?.travel || panel.value?.mining) return;
   const z = request.z ?? mapCurrent.value.z ?? 0;
   const auth = currentAuthRequest();
+  const navigationVersion = mapNavigationVersion;
+  const departure = { ...mapCurrent.value };
+  const departureRegionCode = regionMap.value.currentRegionCode;
   if (!auth.token) return;
   busy.value = true;
   travelPlanningTarget.value = request.targetName;
   error.value = '';
   notice.value = `正在规划前往${request.targetName}的路线…`;
+  mapTargetPopupRequest.value = undefined;
+  let stopped: MovementStopResult | undefined;
   try {
     const result = await api.exploreTravel({ x: request.x, y: request.y, z });
     if (!isCurrentAuthRequest(auth)) return;
+    await prepareExplorationMovement(result, auth, travelVisual.value?.id, navigationVersion);
+    if (!isCurrentAuthRequest(auth)) return;
     if (result.panel) panel.value = result.panel;
-    else await loadPanel();
+    else {
+      if (panel.value?.summary && result.travel) panel.value = { ...panel.value, summary: { ...panel.value.summary, travel: { destination: result.travel.destination ?? request.targetName, remaining: result.travel.remaining, activityType: result.travel.activityType ?? 'move', visual: result.travel.visual } } };
+      await loadPanel();
+    }
+    if (!isCurrentAuthRequest(auth)) return;
     notice.value = result.text || `已安排前往${request.targetName}。`;
-  } catch (e) { if (isCurrentAuthRequest(auth)) setError(e); }
-  finally { travelPlanningTarget.value = ''; busy.value = false; }
+    stopped = result;
+  } catch (e) {
+    if (isCurrentAuthRequest(auth)) {
+      setError(e);
+      if (isCurrentEncounterBlock(e)) {
+        stopped = { message: api.userFacingErrorMessage(e), position: departure, regionCode: departureRegionCode };
+        await loadPanel();
+      }
+    }
+  }
+  finally {
+    if (isCurrentAuthRequest(auth)) {
+      travelPlanningTarget.value = ''; busy.value = false;
+      await requestStoppedMapTarget(stopped, auth, navigationVersion);
+    }
+  }
 };
 
 watch([notice, error], ([nextNotice, nextError]) => {
@@ -2402,6 +3121,10 @@ watch(() => panel.value?.summary?.travel?.remaining, remaining => {
   travelRemaining.value = Math.max(0, Number(remaining) || 0);
   if (remaining === undefined) nextTravelSettleAt = 0;
 }, { immediate: true });
+watch(() => localExplorationMap.value?.environmentJob, job => {
+  environmentRemaining.value = Math.max(0, Number(job?.remainingSeconds) || 0);
+  if (!job) nextEnvironmentSettleAt = 0;
+}, { deep: true });
 
 onMounted(async () => {
   restoreFloatingDockPlacement();
@@ -2425,16 +3148,25 @@ onMounted(async () => {
   window.addEventListener('resize', constrainFloatingDock);
   let notificationPollCount = 0;
   refreshTimer = window.setInterval(() => {
-    void loadPanel();
-    if (tab.value === 'social' || floatingSocialOpen.value) { void loadMessages(); void loadSocial(); }
+    if (!mapMovePending.value) void loadPanel();
+    if (tab.value === 'explore' && !mapMovePending.value && !busy.value) void loadLocalExplorationMap();
+    if (tab.value === 'social' || floatingSocialOpen.value || desktopExploreVisible()) { void loadMessages(); void loadSocial(); }
     notificationPollCount += 1;
     if (notificationPollCount % 2 === 0) {
+      if (desktopExploreVisible() && !partyLoading.value && !partyBusy.value) void refreshPartyData();
       void loadNotificationUnread();
       void loadGameMailUnread();
-      if (notificationOpen.value) void syncNotificationChanges();
+      if (notificationOpen.value || floatingSocialOpen.value === 'system') void syncNotificationChanges();
     }
   }, 8000);
   actionCountdownTimer = window.setInterval(() => {
+    if (localExplorationMap.value?.environmentJob) {
+      if (environmentRemaining.value > 0) environmentRemaining.value = Math.max(0, environmentRemaining.value - 1);
+      else if (Date.now() >= nextEnvironmentSettleAt) {
+        nextEnvironmentSettleAt = Date.now() + 4000;
+        void settleDueEnvironment();
+      }
+    }
     if (panel.value?.summary?.travel) {
       if (travelRemaining.value > 0) travelRemaining.value = Math.max(0, travelRemaining.value - 1);
       else if (Date.now() >= nextTravelSettleAt) {
@@ -2453,6 +3185,7 @@ onMounted(async () => {
   }, 1000);
 });
 onBeforeUnmount(() => {
+  clearMapMoveAnimation();
   window.removeEventListener('pointerdown', unlockBgm);
   window.removeEventListener('touchend', unlockBgm);
   window.removeEventListener('click', unlockBgm);
@@ -2476,30 +3209,80 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="app-shell">
+  <div ref="appShell" class="app-shell" data-visual="light-anime" data-viewport-layout :data-page="loggedIn ? tab : loginMode" :data-explore-canvas="exploreCanvasActive || undefined" :data-character-scene="characterScene" :data-scene-framed="sceneFramed || undefined" :style="{ ...appViewportStyle, ...sceneFramingStyle, ...explorationViewportStyle, '--anime-city': `url(${ANIME_SCENES.city})`, '--anime-forest': `url(${ANIME_SCENES.forest})`, '--anime-auth': `url(${ANIME_SCENES.auth})`, '--anime-main-scene': `url(${ANIME_MAIN_SCENES[tab]})`, '--explore-terrain': `url(${terrainForRegion(regionMap.currentRegionCode, mapCurrent.name)})` }">
     <div v-if="!loggedIn" class="auth-screen">
-      <img class="auth-art" src="/assets/loading/login-hero.webp" alt="梨子喵在森林里追逐一只狡黠的白色球兔" />
-      <div class="auth-card-column">
-        <h1 class="world-title" aria-label="幻想次元"><img src="/assets/loading/fantasy-logo.webp" alt="幻想次元" /></h1>
-        <div class="auth-card card-surface">
-        <div class="auth-tabs"><button :class="{ active: loginMode === 'login' }" @click="loginMode = 'login'; showPassword = false; showPasswordConfirmation = false">登录</button><button :class="{ active: loginMode === 'register' }" @click="loginMode = 'register'; showPassword = false; showPasswordConfirmation = false">注册</button></div>
-        <form @submit.prevent="submitAuth">
-          <label v-if="loginMode === 'register'" class="sr-only">旅人昵称</label><input v-if="loginMode === 'register'" v-model="displayName" maxlength="32" aria-label="旅人昵称" placeholder="输入昵称" />
-          <label v-else class="sr-only">登录号或 Game ID</label><input v-if="loginMode === 'login'" v-model="gameId" inputmode="text" autocomplete="username" aria-label="登录号或 Game ID" placeholder="登录号 / Game ID" />
-          <label class="sr-only">密码</label><div class="password-field"><input v-model="password" :type="showPassword ? 'text' : 'password'" :autocomplete="loginMode === 'login' ? 'current-password' : 'new-password'" aria-label="密码" placeholder="密码（8～64 位）" /><button type="button" class="password-toggle" :aria-label="showPassword ? '隐藏密码' : '显示密码'" @click="togglePasswordVisibility">{{ showPassword ? '隐藏' : '显示' }}</button></div>
-          <template v-if="loginMode === 'register'"><label class="sr-only">确认密码</label><div class="password-field"><input v-model="passwordConfirmation" :type="showPasswordConfirmation ? 'text' : 'password'" autocomplete="new-password" aria-label="确认密码" placeholder="再次输入密码" /><button type="button" class="password-toggle" :aria-label="showPasswordConfirmation ? '隐藏确认密码' : '显示确认密码'" @click="showPasswordConfirmation = !showPasswordConfirmation">{{ showPasswordConfirmation ? '隐藏' : '显示' }}</button></div></template>
-          <button class="primary-button wide" :disabled="busy">{{ busy ? '连接中…' : loginMode === 'login' ? '登录' : '注册' }}</button>
-        </form>
-        <p v-if="error" class="error-text">{{ error }}</p>
+      <img class="auth-hero" :src="ANIME_AUTH_ART[loginMode]" width="1920" height="1080" :alt="loginMode === 'login' ? '梨子喵伸手邀请旅人，球兔背着背包准备冒险' : '梨子喵递来冒险地图，球兔在冒险柜台旁等候'" fetchpriority="high" />
+      <section class="auth-stage" :class="`auth-stage--${loginMode}`" aria-label="幻想次元旅人入口">
+        <h1 class="auth-original-logo"><img :src="ANIME_LOGO" width="1942" height="809" alt="幻想次元" /></h1>
+        <div class="auth-card-column">
+          <div class="auth-tabs" role="tablist" aria-label="旅人账号入口">
+            <button id="auth-tab-login" type="button" role="tab" :aria-selected="loginMode === 'login'" aria-controls="auth-panel" :class="{ active: loginMode === 'login' }" :disabled="busy" @click="loginMode = 'login'; showPassword = false; showPasswordConfirmation = false"><AuthTabFrame :active="loginMode === 'login'" /><TabArtIcon name="paw" class="auth-glyph" :size="26" /><span>登录</span></button>
+            <button id="auth-tab-register" type="button" role="tab" :aria-selected="loginMode === 'register'" aria-controls="auth-panel" :class="{ active: loginMode === 'register' }" :disabled="busy" @click="loginMode = 'register'; showPassword = false; showPasswordConfirmation = false"><AuthTabFrame :active="loginMode === 'register'" /><TabArtIcon name="paw" class="auth-glyph" :size="26" /><span>注册</span></button>
+          </div>
+          <div id="auth-panel" class="auth-card" role="tabpanel" :aria-labelledby="`auth-tab-${loginMode}`">
+            <form class="auth-form" :aria-busy="busy" @submit.prevent="submitAuth">
+              <div class="auth-field-group">
+                <label :class="{ 'sr-only': loginMode === 'register' }" :for="loginMode === 'login' ? 'auth-login-id' : 'auth-display-name'">{{ loginMode === 'login' ? '登录号 / Game ID' : '旅人昵称' }}</label>
+                <div class="auth-input-row">
+                  <AuthGlyph name="user" />
+                  <input v-if="loginMode === 'register'" id="auth-display-name" v-model="displayName" maxlength="32" autocomplete="nickname" aria-label="旅人昵称" placeholder="输入昵称" />
+                  <input v-else id="auth-login-id" v-model="gameId" inputmode="text" autocomplete="username" aria-label="登录号或 Game ID" placeholder="请输入登录号 / Game ID" />
+                </div>
+              </div>
+              <div class="auth-field-group">
+                <label for="auth-password" :class="{ 'sr-only': loginMode === 'register' }">密码（8～64 位）</label>
+                <div class="auth-input-row password-field">
+                  <AuthGlyph name="lock" />
+                  <input id="auth-password" v-model="password" :type="showPassword ? 'text' : 'password'" :autocomplete="loginMode === 'login' ? 'current-password' : 'new-password'" aria-label="密码" placeholder="密码（8～64 位）" />
+                  <button type="button" class="password-toggle" :aria-label="showPassword ? '隐藏密码' : '显示密码'" :aria-pressed="showPassword" @click="togglePasswordVisibility"><AuthGlyph v-if="loginMode === 'login'" name="eye" /><span>{{ showPassword ? '隐藏' : '显示' }}</span></button>
+                </div>
+              </div>
+              <div v-if="loginMode === 'register'" class="auth-field-group">
+                <label for="auth-confirm-password" class="sr-only">确认密码</label>
+                <div class="auth-input-row password-field">
+                  <AuthGlyph name="lock" />
+                  <input id="auth-confirm-password" v-model="passwordConfirmation" :type="showPasswordConfirmation ? 'text' : 'password'" autocomplete="new-password" aria-label="确认密码" placeholder="再次输入密码" />
+                  <button type="button" class="password-toggle" :aria-label="showPasswordConfirmation ? '隐藏确认密码' : '显示确认密码'" :aria-pressed="showPasswordConfirmation" @click="showPasswordConfirmation = !showPasswordConfirmation"><span>{{ showPasswordConfirmation ? '隐藏' : '显示' }}</span></button>
+                </div>
+              </div>
+              <button type="submit" class="auth-submit" :disabled="busy"><span>{{ busy ? '连接中…' : loginMode === 'login' ? '登录' : '注册' }}</span></button>
+            </form>
+            <p v-if="error" class="error-text auth-error" role="alert">{{ error }}</p>
+            <p v-if="loginMode === 'register'" class="auth-welcome"><span>开启属于你的异世界冒险吧！</span></p>
+          </div>
         </div>
-      </div>
+      </section>
     </div>
 
     <template v-else>
       <header class="topbar" :class="{ 'story-topbar': showStoryGuide }">
-        <div class="page-brand"><img src="/assets/loading/fantasy-logo.webp" alt="幻想次元" /><div class="page-context"><span>{{ pageEyebrow }}</span><strong>{{ title }}</strong></div></div>
-        <div class="top-actions"><span class="connection-dot">在线</span><button v-if="catalogOpen" class="ghost-button catalog-toggle" :disabled="showStoryGuide || Boolean(registrationLoginId)" @click="openCommandCatalog">{{ catalogOpen ? '返回页面' : '全部操作' }}</button><button type="button" class="inbox-button" :disabled="showStoryGuide || Boolean(registrationLoginId)" aria-label="打开消息信箱" title="消息信箱" :aria-expanded="notificationOpen" @click="openNotificationInbox"><span aria-hidden="true">✉</span><i v-if="inboxUnreadCount > 0">{{ inboxUnreadCount > 99 ? '99+' : inboxUnreadCount }}</i></button><button type="button" class="settings-button" aria-label="打开设置" title="设置" :aria-expanded="settingsOpen" @click="openSettings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.8 2.8h4.4l.5 2.1a7.4 7.4 0 0 1 1.7.7l1.9-1.1 3.1 3.1-1.1 1.9c.3.5.5 1.1.7 1.7l2.1.5v4.4l-2.1.5a7.4 7.4 0 0 1-.7 1.7l1.1 1.9-3.1 3.1-1.9-1.1a7.4 7.4 0 0 1-1.7.7l-.5 2.1H9.8l-.5-2.1a7.4 7.4 0 0 1-1.7-.7l-1.9 1.1-3.1-3.1 1.1-1.9a7.4 7.4 0 0 1-.7-1.7L.9 16v-4.4l2.1-.5c.2-.6.4-1.2.7-1.7L2.6 7.5l3.1-3.1 1.9 1.1c.5-.3 1.1-.5 1.7-.7z" transform="translate(0 -1.7) scale(.96)"/><circle cx="12" cy="12" r="3.2"/></svg></button></div>
+        <div class="page-brand"><div class="anime-wordmark original-game-logo"><img :src="ANIME_LOGO" width="1942" height="809" alt="幻想次元" /></div></div>
+        <div class="page-context" role="heading" aria-level="1"><strong>{{ title }}</strong></div>
+        <div class="top-actions"><span class="connection-dot">在线</span><button v-if="catalogOpen" class="ghost-button catalog-toggle" :disabled="showStoryGuide || Boolean(registrationLoginId)" @click="openCommandCatalog">{{ catalogOpen ? '返回页面' : '全部操作' }}</button><button type="button" class="inbox-button" :disabled="showStoryGuide || Boolean(registrationLoginId)" :aria-label="mailUnreadCount > 0 ? '打开消息信箱（有未读邮件）' : '打开消息信箱'" title="消息信箱" :aria-expanded="notificationOpen" @click="openNotificationInbox"><img src="/assets/light-anime/header-mail-v1.webp" width="128" height="128" alt="" aria-hidden="true" /><i v-if="mailUnreadCount > 0" class="inbox-unread-dot" aria-hidden="true"></i></button><button type="button" class="settings-button" aria-label="打开设置" title="设置" :aria-expanded="settingsOpen" @click="openSettings"><img src="/assets/light-anime/header-settings-v1.webp" width="128" height="128" alt="" aria-hidden="true" /></button></div>
       </header>
+
+      <nav v-if="!catalogOpen && !showStoryGuide && !registrationLoginId && tab === 'character'" class="main-section-tabs character-tabs" role="tablist" aria-label="角色页面子选项" :inert="showStoryGuide || Boolean(registrationLoginId)">
+        <button v-for="item in characterSections" :key="item.id" type="button" role="tab" :aria-selected="characterSection === item.id" :class="{ active: characterSection === item.id }" :disabled="criticalPending" @click="selectCharacterSection(item.id)"><span class="character-tab-icon"><TabArtIcon :name="item.icon" :size="30" /></span><span>{{ item.label }}</span></button>
+      </nav>
+      <nav v-if="!catalogOpen && !showStoryGuide && !registrationLoginId && tab === 'inventory'" class="main-section-tabs inventory-tabs" role="tablist" aria-label="背包分类" :inert="showStoryGuide || Boolean(registrationLoginId)">
+        <button v-for="category in inventoryCategories" :key="category" type="button" :class="{ active: inventoryCategory === category }" role="tab" :aria-selected="inventoryCategory === category" :title="category" :aria-label="category" @click="selectInventoryCategory(category)"><TabArtIcon class="inventory-category-icon" :name="category === '全部' ? 'all-items' : category === '装备' ? 'equipment' : category === '道具' ? 'consumables' : 'materials'" :size="30" /><span class="inventory-category-label">{{ category }}</span></button>
+      </nav>
+      <nav v-if="!catalogOpen && !showStoryGuide && !registrationLoginId && tab === 'social'" class="main-section-tabs social-section-tabs" role="tablist" aria-label="社交功能" :inert="showStoryGuide || Boolean(registrationLoginId)">
+        <button type="button" role="tab" :aria-selected="socialSection === 'friends'" :class="{ active: socialSection === 'friends' }" :disabled="criticalPending" @click="selectSocialSection('friends')"><TabArtIcon name="friends" :size="30" /><span>好友</span></button>
+        <button type="button" role="tab" :aria-selected="socialSection === 'oath'" :class="{ active: socialSection === 'oath' }" :disabled="criticalPending" @click="selectSocialSection('oath')"><TabArtIcon name="oath" :size="30" /><span>星誓</span></button>
+        <button type="button" role="tab" :aria-selected="socialSection === 'party'" :class="{ active: socialSection === 'party' }" :disabled="criticalPending" @click="selectSocialSection('party')"><TabArtIcon name="party" :size="30" /><span>队伍</span></button>
+      </nav>
+      <nav v-if="!catalogOpen && !showStoryGuide && !registrationLoginId && tab === 'world'" class="main-section-tabs world-section-tabs" role="tablist" aria-label="世界功能" :inert="showStoryGuide || Boolean(registrationLoginId)">
+        <button type="button" role="tab" :aria-selected="worldSection === 'overview'" :class="{ active: worldSection === 'overview' }" :disabled="criticalPending" @click="openWorldSection('overview')"><TabArtIcon name="overview" :size="30" /><span>总览</span></button>
+        <button type="button" role="tab" :aria-selected="worldSection === 'market'" :class="{ active: worldSection === 'market' }" :disabled="criticalPending" @click="openWorldSection('market')"><TabArtIcon name="market" :size="30" /><span>万叶联市</span></button>
+        <button type="button" role="tab" :aria-selected="worldSection === 'home'" :class="{ active: worldSection === 'home' }" :disabled="criticalPending" @click="openWorldSection('home')"><TabArtIcon name="home" :size="30" /><span>家园</span></button>
+      </nav>
+
+      <div v-if="panel?.summary && !showStoryGuide && !registrationLoginId && tab === 'explore' && !catalogOpen && !panel.inBattle && !negotiation" class="anime-status-ribbon" aria-label="角色资源">
+        <div class="stat-card"><AnimeIcon name="heart" /><span>生命</span><strong>{{ panel.summary.hp.current }} / {{ panel.summary.hp.max }}</strong><i><b :style="{ width: `${hpPercent}%` }" /></i></div>
+        <div class="stat-card"><AnimeIcon name="mana" /><span>魔力</span><strong>{{ panel.summary.mp.current }} / {{ panel.summary.mp.max }}</strong><i class="mana"><b :style="{ width: `${mpPercent}%` }" /></i></div>
+        <div class="stat-card"><AnimeIcon name="stamina" /><span>体力</span><strong>{{ panel.summary.stamina.current }} / {{ panel.summary.stamina.max }}</strong><i class="stamina"><b :style="{ width: `${Math.min(100, Math.max(0, panel.summary.stamina.current / Math.max(1, panel.summary.stamina.max) * 100))}%` }" /></i></div>
+      </div>
 
       <div v-if="registrationLoginId" class="account-onboarding-layer">
         <section class="account-onboarding card-surface" role="dialog" aria-modal="true" aria-labelledby="account-onboarding-title">
@@ -2513,134 +3296,165 @@ onBeforeUnmount(() => {
       <main class="page-content" :inert="showStoryGuide || Boolean(registrationLoginId)">
         <section v-if="catalogOpen" class="catalog-page">
           <div class="card-surface catalog-intro"><div><p class="eyebrow">ALL COMMANDS</p><h1>冒险操作目录</h1><p class="muted">所有已开放的本体指令都从这里进入。网页会自动生成参数控件，涉及消耗或变更的操作先预览再确认。</p></div><button class="soft-button" @click="openCommandCatalog">返回当前页面</button></div>
-          <CommandCatalog ref="commandCatalogRef" :commands="catalog" :busy="busy" @refresh="regions => void handleCatalogRefresh(regions)" @executed="handleCatalogResult" @error="setError" @interaction-action="action => runIssuedAction(action, 'catalog')" />
+          <CommandCatalog ref="commandCatalogRef" :commands="catalog" :busy="busy" :execute="executeCatalogAction" @refresh="(regions, result) => void handleCatalogRefresh(regions, result)" @executed="handleCatalogResult" @error="setError" @interaction-action="action => runIssuedAction(action, 'catalog')" />
         </section>
 
-        <section v-else-if="tab === 'explore'" class="explore-page">
-          <TurnBattlePanel v-if="battleState" :battle="battleState" :disabled="busy" @action="runBattleAction" />
-          <NegotiationPanel v-else-if="negotiation" :negotiation="negotiation" :disabled="busy" @action="runNegotiationAction" />
+        <section v-else-if="tab === 'explore'" class="explore-page anime-exploration-refinement">
+          <TurnBattlePanel v-if="battleState" :battle="battleState" :disabled="busy" @action="runBattleAction" @open-auto-battle="openAutoBattle" />
+          <NegotiationPanel v-else-if="negotiation" :player-portrait="portraitBaseAsset(characterData.portrait)" :negotiation="negotiation" :disabled="busy" @action="runNegotiationAction" />
           <template v-else>
           <div class="explore-frame card-surface">
-            <div class="explore-status-strip" v-if="panel?.summary">
-              <div class="stat-card"><span>生命</span><strong>{{ panel.summary.hp.current }} / {{ panel.summary.hp.max }}</strong><i><b :style="{ width: `${hpPercent}%` }" /></i></div>
-              <div class="stat-card"><span>魔力</span><strong>{{ panel.summary.mp.current }} / {{ panel.summary.mp.max }}</strong><i class="mana"><b :style="{ width: `${mpPercent}%` }" /></i></div>
-              <div class="stat-card"><span>体力</span><strong>{{ panel.summary.stamina.current }} / {{ panel.summary.stamina.max }}</strong><i class="stamina"><b :style="{ width: `${Math.min(100, Math.max(0, panel.summary.stamina.current / Math.max(1, panel.summary.stamina.max) * 100))}%` }" /></i></div>
-            </div>
-            <WorldMapPanel class="explore-map" :current="mapCurrent" :bounds="mapBounds" :points="mapPoints" :move-range="mapMoveRange" :sight-range="mapSightRange" :disabled="busy || Boolean(mapActionLock)" :action-lock="mapActionLock" @move="runMapMove" @action="runMapAction" @stop-action="stopMapAction" @open-region-map="openRegionMapSidebar" @open-auto-battle="openAutoBattle" />
+            <WorldMapPanel class="explore-map" :player-portrait="portraitBaseAsset(characterData.portrait)" :player-identity="characterData.portrait" :player-key="panel?.account?.uid ?? panel?.account?.gameUserId" @heading-change="heading => mapRestingHeading = heading" :region-code="mapVisionRegionCode" :moving="mapAvatarMoving" :movement-target="mapMovementTarget" :display-position="mapDisplayPosition" :travel-visual-center="mapTravelVisualCenter" :movement-heading="mapMovementHeading" :movement-speed="mapMovementSpeed" :cells="mapCells" :environment="mapEnvironment" :surface-scene="mapSurfaceScene" :ground-window="mapGroundWindow" :current="mapVisionCurrent" :bounds="mapBounds" :points="mapPoints" :target-popup-request="mapTargetPopupRequest" @target-popup-consumed="id => { if (mapTargetPopupRequest?.id === id) mapTargetPopupRequest = undefined; }" :move-range="mapMoveRange" :sight-range="mapSightRange" :disabled="busy || Boolean(mapActionLock)" :action-lock="mapActionLock" :action-art="mapActionArtwork" @move="runAnimatedMapMove" @action="runAnimatedMapAction" @stop-action="stopMapAction" @clear-environment="runClearEnvironment" @open-region-map="openRegionMapSidebar" :chat-open="Boolean(floatingSocialOpen)" @open-chat="toggleFloatingSocial('chat')" @open-auto-battle="openAutoBattle" >
+              <template #map-footer><AdventureManualDock inline :sections="['tasks', 'footprints', 'codex', 'warrants']" @select="openAdventureManual" /></template>
+            </WorldMapPanel>
           </div>
           <RegionMapSidebar ref="regionMapSidebarRef" :regions="regionMap.regions" :members="regionMap.members" :landmarks="regionMap.landmarks" :current-region-code="regionMap.currentRegionCode" :disabled="busy" :loading="busy" @travel="runRegionTravel" />
-          <div v-if="pendingInteractions.length" class="interaction-choice-backdrop" role="presentation" @click.self="pendingInteractions = []">
+          <div v-if="pendingInteractions.length" class="interaction-choice-backdrop exploration-nearby-layer" role="presentation" @click.self="pendingInteractions = []">
             <div class="interaction-choice card-surface" role="dialog" aria-modal="true" aria-label="附近互动">
-              <button class="dialog-close" aria-label="关闭互动选择" @click="pendingInteractions = []">×</button>
-              <p class="eyebrow">NEW ENCOUNTER</p><h3>这里发现了目标</h3>
-              <p class="muted">选择要查看的互动对象。</p>
-              <div class="interaction-choice-list"><button v-for="target in pendingInteractions" :key="`${target.type}:${target.id}`" class="soft-button" :disabled="busy" @click="pendingInteractions = []; runCommand(`/坐标互动 ${target.type} ${target.id}`)">{{ target.name }}<small>{{ target.type }}</small></button></div>
+              <button type="button" class="dialog-close" aria-label="关闭互动选择" @click="pendingInteractions = []"><SocialGlyph name="close" :size="18" /></button>
+              <header class="exploration-dialog-heading"><SocialGlyph name="paw" :size="29" /><div><h3>这里发现了目标</h3><p>选择要查看的互动对象。</p></div></header>
+              <div v-if="selectedPendingInteraction" class="nearby-encounter-preview"><span class="encounter-illustration"><img class="encounter-target-art" :src="pendingInteractionArtwork(selectedPendingInteraction)" alt="" /></span><div><small>{{ interactionTypeName(selectedPendingInteraction.type) }}</small><strong>{{ selectedPendingInteraction.name }}</strong></div><SocialGlyph class="encounter-paw" name="paw" :size="46" /></div>
+              <div class="interaction-choice-list" role="group" aria-label="选择附近互动对象"><button v-for="target in pendingInteractions" :key="`${target.type}:${target.id}`" type="button" class="soft-button" :class="{ selected: selectedPendingInteraction === target }" :aria-pressed="selectedPendingInteraction === target" :disabled="busy" @click="pendingInteractionSelection = `${target.type}:${target.id}`"><span class="encounter-row-icon"><img class="encounter-target-art" :src="pendingInteractionArtwork(target)" alt="" /></span><span><strong>{{ target.name }}</strong><small>{{ interactionTypeName(target.type) }}<template v-if="target.description"> · {{ target.description }}</template></small></span><AnimeIcon name="arrow" :size="18" /></button></div>
+              <section v-if="selectedPendingInteraction" class="nearby-encounter-detail"><h4><SocialGlyph name="leaf" :size="24" />{{ selectedPendingInteraction.name }}</h4><div><img class="encounter-target-art" :src="pendingInteractionArtwork(selectedPendingInteraction)" alt="" /><p>{{ selectedPendingInteraction.description || `查看${selectedPendingInteraction.name}，了解此处可进行的互动。` }}</p></div><button type="button" class="primary-button" :disabled="busy" @click="openSelectedPendingInteraction"><SocialGlyph name="search" :size="22" />查看互动</button></section>
             </div>
           </div>
           </template>
         </section>
 
-        <div v-if="autoBattleOpen" class="auto-battle-backdrop" role="presentation" @click.self="closeAutoBattle">
+        <div v-if="autoBattleOpen" class="auto-battle-backdrop exploration-auto-layer" role="presentation" @click.self="closeAutoBattle">
           <section class="auto-battle-dialog card-surface" role="dialog" aria-modal="true" aria-label="自动战斗设置">
-            <button type="button" class="dialog-close" aria-label="关闭自动战斗设置" @click="closeAutoBattle">×</button>
-            <div class="section-heading auto-battle-heading"><div><p class="eyebrow">AUTO BATTLE</p><h2>自动战斗设置</h2></div><span class="auto-battle-state" :class="{ enabled: autoBattleSettings?.settings.enabled }">{{ autoBattleSettings?.settings.enabled ? '运行中' : '未开启' }}</span></div>
+            <header class="auto-battle-dialog-header">
+            <button type="button" class="dialog-close" aria-label="关闭自动战斗设置" :disabled="autoBattleBusy" @click="closeAutoBattle"><SocialGlyph name="close" :size="18" /></button>
+            <div class="section-heading auto-battle-heading"><div><h2><SocialGlyph name="paw" :size="27" />自动战斗设置</h2></div><span class="auto-battle-state" :class="{ enabled: autoBattleSettings?.settings.enabled }">{{ autoBattleLoadError ? '读取失败' : !autoBattleSettings ? '读取中' : autoBattleSettings.settings.enabled ? '运行中' : '未开启' }}</span></div>
+            </header>
+            <div class="auto-battle-dialog-body">
             <div v-if="autoBattleSettings" class="auto-battle-content">
-              <div class="auto-battle-mode-tabs"><button type="button" :class="{ active: autoBattleMode === 'pve' }" :disabled="autoBattleBusy" @click="switchAutoBattleMode('pve')">PVE 探索</button><button type="button" :class="{ active: autoBattleMode === 'pvp' }" :disabled="autoBattleBusy" @click="switchAutoBattleMode('pvp')">PVP 对战</button></div>
-              <div class="auto-battle-toggle-row"><span>自动战斗</span><button type="button" class="toggle-button" :class="{ active: autoBattleSettings.settings.enabled }" :disabled="autoBattleBusy" @click="saveAutoBattleSetting({ operation: 'enabled', enabled: !autoBattleSettings.settings.enabled })">{{ autoBattleSettings.settings.enabled ? '已开启' : '已关闭' }}</button><span>自动嗑药</span><button type="button" class="toggle-button" :class="{ active: autoBattleSettings.settings.autoPotionEnabled }" :disabled="autoBattleBusy" @click="saveAutoBattleSetting({ operation: 'potion', enabled: !autoBattleSettings.settings.autoPotionEnabled })">{{ autoBattleSettings.settings.autoPotionEnabled ? '已开启' : '已关闭' }}</button></div>
-              <div v-if="autoBattleMode === 'pve'" class="auto-battle-default"><span>遇敌默认操作</span><select :value="autoBattleSettings.settings.defaultEncounterAction" :disabled="autoBattleBusy" @change="saveAutoBattleSetting({ operation: 'default-action' })"><option value="battle">直接战斗</option><option value="persuade">优先交涉</option></select></div>
-              <div class="auto-battle-potion-grid"><label><span>生命低于 {{ autoBattleHpThreshold }}%</span><input v-model.number="autoBattleHpThreshold" type="range" min="1" max="99" step="1" @change="saveAutoBattleThreshold('hp')" /><select :value="autoBattleSettings.settings.hpItemId ?? 0" :disabled="autoBattleBusy" @change="saveAutoBattlePotion('hp', $event)"><option value="0">不使用药剂</option><option v-for="item in autoBattlePotionChoices" :key="item.id" :value="item.id">{{ item.name }}</option></select></label><label><span>魔力低于 {{ autoBattleMpThreshold }}%</span><input v-model.number="autoBattleMpThreshold" type="range" min="1" max="99" step="1" @change="saveAutoBattleThreshold('mp')" /><select :value="autoBattleSettings.settings.mpItemId ?? 0" :disabled="autoBattleBusy" @change="saveAutoBattlePotion('mp', $event)"><option value="0">不使用药剂</option><option v-for="item in autoBattlePotionChoices" :key="item.id" :value="item.id">{{ item.name }}</option></select></label></div>
-              <div class="auto-battle-actions"><div class="auto-battle-actions-heading"><strong>出招顺序</strong><small>循环执行，未配置时使用普通攻击</small></div><div v-for="sequence in autoBattleActionSlots" :key="sequence" class="auto-battle-action-row"><b>{{ sequence }}</b><select :value="autoBattleActionValue(sequence)" :disabled="autoBattleBusy" @change="saveAutoBattleActionSlot(sequence, $event)"><option v-for="skill in autoBattleSkillChoices" :key="`${sequence}:${skill.id ?? 0}`" :value="skill.id ?? 0">{{ skill.name }}</option></select><button v-if="autoBattleSettings.actions.some(item => item.sequence === sequence)" type="button" class="ghost-button" :disabled="autoBattleBusy" @click="deleteAutoBattleActionSlot(sequence)">删除</button></div></div>
+              <div class="auto-battle-mode-tabs" role="group" aria-label="自动战斗模式"><button type="button" :class="{ active: autoBattleMode === 'pve' }" :aria-pressed="autoBattleMode === 'pve'" :disabled="autoBattleBusy" @click="switchAutoBattleMode('pve')"><TabArtIcon name="forest" :size="26" />PVE 探索</button><button type="button" :class="{ active: autoBattleMode === 'pvp' }" :aria-pressed="autoBattleMode === 'pvp'" :disabled="autoBattleBusy" @click="switchAutoBattleMode('pvp')"><TabArtIcon name="equipment" :size="26" />PVP 对战</button></div>
+              <div class="auto-battle-switches"><div class="auto-battle-toggle-row"><AnimeIcon name="sword" :size="29" /><span><strong>自动战斗</strong><small>按照配置的顺序执行战斗</small></span><button type="button" role="switch" :aria-checked="autoBattleSettings.settings.enabled" aria-label="自动战斗" class="toggle-button" :class="{ active: autoBattleSettings.settings.enabled }" :disabled="autoBattleBusy" @click="saveAutoBattleSetting({ operation: 'enabled', enabled: !autoBattleSettings.settings.enabled })"><i />{{ autoBattleSettings.settings.enabled ? '已开启' : '已关闭' }}</button></div><div class="auto-battle-toggle-row"><ExplorePotionGlyph /><span><strong>自动嗑药</strong><small>根据生命与魔力阈值使用药剂</small></span><button type="button" role="switch" :aria-checked="autoBattleSettings.settings.autoPotionEnabled" aria-label="自动嗑药" class="toggle-button" :class="{ active: autoBattleSettings.settings.autoPotionEnabled }" :disabled="autoBattleBusy" @click="saveAutoBattleSetting({ operation: 'potion', enabled: !autoBattleSettings.settings.autoPotionEnabled })"><i />{{ autoBattleSettings.settings.autoPotionEnabled ? '已开启' : '已关闭' }}</button></div></div>
+              <div v-if="autoBattleMode === 'pve'" class="auto-battle-default"><span><SocialGlyph name="paw" :size="22" />遇敌默认操作</span><div class="auto-battle-default-actions"><button type="button" :class="{ active: autoBattleSettings.settings.defaultEncounterAction === 'persuade' }" :aria-pressed="autoBattleSettings.settings.defaultEncounterAction === 'persuade'" :disabled="autoBattleBusy || autoBattleSettings.settings.defaultEncounterAction === 'persuade'" @click="saveAutoBattleSetting({ operation: 'default-action' })"><SocialGlyph name="chat" :size="21" />优先交涉</button><button type="button" :class="{ active: autoBattleSettings.settings.defaultEncounterAction === 'battle' }" :aria-pressed="autoBattleSettings.settings.defaultEncounterAction === 'battle'" :disabled="autoBattleBusy || autoBattleSettings.settings.defaultEncounterAction === 'battle'" @click="saveAutoBattleSetting({ operation: 'default-action' })"><AnimeIcon name="sword" :size="21" />直接战斗</button></div></div>
+              <div class="auto-battle-potion-grid"><label><span><AnimeIcon name="heart" :size="24" />生命低于 <b>{{ autoBattleHpThreshold }}%</b></span><input v-model.number="autoBattleHpThreshold" type="range" min="1" max="99" step="1" :disabled="autoBattleBusy" aria-label="生命自动用药阈值" @change="saveAutoBattleThreshold('hp')" /><span class="auto-battle-select-label">使用药剂</span><select :value="autoBattleSettings.settings.hpItemId ?? 0" :disabled="autoBattleBusy" aria-label="生命自动用药" @change="saveAutoBattlePotion('hp', $event)"><option value="0">不使用药剂</option><option v-for="item in autoBattlePotionChoices" :key="item.id" :value="item.id">{{ item.name }}</option></select></label><label><span><AnimeIcon name="mana" :size="24" />魔力低于 <b>{{ autoBattleMpThreshold }}%</b></span><input v-model.number="autoBattleMpThreshold" type="range" min="1" max="99" step="1" :disabled="autoBattleBusy" aria-label="魔力自动用药阈值" @change="saveAutoBattleThreshold('mp')" /><span class="auto-battle-select-label">使用药剂</span><select :value="autoBattleSettings.settings.mpItemId ?? 0" :disabled="autoBattleBusy" aria-label="魔力自动用药" @change="saveAutoBattlePotion('mp', $event)"><option value="0">不使用药剂</option><option v-for="item in autoBattlePotionChoices" :key="item.id" :value="item.id">{{ item.name }}</option></select></label></div>
+              <div class="auto-battle-actions"><div class="auto-battle-actions-heading"><strong><SocialGlyph name="paw" :size="23" />出招顺序</strong><small>循环执行，未配置时使用普通攻击</small></div><div v-for="sequence in autoBattleActionSlots" :key="sequence" class="auto-battle-action-row"><b>{{ sequence }}</b><SkillIcon v-if="autoBattleSlotSkill(sequence)?.code" :code="autoBattleSlotSkill(sequence)?.code" :size="34" /><SkillIcon v-else-if="autoBattleActionValue(sequence) === '0'" code="basic_slash" :size="34" /><SkillIcon v-else :size="34" /><select :value="autoBattleActionValue(sequence)" :disabled="autoBattleBusy" :aria-label="`第${sequence}步出招`" @change="saveAutoBattleActionSlot(sequence, $event)"><option v-for="skill in autoBattleSkillChoices" :key="`${sequence}:${skill.id ?? 0}`" :value="skill.id ?? 0">{{ skill.name }}</option></select><button v-if="autoBattleSettings.actions.some(item => item.sequence === sequence)" type="button" class="ghost-button" :disabled="autoBattleBusy" :aria-label="`删除第${sequence}步出招`" @click="deleteAutoBattleActionSlot(sequence)"><SocialGlyph name="close" :size="15" /><span>删除</span></button></div></div>
             </div>
-            <div v-else-if="error" class="empty-state auto-battle-load-error">自动战斗设置读取失败：{{ error }}<button type="button" class="soft-button" :disabled="autoBattleBusy" @click="openAutoBattle">重新读取</button></div>
-            <div v-else class="empty-state">正在读取自动战斗设置…</div>
+            <div v-else-if="autoBattleLoadError" class="empty-state auto-battle-load-error game-ui-empty-message" role="alert"><GameUiFeedbackArt name="error" /><span>自动战斗设置读取失败：{{ autoBattleLoadError }}<button type="button" class="soft-button" :disabled="autoBattleBusy" @click="openAutoBattle">重新读取</button></span></div>
+            <div v-else class="empty-state game-ui-empty-message" role="status"><GameUiFeedbackArt name="loading" /><span>正在读取自动战斗设置…</span></div>
+            </div>
           </section>
         </div>
 
         <section v-else-if="tab === 'character'" class="character-page">
-          <div class="character-tabs card-surface" role="tablist" aria-label="角色页面子选项">
-            <button v-for="item in characterSections" :key="item.id" type="button" role="tab" :aria-selected="characterSection === item.id" :class="{ active: characterSection === item.id }" :disabled="criticalPending" @click="selectCharacterSection(item.id)">
-              <span class="character-tab-icon">{{ item.icon }}</span><span>{{ item.label }}</span>
-            </button>
-          </div>
+          <CharacterInfoPanel v-if="characterSection === 'profile'" :summary="panel?.summary" :game-id="panel?.account?.gameUserId ?? panel?.account?.uid" :portrait="characterData.portrait" :equipment="characterData.equipment" :groups="profileViewportGroups" />
 
-          <div v-if="characterSection === 'profile'" class="character-panel-grid">
-            <div class="profile-card character-profile-card card-surface">
-              <CharacterPortrait class="character-profile-portrait" :portrait="characterData.portrait" :equipment="characterData.equipment" alt="当前角色立绘" />
-              <div class="character-profile-info"><p class="eyebrow">ADVENTURER</p><h1>{{ panel?.summary?.name ?? '待登记旅人' }}</h1><p class="muted">{{ panel?.summary?.profession ?? '尚未选择职业' }} · Lv.{{ panel?.summary?.level ?? 1 }}</p><button type="button" class="soft-button" @click="advancedProfessionOpen = true">职业进阶</button><div class="character-identity"><div><span>Game ID</span><strong>{{ panel?.account?.uid ?? '未生成' }}</strong></div><div><span>性别</span><strong>{{ panel?.summary?.gender ?? '未设定' }}</strong></div><div><span>经验</span><strong>{{ panel?.summary?.experience ?? 0 }} / {{ panel?.summary?.experienceRequired ?? '—' }}</strong></div><div><span>天赋</span><strong>{{ panel?.summary?.giftName ?? '无' }}</strong></div><div><span>所在区域</span><strong>{{ panel?.summary?.region ?? '未进入地图' }}</strong></div><div><span>当前坐标</span><strong>{{ panel?.summary?.position ? `(${panel.summary.position.x}, ${panel.summary.position.y}, ${panel.summary.position.z})` : '—' }}</strong></div><div class="character-identity-buffs"><span>增益效果</span><strong>{{ panel?.summary?.activeBuffs?.length ? panel.summary.activeBuffs.join('、') : '暂无' }}</strong></div></div><div class="character-resource-list"><div><span>生命</span><strong>{{ panel?.summary?.hp.current ?? 0 }} / {{ panel?.summary?.hp.max ?? 0 }}</strong><i><b :style="{ width: `${hpPercent}%` }" /></i></div><div><span>魔力</span><strong>{{ panel?.summary?.mp.current ?? 0 }} / {{ panel?.summary?.mp.max ?? 0 }}</strong><i class="mana"><b :style="{ width: `${mpPercent}%` }" /></i></div><div><span>体力</span><strong>{{ panel?.summary?.stamina.current ?? 0 }} / {{ panel?.summary?.stamina.max ?? 0 }}</strong><i class="stamina"><b :style="{ width: `${Math.min(100, Math.max(0, (panel?.summary?.stamina.current ?? 0) / Math.max(1, panel?.summary?.stamina.max ?? 1) * 100))}%` }" /></i></div></div></div>
-            </div>
-            <div class="character-battle-stats card-surface" aria-label="角色战斗属性" @click="closeAttributeHelp">
-              <h2>战斗属性</h2>
-              <div class="character-battle-section"><h3>六维</h3><div class="character-battle-grid"><div v-for="stat in baseAttributeDefinitions" :key="stat.key" class="character-battle-item" @mouseleave="closeAttributeHelp"><span class="attribute-help-label"><span>{{ stat.label }}</span><button type="button" class="attribute-help-trigger" :aria-label="`查看${stat.label}说明`" :aria-expanded="activeAttributeHelp === `base:${stat.key}`" @click.stop="toggleAttributeHelp(`base:${stat.key}`)">?</button><span v-if="activeAttributeHelp === `base:${stat.key}`" class="attribute-help-popover" role="tooltip">{{ attributeHelpText(stat.key) }}</span></span><strong>{{ formatAttributeValue(baseAttributeValue(stat.key)) }}</strong></div></div></div>
-              <div class="character-battle-section"><h3>战斗数值</h3><div class="character-battle-grid"><div v-for="stat in combatStatDefinitions" :key="stat.key" class="character-battle-item" @mouseleave="closeAttributeHelp"><span class="attribute-help-label"><span>{{ stat.label }}</span><button type="button" class="attribute-help-trigger" :aria-label="`查看${stat.label}说明`" :aria-expanded="activeAttributeHelp === `combat:${stat.key}`" @click.stop="toggleAttributeHelp(`combat:${stat.key}`)">?</button><span v-if="activeAttributeHelp === `combat:${stat.key}`" class="attribute-help-popover" role="tooltip">{{ attributeHelpText(stat.key) }}</span></span><strong>{{ combatStatValue(stat.key) }}</strong></div></div></div>
-              <div class="character-battle-section" v-if="extraAttributeEntries.length"><h3>额外</h3><div class="character-battle-grid"><div v-for="item in extraAttributeEntries" :key="item.label" class="character-battle-item" @mouseleave="closeAttributeHelp"><span class="attribute-help-label"><span>{{ item.label }}</span><button type="button" class="attribute-help-trigger" :aria-label="`查看${item.label}说明`" :aria-expanded="activeAttributeHelp === `extra:${item.key}`" @click.stop="toggleAttributeHelp(`extra:${item.key}`)">?</button><span v-if="activeAttributeHelp === `extra:${item.key}`" class="attribute-help-popover" role="tooltip">{{ attributeHelpText(item.key) }}</span></span><strong>{{ item.value > 0 ? '+' : '' }}{{ item.value }}{{ item.unit }}</strong></div></div></div>
-              <div class="character-element-mastery"><span class="attribute-help-label"><span>元素精通</span><button type="button" class="attribute-help-trigger" aria-label="查看元素精通说明" :aria-expanded="activeAttributeHelp === 'elementMastery'" @click.stop="toggleAttributeHelp('elementMastery')">?</button><span v-if="activeAttributeHelp === 'elementMastery'" class="attribute-help-popover" role="tooltip">{{ attributeHelpText('elementMastery') }}</span></span><div class="element-mastery-list"><span v-for="([element, value]) in elementMasteryEntries" :key="element">{{ element }} {{ value }}</span></div></div>
-              <div class="character-element-mastery"><span class="attribute-help-label"><span>元素抗性</span><button type="button" class="attribute-help-trigger" aria-label="查看元素抗性说明" :aria-expanded="activeAttributeHelp === 'elementResistance'" @click.stop="toggleAttributeHelp('elementResistance')">?</button><span v-if="activeAttributeHelp === 'elementResistance'" class="attribute-help-popover" role="tooltip">{{ attributeHelpText('elementResistance') }}</span></span><div class="element-mastery-list"><span v-for="([element, value]) in elementResistanceEntries" :key="element">{{ element }} {{ value }}</span></div></div>
-            </div>
-          </div>
-
-          <div v-else-if="characterSection === 'equipment'" class="character-subpanel card-surface">
-            <div class="subpanel-intro"><div><p class="eyebrow">EQUIPMENT</p><h2>装备配置</h2></div><span class="muted">点击部位查看当前穿戴</span></div>
+          <div v-else-if="characterSection === 'equipment'" class="character-subpanel character-equipment-panel card-surface">
             <div class="equipment-layout">
-              <div class="equipment-column equipment-armor-column" role="list" aria-label="防具部位"><h3>防具</h3><button v-for="slot in equipmentArmorSlots" :key="slot.id" type="button" class="equipment-slot" :class="{ filled: equipmentForSlot(slot.id), [equipmentRarityClass(equipmentForSlot(slot.id))]: true }" :aria-label="equipmentForSlot(slot.id)?.name ?? slot.label" @click="equipmentForSlot(slot.id) && inspectCharacterEquipment(equipmentForSlot(slot.id)!)"><span class="equipment-slot-icon"><InventoryItemIcon v-if="equipmentForSlot(slot.id)" :name="equipmentForSlot(slot.id)?.name" :code="equipmentForSlot(slot.id)?.code" :codex-id="equipmentForSlot(slot.id)?.codexId ?? undefined" item-type="equipment" :item-category="equipmentForSlot(slot.id)?.itemCategory" :instance="true" /><span v-else class="equipment-slot-placeholder">{{ slot.icon }}</span></span><span class="equipment-slot-name">{{ equipmentForSlot(slot.id)?.name ?? slot.label }}</span></button></div>
-              <div class="equipment-summary"><CharacterPortrait class="equipment-portrait" :portrait="characterData.portrait" :equipment="characterData.equipment" alt="当前装备立绘" /><p class="equipment-profession">{{ panel?.summary?.profession ?? '尚未选择职业' }} · Lv.{{ panel?.summary?.level ?? 1 }}</p></div>
-              <div class="equipment-column equipment-combat-column" role="list" aria-label="武器与饰品部位"><h3>武器与饰品</h3><button v-for="slot in equipmentCombatSlots" :key="slot.id" type="button" class="equipment-slot" :class="{ filled: equipmentForSlot(slot.id), [equipmentRarityClass(equipmentForSlot(slot.id))]: true }" :aria-label="equipmentForSlot(slot.id)?.name ?? slot.label" @click="equipmentForSlot(slot.id) && inspectCharacterEquipment(equipmentForSlot(slot.id)!)"><span class="equipment-slot-icon"><InventoryItemIcon v-if="equipmentForSlot(slot.id)" :name="equipmentForSlot(slot.id)?.name" :code="equipmentForSlot(slot.id)?.code" :codex-id="equipmentForSlot(slot.id)?.codexId ?? undefined" item-type="equipment" :item-category="equipmentForSlot(slot.id)?.itemCategory" :instance="true" /><span v-else class="equipment-slot-placeholder">{{ slot.icon }}</span></span><span class="equipment-slot-name">{{ equipmentForSlot(slot.id)?.name ?? slot.label }}</span></button></div>
+              <div class="equipment-column equipment-armor-column" role="list" aria-label="防具部位"><h3 class="sr-only">防具</h3><button v-for="slot in equipmentLeftSlots" :key="slot.id" type="button" class="equipment-slot" :class="{ filled: equipmentForSlot(slot.id), selected: selectedEquipment?.slot === slot.id, [equipmentRarityClass(equipmentForSlot(slot.id))]: true }" :data-equipment-slot="slot.id" :aria-label="equipmentForSlot(slot.id)?.name ?? slot.label" :aria-pressed="selectedEquipment?.slot === slot.id" @click="equipmentForSlot(slot.id) && inspectCharacterEquipment(equipmentForSlot(slot.id)!)"><span class="equipment-slot-icon item-rarity-slot" :data-item-rarity="normalizeItemRarity(equipmentForSlot(slot.id)?.rarity)" v-item-rarity-sparkle="normalizeItemRarity(equipmentForSlot(slot.id)?.rarity)"><InventoryItemIcon v-if="equipmentForSlot(slot.id)" :name="equipmentForSlot(slot.id)?.name" :code="equipmentForSlot(slot.id)?.code" :codex-id="equipmentForSlot(slot.id)?.codexId ?? undefined" item-type="equipment" :item-category="equipmentForSlot(slot.id)?.itemCategory" :instance="true" /><span v-else class="equipment-slot-placeholder"><GearSlotIcon :slot="slot.id" /></span></span><span class="equipment-slot-copy"><strong>{{ slot.label }}</strong><span class="equipment-slot-name">{{ equipmentForSlot(slot.id)?.name ?? '尚未穿戴' }}</span><small v-if="equipmentForSlot(slot.id)?.requiredLevel">Lv.{{ equipmentForSlot(slot.id)?.requiredLevel }}</small></span></button></div>
+              <div class="equipment-summary"><CharacterPortrait variant="equipment" class="equipment-portrait" :portrait="characterData.portrait" :equipment="characterData.equipment" alt="当前装备立绘" /><p class="equipment-profession">{{ panel?.summary?.profession ?? '尚未选择职业' }} · Lv.{{ panel?.summary?.level ?? 1 }}</p></div>
+              <div class="equipment-column equipment-combat-column" role="list" aria-label="武器、副手与首饰部位"><h3 class="sr-only">武器、副手与首饰</h3><button v-for="slot in equipmentRightSlots" :key="slot.id" type="button" class="equipment-slot" :class="{ filled: equipmentForSlot(slot.id), selected: selectedEquipment?.slot === slot.id, [equipmentRarityClass(equipmentForSlot(slot.id))]: true }" :data-equipment-slot="slot.id" :aria-label="equipmentForSlot(slot.id)?.name ?? slot.label" :aria-pressed="selectedEquipment?.slot === slot.id" @click="equipmentForSlot(slot.id) && inspectCharacterEquipment(equipmentForSlot(slot.id)!)"><span class="equipment-slot-icon item-rarity-slot" :data-item-rarity="normalizeItemRarity(equipmentForSlot(slot.id)?.rarity)" v-item-rarity-sparkle="normalizeItemRarity(equipmentForSlot(slot.id)?.rarity)"><InventoryItemIcon v-if="equipmentForSlot(slot.id)" :name="equipmentForSlot(slot.id)?.name" :code="equipmentForSlot(slot.id)?.code" :codex-id="equipmentForSlot(slot.id)?.codexId ?? undefined" item-type="equipment" :item-category="equipmentForSlot(slot.id)?.itemCategory" :instance="true" /><span v-else class="equipment-slot-placeholder"><GearSlotIcon :slot="slot.id" /></span></span><span class="equipment-slot-copy"><strong>{{ slot.label }}</strong><span class="equipment-slot-name">{{ equipmentForSlot(slot.id)?.name ?? '尚未穿戴' }}</span><small v-if="equipmentForSlot(slot.id)?.requiredLevel">Lv.{{ equipmentForSlot(slot.id)?.requiredLevel }}</small></span></button></div>
             </div>
-            <div v-if="selectedEquipment" class="inventory-item-backdrop" role="presentation" @click.self="closeCharacterEquipment"><div class="inventory-item-dialog card-surface" role="dialog" aria-modal="true" :aria-label="selectedEquipment.name"><button type="button" class="dialog-close" aria-label="关闭装备详情" @click="closeCharacterEquipment">×</button><InventoryItemIcon class="inventory-dialog-icon" :name="selectedEquipment.name" :code="selectedEquipment.code" :codex-id="selectedEquipment.codexId ?? undefined" item-type="equipment" :item-category="selectedEquipment.itemCategory" :instance="true" /><p class="eyebrow">{{ selectedEquipment.itemCategory || '装备' }}</p><h3>{{ selectedEquipment.name }}</h3><p class="inventory-dialog-description">{{ selectedEquipment.description || (selectedEquipment.appearanceName ? `外观：${selectedEquipment.appearanceName}` : '当前已穿戴装备') }}<span v-if="selectedEquipment.weaponType"> · {{ selectedEquipment.weaponType }}</span></p><div class="inventory-dialog-meta"><span v-if="selectedEquipment.rarity">{{ selectedEquipment.rarity }}</span><span v-if="selectedEquipment.requiredLevel">Lv.{{ selectedEquipment.requiredLevel }}</span><span v-if="selectedEquipment.quality !== undefined">品质 {{ selectedEquipment.quality }}%</span><span v-if="selectedEquipment.durability !== undefined">耐久 {{ selectedEquipment.durability }}/{{ selectedEquipment.durabilityMax ?? 0 }}</span></div><div class="inventory-dialog-actions"><button type="button" class="primary-button" :disabled="busy" @click="replaceSelectedEquipment">更换</button><button type="button" class="soft-button" :disabled="busy" @click="unequipSelectedEquipment">卸下</button><button type="button" class="soft-button" @click="closeCharacterEquipment">❌</button></div></div></div>
+            <aside v-if="selectedEquipment" class="equipment-preview-card equipment-details-inline" role="region" aria-label="已穿戴装备详情" :data-equipment-id="selectedEquipment.id" :data-equipment-slot="selectedEquipment.slot" :data-rarity="selectedEquipment.rarity">
+              <header class="equipment-details-heading" :data-rarity="selectedEquipment.rarity">
+                <InventoryItemIcon class="equipment-details-icon item-rarity-slot" :data-item-rarity="normalizeItemRarity(selectedEquipment.rarity)" v-item-rarity-sparkle="normalizeItemRarity(selectedEquipment.rarity)" :name="selectedEquipment.name" :code="selectedEquipment.code" :codex-id="selectedEquipment.codexId ?? undefined" item-type="equipment" :item-category="selectedEquipment.itemCategory" :instance="true" />
+                <div class="equipment-preview-copy"><p class="eyebrow">{{ selectedEquipmentCategory }}</p><h2 class="item-detail-name">{{ selectedEquipment.name }}</h2><div class="equipment-details-badges"><span v-if="selectedEquipment.rarity">{{ selectedEquipment.rarity }}</span><span v-if="selectedEquipment.requiredLevel !== undefined">Lv.{{ selectedEquipment.requiredLevel }}</span><span v-if="selectedEquipment.quality !== undefined">品质 {{ selectedEquipment.quality }}%</span><span>已装备</span></div></div>
+              </header>
+              <div class="equipment-details-scroll" tabindex="0" aria-label="装备详细信息">
+                <p v-if="equipmentDetailsLoading" class="equipment-details-loading" role="status">正在读取装备属性…</p>
+                <div v-else-if="equipmentDetailsError" class="equipment-details-error" role="alert"><p>{{ equipmentDetailsError }}</p><button type="button" class="soft-button" @click="loadSelectedEquipmentDetails">重新读取</button></div>
+                <EquipmentDetailSections v-else-if="selectedEquipmentDetails" :sections="selectedEquipmentDetails.sections" :sets="selectedEquipmentDetails.sets" :appearance-name="selectedEquipment.appearanceName" :armor-type="selectedEquipment.weaponType ?? undefined" />
+              </div>
+              <div class="equipment-details-actions"><button type="button" class="primary-button" :disabled="busy" @click="replaceSelectedEquipment">更换</button><button type="button" class="soft-button" :disabled="busy" @click="unequipSelectedEquipment">卸下</button><button type="button" class="soft-button" aria-label="关闭装备详情" @click="closeCharacterEquipment">返回</button></div>
+            </aside>
           </div>
 
           <SkillPanel v-else-if="characterSection === 'skills'" class="character-subpanel" @updated="loadPanel" @pending-change="value => setCriticalPending('skill', value)" />
 
-          <EvolutionPanel v-else class="character-subpanel" @updated="loadPanel" @pending-change="value => setCriticalPending('evolution', value)" />
+          <EvolutionPanel v-else-if="characterSection === 'evolution'" class="character-subpanel" @updated="loadPanel" @locate="command => runCommand(command, { surface: 'interaction' })" @pending-change="value => setCriticalPending('evolution', value)" />
+          <AdvancedProfessionPanel v-else-if="characterSection === 'advancedProfession'" :open="tab === 'character'" inline @close="characterSection = 'profile'" @updated="loadPanel" @locate="locateAdvancedMentor" @trial-started="handleAdvancedTrialStarted" @pending-change="value => setCriticalPending('advancedProfession', value)" />
         </section>
 
         <section v-else-if="tab === 'inventory'" class="inventory-page">
           <div class="inventory-frame card-surface">
-            <div class="inventory-tabs" role="tablist" aria-label="背包分类"><button v-for="category in inventoryCategories" :key="category" type="button" :class="{ active: inventoryCategory === category }" role="tab" :aria-selected="inventoryCategory === category" :title="category" :aria-label="category" @click="selectInventoryCategory(category)"><InventoryItemIcon class="inventory-category-icon" :name="category === '全部' ? '全部物品' : category" :item-type="category === '装备' ? 'equipment' : category === '道具' ? 'consumable' : 'material'" /><span class="inventory-category-label">{{ category }}</span></button></div>
+            <label class="inventory-search"><AnimeIcon name="search" :size="20" /><span class="sr-only">搜索背包物品</span><input v-model="inventoryKeyword" type="search" placeholder="搜索物品名称" autocomplete="off" /><span class="inventory-result-count">{{ inventoryItems.length }} 项</span><button v-if="inventoryKeyword" type="button" aria-label="清空物品搜索" @click="inventoryKeyword = ''"><AnimeIcon name="close" :size="18" /></button></label>
+            <div class="inventory-paper-panel">
+            <div v-if="inventoryCategory !== '全部'" class="inventory-filter-controls">
             <div v-if="inventoryCategory === '装备'" class="inventory-equipment-tabs" role="tablist" aria-label="装备大类"><button v-for="group in inventoryEquipmentGroups" :key="group" type="button" :class="{ active: inventoryEquipmentGroup === group }" role="tab" :aria-selected="inventoryEquipmentGroup === group" :title="group" :aria-label="group" @click="selectInventoryEquipmentGroup(group)"><span class="inventory-category-label">{{ group }}</span></button></div>
-            <div v-if="inventorySubcategories.length > 1" class="inventory-subtabs" role="tablist"><button v-for="subcategory in inventorySubcategories" :key="subcategory" :class="{ active: inventorySubcategory === subcategory }" role="tab" @click="selectInventorySubcategory(subcategory)">{{ subcategory }}</button></div>
-            <div v-if="inventoryItems.length" class="inventory-grid"><button v-for="item in inventoryItems" :key="`${item.instance ? 'instance' : 'stack'}:${item.id ?? item.name}`" class="inventory-slot" :title="item.name" :aria-label="`${item.name}${item.instance ? '' : ` ×${item.quantity}`}`" @click="inspectInventoryItem(item)"><InventoryItemIcon :name="item.name" :code="item.code" :codex-id="item.instance ? item.definitionCodexId : item.codexId" :item-type="item.itemType" :item-category="item.itemCategory" :instance="item.instance" /><strong>{{ item.name }}</strong><small v-if="item.instance">{{ item.quality ?? 0 }}%</small><small v-else>×{{ item.quantity }}</small></button></div>
-            <div v-else class="empty-state inventory-empty">背包中还没有这一类物品。</div>
+            <div :key="`${inventoryCategory}:${inventoryEquipmentGroup}`" class="inventory-subtabs" role="tablist" aria-label="物品分类"><button v-for="subcategory in inventorySubcategories" :key="subcategory" type="button" :class="{ active: inventorySubcategory === subcategory }" role="tab" :aria-selected="inventorySubcategory === subcategory" :title="subcategory" :aria-label="subcategory" @click="selectInventorySubcategory(subcategory)"><span class="inventory-category-label">{{ subcategory }}</span></button></div>
+            </div>
+            <div ref="inventoryViewport" class="inventory-viewport" :data-page-size="inventoryPaging.pageSize.value" :style="{ '--inventory-columns': inventoryColumns(), '--inventory-row-height': `${inventoryRowHeight()}px` }">
+              <div v-if="inventoryItems.length" class="inventory-grid"><button v-for="item in inventoryPaging.visibleItems.value" :key="inventoryItemKey(item)" :data-item-key="inventoryItemKey(item)" :data-rarity="inventoryRarity(item)" class="inventory-slot" :class="{ 'is-previewed': inventoryPreviewItem && inventoryItemKey(inventoryPreviewItem) === inventoryItemKey(item) }" :title="item.name" :aria-label="`${item.name} ×${item.instance ? 1 : item.quantity}`" @focus="inventoryPreviewKey = inventoryItemKey(item)" @click="inventoryPreviewKey = inventoryItemKey(item); inspectInventoryItem(item)"><span class="inventory-slot-box item-rarity-slot" :data-item-rarity="inventoryRarity(item)" v-item-rarity-sparkle="inventoryRarity(item)"><InventoryItemIcon :name="item.name" :code="item.code" :codex-id="item.instance ? item.definitionCodexId : item.codexId" :item-type="item.itemType" :item-category="item.itemCategory" :instance="item.instance" /><small class="inventory-slot-quantity">×{{ item.instance ? 1 : item.quantity }}</small></span><strong class="inventory-slot-name">{{ item.name }}</strong></button></div>
+            <div v-else class="empty-state inventory-empty game-ui-empty-message"><GameUiFeedbackArt name="empty" :size="64" /><span>背包中还没有这一类物品。</span></div>
+            </div>
+            <ViewportPagination :page="inventoryPaging.page.value" :total-pages="inventoryPaging.totalPages.value" :total="inventoryItems.length" editable label="背包翻页" @update:page="inventoryPaging.setPage" />
+            </div>
           </div>
           <div v-if="selectedInventoryItem" class="inventory-item-backdrop" role="presentation" @click.self="closeInventoryItem">
             <div class="inventory-item-dialog card-surface" role="dialog" aria-modal="true" :aria-label="selectedInventoryItem.name">
               <button type="button" class="dialog-close" aria-label="关闭物品详情" @click="closeInventoryItem">×</button>
-              <InventoryItemIcon class="inventory-dialog-icon" :name="selectedInventoryItem.name" :code="selectedInventoryItem.code" :codex-id="selectedInventoryItem.instance ? selectedInventoryItem.definitionCodexId : selectedInventoryItem.codexId" :item-type="selectedInventoryItem.itemType" :item-category="selectedInventoryItem.itemCategory" :instance="selectedInventoryItem.instance" />
+              <header class="inventory-dialog-heading" :data-rarity="inventoryRarity(selectedInventoryItem)">
+              <span class="inventory-dialog-slot inventory-slot-box item-rarity-slot" :data-item-rarity="inventoryRarity(selectedInventoryItem)" v-item-rarity-sparkle="inventoryRarity(selectedInventoryItem)" :data-rarity="inventoryRarity(selectedInventoryItem)"><InventoryItemIcon :name="selectedInventoryItem.name" :code="selectedInventoryItem.code" :codex-id="selectedInventoryItem.instance ? selectedInventoryItem.definitionCodexId : selectedInventoryItem.codexId" :item-type="selectedInventoryItem.itemType" :item-category="selectedInventoryItem.itemCategory" :instance="selectedInventoryItem.instance" /></span>
+              <div>
               <p class="eyebrow">{{ selectedInventoryItem.itemCategory || (selectedInventoryItem.itemType === 'equipment' ? '装备' : selectedInventoryItem.itemType === 'material' ? '材料' : '道具') }}</p>
-              <h3>{{ selectedInventoryItem.name }}</h3>
-              <p class="inventory-dialog-description">{{ selectedInventoryItem.description || (selectedInventoryItem.instance ? `耐久 ${selectedInventoryItem.durability ?? 0}/${selectedInventoryItem.durabilityMax ?? 0}` : `数量 ×${selectedInventoryItem.quantity}`) }}</p>
+              <h3 :class="{ 'item-detail-name': selectedInventoryItem.itemType === 'equipment' || selectedInventoryItem.instance }">{{ selectedInventoryItem.name }}</h3>
               <div class="inventory-dialog-meta"><span v-if="selectedInventoryItem.instance">品质 {{ selectedInventoryItem.quality ?? 0 }}%</span><span v-else>数量 ×{{ selectedInventoryItem.quantity }}</span></div>
+              </div>
+              </header>
+              <div class="inventory-dialog-scroll">
+              <p class="inventory-dialog-description">{{ selectedInventoryItem.description || (selectedInventoryItem.instance ? `耐久 ${selectedInventoryItem.durability ?? 0}/${selectedInventoryItem.durabilityMax ?? 0}` : `数量 ×${selectedInventoryItem.quantity}`) }}</p>
+              <div v-if="inventoryUsePreview && !selectedInventoryItem.instance" class="inventory-use-preview">
+                <h4><AnimeIcon name="check" :size="19" /> 使用预览</h4>
+                <div><span>使用数量</span><strong>1 件</strong></div>
+                <div><span>持有数量</span><strong>{{ selectedInventoryItem.quantity }} → {{ Math.max(0, selectedInventoryItem.quantity - 1) }}</strong></div>
+                <p>当前道具每次使用一件，确认后由服务器结算实际效果。</p>
+              </div>
+              </div>
               <div class="inventory-dialog-actions">
-                <button v-if="!selectedInventoryItem.instance && selectedInventoryItem.itemType === 'consumable' && selectedInventoryItem.id" type="button" class="primary-button" :disabled="busy" @click="useSelectedInventoryItem">使用</button>
+                <template v-if="!selectedInventoryItem.instance && selectedInventoryItem.itemType === 'consumable' && selectedInventoryItem.id">
+                  <button v-if="!inventoryUsePreview" type="button" class="primary-button" :disabled="busy || selectedInventoryItem.quantity < 1" @click="inventoryUsePreview = true">预览使用</button>
+                  <button v-else type="button" class="primary-button" :disabled="busy || selectedInventoryItem.quantity < 1" @click="useSelectedInventoryItem">确认使用</button>
+                </template>
                 <button v-else-if="selectedInventoryItem.instance && selectedInventoryItem.id" type="button" class="primary-button" :disabled="busy" @click="inspectSelectedEquipment">查看装备</button>
-                <button type="button" class="soft-button" @click="closeInventoryItem">❌</button>
+                <button type="button" class="soft-button" @click="closeInventoryItem">返回</button>
               </div>
             </div>
           </div>
         </section>
 
-        <section v-if="tab === 'social'" class="social-page">
-          <div class="social-section-tabs" role="tablist" aria-label="社交功能">
-            <button type="button" role="tab" :aria-selected="socialSection === 'friends'" :class="{ active: socialSection === 'friends' }" @click="selectSocialSection('friends')">好友</button>
-            <button type="button" role="tab" :aria-selected="socialSection === 'oath'" :class="{ active: socialSection === 'oath' }" @click="selectSocialSection('oath')">星誓</button>
-            <button type="button" role="tab" :aria-selected="socialSection === 'party'" :class="{ active: socialSection === 'party' }" @click="selectSocialSection('party')">队伍</button>
+        <section v-if="tab === 'social'" class="social-page anime-social-refinement" :class="'social-view-' + socialSection">
+          <article v-if="socialSection === 'friends'" class="social-paper social-friends-paper" aria-label="好友列表与申请">
+            <form class="social-add-friend" @submit.prevent="addSocialFriend"><SocialGlyph name="search" :size="29" /><input v-model="socialGameId" inputmode="numeric" maxlength="20" placeholder="输入 Game ID 添加好友" aria-label="好友 Game ID" :disabled="busy || criticalPending" /><button type="submit" class="social-ui-button social-button-teal" :disabled="busy || criticalPending"><SocialGlyph name="add" :size="24" />添加</button></form>
+            <nav class="viewport-subtabs" aria-label="好友分类"><button type="button" :class="{active:socialFriendView === 'friends'}" @click="socialFriendView = 'friends'">我的好友 ({{ socialSummary.friends.length }})</button><button type="button" :class="{active:socialFriendView === 'requests'}" @click="socialFriendView = 'requests'">好友申请 ({{ socialSummary.friendRequests.length }})</button></nav>
+            <div ref="socialViewport" class="social-viewport">
+            <div v-if="socialFriendView === 'friends' && socialSummary.friends.length" class="social-friend-list">
+              <article v-for="friend in friendPaging.visibleItems.value" :key="friend.gameId" :data-person-id="friend.gameId" class="social-friend-row social-person-card">
+                <SocialAvatar :name="friend.name" :id="friend.gameId" :portrait="socialPortraitFor(friend)" :size="80" shape="square" />
+                <div class="social-person-identity"><h3>{{ friend.name }}</h3><p>Game ID <span>{{ friend.gameId }}</span></p><p v-if="socialIdentityText(friend)" class="social-identity-detail">{{ socialIdentityText(friend) }}</p></div>
+                <div class="social-person-relation"><strong class="social-stage-badge">{{ friend.stage }}</strong><p class="social-affinity" title="心形表示好感，数值为当前累计好感" :aria-label="'好感 ' + friend.affinity"><span>好感</span><SocialGlyph name="heart" :size="24" /><strong>{{ friend.affinity }}</strong></p><div v-if="socialAffinityProgress(friend)" class="social-affinity-progress"><div role="progressbar" :aria-valuenow="socialAffinityProgress(friend)?.percent" aria-valuemin="0" aria-valuemax="100" :aria-label="friend.stage + '阶段进度'"><i :style="{ width: socialAffinityProgress(friend)?.percent + '%' }"></i></div><small>距下一阶段 {{ socialAffinityProgress(friend)?.toNext }}</small></div></div>
+                <div class="social-person-actions"><em class="social-relationship-badge" :class="{ oath: friend.status === 'oath' }">{{ friend.status === 'oath' ? '星誓' : '好友' }}</em><div class="social-row-actions"><button type="button" class="social-ui-button social-button-paper" :disabled="busy || criticalPending" @click="socialAction(`/好友资料 ${friend.gameId}`)"><SocialGlyph name="document" :size="21" />资料</button><button type="button" class="social-ui-button social-button-paper" :disabled="busy || criticalPending" @click="socialAction(`/玩家互动 ${friend.gameId}`)"><SocialGlyph name="chat" :size="21" />互动</button></div></div>
+              </article>
+            </div><p v-else-if="socialFriendView === 'friends'" class="social-empty">还没有好友，先在世界频道认识新的旅人。</p>
+            <section v-else class="social-request-list" aria-label="待处理好友申请">
+              <article v-for="request in friendRequestPaging.visibleItems.value" :key="request.id" :data-person-id="request.id" class="social-request-row social-person-card"><SocialAvatar :name="request.name" :id="request.gameId" :portrait="socialPortraitFor(request)" :size="80" shape="square" /><div class="social-request-identity"><h3>{{ request.name }}</h3><p>Game ID {{ request.gameId }}</p><p v-if="socialIdentityText(request)" class="social-identity-detail">{{ socialIdentityText(request) }}</p><time :datetime="request.createdAt">申请于 {{ socialDateText(request.createdAt) }}</time></div><div class="social-row-actions"><button type="button" class="social-ui-button social-button-teal" :disabled="busy || criticalPending" @click="socialAction(`/同意好友 ${request.id}`)"><SocialGlyph name="check" :size="23" />接受</button><button type="button" class="social-ui-button social-button-red" :disabled="busy || criticalPending" @click="socialAction(`/拒绝好友 ${request.id}`)"><SocialGlyph name="close" :size="23" />拒绝</button></div></article><p v-if="!socialSummary.friendRequests.length" class="social-empty">暂无待处理好友申请。</p>
+            </section>
+            </div>
+            <ViewportPagination v-if="socialFriendView === 'friends'" :page="friendPaging.page.value" :total-pages="friendPaging.totalPages.value" :total="socialSummary.friends.length" label="好友翻页" @update:page="friendPaging.setPage" />
+            <ViewportPagination v-else :page="friendRequestPaging.page.value" :total-pages="friendRequestPaging.totalPages.value" :total="socialSummary.friendRequests.length" label="好友申请翻页" @update:page="friendRequestPaging.setPage" />
+          </article>
+          <div v-else-if="socialSection === 'oath'" class="social-oath-screen">
+            <nav class="viewport-subtabs" aria-label="星誓分类"><button type="button" :class="{active:socialOathView === 'partner'}" @click="socialOathView = 'partner'">我的伙伴</button><button type="button" :class="{active:socialOathView === 'requests'}" @click="socialOathView = 'requests'">星誓申请 ({{ socialSummary.oathRequests.length }})</button><button type="button" :class="{active:socialOathView === 'release'}" @click="socialOathView = 'release'">解除申请 ({{ socialSummary.oathReleaseRequests.length }})</button></nav>
+            <div ref="socialViewport" class="social-viewport">
+            <figure v-if="socialOathView === 'partner'" class="social-oath-banner"><img src="/assets/light-anime/social-v1/oath-banner.webp" alt="星誓之约的花园插画" /><figcaption>有你在身边，<br />平凡的旅途<br />也会闪闪发光。</figcaption></figure>
+            <section v-if="socialOathView === 'partner'" class="social-paper social-oath-partner" aria-label="我的星誓伙伴"><h2 class="social-oath-heading"><SocialGlyph name="flower" :size="28" />我的星誓伙伴</h2>
+              <article v-if="socialSummary.oath" class="social-oath-partner-card social-person-card">
+                <SocialAvatar :name="socialSummary.oath.name" :id="socialSummary.oath.gameId" :portrait="socialPortraitFor(socialSummary.oath)" :size="100" shape="square" />
+                <div class="social-oath-identity"><h3>{{ socialSummary.oath.name }}</h3><p>Game ID {{ socialSummary.oath.gameId }}</p><p v-if="socialIdentityText(socialSummary.oath)" class="social-identity-detail">{{ socialIdentityText(socialSummary.oath) }}</p></div>
+                <div class="social-oath-metrics"><p class="social-affinity" title="心形表示好感，数值为当前累计好感"><SocialGlyph name="heart" :size="29" /><span>好感</span><strong>{{ socialSummary.oath.affinity }}</strong></p><div v-if="socialAffinityProgress(socialSummary.oath)" class="social-affinity-progress"><div role="progressbar" :aria-valuenow="socialAffinityProgress(socialSummary.oath)?.percent" aria-valuemin="0" aria-valuemax="100" :aria-label="socialSummary.oath.stage + '阶段进度'"><i :style="{ width: socialAffinityProgress(socialSummary.oath)?.percent + '%' }"></i></div><small>距下一阶段 {{ socialAffinityProgress(socialSummary.oath)?.toNext }}</small></div><p><span>关系阶段</span><strong><SocialGlyph name="star" :size="21" />{{ socialSummary.oath.stage }}</strong></p><p><span>状态</span><strong class="social-oath-state">{{ socialSummary.oath.status === 'active' ? '星誓关系进行中' : socialSummary.oath.status === 'ceremony_pending' ? '等待星誓仪式' : socialSummary.oath.status }}</strong></p></div>
+                <div class="social-oath-keepsake"><SocialGlyph name="star" :size="48" /><button v-if="socialSummary.oath.status === 'ceremony_pending'" type="button" class="social-ui-button social-button-teal" :disabled="busy || criticalPending" @click="socialAction('/星誓仪式')">仪式</button><button v-if="socialSummary.oath.status === 'active'" type="button" class="social-ui-button social-button-teal" :disabled="busy || criticalPending" @click="socialAction('/星誓纪念')">纪念</button></div>
+              </article>
+              <p v-else class="social-empty">尚未建立星誓关系。与好友提升好感后，可以在教堂发起星誓。</p>
+            </section>
+            <section v-if="socialOathView === 'requests'" class="social-paper social-oath-requests" aria-label="收到星誓申请"><article v-for="request in oathRequestPaging.visibleItems.value" :key="request.id" :data-person-id="request.id" class="social-request-row social-person-card"><SocialAvatar :name="request.name" :id="request.gameId" :portrait="socialPortraitFor(request)" :size="88" shape="square" /><div class="social-request-identity"><h3>{{ request.name }}</h3><p>Game ID {{ request.gameId }}</p><p v-if="socialIdentityText(request)" class="social-identity-detail">{{ socialIdentityText(request) }}</p><p class="social-affinity"><SocialGlyph name="heart" :size="20" /><span>好感 {{ request.affinity }} · {{ request.stage }}</span></p><time :datetime="request.expiresAt">有效至 {{ socialDateText(request.expiresAt) }}</time></div><div class="social-row-actions"><button type="button" class="social-ui-button social-button-teal" :disabled="busy || criticalPending" @click="socialAction(`/接受星誓 ${request.id}`)"><SocialGlyph name="check" :size="24" />接受</button><button type="button" class="social-ui-button social-button-red" :disabled="busy || criticalPending" @click="socialAction(`/拒绝星誓 ${request.id}`)"><SocialGlyph name="close" :size="24" />拒绝</button></div></article><p v-if="!socialSummary.oathRequests.length" class="social-empty">暂无星誓申请。</p></section>
+            <section v-if="socialOathView === 'release'" class="social-paper social-oath-release" aria-label="收到解除星誓申请"><article v-for="request in oathReleasePaging.visibleItems.value" :key="request.id" :data-person-id="request.id" class="social-request-row social-person-card"><SocialAvatar :name="request.name" :id="request.gameId" :portrait="socialPortraitFor(request)" :size="88" shape="square" /><div class="social-request-identity"><h3>{{ request.name }}</h3><p>Game ID {{ request.gameId }}</p><p v-if="socialIdentityText(request)" class="social-identity-detail">{{ socialIdentityText(request) }}</p><time :datetime="request.expiresAt">有效至 {{ socialDateText(request.expiresAt) }}</time></div><div class="social-row-actions"><button type="button" class="social-ui-button social-button-teal" :disabled="busy || criticalPending" @click="socialAction(`/同意解除星誓 ${request.id}`)"><SocialGlyph name="check" :size="24" />同意</button><button type="button" class="social-ui-button social-button-red" :disabled="busy || criticalPending" @click="socialAction(`/拒绝解除星誓 ${request.id}`)"><SocialGlyph name="close" :size="24" />拒绝</button></div></article><p v-if="!socialSummary.oathReleaseRequests.length" class="social-empty">暂无解除星誓申请。</p></section>
           </div>
-          <div v-if="socialSection === 'friends'" class="social-overview-grid social-single-panel">
-            <article class="card-surface social-summary-card">
-              <div class="section-heading"><div><p class="eyebrow">FRIENDS</p><h3>好友</h3></div><span class="social-count">{{ socialSummary.friends.length }}</span></div>
-              <form class="social-add-friend" @submit.prevent="addSocialFriend"><input v-model="socialGameId" inputmode="numeric" placeholder="输入 Game ID 添加好友" /><button class="soft-button" :disabled="busy">添加</button></form>
-              <div v-if="socialSummary.friends.length" class="social-friend-list"><div v-for="friend in socialSummary.friends" :key="friend.gameId" class="social-friend-row"><span class="avatar-dot">{{ friend.name.slice(0, 1) }}</span><div><strong>{{ friend.name }}</strong><small>Game ID {{ friend.gameId }} · {{ friend.stage }} · 好感 {{ friend.affinity }}</small></div><em :class="{ oath: friend.status === 'oath' }">{{ friend.status === 'oath' ? '星誓' : '好友' }}</em><div class="social-row-actions"><button type="button" class="ghost-button" :disabled="busy" @click="socialAction(`/好友资料 ${friend.gameId}`)">资料</button><button type="button" class="ghost-button" :disabled="busy" @click="socialAction(`/玩家互动 ${friend.gameId}`)">互动</button></div></div></div>
-              <div v-else class="social-empty">还没有好友，先在世界频道认识新的旅人。</div>
-              <div v-if="socialSummary.friendRequests.length" class="social-request-list"><strong class="social-pending">待处理好友申请 {{ socialSummary.friendRequests.length }} 条</strong><div v-for="request in socialSummary.friendRequests" :key="request.id" class="social-request-row"><span>{{ request.name }} · {{ request.gameId }}</span><span class="social-row-actions"><button type="button" class="soft-button" :disabled="busy" @click="socialAction(`/同意好友 ${request.id}`)">接受</button><button type="button" class="ghost-button" :disabled="busy" @click="socialAction(`/拒绝好友 ${request.id}`)">拒绝</button></span></div></div>
-            </article>
-          </div>
-          <div v-else-if="socialSection === 'oath'" class="social-overview-grid social-single-panel">
-            <article class="card-surface social-summary-card oath-card">
-              <div class="section-heading"><div><p class="eyebrow">STAR OATH</p><h3>星誓</h3></div><span class="social-count">{{ socialSummary.oath ? '1' : '0' }}</span></div>
-              <div v-if="socialSummary.oath" class="oath-status"><img class="oath-emblem" src="/assets/social/social-emblem.png" alt="星誓" /><div><strong>{{ socialSummary.oath.name }}</strong><p>{{ socialSummary.oath.stage }} · 好感 {{ socialSummary.oath.affinity }}</p><small>{{ socialSummary.oath.status === 'active' ? '星誓关系进行中' : '等待仪式推进' }}</small></div><div class="social-row-actions"><button v-if="socialSummary.oath.status === 'ceremony_pending'" type="button" class="soft-button" :disabled="busy" @click="socialAction('/星誓仪式')">仪式</button><button v-if="socialSummary.oath.status === 'active'" type="button" class="ghost-button" :disabled="busy" @click="socialAction('/星誓纪念')">纪念</button></div></div>
-              <div v-else class="social-empty">尚未建立星誓关系。与好友提升好感后，可以在教堂发起星誓。</div>
-              <div v-if="socialSummary.oathRequests.length" class="social-request-list"><strong class="social-pending">收到星誓申请 {{ socialSummary.oathRequests.length }} 条</strong><div v-for="request in socialSummary.oathRequests" :key="request.id" class="social-request-row"><span>{{ request.name }} · 好感 {{ request.affinity }}</span><span class="social-row-actions"><button type="button" class="soft-button" :disabled="busy" @click="socialAction(`/接受星誓 ${request.id}`)">接受</button><button type="button" class="ghost-button" :disabled="busy" @click="socialAction(`/拒绝星誓 ${request.id}`)">拒绝</button></span></div></div>
-              <div v-if="socialSummary.oathReleaseRequests.length" class="social-request-list"><strong class="social-pending">收到解除星誓申请 {{ socialSummary.oathReleaseRequests.length }} 条</strong><div v-for="request in socialSummary.oathReleaseRequests" :key="request.id" class="social-request-row"><span>{{ request.name }} · {{ request.gameId }}</span><span class="social-row-actions"><button type="button" class="soft-button" :disabled="busy" @click="socialAction(`/同意解除星誓 ${request.id}`)">同意</button><button type="button" class="ghost-button" :disabled="busy" @click="socialAction(`/拒绝解除星誓 ${request.id}`)">拒绝</button></span></div></div>
-            </article>
+            <ViewportPagination v-if="socialOathView === 'requests'" :page="oathRequestPaging.page.value" :total-pages="oathRequestPaging.totalPages.value" :total="socialSummary.oathRequests.length" label="星誓申请翻页" @update:page="oathRequestPaging.setPage" />
+            <ViewportPagination v-if="socialOathView === 'release'" :page="oathReleasePaging.page.value" :total-pages="oathReleasePaging.totalPages.value" :total="socialSummary.oathReleaseRequests.length" label="解除星誓申请翻页" @update:page="oathReleasePaging.setPage" />
           </div>
           <article v-else class="card-surface social-summary-card social-party-card">
             <PartyPopup :party="currentParty" :recruitments="recruitments" :applications="applications" :busy="partyBusy" :loading="partyLoading" :loading-more="partyLoadingMore" :has-more="partyHasMore" :error="partyError" @create="createWebParty" @search="searchParties" @load-more="loadMoreParties" @apply="applyPartyById" @publish="publishPartyRecruitment" @leave="leaveWebParty" @rename="renameWebParty" @refresh="refreshPartyData" @accept="id => respondApplicationById(id, true)" @reject="id => respondApplicationById(id, false)" />
@@ -2649,14 +3463,16 @@ onBeforeUnmount(() => {
 
         <section v-else-if="tab === 'world'" class="world-page card-surface" aria-label="世界">
           <div v-if="worldSection === 'overview'" class="world-entry-grid">
-            <button type="button" class="world-entry" @click="openWorldSection('market')"><span class="world-entry-mark market" aria-hidden="true">❧</span><strong>万叶联市</strong><small>交易与寄售</small></button>
-            <button type="button" class="world-entry" @click="openWorldSection('home')"><span class="world-entry-mark home" aria-hidden="true">⌂</span><strong>家园</strong><small>小屋与家具</small></button>
+            <button type="button" class="world-entry world-entry-painted" :disabled="criticalPending" @click="openWorldSection('market')">
+              <img class="world-entry-art" src="/assets/light-anime/game-ui-v2/world-market.webp" width="2171" height="724" alt="" aria-hidden="true" />
+              <span class="world-entry-copy"><strong>万叶联市</strong><small>交易与寄售</small></span>
+            </button>
+            <button type="button" class="world-entry world-entry-painted" :disabled="criticalPending" @click="openWorldSection('home')">
+              <img class="world-entry-art" src="/assets/light-anime/game-ui-v2/world-home.webp" width="2170" height="725" alt="" aria-hidden="true" />
+              <span class="world-entry-copy"><strong>家园</strong><small>小屋与家具</small></span>
+            </button>
           </div>
           <div v-else class="world-selected-layout">
-            <nav class="world-side-links" aria-label="世界功能">
-              <button type="button" :class="{ active: worldSection === 'market' }" :disabled="criticalPending" @click="openWorldSection('market')"><span class="world-entry-mark market" aria-hidden="true">❧</span><span>万叶联市</span></button>
-              <button type="button" :class="{ active: worldSection === 'home' }" :disabled="criticalPending" @click="openWorldSection('home')"><span class="world-entry-mark home" aria-hidden="true">⌂</span><span>家园</span></button>
-            </nav>
             <div class="world-detail" :class="{ 'world-market-detail': worldSection === 'market' }">
             <button type="button" class="world-back" :disabled="criticalPending" @click="worldSection = 'overview'">‹ 返回世界</button>
             <template v-if="worldSection === 'market'">
@@ -2676,8 +3492,9 @@ onBeforeUnmount(() => {
           <aside class="settings-drawer card-surface" role="dialog" aria-modal="true" aria-labelledby="settings-title">
             <header class="settings-header"><div><p class="eyebrow">PREFERENCES</p><h2 id="settings-title">设置</h2></div><button type="button" class="dialog-close" aria-label="关闭设置" @click="closeSettings">×</button></header>
             <div class="settings-content">
+              <section class="settings-section settings-help"><div class="settings-section-heading"><div><h3>冒险操作目录</h3><p>查找已开放的操作，查看参数和执行预览</p></div><button type="button" class="soft-button" :disabled="criticalPending || showStoryGuide || Boolean(registrationLoginId)" @click="closeSettings(); openCommandCatalog()"><AnimeIcon name="book" :size="20" />打开目录</button></div></section>
               <section class="settings-section"><div class="settings-section-heading"><div><h3>背景音乐</h3><p>随场景切换，音量设置保存在本机</p></div><button type="button" class="settings-switch" :class="{ active: musicEnabled }" @click="toggleMusic">{{ musicEnabled ? '开启' : '关闭' }}</button></div><label class="settings-range"><span>音量 {{ musicVolume }}%</span><input v-model.number="musicVolume" type="range" min="0" max="100" step="1" :disabled="!musicEnabled" /></label></section>
-              <section class="settings-section"><div class="settings-section-heading"><div><h3>头像</h3><p>仅保存在当前浏览器</p></div></div><div class="avatar-picker" role="listbox" aria-label="选择头像"><button v-for="avatar in settingsAvatarOptions" :key="avatar.id" type="button" class="avatar-choice" :class="{ active: settingsAvatar === avatar.id }" :aria-label="avatar.label" :aria-selected="settingsAvatar === avatar.id" @click="settingsAvatar = avatar.id"><span>{{ avatar.icon }}</span><small>{{ avatar.label }}</small></button></div></section>
+              <section class="settings-section"><div class="settings-section-heading"><div><h3>头像</h3><p>仅保存在当前浏览器</p></div></div><div class="avatar-picker" role="listbox" aria-label="选择头像"><button v-for="avatar in settingsAvatarOptions" :key="avatar.id" type="button" class="avatar-choice" :class="{ active: settingsAvatar === avatar.id }" :aria-label="avatar.label" :aria-selected="settingsAvatar === avatar.id" @click="settingsAvatar = avatar.id"><AnimeIcon :name="avatar.icon" :size="30" /><small>{{ avatar.label }}</small></button></div></section>
               <section class="settings-section"><div class="settings-section-heading"><div><h3>角色资料</h3><p>修改后会同步到角色面板</p></div></div><form class="settings-form" @submit.prevent="saveSettingsNickname"><label>昵称<input v-model="settingsNickname" maxlength="24" autocomplete="nickname" placeholder="输入角色昵称" /></label><button type="submit" class="primary-button" :disabled="busy">保存昵称</button></form><div class="settings-gender"><span>性别</span><div><button type="button" :class="{ active: settingsGender === '男' }" :disabled="busy" @click="saveSettingsGender('男')">男</button><button type="button" :class="{ active: settingsGender === '女' }" :disabled="busy" @click="saveSettingsGender('女')">女</button></div></div></section>
               <section class="settings-section settings-account">
                 <h3>账号</h3>
@@ -2699,7 +3516,7 @@ onBeforeUnmount(() => {
       </Transition>
 
       <div class="floating-social-layer" :inert="showStoryGuide || Boolean(registrationLoginId)" aria-label="社交快捷入口">
-        <div ref="floatingDockRef" class="floating-social-dock" :class="{ expanded: floatingDockExpanded, 'dock-side-left': floatingDockSide === 'left' }" :style="floatingDockStyle" @pointerdown="startFloatingDockDrag">
+        <div v-show="tab === 'explore'" ref="floatingDockRef" class="floating-social-dock" :class="{ expanded: floatingDockExpanded, 'dock-side-left': floatingDockSide === 'left' }" :style="floatingDockStyle" @pointerdown="startFloatingDockDrag">
           <button type="button" class="floating-social-button floating-chat-button" :class="{ active: floatingSocialOpen === 'chat' }" aria-label="打开世界频道" @click="toggleFloatingSocial('chat')">
             <img class="floating-social-art" src="/assets/ui/dock-world.png" alt="" /><span>世界</span>
           </button>
@@ -2713,92 +3530,35 @@ onBeforeUnmount(() => {
           </Transition>
         </div>
 
-        <section v-if="floatingSocialOpen" ref="floatingSocialPanelRef" :style="floatingSocialPanelStyle" class="floating-social-panel card-surface" role="dialog" aria-modal="false" :aria-label="floatingSocialOpen === 'chat' ? '世界频道' : floatingSocialOpen === 'party' ? '组队频道' : '好友私信'">
-          <div class="floating-social-panel-heading" @pointerdown="startModalDrag('social', $event)">
-            <div class="floating-social-tabs" role="tablist" aria-label="社交频道">
-              <button type="button" role="tab" :aria-selected="floatingSocialOpen === 'chat'" :class="{ active: floatingSocialOpen === 'chat' }" @click.stop="openFloatingSocial('chat')">世界频道</button>
-              <button type="button" role="tab" :aria-selected="floatingSocialOpen === 'party'" :class="{ active: floatingSocialOpen === 'party' }" @click.stop="openFloatingSocial('party')">组队频道</button>
-              <button type="button" role="tab" :aria-selected="floatingSocialOpen === 'friend'" :class="{ active: floatingSocialOpen === 'friend' }" @click.stop="openFloatingSocial('friend')">好友私信</button>
-            </div>
-            <button type="button" class="dialog-close floating-social-close" aria-label="关闭社交弹窗" @click.stop="closeFloatingSocial">❌</button>
-          </div>
-
-          <div v-if="floatingSocialOpen === 'chat'" class="chat-card floating-social-card">
-            <button v-if="chatHasEarlier || chatLoadingEarlier" type="button" class="chat-history-button" :disabled="chatLoadingEarlier" @click="loadEarlierMessages">{{ chatLoadingEarlier ? '读取中…' : '查看更早消息' }}</button>
-            <div ref="chatMessageListRef" class="message-list" @scroll="handleChatScroll"><div v-if="!messages.length" class="empty-state">这里还没有消息，和大家打个招呼吧。</div><div v-for="message in messages" :key="message.id" class="message-row" :class="{ own: message.own }"><span class="avatar-dot">{{ message.senderName.slice(0, 1) }}</span><div><strong>{{ message.senderName }}</strong><p>{{ message.content }}</p><small>{{ new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}</small></div></div></div>
-            <button v-if="chatHasNewMessages" type="button" class="chat-latest-button" @click="jumpToLatestMessages">有新消息，跳到最新 ↓</button>
-            <form class="chat-input" @submit.prevent="sendChat"><input v-model="messageDraft" maxlength="200" :placeholder="`发送到 ${currentChannel?.name ?? '世界频道'}`" /><button class="primary-button" :disabled="busy">发送</button></form>
-          </div>
-
-          <div v-else-if="floatingSocialOpen === 'party'" class="chat-card floating-social-card">
-            <div v-if="!recruitmentChannel" class="empty-state">正在连接组队频道…</div>
-            <template v-else>
-              <button v-if="chatHasEarlier || chatLoadingEarlier" type="button" class="chat-history-button" :disabled="chatLoadingEarlier" @click="loadEarlierMessages">{{ chatLoadingEarlier ? '读取中…' : '查看更早消息' }}</button>
-              <div ref="chatMessageListRef" class="message-list" @scroll="handleChatScroll">
-                <div v-if="!messages.length" class="empty-state">队伍频道还没有消息。</div>
-                <div v-for="message in messages" :key="message.id" class="message-row" :class="{ own: message.own }">
-                  <span class="avatar-dot">{{ message.senderName.slice(0, 1) }}</span>
-                  <div class="message-body">
-                    <strong>{{ message.senderName }}</strong>
-                    <p v-if="!message.recruitment">{{ message.content }}</p>
-                    <div v-else class="chat-recruitment-card">
-                      <div class="chat-recruitment-heading"><strong>{{ message.recruitment.partyName }}</strong><span>{{ message.recruitment.memberCount }}/{{ message.recruitment.targetCount }} 人</span></div>
-                      <p>{{ message.recruitment.description || '一起探索异世界。' }}</p>
-                      <div class="chat-recruitment-footer"><span>{{ message.recruitment.regionName || '未知地区' }}</span><span v-if="chatRecruitmentStatus(message.recruitment)">{{ chatRecruitmentStatus(message.recruitment) }}</span><button v-if="canApplyChatRecruitment(message.recruitment)" type="button" :disabled="partyBusy" @click="applyChatRecruitment(message)">申请加入</button></div>
-                    </div>
-                    <small>{{ new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}</small>
-                  </div>
-                </div>
-              </div>
-              <button v-if="chatHasNewMessages" type="button" class="chat-latest-button" @click="jumpToLatestMessages">有新消息，跳到最新 ↓</button>
-              <form class="chat-input" @submit.prevent="sendChat"><input v-model="messageDraft" maxlength="200" :placeholder="`发送到 ${recruitmentChannel.name}`" /><button class="primary-button" :disabled="busy">发送</button></form>
-            </template>
-          </div>
-
-          <div v-else class="friend-social-content floating-social-card">
-            <div class="friend-channel-list" role="listbox" aria-label="好友私信对象">
-              <button v-for="channel in friendChannels" :key="channel.id" type="button" class="friend-channel-option" :class="{ active: activeChannel === channel.id }" @click="selectChannel(channel.id)">{{ channel.name }}</button>
-              <div v-if="!friendChannels.length" class="empty-state">还没有可用的好友私信频道。</div>
-            </div>
-            <div v-if="friendChannels.length && activeChannel.startsWith('friend:')" class="chat-card friend-chat-card">
-              <button v-if="chatHasEarlier || chatLoadingEarlier" type="button" class="chat-history-button" :disabled="chatLoadingEarlier" @click="loadEarlierMessages">{{ chatLoadingEarlier ? '读取中…' : '查看更早消息' }}</button>
-              <div ref="chatMessageListRef" class="message-list" @scroll="handleChatScroll"><div v-if="!messages.length" class="empty-state">还没有私信，先打个招呼吧。</div><div v-for="message in messages" :key="message.id" class="message-row" :class="{ own: message.own }"><span class="avatar-dot">{{ message.senderName.slice(0, 1) }}</span><div><strong>{{ message.senderName }}</strong><p>{{ message.content }}</p><small>{{ new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}</small></div></div></div>
-              <button v-if="chatHasNewMessages" type="button" class="chat-latest-button" @click="jumpToLatestMessages">有新消息，跳到最新 ↓</button>
-              <form class="chat-input" @submit.prevent="sendChat"><input v-model="messageDraft" maxlength="200" :placeholder="`发送到 ${currentChannel?.name ?? '好友私信'}`" /><button class="primary-button" :disabled="busy">发送</button></form>
-            </div>
-          </div>
-          <div class="floating-social-resize" role="separator" aria-orientation="horizontal" aria-label="调整聊天窗口高度" @pointerdown="startSocialResize">
-            <span aria-hidden="true">↕️</span>
-          </div>
-        </section>
+        <ExploreChatPanel :open="Boolean(floatingSocialOpen)" :tab="exploreChatTab" :messages="messages" :friend-channels="friendChannels" :active-channel-id="activeChannel" :channel-name="exploreChatChannelName" v-model:draft="messageDraft" :busy="busy || criticalPending" :can-send="exploreChatCanSend" :status-text="exploreChatStatusText" :has-earlier="chatHasEarlier" :loading-earlier="chatLoadingEarlier" :has-new="chatHasNewMessages" :system-items="notificationItems" :system-loading="notificationLoading || notificationLoadingMore" :system-has-more="notificationHasMore" :system-error="notificationError" :party-busy="partyBusy" :panel-style="floatingSocialPanelStyle" :message-portrait="socialMessagePortrait" :friend-portrait="socialPortraitFor" :recruitment-status="chatRecruitmentStatus" :can-apply="canApplyChatRecruitment" @close="closeFloatingSocial" @select-tab="selectExploreChatTab" @select-friend="selectChannel" @send="sendChat" @earlier="loadEarlierMessages" @latest="jumpToLatestMessages" @scroll="handleChatScroll" @manage-party="toggleTeamPopup" @apply="applyChatRecruitment" @refresh-system="loadNotifications" @more-system="loadOlderNotifications" @panel-element="element => floatingSocialPanelRef = element" @list-element="element => chatMessageListRef = element" @drag-start="event => startModalDrag('social', event)" @resize-start="startSocialResize" />
 
         <section v-if="teamPopupOpen" ref="teamPanelRef" :style="teamPanelStyle" class="floating-social-panel team-info-panel card-surface" role="dialog" aria-modal="false" aria-label="队伍信息">
           <div class="floating-social-panel-heading" @pointerdown="startModalDrag('team', $event)">
             <div><p class="eyebrow">PARTY</p><h3>队伍信息</h3></div>
-            <button type="button" class="dialog-close floating-social-close" aria-label="关闭队伍信息" @click.stop="teamPopupOpen = false">❌</button>
+            <button type="button" class="dialog-close floating-social-close" aria-label="关闭队伍信息" @click.stop="teamPopupOpen = false"><AnimeIcon name="close" :size="19" /></button>
           </div>
           <PartyPopup :party="currentParty" :recruitments="recruitments" :applications="applications" :busy="partyBusy" :loading="partyLoading" :loading-more="partyLoadingMore" :has-more="partyHasMore" :error="partyError" @create="createWebParty" @search="searchParties" @load-more="loadMoreParties" @apply="applyPartyById" @publish="publishPartyRecruitment" @leave="leaveWebParty" @rename="renameWebParty" @refresh="refreshPartyData" @accept="id => respondApplicationById(id, true)" @reject="id => respondApplicationById(id, false)" />
         </section>
       </div>
 
-      <div v-if="notice || error" :key="feedbackToastKey" class="feedback-toast" role="status">
-        {{ error || notice }}
+      <div v-if="notice || error" :key="feedbackToastKey" class="feedback-toast" :class="{ error: Boolean(error) }" :role="error ? 'alert' : 'status'">
+        <GameUiFeedbackArt :name="error ? 'error' : 'message'" :size="36" />
+        <span class="feedback-toast-copy">{{ error || notice }}</span>
       </div>
 
       <NotificationInbox :open="notificationOpen && !showStoryGuide" :items="notificationItems" :unread-count="notificationUnreadCount" :loading="notificationLoading" :loading-more="notificationLoadingMore" :has-more="notificationHasMore" :error="notificationError" :marking-read-id="notificationMarkingReadId" :mail-items="mailItems" :mail-unread-count="mailUnreadCount" :mail-filter="mailFilter" :mail-loading="mailLoading" :mail-loading-more="mailLoadingMore" :mail-has-more="mailHasMore" :mail-error="mailError" :mail-detail="mailDetail" :mail-detail-loading="mailDetailLoading" :mail-action-busy="mailActionBusy" @close="notificationOpen = false" @refresh="loadNotifications" @load-more="loadOlderNotifications" @mark-read="markNotificationRead" @open-command="openNotificationCommand" @mail-filter-change="selectGameMailFilter" @mail-refresh="loadGameMails" @mail-load-more="loadOlderGameMails" @open-mail="loadGameMailDetail" @claim-mail="claimGameMail" @delete-mail="deleteGameMail" @claim-all-mail="claimAllGameMails" />
 
-      <StoryDialog :open="showStoryGuide && !registrationLoginId" :messages="storyGuide?.messages ?? []" :busy="busy || storyLoading" :error="storyError" :in-battle="Boolean(panel?.inBattle)" :can-finish="Boolean(panel?.account?.hasCharacter && !panel?.pendingStory && !storyGuide?.buttons.length)" @action="action => runIssuedAction(action, 'story')" @command="command => runCommand(command, { surface: 'story' })" @refresh="refreshStoryGuide" @finish="leaveStory" />
-      <AdventureManualDock v-show="!showStoryGuide && !registrationLoginId" :sections="['tasks', 'footprints', 'codex', 'warrants']" @select="openAdventureManual" />
+      <StoryDialog :open="showStoryGuide && !registrationLoginId" :messages="storyGuide?.messages ?? []" :busy="busy || storyLoading" :error="storyError" :in-battle="Boolean(panel?.inBattle)" :can-finish="Boolean(panel?.account?.hasCharacter && !panel?.pendingStory)" @action="action => runIssuedAction(action, 'story')" @command="command => runCommand(command, { surface: 'story' })" @refresh="refreshStoryGuide" @finish="leaveStory" />
+
       <AdventureManualPanel :open="manualOpen && !showStoryGuide" title="任务" :category="manualCategory" :available-categories="['主线', '支线', '委托', '悬赏']" :messages="manualMessages" :busy="manualBusy || busy" :error="manualError" @close="manualOpen = false" @category="selectManualCategory" @command="runManualCommand" @action="action => runIssuedAction(action, 'manual')" />
       <HandbookContent :open="handbookOpen && !showStoryGuide" :section="handbookSection" @close="handbookOpen = false" @updated="() => loadPanel()" />
       <BankPanel :open="bankOpen && !showStoryGuide" @close="bankOpen = false" @updated="loadPanel" />
       <GuildShopPanel v-if="guildShopTargetId" :open="!showStoryGuide" :target-id="guildShopTargetId" :initial-side="commerceSide" @close="guildShopTargetId = null" @updated="loadPanel" />
       <BookshopPanel :open="bookshopOpen && !showStoryGuide" target-id="bookshop" :initial-side="commerceSide" @close="bookshopOpen = false" @updated="loadPanel" />
       <HomePurchasePanel v-if="homePurchaseMode" :open="true" :mode="homePurchaseMode" @close="homePurchaseMode = null" @updated="() => { loadPanel(); homePanelRef?.refresh(); }" @purchased="result => { notice = `已购得小屋，地块坐标 (${result.plot.x}, ${result.plot.y}, ${result.plot.z})。`; homePanelRef?.refresh(); }" @locate="locateHomePurchaseSite" @pending-change="value => setCriticalPending('homePurchase', value)" />
-      <AdvancedProfessionPanel :open="advancedProfessionOpen && !showStoryGuide" @close="advancedProfessionOpen = false" @updated="loadPanel" @locate="locateAdvancedMentor" @trial-started="handleAdvancedTrialStarted" @pending-change="value => setCriticalPending('advancedProfession', value)" />
-      <AdventureManualPanel :open="interactionOpen && !showStoryGuide" :title="interactionTitle" caption="地点互动" :messages="interactionMessages" :busy="busy" :error="interactionError" @close="interactionOpen = false" @command="runInteractionCommand" @action="action => runIssuedAction(action, 'interaction')" />
+      <AdventureManualPanel :open="interactionOpen && !showStoryGuide" :title="interactionTitle" caption="地点互动" :appearance="interactionTitle === '战斗结算' ? 'default' : 'location'" :messages="interactionMessages" :busy="busy" :error="interactionError" @close="interactionOpen = false" @command="runInteractionCommand" @action="action => runIssuedAction(action, 'interaction')" />
 
-      <nav class="bottom-nav" :inert="showStoryGuide || Boolean(registrationLoginId)"><button :class="{ active: tab === 'character' }" :disabled="criticalPending" @click="tab = 'character'"><img src="/assets/ui/nav-character.png" alt="" /><span>角色</span></button><button :class="{ active: tab === 'inventory' }" :disabled="criticalPending" @click="tab = 'inventory'"><img src="/assets/ui/nav-inventory.png" alt="" /><span>背包</span></button><button class="explore-nav" :class="{ active: tab === 'explore' }" :disabled="criticalPending" @click="tab = 'explore'"><img src="/assets/ui/nav-explore.png" alt="" /><span>探索</span></button><button :class="{ active: tab === 'social' }" :disabled="criticalPending" @click="tab = 'social'"><img src="/assets/ui/nav-social.png" alt="" /><span>社交</span></button><button :class="{ active: tab === 'world' }" :disabled="criticalPending" @click="tab = 'world'"><img src="/assets/ui/nav-world.png" alt="" /><span>世界</span></button></nav>
+      <nav class="bottom-nav" :inert="showStoryGuide || Boolean(registrationLoginId)"><button :class="{ active: tab === 'character' }" :disabled="criticalPending" @click="tab = 'character'"><img :src="ANIME_NAV_ART.character" alt="" /><span>角色</span></button><button :class="{ active: tab === 'inventory' }" :disabled="criticalPending" @click="tab = 'inventory'"><img :src="ANIME_NAV_ART.inventory" alt="" /><span>背包</span></button><button class="explore-nav" :class="{ active: tab === 'explore' }" :disabled="criticalPending" @click="tab = 'explore'"><img :src="ANIME_NAV_ART.explore" alt="" /><span>探索</span></button><button :class="{ active: tab === 'social' }" :disabled="criticalPending" @click="tab = 'social'"><img :src="ANIME_NAV_ART.social" alt="" /><span>社交</span></button><button :class="{ active: tab === 'world' }" :disabled="criticalPending" @click="tab = 'world'"><img :src="ANIME_NAV_ART.world" alt="" /><span>世界</span></button></nav>
     </template>
   </div>
 </template>

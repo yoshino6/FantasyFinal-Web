@@ -1,0 +1,98 @@
+/* State artwork remains separate from live copy, retry buttons and alert roles. */
+:is(.app-shell[data-visual='light-anime'], .anime-growth-commerce, .anime-party-refinement, .inbox-dialog.anime-adventure, .handbook-dialog.anime-adventure, .manual-dialog.anime-adventure, .story-dialog.anime-adventure) .game-ui-empty-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border: 5px solid transparent;
+  border-image: var(--game-ui-panel) 144 fill / 5px stretch;
+  border-radius: 0;
+  background: transparent;
+  color: var(--game-ui-muted);
+  text-align: left;
+}
+
+:is(.app-shell[data-visual='light-anime'], .anime-growth-commerce, .anime-party-refinement, .inbox-dialog.anime-adventure, .handbook-dialog.anime-adventure, .manual-dialog.anime-adventure, .story-dialog.anime-adventure) .game-ui-empty-message > span:last-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font: inherit;
+  color: inherit;
+}
+
+/* With no channel to choose, let the explanation use the idle conversation area. */
+.app-shell[data-visual='light-anime'] .anime-social-chat .friend-social-content:has(> .friend-channel-list > .game-ui-empty-message) {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.app-shell[data-visual='light-anime'] .anime-social-chat .friend-channel-list:has(> .game-ui-empty-message) {
+  grid-column: 1 / -1;
+  align-items: center;
+  justify-content: center;
+  border-right: 0;
+  padding: 12px;
+}
+
+.app-shell[data-visual='light-anime'] .anime-social-chat .friend-channel-list > .game-ui-empty-message {
+  flex-direction: row;
+  width: min(360px, 100%);
+  min-height: 96px;
+  padding: 14px;
+  gap: 12px;
+  text-align: left;
+}
+
+.app-shell[data-visual='light-anime'] .anime-social-chat .friend-channel-list > .game-ui-empty-message > span:last-child {
+  width: auto;
+}
+
+.app-shell[data-visual='light-anime'] .anime-social-chat .friend-channel-list > .game-ui-empty-message > .game-ui-feedback-art {
+  width: 48px;
+  height: 48px;
+}
+
+.app-shell[data-visual='light-anime'] .feedback-toast {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  border: 6px solid transparent;
+  border-image: var(--game-ui-paper) 144 fill / 6px stretch;
+  border-radius: 0;
+  background: transparent;
+  background-clip: padding-box;
+  color: var(--game-ui-primary-ink);
+  text-align: left;
+  backdrop-filter: none;
+}
+
+.app-shell[data-visual='light-anime'] .feedback-toast.error {
+  color: var(--game-ui-danger-ink);
+}
+
+.app-shell[data-visual='light-anime'] .feedback-toast-copy {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (max-height: 450px) {
+  :is(.app-shell[data-visual='light-anime'], .anime-growth-commerce, .anime-party-refinement, .inbox-dialog.anime-adventure, .handbook-dialog.anime-adventure, .manual-dialog.anime-adventure, .story-dialog.anime-adventure) .game-ui-empty-message {
+    min-height: 54px;
+    padding: 6px 10px;
+    gap: 8px;
+  }
+
+  :is(.app-shell[data-visual='light-anime'], .anime-growth-commerce, .anime-party-refinement, .inbox-dialog.anime-adventure, .handbook-dialog.anime-adventure, .manual-dialog.anime-adventure, .story-dialog.anime-adventure) .game-ui-empty-message > .game-ui-feedback-art {
+    width: 32px;
+    height: 32px;
+  }
+
+  .app-shell[data-visual='light-anime'] .anime-social-chat .friend-channel-list > .game-ui-empty-message {
+    min-height: 64px;
+    padding: 6px 10px;
+  }
+
+  .app-shell[data-visual='light-anime'] .anime-social-chat .friend-channel-list > .game-ui-empty-message > .game-ui-feedback-art {
+    width: 32px;
+    height: 32px;
+  }
+}

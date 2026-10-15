@@ -1,0 +1,38 @@
+.app-shell[data-visual='light-anime'][data-explore-canvas] {
+  height: 100dvh; min-height: 100dvh; padding-bottom: 0; overflow: hidden;
+  isolation: isolate; background: #3e5c50;
+  --exploration-dock-bottom: calc(110px + env(safe-area-inset-bottom));
+}
+.app-shell[data-explore-canvas] > .topbar,
+.app-shell[data-explore-canvas] > .anime-status-ribbon { position: relative; z-index: 15; }
+.app-shell[data-explore-canvas] .page-content,
+.app-shell[data-explore-canvas] .explore-page,
+.app-shell[data-explore-canvas] .explore-frame {
+  position: static; min-height: 0; margin: 0; padding: 0; overflow: visible;
+  background: transparent; border: 0; box-shadow: none;
+}
+.app-shell[data-explore-canvas] .bottom-nav { z-index: 30; }
+.app-shell[data-explore-canvas] .floating-social-dock { display: none; }
+.app-shell[data-explore-canvas] .exploration-social-rail { display: block; width: 100%; }
+.app-shell[data-explore-canvas] .desktop-explore-sidebar { position: static; max-height: none; }
+.app-shell[data-explore-canvas] .settings-drawer { height: 100dvh; max-height: 100dvh; }
+.app-shell[data-explore-canvas] .settings-content { flex: 1; min-height: 0; overflow: auto; }
+@media (orientation: landscape) and (max-height: 500px) and (max-width: 1179px) {
+  .app-shell[data-visual='light-anime'][data-explore-canvas] { --exploration-dock-bottom: calc(56px + env(safe-area-inset-bottom)); }
+  .app-shell[data-explore-canvas] .topbar { min-height: 0; padding: 0 0 3px; gap: 8px; }
+  .app-shell[data-explore-canvas] .page-context { --title-width: 200px; }
+  .app-shell[data-explore-canvas] .page-context > strong { font-size: 23px; }
+  .app-shell[data-explore-canvas] .page-brand .original-game-logo { width: 140px; }
+  .app-shell[data-explore-canvas] .page-brand .original-game-logo > img { height: 44px; }
+  .app-shell[data-explore-canvas] .anime-status-ribbon .stat-card {
+    min-height: 38px; padding: 3px 6px; border-width: 4px; border-image-width: 4px;
+    grid-template-columns: 18px auto 1fr; grid-template-rows: auto 4px; gap: 2px 4px;
+  }
+  .app-shell[data-explore-canvas] .anime-status-ribbon .stat-card > .anime-icon { width: 18px; height: 18px; }
+  .app-shell[data-explore-canvas] .anime-status-ribbon .stat-card > span,
+  .app-shell[data-explore-canvas] .anime-status-ribbon .stat-card > strong { font-size: 10px; }
+  .app-shell[data-explore-canvas] .anime-status-ribbon .stat-card > i { height: 4px; }
+}
+@media (min-width: 1180px) {
+  .app-shell[data-visual='light-anime'][data-explore-canvas] { --exploration-dock-bottom: 12px; }
+}

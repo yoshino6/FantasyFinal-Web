@@ -1,0 +1,251 @@
+/* The field remains visible between team information and the command deck. */
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure {
+  display:flex;flex:1;flex-direction:column;box-sizing:border-box;width:100%;height:100%;min-width:0;min-height:0;margin:0;padding:6px;gap:5px;overflow:hidden;
+  color:#3d5655;border:6px solid transparent;border-image:var(--game-ui-panel,var(--adventure-paper)) 144 fill / 6px stretch;border-radius:0;background:#edf1df;background-clip:padding-box;box-shadow:none;container:battle-layout / size;
+}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure :is(.battle-command-header,.battle-overview,.battle-command-deck) {flex:none;min-width:0}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-command-header {display:flex;align-items:center;gap:10px;min-height:38px;margin:0;padding:0 4px}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-heading {display:grid;flex:1;gap:2px;min-width:0}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-heading h3 {display:flex;align-items:center;gap:6px;min-width:0;margin:0;color:#3f625d;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:16px}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-heading > small {overflow:hidden;color:#829085;text-overflow:ellipsis;white-space:nowrap;font-size:10px;line-height:1.2}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-round-badge {display:flex;align-items:baseline;flex:none;gap:5px;padding:4px 12px;color:#3e6866;border:4px solid transparent;border-image:var(--game-ui-paper,var(--adventure-neutral)) 144 fill / 4px 7px stretch;white-space:nowrap}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-round-badge small {font-size:10px}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-round-badge strong {font-size:20px;line-height:1}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure :is(.battle-tool,.cancel-targeting) {box-sizing:border-box;flex:none;min-width:38px;min-height:32px;margin:0;padding:3px 7px;color:#566e65;border:4px solid transparent;border-image:var(--game-ui-paper,var(--adventure-neutral)) 144 fill / 4px 6px stretch;border-radius:0;background:transparent;box-shadow:none;white-space:nowrap;font-size:11px;line-height:1.15}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-tool.active {color:#25575a;border-image-source:var(--game-ui-teal,var(--adventure-teal))}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .cancel-targeting {color:#9c6251;border-image-source:var(--game-ui-coral,var(--adventure-coral))}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-overview {display:grid;grid-template-columns:minmax(0,1fr) minmax(80px,.8fr) minmax(0,1fr);align-items:stretch;gap:5px}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-team-summary {display:grid;align-content:center;gap:4px;min-width:0;padding:4px 7px;border:4px solid transparent;border-image:var(--game-ui-panel,var(--adventure-paper)) 144 fill / 4px stretch;background:transparent}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-team-summary > span:first-child {display:flex;align-items:center;justify-content:space-between;gap:4px;min-width:0;color:#437b6b}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-team-summary.enemy > span:first-child {color:#a36459}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-team-summary strong {overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-team-summary small {color:#82907d;white-space:nowrap;font-size:9px;line-height:1.2}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-team-summary > small {overflow:hidden;text-overflow:ellipsis}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-bar {display:block;width:100%;height:6px;overflow:hidden;border:1px solid #567b6573;border-image:none;border-radius:5px;background:#f8edd4}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-bar i {display:block;height:100%;min-width:0;border-radius:4px;background:linear-gradient(90deg,#50a785,#92d09a);transition:width .25s ease}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure :is(.battle-team-summary.enemy,.battle-formation.is-enemy) .battle-bar i,
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-bar.enemy-hp i {background:linear-gradient(90deg,#cc7968,#eda38b)}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-bar.mp i {background:#6aa9bd}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-turn-state {display:grid;align-content:center;justify-items:center;gap:4px;min-width:0;padding:4px 3px;color:#3e796a;text-align:center}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-turn-state strong {max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-turn-state small {display:-webkit-box;max-width:100%;overflow:hidden;color:#7a877a;line-height:1.3;font-size:9px;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-turn-state:is(.phase-enemy,.phase-defeat) {color:#b16e5a}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-turn-state.phase-waiting {color:#5b8798}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-turn-state.phase-victory {color:#b78e3e}
+
+/* Transparent portraits share one scene; overfull formations scroll independently. */
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-stage {position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);flex:1;gap:25px;min-height:0;overflow:hidden;padding:5px 7px 8px;border:1px solid #7e9f7c;border-radius:5px 12px 5px 12px;background:linear-gradient(180deg,#edf6d914,#4b775339),var(--adventure-scene) center 54% / cover;box-shadow:inset 0 0 28px #36593c1c}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-stage::after {content:'';position:absolute;inset:0;z-index:0;pointer-events:none;background:linear-gradient(180deg,#d7eaca38 0,transparent 30%,#304b3b1c 100%)}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-stage-versus {position:absolute;top:50%;left:50%;z-index:1;color:#fff6d2;font-size:clamp(18px,3vw,34px);font-style:italic;font-weight:900;letter-spacing:-2px;text-shadow:1px 2px 0 #786c4a,0 0 13px #fff5c99c;transform:translate(-50%,-50%) rotate(-8deg);pointer-events:none}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-formation {position:relative;z-index:1;display:flex;flex-direction:column;gap:3px;min-width:0;min-height:0}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-formation > header {display:flex;align-items:center;justify-content:space-between;flex:none;gap:3px;min-height:20px;color:#efffe8;text-shadow:0 1px 3px #2b4c3d}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-formation > header strong {font-size:11px}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-formation > header small {font-size:9px;white-space:nowrap}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-formation.is-enemy > header {color:#fff0d9}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-formation-units {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:max-content;align-content:safe center;align-items:end;flex:1;gap:8px 4px;min-width:0;min-height:0;overflow:hidden auto;padding:7px 3px 8px;scrollbar-width:thin;scrollbar-color:#eff2cb8c #4b70592e;overscroll-behavior:contain}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-formation-units:has(> .battle-stage-unit:only-child) {grid-template-columns:minmax(0,1fr)}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-stage-unit {position:relative;display:grid;grid-template-columns:minmax(0,1fr);justify-items:center;align-content:end;gap:3px;width:100%;min-width:0;min-height:100px;margin:0;padding:2px 2px 5px;color:#3f5a46;border:0;border-image:none;border-radius:5px;background:transparent;box-shadow:none;isolation:isolate;cursor:pointer;touch-action:manipulation}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-stage-unit::before {content:'';position:absolute;z-index:-1;top:calc(22px + clamp(48px,16cqh,150px));left:12%;right:12%;height:12px;border-radius:50%;background:#34563840;filter:blur(2px);pointer-events:none}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-unit-mark {display:block;max-width:100%;min-height:14px;padding:1px 5px;overflow:hidden;color:#edf5d8;border-radius:8px;background:#37573a65;text-overflow:ellipsis;white-space:nowrap;font-size:9px;line-height:12px}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-unit-mark:empty {visibility:hidden}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-unit-art {display:flex;align-items:end;justify-content:center;width:100%;height:clamp(48px,16cqh,150px);min-width:0;pointer-events:none}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-unit-art img {display:block;width:100%;height:100%;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 4px 2px #284a3c70)}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-unit-art > .anime-icon {width:min(75%,70px);height:min(85%,85px);filter:drop-shadow(0 3px 2px #284a3c70)}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-stage-unit > strong {display:block;max-width:100%;padding:2px 5px;overflow:hidden;color:#35594e;border-radius:3px;background:#fff8e7e6;text-overflow:ellipsis;white-space:nowrap;font-size:10px;line-height:1.25}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-stage-unit > .battle-bar {width:min(90%,112px);height:5px;box-shadow:0 1px 3px #213f326b}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-unit-hp {max-width:100%;overflow:hidden;color:#fffbe6;text-overflow:ellipsis;white-space:nowrap;text-shadow:0 1px 2px #244535;font-size:8px;line-height:1.2}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-unit-tags {display:flex;justify-content:center;gap:2px;min-height:0;max-width:100%;overflow:hidden}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-unit-tags:empty {display:none}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-unit-tags em {display:block;max-width:100%;padding:1px 3px;overflow:hidden;color:#edfbe8;border-radius:2px;background:#397264c7;text-overflow:ellipsis;white-space:nowrap;font-size:8px;font-style:normal;line-height:1.2}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-stage-unit.targetable {outline:1px solid #c5ffe18c;background:radial-gradient(ellipse at 50% 60%,#bdffe22e,transparent 70%)}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-stage-unit.targetable .battle-unit-mark {color:#265f55;background:#ddffe6;box-shadow:0 0 8px #c2ffe47a}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-stage-unit.targetable::before {border:2px solid #d1ffe4;background:#a4ffe64a;box-shadow:0 0 10px #9cefc4;filter:none}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-stage-unit.active .battle-unit-mark {color:#76602b;background:#fff0af}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-stage-unit.active > strong {background:#fff1b3;box-shadow:0 0 0 1px #d8b664a6}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-stage-unit.untargetable {opacity:.55}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-stage-unit:disabled {cursor:default;opacity:1;filter:none}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-stage-unit.untargetable:disabled {opacity:.55}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-stage-unit.defeated {opacity:.5;filter:grayscale(.75)}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-stage-unit.defeated:disabled {opacity:.5}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-stage-unit:focus-visible {outline:3px solid #fcf3b5;outline-offset:-1px}
+
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-command-deck {display:grid;grid-template-columns:minmax(0,1fr);gap:5px;padding:4px;border:4px solid transparent;border-image:var(--game-ui-panel,var(--adventure-paper)) 144 fill / 4px stretch;background:transparent}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-command-toolbar {display:flex;align-items:center;gap:4px;min-width:0;min-height:32px}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-command-prompt {display:grid;flex:1;gap:2px;min-width:0;padding-left:2px}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-command-prompt strong {min-width:0;overflow:hidden;color:#3e7669;text-overflow:ellipsis;white-space:nowrap;font-size:11px}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-command-prompt small {overflow:hidden;color:#7e8979;text-overflow:ellipsis;white-space:nowrap;font-size:9px;line-height:1.2}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-action-tabs {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));flex:none;gap:4px;margin:0;padding:0;overflow:visible;border:0;background:transparent}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-action-tabs > button {display:flex;align-items:center;justify-content:center;gap:4px;min-width:0;min-height:34px;padding:2px 4px;color:#617264;border:4px solid transparent;border-image:var(--game-ui-paper,var(--adventure-tab)) 144 fill / 4px 7px stretch;border-radius:0;background:transparent;box-shadow:none;font-size:11px}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-action-tabs > button.active {color:#285d5d;border-image-source:var(--game-ui-teal,var(--adventure-teal));box-shadow:inset 0 -2px #70aaa333}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-action-tabs :is(img,.anime-icon,.tab-art-icon) {flex:none;width:22px;height:22px;object-fit:contain}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-viewport-list.actions {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:64px;align-content:start;gap:6px;height:134px;min-width:0;min-height:0;overflow:hidden}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-viewport-action-row {position:relative;display:flex;height:64px;min-width:0}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-viewport-action-row .battle-action {display:flex;align-items:center;justify-content:flex-start;flex:1;flex-direction:row;gap:5px;width:100%;height:64px;min-width:0;min-height:0;padding:4px 34px 4px 4px;color:#4c675e;border:4px solid transparent;border-image:var(--game-ui-paper,var(--adventure-paper)) 144 fill / 4px 7px stretch;border-radius:0;background:transparent;box-shadow:none;text-align:left}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-viewport-action-row .battle-action.selected {color:#2d6660;border-image-source:var(--game-ui-teal,var(--adventure-teal));background:transparent;box-shadow:inset 0 0 0 1px #6caaa8}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-action:disabled {opacity:.5;cursor:default;filter:saturate(.5)}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-action-icon {display:grid;place-items:center;flex:0 0 31px;width:31px;height:36px;overflow:hidden;border:0;border-image:none;border-radius:4px;background:#dce9dd9c}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-action-copy {display:grid;flex:1;gap:4px;min-width:0}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-action-copy :is(strong,small) {display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-action-copy small {display:block;color:#7b8979;font-size:9px}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-viewport-action-info {position:absolute;top:16px;right:3px;width:32px;min-height:32px;padding:0;color:#799084;border:0;border-image:none;border-radius:4px;background:#fff8e79c;font-size:16px}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-viewport-action-info:hover {color:#356f68;background:#e4f4df}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-viewport-empty {grid-column:1 / -1;align-self:center;margin:0;padding:10px;color:#809080;text-align:center;font-size:11px;line-height:1.6}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .viewport-pagination {min-height:32px;padding:0;gap:6px;font-size:11px}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .viewport-pagination :is(button,select,input) {min-height:32px;padding:2px 7px;color:#577365;border-color:#acba96;border-radius:4px;font-size:11px}
+.turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .viewport-pagination small {font-size:9px}
+
+/* Details scroll separately without replacing the field. */
+.battle-viewport-backdrop {position:fixed;z-index:160;inset:0;display:grid;place-items:center;padding:14px;background:#253b3d9c}
+.battle-viewport-backdrop > .battle-viewport-dialog {display:flex;flex-direction:column;box-sizing:border-box;width:min(620px,100%);max-height:calc(100dvh - 28px);min-height:0;padding:10px;gap:10px;color:#52695d;border:8px solid transparent;border-image:var(--game-ui-panel,url('/assets/light-anime/game-ui-v2/panel-parchment.webp')) 144 fill / 8px stretch;border-radius:0;background:#fff9e9;background-clip:padding-box;box-shadow:0 14px 40px #193a3d33}
+.battle-viewport-backdrop > .battle-viewport-dialog > header {display:flex;justify-content:space-between;align-items:center;flex:none;gap:8px;min-width:0}
+.battle-viewport-dialog h3 {min-width:0;margin:0;color:#3e6e65;font-size:16px}
+.battle-viewport-backdrop > .battle-viewport-dialog > header button {flex:none;min-height:34px;padding:3px 8px;color:#637565;border:4px solid transparent;border-image:var(--game-ui-paper,url('/assets/light-anime/game-ui-v2/button-paper.webp')) 144 fill / 4px 6px stretch;border-radius:0;background:transparent;font-size:12px}
+.battle-viewport-dialog > div {min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin}
+.battle-viewport-dialog p {white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px;line-height:1.7}
+.battle-viewport-dialog :is(.battle-roster-list,.battle-record-list) {display:grid;gap:7px}
+.battle-viewport-dialog .battle-viewport-member {display:flex;align-items:center;gap:9px;width:100%;min-height:74px;min-width:0;padding:7px 9px;overflow:hidden;color:#52675b;border:1px solid #c4c5a3;border-radius:4px;background:#fffcef;text-align:left}
+.battle-viewport-dialog .battle-viewport-member.active {border-color:#c5a869;background:#fff4d8}
+.battle-viewport-dialog .battle-viewport-member.defeated {opacity:.55;filter:grayscale(.7)}
+.battle-viewport-dialog .battle-viewport-member-portrait {display:grid;place-items:center;flex:0 0 42px;width:42px;height:60px;overflow:hidden}
+.battle-viewport-dialog .battle-viewport-member-portrait img {width:100%;height:100%;object-fit:contain}
+.battle-viewport-dialog .battle-viewport-member-copy {display:grid;flex:1;gap:3px;min-width:0}
+.battle-viewport-dialog .battle-viewport-member-copy :is(strong,small) {display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px}
+.battle-viewport-dialog .battle-viewport-member-copy small {color:#84907d;font-size:10px}
+.battle-viewport-dialog .battle-bar {display:block;height:5px;overflow:hidden;border-radius:4px;background:#e8e8cb}
+.battle-viewport-dialog .battle-bar i {display:block;height:100%;background:#79b58d}
+.battle-viewport-dialog .battle-bar.enemy-hp i {background:#d38a79}
+.battle-viewport-dialog .battle-viewport-log-entry {display:flex;align-items:center;gap:8px;width:100%;min-height:58px;min-width:0;padding:8px 10px;color:#6a7866;border:1px solid #c7c9ac;border-radius:4px;background:#fffcef;text-align:left;font-size:12px}
+.battle-viewport-dialog .battle-viewport-log-entry span {display:-webkit-box;flex:1;min-width:0;overflow:hidden;line-height:18px;-webkit-line-clamp:3;-webkit-box-orient:vertical}
+.battle-viewport-dialog .battle-viewport-log-entry b {font-weight:400}
+.battle-viewport-dialog .battle-viewport-log-entry.log-danger {color:#a86659}
+.battle-viewport-dialog .battle-viewport-log-entry.log-good {color:#4f8a69}
+.battle-viewport-dialog .battle-viewport-log-entry.log-muted {color:#9ba28e}
+
+@media (min-width:1000px) {
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure {padding:8px;gap:7px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-command-header {min-height:42px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-heading h3 {font-size:19px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-overview {grid-template-columns:minmax(0,1fr) minmax(160px,.7fr) minmax(0,1fr);gap:10px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-team-summary {gap:5px;padding:5px 12px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-team-summary strong {font-size:14px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-team-summary small {font-size:11px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-turn-state strong {font-size:16px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-turn-state small {font-size:11px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-stage {gap:55px;padding:7px 18px 12px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-formation-units {grid-template-columns:repeat(var(--formation-columns,3),minmax(0,1fr));gap:14px 10px;padding:15px 7px 20px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-formation.is-ally .battle-stage-unit:nth-child(even) {transform:translateY(-11px)}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-formation.is-enemy .battle-stage-unit:nth-child(odd) {transform:translateY(-11px)}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-unit-art {height:clamp(72px,22cqh,185px)}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-stage-unit::before {top:calc(22px + clamp(72px,22cqh,185px))}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-stage-unit > strong {max-width:160px;font-size:12px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-unit-mark {font-size:10px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-unit-hp {font-size:10px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-unit-tags em {font-size:9px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-command-deck {gap:6px;padding:5px 8px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-command-toolbar {gap:7px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-command-prompt strong {font-size:13px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-command-prompt small {font-size:10px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-viewport-list.actions {grid-template-columns:repeat(4,minmax(0,1fr))}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-action-tabs {width:min(560px,100%)}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-action-copy strong {font-size:12px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-action-copy small {font-size:10px}
+}
+
+@media (max-width:360px) {
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure {padding:3px;border-width:4px;border-image-width:4px;gap:4px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-command-header {gap:4px;padding:0 2px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-heading h3 {font-size:14px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-round-badge {padding:4px 6px;gap:3px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-overview {gap:3px;grid-template-columns:minmax(0,1fr) 80px minmax(0,1fr)}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-team-summary {padding:4px 3px;gap:3px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-team-summary strong {font-size:11px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-team-summary small {font-size:8px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-turn-state strong {font-size:11px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-stage {gap:19px;padding:3px 3px 6px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-formation > header small {font-size:8px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-command-deck {padding:2px;gap:4px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-command-toolbar {gap:2px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure :is(.battle-tool,.cancel-targeting) {min-width:34px;padding:3px 4px;font-size:10px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-command-prompt strong {font-size:10px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-command-prompt small {font-size:8px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-action-tabs > button {gap:2px;padding:2px;font-size:10px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-action-tabs :is(img,.anime-icon,.tab-art-icon) {width:19px;height:19px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-action-icon {flex-basis:27px;width:27px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-viewport-action-row .battle-action {gap:3px;padding-left:1px;padding-right:32px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-action-copy strong {font-size:10px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-action-copy small {font-size:8px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-viewport-action-info {right:1px;width:32px}
+}
+
+/* Page chrome can leave less height than the viewport media query suggests. */
+@container battle-layout (max-height:520px) {
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-command-header {min-height:32px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-heading > small {display:none}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-team-summary {gap:3px;padding-top:3px;padding-bottom:3px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-team-summary > small {display:none}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-turn-state {gap:2px;padding:2px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-turn-state small {-webkit-line-clamp:1}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-viewport-list.actions {height:64px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-command-prompt small {display:none}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-unit-art {height:clamp(42px,14cqh,75px)}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-stage-unit::before {top:calc(22px + clamp(42px,14cqh,75px))}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-formation-units {align-content:start;gap:5px 3px;padding-top:3px;padding-bottom:5px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-stage-unit {gap:2px;min-height:87px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-unit-tags {display:none}
+}
+
+/* Short landscape places category tabs beside the actions to retain field height. */
+@media (min-width:600px) and (max-height:480px) {
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure {padding:3px;gap:3px;border-width:3px;border-image-width:3px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-command-header {min-height:32px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-heading h3 {font-size:14px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-heading > small {display:none}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-round-badge {padding-top:1px;padding-bottom:1px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-round-badge strong {font-size:17px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-overview {grid-template-columns:minmax(0,1fr) minmax(160px,.8fr) minmax(0,1fr)}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-team-summary {padding:2px 7px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-team-summary > small {display:none}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-command-deck {grid-template-columns:125px minmax(0,1fr);gap:3px 6px;padding:2px 4px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-command-toolbar {grid-column:1 / -1;min-height:32px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-command-prompt {display:flex;align-items:center;gap:8px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-action-tabs {grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;width:auto}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-action-tabs > button {min-height:32px;padding:0 2px;gap:2px;font-size:10px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-action-tabs :is(img,.anime-icon,.tab-art-icon) {width:17px;height:17px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-viewport-list.actions {grid-template-columns:repeat(4,minmax(0,1fr));height:64px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .viewport-pagination {grid-column:1 / -1;min-height:32px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-stage {gap:35px;padding-top:1px;padding-bottom:3px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-formation > header {min-height:14px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-unit-art {height:clamp(32px,13cqh,56px)}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-stage-unit::before {top:calc(18px + clamp(32px,13cqh,56px))}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-stage-unit {min-height:76px;gap:1px;padding-bottom:2px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-unit-mark {min-height:12px;font-size:8px;line-height:10px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-unit-tags {display:none}
+}
+@media (prefers-reduced-motion:reduce) {
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-bar i {transition:none}
+}
+
+/* Common three- and four-member mobile formations share the available height. */
+@media (max-width:999px) and (min-height:481px) {
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-formation-units:has(> .battle-stage-unit:nth-child(3)):not(:has(> .battle-stage-unit:nth-child(5))) {
+    grid-template-rows:repeat(2,minmax(89px,1fr));align-content:stretch;align-items:stretch;gap:6px 4px;padding-top:4px;padding-bottom:4px;
+  }
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-formation-units:has(> .battle-stage-unit:nth-child(3)):not(:has(> .battle-stage-unit:nth-child(5))) .battle-stage-unit {
+    grid-template-rows:14px minmax(32px,1fr) 16px 5px 10px;height:100%;min-height:89px;align-content:stretch;gap:2px;padding:2px;
+  }
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-formation-units:has(> .battle-stage-unit:nth-child(3)):not(:has(> .battle-stage-unit:nth-child(5))) .battle-unit-art {height:100%;min-height:32px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-formation-units:has(> .battle-stage-unit:nth-child(3)):not(:has(> .battle-stage-unit:nth-child(5))) .battle-stage-unit > strong {padding:2px 4px;line-height:12px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-formation-units:has(> .battle-stage-unit:nth-child(3)):not(:has(> .battle-stage-unit:nth-child(5))) .battle-unit-tags {display:none}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure .battle-formation-units:has(> .battle-stage-unit:nth-child(3)):not(:has(> .battle-stage-unit:nth-child(5))) .battle-stage-unit::before {top:auto;bottom:36px}
+}
+
+/* Attack, defend and retreat remain together on the narrowest phone screens. */
+@media (max-width:360px) {
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure[data-battle-category='normal'] .battle-viewport-list.actions {grid-template-columns:repeat(3,minmax(0,1fr))}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure[data-battle-category='normal'] .battle-viewport-action-row .battle-action {flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:3px 32px 3px 2px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure[data-battle-category='normal'] .battle-action-icon {flex:0 0 25px;width:27px;height:25px;overflow:visible;background:transparent}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure[data-battle-category='normal'] .battle-action-icon :is(.skill-icon,.anime-icon) {width:25px;height:25px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure[data-battle-category='normal'] .battle-action-copy {flex:none;max-width:100%;text-align:center}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure[data-battle-category='normal'] .battle-action-copy strong {font-size:10px;line-height:12px}
+  .turn-battle-panel.battle-viewport-panel.battle-command-layout.anime-adventure[data-battle-category='normal'] .battle-action-copy small {display:none}
+}

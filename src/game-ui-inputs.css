@@ -1,0 +1,196 @@
+/* Native controls retain their keyboard, pointer and value semantics. */
+.app-shell[data-visual='light-anime'] :is(.settings-range, .auto-battle-potion-grid) input[type='range'] {
+  appearance: none;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.app-shell[data-visual='light-anime'] :is(.settings-range, .auto-battle-potion-grid) input[type='range']::-webkit-slider-runnable-track {
+  height: 10px;
+  border: 3px solid transparent;
+  border-image: var(--game-ui-panel) 144 fill / 3px stretch;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.app-shell[data-visual='light-anime'] :is(.settings-range, .auto-battle-potion-grid) input[type='range']::-moz-range-track {
+  height: 4px;
+  border: 3px solid transparent;
+  border-image: var(--game-ui-panel) 144 fill / 3px stretch;
+  border-radius: 0;
+  background: transparent;
+}
+
+.app-shell[data-visual='light-anime'] :is(.settings-range, .auto-battle-potion-grid) input[type='range']::-webkit-slider-thumb {
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  margin-top: -10px;
+  border: 0;
+  border-radius: 0;
+  background: url('/assets/light-anime/game-ui-v2/icons.webp') 65.470297% 40.227273% / 474.074074% 711.111111% no-repeat;
+  box-shadow: none;
+}
+
+.app-shell[data-visual='light-anime'] :is(.settings-range, .auto-battle-potion-grid) input[type='range']::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 0;
+  background: url('/assets/light-anime/game-ui-v2/icons.webp') 65.470297% 40.227273% / 474.074074% 711.111111% no-repeat;
+}
+
+.world-map-panel.anime-adventure.exploration-map.exploration-canvas .world-map-zoom input {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  cursor: ns-resize;
+}
+
+.world-map-panel.anime-adventure.exploration-map.exploration-canvas .world-map-zoom input::-webkit-slider-runnable-track {
+  width: 9px;
+  height: 100%;
+  border: 3px solid transparent;
+  border-image: var(--game-ui-panel) 144 fill / 3px stretch;
+  border-radius: 0;
+  background: transparent;
+}
+
+.world-map-panel.anime-adventure.exploration-map.exploration-canvas .world-map-zoom input::-moz-range-track {
+  width: 3px;
+  height: 100%;
+  border: 3px solid transparent;
+  border-image: var(--game-ui-panel) 144 fill / 3px stretch;
+  border-radius: 0;
+  background: transparent;
+}
+
+.world-map-panel.anime-adventure.exploration-map.exploration-canvas .world-map-zoom input::-webkit-slider-thumb {
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  margin-left: -10.5px;
+  border: 0;
+  border-radius: 0;
+  background: url('/assets/light-anime/game-ui-v2/icons.webp') 65.470297% 40.227273% / 474.074074% 711.111111% no-repeat;
+}
+
+.world-map-panel.anime-adventure.exploration-map.exploration-canvas .world-map-zoom input::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 0;
+  background: url('/assets/light-anime/game-ui-v2/icons.webp') 65.470297% 40.227273% / 474.074074% 711.111111% no-repeat;
+}
+
+.app-shell[data-visual='light-anime'] input[type='range']:disabled {
+  opacity: .5;
+  filter: saturate(.25);
+  cursor: default;
+}
+
+.app-shell[data-visual='light-anime'] input[type='range']:focus-visible {
+  outline: 2px solid #27847d;
+  outline-offset: 3px;
+}
+
+.app-shell .exploration-auto-layer .auto-battle-dialog {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-image: var(--game-ui-journal) var(--game-ui-journal-slice) fill / 12px stretch;
+  border-width: 12px;
+  background: #fffaf0;
+  background-clip: padding-box;
+}
+
+.app-shell .exploration-auto-layer .auto-battle-dialog-header {
+  position: relative;
+  flex: 0 0 auto;
+  min-width: 0;
+}
+
+.app-shell .exploration-auto-layer .auto-battle-dialog-header .auto-battle-heading {
+  flex-wrap: wrap;
+  padding-right: 36px;
+  margin-bottom: 10px;
+}
+
+.app-shell .exploration-auto-layer .auto-battle-dialog-header .dialog-close {
+  top: 0;
+  right: 0;
+  padding: 0;
+  border: 5px solid transparent;
+  border-image: var(--game-ui-paper) 144 fill / 5px stretch;
+  border-radius: 0;
+  background: transparent;
+}
+
+.app-shell .exploration-auto-layer .auto-battle-dialog-body {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  padding: 0 3px 4px 0;
+}
+
+.app-shell .exploration-auto-layer .auto-battle-state {
+  border: 4px solid transparent;
+  border-image: var(--game-ui-paper) 144 fill / 4px stretch;
+  border-radius: 0;
+  color: var(--game-ui-ink);
+  background: transparent;
+}
+
+.app-shell .exploration-auto-layer .auto-battle-state.enabled {
+  border-image-source: var(--game-ui-teal);
+  color: var(--game-ui-primary-ink);
+  background: transparent;
+}
+
+.app-shell .exploration-auto-layer :is(.auto-battle-mode-tabs button, .auto-battle-default-actions button, .toggle-button) {
+  border: 6px solid transparent;
+  border-image: var(--game-ui-paper) 144 fill / 6px 9px stretch;
+  border-radius: 0;
+  background: transparent;
+  color: var(--game-ui-ink);
+  text-shadow: none;
+  box-shadow: none;
+}
+
+.app-shell .exploration-auto-layer :is(.auto-battle-mode-tabs button.active, .auto-battle-default-actions button.active, .toggle-button.active) {
+  border-image-source: var(--game-ui-teal);
+  color: var(--game-ui-primary-ink);
+  text-shadow: none;
+}
+
+.app-shell .exploration-auto-layer :is(.auto-battle-toggle-row, .auto-battle-default, .auto-battle-potion-grid > label, .auto-battle-action-row) {
+  border: 4px solid transparent;
+  border-image: var(--game-ui-panel) 144 fill / 4px stretch;
+  border-radius: 0;
+  background: transparent;
+}
+
+.app-shell .exploration-auto-layer .toggle-button > i {
+  display: none;
+}
+
+.app-shell .exploration-auto-layer .toggle-button {
+  justify-content: center;
+  padding-inline: 5px;
+}
+
+.app-shell .exploration-auto-layer :is(select, .auto-battle-action-row > b) {
+  border: 4px solid transparent;
+  border-image: var(--game-ui-paper) 144 fill / 4px stretch;
+  border-radius: 0;
+  color: var(--game-ui-ink);
+  background-color: transparent;
+}

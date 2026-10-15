@@ -1,0 +1,290 @@
+[
+  {
+    "key": "all-items",
+    "label": "全部物品：冒险背包与小物件",
+    "tool": "functions.exec tools.image_gen__imagegen (built-in)",
+    "transparent_background": true,
+    "generatedSource": "C:\\Users\\afshu\\.codex\\generated_images\\01a12765-b012-7c53-b055-9fb96662851a\\exec-2f79d720-7da7-440d-9bbc-3c4dab9092db.png",
+    "sourcePath": "E:\\猫拉瑞亚\\FantasyFinal\\web\\public\\assets\\light-anime\\tab-icons-imagegen-v1\\sources\\all-items.png",
+    "runtimePath": "E:\\猫拉瑞亚\\FantasyFinal\\web\\public\\assets\\light-anime\\tab-icons-imagegen-v1\\all-items.png",
+    "sourceSha256": "8fc16faef9c2d5b31fa953472767ddb71b4c567b5d39a939c34ad15b607b9e2d",
+    "runtimeSha256": "0597febffc1adc1aa2f335bc195d9294712717061d966de18835212dbd1c74c4",
+    "source": {
+      "width": 1254,
+      "height": 1254,
+      "channels": 4,
+      "transparentPixels": 818073,
+      "partialAlphaPixels": 753890,
+      "opaquePixels": 553,
+      "transparentRatio": 0.5202319086101509,
+      "alphaBounds": {
+        "left": 0,
+        "top": 20,
+        "width": 1236,
+        "height": 1234
+      },
+      "subjectBounds": {
+        "left": 95,
+        "top": 146,
+        "width": 1066,
+        "height": 954
+      },
+      "corners": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "runtime": {
+      "width": 128,
+      "height": 128,
+      "channels": 4,
+      "transparentPixels": 10952,
+      "partialAlphaPixels": 5171,
+      "opaquePixels": 261,
+      "transparentRatio": 0.66845703125,
+      "alphaBounds": {
+        "left": 20,
+        "top": 24,
+        "width": 88,
+        "height": 79
+      },
+      "subjectBounds": {
+        "left": 20,
+        "top": 24,
+        "width": 88,
+        "height": 79
+      },
+      "corners": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "extraction": {
+      "left": 93,
+      "top": 144,
+      "width": 1070,
+      "height": 958
+    },
+    "prompt": "Use case: stylized-concept\nAsset type: FantasyFinal Chinese fantasy RPG inventory category tab icon, single raster PNG asset.\nPrimary request: A beautifully illustrated cute adventurer's leather backpack with a little rolled parchment and two small travel objects peeking out, the clear symbol for all inventory items.\nStyle/medium: Japanese light anime, chibi hand-painted game item icon; soft rounded proportions, polished painterly shading, clean warm brown contour lines. Friendly storybook fantasy, consistent with a sunny anime RPG village. Detailed material highlights but a clear compact silhouette that remains readable at 20–28 pixels.\nColor palette: warm honey brown leather, cream warm gold fastenings, a restrained turquoise teal accent. Soft warm illumination.\nComposition/framing: One centered object group in a square canvas; the complete backpack plus its small contents occupy approximately 70 percent of canvas width/height, leaving at least 15 percent clean empty margin on every edge. Slight three-quarter view, chunky front flap and prominent gold clasp.\nScene/backdrop: Truly transparent alpha background, isolated cutout.\nConstraints: Generate exactly one inventory icon, no text, no letters, no numbers, no watermark, no decorative UI frame, no tile or disc behind the subject, no scene, no border, no ground plane, no cast shadow outside the object, no SVG or vector look. Background pixels must be transparent, never a drawn checkerboard or a white backdrop."
+  },
+  {
+    "key": "equipment",
+    "label": "装备：交叉剑与小盾",
+    "tool": "functions.exec tools.image_gen__imagegen (built-in)",
+    "transparent_background": true,
+    "generatedSource": "C:\\Users\\afshu\\.codex\\generated_images\\01a12765-b012-7c53-b055-9fb96662851a\\exec-8b6584b5-77ba-47bc-86bf-ed3b53fc3fc4.png",
+    "sourcePath": "E:\\猫拉瑞亚\\FantasyFinal\\web\\public\\assets\\light-anime\\tab-icons-imagegen-v1\\sources\\equipment.png",
+    "runtimePath": "E:\\猫拉瑞亚\\FantasyFinal\\web\\public\\assets\\light-anime\\tab-icons-imagegen-v1\\equipment.png",
+    "sourceSha256": "6a4cf9c7d4226a1338a484f12bf74b73530b0cf2322f60a12facf35b6a021709",
+    "runtimeSha256": "50877ab1f30f580975042f1dd1497edb9f1822e207ef0d32f499f1f32de81bc8",
+    "source": {
+      "width": 1254,
+      "height": 1254,
+      "channels": 4,
+      "transparentPixels": 1058825,
+      "partialAlphaPixels": 512972,
+      "opaquePixels": 719,
+      "transparentRatio": 0.6733317816798049,
+      "alphaBounds": {
+        "left": 0,
+        "top": 35,
+        "width": 1238,
+        "height": 1130
+      },
+      "subjectBounds": {
+        "left": 122,
+        "top": 187,
+        "width": 1010,
+        "height": 850
+      },
+      "corners": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "runtime": {
+      "width": 128,
+      "height": 128,
+      "channels": 4,
+      "transparentPixels": 12056,
+      "partialAlphaPixels": 4038,
+      "opaquePixels": 290,
+      "transparentRatio": 0.73583984375,
+      "alphaBounds": {
+        "left": 20,
+        "top": 27,
+        "width": 88,
+        "height": 74
+      },
+      "subjectBounds": {
+        "left": 20,
+        "top": 27,
+        "width": 88,
+        "height": 74
+      },
+      "corners": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "extraction": {
+      "left": 120,
+      "top": 185,
+      "width": 1014,
+      "height": 854
+    },
+    "prompt": "Use case: stylized-concept\nAsset type: FantasyFinal Chinese fantasy RPG inventory category tab icon, exactly one raster PNG asset.\nStyle/medium: Japanese light anime, chibi hand-painted game item icon; soft rounded proportions, polished painterly shading, clean warm brown contour lines. Friendly storybook fantasy, consistent with a sunny anime RPG village. Detailed material highlights but a clear compact silhouette that remains readable at 20–28 pixels.\nColor palette: cream warm gold, honey brown outlines and accents, restrained turquoise teal; soft warm illumination, saturated subject colors for small-size readability.\nComposition/framing: One centered compact object group in a square canvas; the complete subject occupies approximately 70 percent of canvas width/height, leaving at least 15 percent clean empty margin on every edge. Chunky readable shapes.\nScene/backdrop: Truly transparent alpha background, isolated cutout.\nConstraints: Generate exactly one inventory icon, no text, no letters, no numbers, no watermark, no decorative UI frame, no tile or disc behind the subject, no scene, no border, no ground plane, no cast shadow outside the object, no SVG or vector look. Background pixels must be transparent, never a drawn checkerboard or a white backdrop.\nPrimary request: The equipment category icon: two cute short fantasy swords crossed behind a small rounded knight's shield. Bright softly shaded silver blades, warm gold hilts, brown grip leather, a turquoise teal shield face with simple gold edging. The crossed blades and shield are the only objects. Clear weapon-and-armor silhouette."
+  },
+  {
+    "key": "consumables",
+    "label": "道具：红蓝圆药水瓶",
+    "tool": "functions.exec tools.image_gen__imagegen (built-in)",
+    "transparent_background": true,
+    "generatedSource": "C:\\Users\\afshu\\.codex\\generated_images\\01a12765-b012-7c53-b055-9fb96662851a\\exec-eeaf4aaa-1e82-4c62-958c-60e7837d44c7.png",
+    "sourcePath": "E:\\猫拉瑞亚\\FantasyFinal\\web\\public\\assets\\light-anime\\tab-icons-imagegen-v1\\sources\\consumables.png",
+    "runtimePath": "E:\\猫拉瑞亚\\FantasyFinal\\web\\public\\assets\\light-anime\\tab-icons-imagegen-v1\\consumables.png",
+    "sourceSha256": "d77ac297fb9afcb5a5cf2b784fe1e2945d9212d6cf7eefdaca1cc0e0c9d14ef8",
+    "runtimeSha256": "05ea64162894bd775857832a63fd570809e0430a940c0e0797b442d5068bb40d",
+    "source": {
+      "width": 1254,
+      "height": 1254,
+      "channels": 4,
+      "transparentPixels": 1087459,
+      "partialAlphaPixels": 484505,
+      "opaquePixels": 552,
+      "transparentRatio": 0.6915408173907293,
+      "alphaBounds": {
+        "left": 0,
+        "top": 55,
+        "width": 1218,
+        "height": 1159
+      },
+      "subjectBounds": {
+        "left": 214,
+        "top": 228,
+        "width": 846,
+        "height": 794
+      },
+      "corners": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "runtime": {
+      "width": 128,
+      "height": 128,
+      "channels": 4,
+      "transparentPixels": 10827,
+      "partialAlphaPixels": 5338,
+      "opaquePixels": 219,
+      "transparentRatio": 0.66082763671875,
+      "alphaBounds": {
+        "left": 20,
+        "top": 22,
+        "width": 88,
+        "height": 83
+      },
+      "subjectBounds": {
+        "left": 20,
+        "top": 22,
+        "width": 88,
+        "height": 83
+      },
+      "corners": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "extraction": {
+      "left": 212,
+      "top": 226,
+      "width": 850,
+      "height": 798
+    },
+    "prompt": "Use case: stylized-concept\nAsset type: FantasyFinal Chinese fantasy RPG inventory category tab icon, exactly one raster PNG asset.\nStyle/medium: Japanese light anime, chibi hand-painted game item icon; soft rounded proportions, polished painterly shading, clean warm brown contour lines. Friendly storybook fantasy, consistent with a sunny anime RPG village. Detailed material highlights but a clear compact silhouette that remains readable at 20–28 pixels.\nColor palette: cream warm gold, honey brown outlines and accents, restrained turquoise teal; soft warm illumination, saturated subject colors for small-size readability.\nComposition/framing: One centered compact object group in a square canvas; the complete subject occupies approximately 70 percent of canvas width/height, leaving at least 15 percent clean empty margin on every edge. Chunky readable shapes.\nScene/backdrop: Truly transparent alpha background, isolated cutout.\nConstraints: Generate exactly one inventory icon, no text, no letters, no numbers, no watermark, no decorative UI frame, no tile or disc behind the subject, no scene, no border, no ground plane, no cast shadow outside the object, no SVG or vector look. Background pixels must be transparent, never a drawn checkerboard or a white backdrop.\nPrimary request: The consumable items category icon: two adorable plump round glass potion bottles, one containing ruby red healing potion, the other clear sapphire blue mana potion. Small honey-brown corks and a cream gold ring around the necks, smooth bright glass highlights, soft rounded cute chibi forms. The red and blue bottles overlap slightly as one easily recognized compact icon. Bottles are the only objects."
+  },
+  {
+    "key": "materials",
+    "label": "材料：金黄矿石与绿色草药",
+    "tool": "functions.exec tools.image_gen__imagegen (built-in)",
+    "transparent_background": true,
+    "generatedSource": "C:\\Users\\afshu\\.codex\\generated_images\\01a12765-b012-7c53-b055-9fb96662851a\\exec-4404f0e2-10cf-42c4-9d2f-bc0d88833c33.png",
+    "sourcePath": "E:\\猫拉瑞亚\\FantasyFinal\\web\\public\\assets\\light-anime\\tab-icons-imagegen-v1\\sources\\materials.png",
+    "runtimePath": "E:\\猫拉瑞亚\\FantasyFinal\\web\\public\\assets\\light-anime\\tab-icons-imagegen-v1\\materials.png",
+    "sourceSha256": "36eaa2fe241f48e50cd5f3058bc9cef859d970dd5a611a335ad88191c15186da",
+    "runtimeSha256": "9d126ef929278ee492abcefed591f173ec016d027fd2432b3b91b5b7521378f2",
+    "source": {
+      "width": 1254,
+      "height": 1254,
+      "channels": 4,
+      "transparentPixels": 966130,
+      "partialAlphaPixels": 605877,
+      "opaquePixels": 509,
+      "transparentRatio": 0.6143848456867848,
+      "alphaBounds": {
+        "left": 0,
+        "top": 57,
+        "width": 1232,
+        "height": 1197
+      },
+      "subjectBounds": {
+        "left": 133,
+        "top": 183,
+        "width": 1010,
+        "height": 890
+      },
+      "corners": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "runtime": {
+      "width": 128,
+      "height": 128,
+      "channels": 4,
+      "transparentPixels": 11425,
+      "partialAlphaPixels": 4732,
+      "opaquePixels": 227,
+      "transparentRatio": 0.69732666015625,
+      "alphaBounds": {
+        "left": 20,
+        "top": 25,
+        "width": 88,
+        "height": 78
+      },
+      "subjectBounds": {
+        "left": 20,
+        "top": 25,
+        "width": 88,
+        "height": 78
+      },
+      "corners": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "extraction": {
+      "left": 131,
+      "top": 181,
+      "width": 1014,
+      "height": 894
+    },
+    "prompt": "Use case: stylized-concept\nAsset type: FantasyFinal Chinese fantasy RPG inventory category tab icon, exactly one raster PNG asset.\nStyle/medium: Japanese light anime, chibi hand-painted game item icon; soft rounded proportions, polished painterly shading, clean warm brown contour lines. Friendly storybook fantasy, consistent with a sunny anime RPG village. Detailed material highlights but a clear compact silhouette that remains readable at 20–28 pixels.\nColor palette: cream warm gold, honey brown outlines and accents, restrained turquoise teal; soft warm illumination, saturated subject colors for small-size readability.\nComposition/framing: One centered compact object group in a square canvas; the complete subject occupies approximately 70 percent of canvas width/height, leaving at least 15 percent clean empty margin on every edge. Chunky readable shapes.\nScene/backdrop: Truly transparent alpha background, isolated cutout.\nConstraints: Generate exactly one inventory icon, no text, no letters, no numbers, no watermark, no decorative UI frame, no tile or disc behind the subject, no scene, no border, no ground plane, no cast shadow outside the object, no SVG or vector look. Background pixels must be transparent, never a drawn checkerboard or a white backdrop.\nPrimary request: The crafting materials category icon: a chunky golden yellow ore rock with a few large clean crystal facets paired with a little fresh green medicinal herb sprig. Warm gold mineral with honey brown shaded facets, emerald and soft grass green leaves, one cream gold tied stem. The ore and herb form one coherent compact icon. These are the only objects."
+  }
+]

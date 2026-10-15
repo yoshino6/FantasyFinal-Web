@@ -1,0 +1,212 @@
+/* Party-only illustration layout. Frames retain their transparent drawn edges. */
+.app-shell .social-party-card:has(> .anime-party-refinement) { padding: 0; border: 0; border-image: none; border-radius: 0; background: transparent; box-shadow: none; }
+.party-popup.anime-party-refinement {
+  --party-ink: #26344b;
+  --party-muted: #7c6a57;
+  --party-paper: url('/assets/light-anime/social-v1/social-paper-frame.svg');
+  --party-member-frame: url('/assets/light-anime/social-v1/social-member-frame.svg');
+  --party-request-frame: url('/assets/light-anime/social-v1/social-request-frame.svg');
+  --party-button: url('/assets/light-anime/social-v1/social-button-teal.svg');
+  display: grid;
+  container: party-layout / inline-size;
+  min-width: 0;
+  max-height: none;
+  gap: 12px;
+  padding: 0 0 4px;
+  overflow: visible;
+  color: var(--party-ink);
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: left;
+}
+.anime-party-refinement *, .anime-party-refinement *::before, .anime-party-refinement *::after { box-sizing: border-box; }
+.anime-party-refinement :is(h3, h4, p, dl, dd) { margin: 0; }
+.anime-party-refinement :is(button, input, textarea, select) { font: inherit; }
+.anime-party-refinement :is(button, label, article, section, form) { min-width: 0; }
+.anime-party-refinement :is(h3, h4, .party-member-name, .party-recruitment-heading > strong) { font-family: 'STKaiti', 'KaiTi', 'Microsoft YaHei', serif; font-weight: 700; }
+.anime-party-refinement :is(.party-toolbar, .party-toolbar > span, .party-section-heading, .party-section-heading h3, .party-current-heading, .party-current-heading h3, .party-recruitment-meta, .party-recruitment-meta > span, .party-fixed-count, .party-fixed-count > span) { display: flex; align-items: center; gap: 7px; }
+.anime-party-refinement .party-toolbar { justify-content: space-between; padding: 0 4px; color: var(--party-muted); font-size: 12px; }
+.anime-party-refinement .party-text-button { display: inline-flex; align-items: center; justify-content: center; gap: 5px; min-height: 32px; padding: 5px 14px; border: 0; border-radius: 0; color: #64513e; background: url('/assets/light-anime/social-v1/social-button-paper.svg') center / 100% 100% no-repeat; }
+.anime-party-refinement .party-text-button > span { font-size: 23px; line-height: 1; }
+.anime-party-refinement .party-tabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; padding-bottom: 6px; }
+.anime-party-refinement .party-tabs > button { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; padding: 11px 13px 15px; border: 0; border-radius: 0; background: url('/assets/light-anime/social-v1/social-tab-paper.svg') center / 100% 100% no-repeat; color: var(--party-ink); font-size: clamp(16px, 4.4cqw, 23px); font-family: 'STKaiti', 'KaiTi', serif; font-weight: 700; box-shadow: none; }
+.anime-party-refinement .party-tabs > button.active { background-image: url('/assets/light-anime/social-v1/social-tab-active.svg'); color: #fffdf0; text-shadow: 0 1px 1px #176f7c; }
+.anime-party-refinement .party-section { display: grid; min-width: 0; gap: 13px; padding: 11px 9px 13px; background: transparent; border: 10px solid transparent; border-image: var(--party-paper) 24 fill / 10px / 0 stretch; border-radius: 0; }
+.anime-party-refinement .party-section-heading { justify-content: space-between; flex-wrap: wrap; gap: 6px 12px; padding-bottom: 8px; border-bottom: 1px solid #cdb38a; }
+.anime-party-refinement .party-section-heading h3, .anime-party-refinement .party-current-heading h3 { font-size: clamp(19px, 5.3cqw, 27px); line-height: 1.25; }
+.anime-party-refinement .party-section-caption { margin: 0; color: var(--party-muted); font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; }
+.anime-party-refinement .party-slot-preview { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 7px; }
+.anime-party-refinement .party-empty-slot { position: relative; display: grid; justify-items: center; align-content: end; aspect-ratio: 160 / 220; min-width: 0; padding: 5px 3px 7px; color: #77604d; background: transparent; border: 6px solid transparent; border-image: var(--party-member-frame) 24 fill / 6px / 0 stretch; }
+.anime-party-refinement .party-empty-slot > img { position: absolute; inset: 2% 0 4%; width: 100%; height: 94%; object-fit: contain; opacity: .64; }
+.anime-party-refinement .party-empty-slot > small { position: relative; padding: 1px 3px; font-size: clamp(10px, 3.1cqw, 14px); font-family: 'STKaiti', 'KaiTi', serif; font-weight: 700; text-shadow: 0 1px #fff7e5; }
+.anime-party-refinement .party-slot-add { position: relative; display: grid; place-items: center; width: clamp(24px, 7.6cqw, 37px); aspect-ratio: 1; margin-bottom: 3px; border: 2px solid #fff6df; border-radius: 50%; color: #fffaf0; background: #8e7c6bd9; font-family: sans-serif; font-size: 27px; line-height: 1; box-shadow: 0 0 0 1px #ac957a; }
+.anime-party-refinement :is(.party-form, .party-search-form) { display: grid; gap: 12px; }
+.anime-party-refinement .party-create-form { grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
+.anime-party-refinement :is(.party-form, .party-search-form, .party-inline-form) label { display: grid; min-width: 0; gap: 6px; margin: 0; color: var(--party-ink); font-weight: 700; font-size: 13px; }
+.anime-party-refinement label > span:first-child { display: flex; align-items: center; gap: 5px; }
+.anime-party-refinement :is(.party-form, .party-search-form, .party-inline-form) :is(input, textarea, select) { display: block; width: 100%; max-width: 100%; min-width: 0; min-height: 42px; margin: 0; padding: 9px 10px; border: 1.5px solid #aa9c88; border-radius: 6px 9px 5px 7px; background: #fffdf5; color: var(--party-ink); font-size: 13px; font-weight: 400; line-height: 1.45; box-shadow: inset 0 1px 3px #94754e0a; }
+.anime-party-refinement :is(input, textarea)::placeholder { color: #989694; opacity: 1; }
+.anime-party-refinement .party-form textarea { min-height: 86px; resize: vertical; overflow-wrap: anywhere; }
+.anime-party-refinement .party-description-field { grid-column: 1 / -1; }
+.anime-party-refinement .party-field-limit { margin-left: auto; color: #8a7967; font-size: 10px; font-weight: 400; white-space: nowrap; }
+.anime-party-refinement .party-fixed-count { align-self: end; flex-wrap: wrap; justify-content: center; gap: 4px; min-height: 42px; margin-bottom: 1px; padding: 5px 0 5px 7px; color: #3c3b40; font-size: 12px; }
+.anime-party-refinement .party-fixed-count strong { color: #cc6a38; font-size: 24px; line-height: 1; }
+.anime-party-refinement .party-fixed-count small { color: var(--party-ink); font-size: 13px; }
+.anime-party-refinement :is(.party-primary, .party-quiet, .party-danger, .party-gold, .party-blue, .party-load-more) { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; min-width: 0; padding: 10px 17px; border: 0; border-radius: 0; background: var(--party-button) center / 100% 100% no-repeat; color: #fffbed; box-shadow: none; font-family: 'STKaiti', 'KaiTi', 'Microsoft YaHei', serif; font-size: 16px; font-weight: 700; text-align: center; text-shadow: 0 1px 1px #126f79; line-height: 1.2; overflow-wrap: anywhere; cursor: pointer; }
+.anime-party-refinement .party-quiet, .anime-party-refinement .party-load-more { --party-button: url('/assets/light-anime/social-v1/social-button-paper.svg'); color: var(--party-ink); text-shadow: 0 1px #fff9eb; }
+.anime-party-refinement .party-danger { --party-button: url('/assets/light-anime/social-v1/social-button-red.svg'); text-shadow: 0 1px 1px #a94436; }
+.anime-party-refinement .party-gold { --party-button: url('/assets/light-anime/social-v1/social-button-gold.svg'); color: #67411f; text-shadow: 0 1px #ffeec3; }
+.anime-party-refinement .party-blue { --party-button: url('/assets/light-anime/social-v1/social-button-blue.svg'); text-shadow: 0 1px 1px #1d628e; }
+.anime-party-refinement .party-main-submit { justify-self: center; min-width: min(100%, 184px); min-height: 52px; margin: 1px 0 3px; font-size: 21px; }
+.anime-party-refinement .party-create-form > .party-main-submit { grid-column: 1 / -1; }
+.anime-party-refinement button:disabled { opacity: .5; filter: saturate(.65); cursor: default; }
+.anime-party-refinement :is(button, input, textarea, select):focus-visible { outline: 3px solid #2b9fad; outline-offset: 3px; }
+.anime-party-refinement .party-preview { position: relative; display: grid; gap: 12px; padding: 10px 9px 12px; border: 10px solid transparent; border-image: var(--party-paper) 24 fill / 10px / 0 stretch; background: transparent; color: var(--party-ink); }
+.anime-party-refinement .party-preview h4 { display: flex; align-items: center; gap: 7px; font-size: 18px; line-height: 1.4; }
+.anime-party-refinement .party-preview-ribbon { justify-self: start; min-height: 36px; margin: -20px 0 0 -11px; padding: 6px 27px 6px 17px; background: url('/assets/light-anime/social-v1/social-section-ribbon.svg') center / 100% 100% no-repeat; color: #72553d; font-size: 17px; text-shadow: 0 1px #fff9e8; }
+.anime-party-refinement .party-preview-body { display: flex; align-items: center; gap: 11px; min-width: 0; }
+.anime-party-refinement .party-preview-copy { display: grid; flex: 1; min-width: 0; gap: 7px; overflow-wrap: anywhere; }
+.anime-party-refinement .party-preview-copy > strong { font-family: 'STKaiti', 'KaiTi', serif; font-size: 19px; }
+.anime-party-refinement .party-preview-copy :is(p, small) { margin: 0; line-height: 1.55; }
+.anime-party-refinement .party-preview-copy small { color: var(--party-muted); font-size: 11px; }
+.anime-party-refinement .party-preview-flag { flex: 0 0 46px; width: 46px; height: 82px; object-fit: contain; }
+.anime-party-refinement .party-preview-journey { flex: 0 0 82px; width: 82px; height: 92px; object-fit: contain; }
+.anime-party-refinement .party-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.anime-party-refinement .party-preview-actions { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.anime-party-refinement .party-preview-actions > button { width: 100%; font-size: 15px; }
+.anime-party-refinement .party-search-form { grid-template-columns: minmax(0, 1.8fr) minmax(0, 1.1fr) minmax(66px, .8fr) auto; align-items: end; gap: 9px; }
+.anime-party-refinement .party-search-form > button { min-height: 42px; padding: 9px 15px; }
+.anime-party-refinement .party-input-icon { position: relative; display: block; min-width: 0; }
+.anime-party-refinement .party-input-icon > .social-glyph { position: absolute; left: 9px; top: 12px; color: #62594d; pointer-events: none; }
+.anime-party-refinement .party-input-icon input { padding-left: 32px; }
+.anime-party-refinement :is(.party-recruitment-list, .party-application-list) { display: grid; min-width: 0; gap: 12px; }
+.anime-party-refinement .party-recruitment-card { position: relative; display: grid; gap: 10px; min-width: 0; padding: 8px 7px 10px; border: 9px solid transparent; border-image: var(--party-request-frame) 24 fill / 9px / 0 stretch; background: transparent; }
+.anime-party-refinement .party-recruitment-summary { display: flex; align-items: center; gap: 11px; width: 100%; min-width: 0; padding: 0; border: 0; border-radius: 0; color: inherit; background: transparent; text-align: left; box-shadow: none; cursor: pointer; }
+.anime-party-refinement .party-avatar-frame { position: relative; display: block; flex-shrink: 0; min-width: 0; border: 4px solid transparent; border-image: var(--party-member-frame) 24 fill / 4px / 0 stretch; background: transparent; }
+.anime-party-refinement .party-avatar-image { display: block; width: 100% !important; max-width: 100%; height: 100% !important; padding: 0 !important; border: 0 !important; border-radius: 0 !important; background: transparent !important; box-shadow: none !important; }
+.anime-party-refinement .party-avatar-image.personalized img { top: 0; width: 250%; }
+.anime-party-refinement .party-recruitment-avatar { flex-basis: 66px; width: 66px; height: 80px; margin-bottom: 7px; }
+.anime-party-refinement .party-recruitment-avatar > small { position: absolute; inset: auto -3px -10px; display: block; padding: 2px 8px; color: #624320; background: url('/assets/light-anime/social-v1/social-button-gold.svg') center / 100% 100% no-repeat; font-size: 11px; font-family: 'STKaiti', 'KaiTi', serif; font-weight: 700; text-align: center; }
+.anime-party-refinement .party-recruitment-heading { display: grid; flex: 1; min-width: 0; gap: 6px; }
+.anime-party-refinement .party-recruitment-heading > strong { color: #202d43; font-size: clamp(17px, 5cqw, 23px); line-height: 1.35; overflow-wrap: anywhere; }
+.anime-party-refinement .party-recruitment-heading > small { color: var(--party-muted); font-size: 11px; overflow-wrap: anywhere; }
+.anime-party-refinement .party-recruitment-meta { flex-wrap: wrap; gap: 4px 9px; font-size: 11px; color: #62594b; }
+.anime-party-refinement .party-recruitment-meta > span { gap: 3px; min-width: 0; overflow-wrap: anywhere; }
+.anime-party-refinement .party-recruitment-meta > span:nth-child(-n+2) { padding: 1px 5px; border-radius: 40% 32% 30% 34% / 50%; background: #e3e9dfc7; }
+.anime-party-refinement .party-fold-indicator { flex: 0 0 18px; align-self: flex-start; color: #8c7966; font: 700 26px/1 sans-serif; }
+.anime-party-refinement .party-fold-indicator.is-open { transform: rotate(180deg); }
+.anime-party-refinement :is(.party-recruitment-excerpt, .party-recruitment-detail > p) { margin: 0; padding: 10px 11px; background: url('/assets/light-anime/social-v1/social-paper-tile.svg') repeat; border: 1px solid #e5cfaa; border-radius: 8px 11px 6px 9px; color: #5d554b; line-height: 1.65; overflow-wrap: anywhere; }
+.anime-party-refinement .party-recruitment-excerpt { font-size: 12px; }
+.anime-party-refinement .party-recruitment-detail { display: grid; min-width: 0; gap: 11px; padding-top: 9px; border-top: 1px solid #cfb98e; }
+.anime-party-refinement .party-recruitment-capacity { display: grid; gap: 4px; padding: 2px 3px; }
+.anime-party-refinement .party-recruitment-capacity > span { display: flex; align-items: center; gap: 7px; font-size: 14px; }
+.anime-party-refinement .party-recruitment-capacity small { color: var(--party-muted); font-size: 11px; }
+.anime-party-refinement .party-recruitment-foot { display: flex; align-items: center; flex-wrap: wrap; justify-content: space-between; gap: 7px; }
+.anime-party-refinement .party-recruitment-foot > button { margin-left: auto; min-width: 140px; }
+.anime-party-refinement .party-status { justify-self: start; display: inline-flex; align-items: center; min-height: 25px; padding: 4px 11px; color: #356f68; background: url('/assets/light-anime/social-v1/social-button-paper.svg') center / 100% 100% no-repeat; border: 0; border-radius: 0; font-size: 11px; line-height: 1.4; }
+.anime-party-refinement .party-collapsed-status { margin-top: -3px; }
+.anime-party-refinement .party-load-more { justify-self: center; min-width: 160px; }
+.anime-party-refinement .party-scenery { position: relative; width: 100%; height: clamp(72px, 22cqw, 138px); overflow: hidden; }
+.anime-party-refinement .party-scenery img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 56%; }
+.anime-party-refinement .party-current-heading { align-items: start; justify-content: space-between; flex-wrap: wrap; gap: 7px; padding-bottom: 10px; border-bottom: 1px solid #ccb58f; }
+.anime-party-refinement .party-current-name { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1px 10px; max-width: 100%; min-width: 0; padding: 4px 9px; border: 5px solid transparent; border-image: var(--party-request-frame) 24 fill / 5px / 0 stretch; background: transparent; }
+.anime-party-refinement .party-current-name > strong { font-family: 'STKaiti', 'KaiTi', serif; font-size: 20px; line-height: 1.3; overflow-wrap: anywhere; }
+.anime-party-refinement .party-current-name > span { align-self: center; white-space: nowrap; font-size: 14px; }
+.anime-party-refinement .party-current-name > small { grid-column: 1 / -1; color: var(--party-muted); font-size: 11px; overflow-wrap: anywhere; }
+.anime-party-refinement .party-member-list { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.anime-party-refinement .party-member { position: relative; display: grid; align-content: start; min-width: 0; gap: 8px; padding: 6px 4px 9px; border: 6px solid transparent; border-image: var(--party-member-frame) 24 fill / 6px / 0 stretch; background: transparent; }
+.anime-party-refinement .party-member-avatar { width: 100%; aspect-ratio: .67; height: auto; border: 0; border-image: none; }
+.anime-party-refinement .party-leader-ribbon { position: absolute; left: -9px; top: -7px; display: inline-flex; align-items: center; gap: 2px; min-height: 22px; padding: 3px 11px 3px 5px; background: url('/assets/light-anime/social-v1/social-section-ribbon.svg') center / 100% 100% no-repeat; color: #72553d; font-family: 'STKaiti', 'KaiTi', serif; font-size: 11px; font-weight: 700; }
+.anime-party-refinement .party-member-info { display: grid; align-content: start; min-width: 0; gap: 3px; width: 100%; text-align: center; }
+.anime-party-refinement .party-member-name { min-width: 0; font-size: clamp(13px, 3.7cqw, 18px); line-height: 1.35; overflow-wrap: anywhere; }
+.anime-party-refinement .party-member-name em { display: inline-block; margin-left: 3px; padding: 2px 5px; border: 0; color: #fffbee; background: url('/assets/light-anime/social-v1/social-button-teal.svg') center / 100% 100% no-repeat; border-radius: 0; font: normal 10px/1.5 'Microsoft YaHei', sans-serif; vertical-align: middle; }
+.anime-party-refinement .party-member-level { font-size: 12px; color: #576247; font-weight: 700; }
+.anime-party-refinement .party-member-data { display: grid; gap: 5px; padding-top: 5px; border-top: 1px solid #dfccb0; text-align: left; }
+.anime-party-refinement .party-member-data > div { display: grid; gap: 1px; min-width: 0; }
+.anime-party-refinement .party-member-data dt { display: flex; align-items: center; gap: 3px; color: #86705c; font-size: 10px; }
+.anime-party-refinement .party-member-data dd { min-width: 0; color: #3e3f44; font-size: 11px; line-height: 1.4; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.anime-party-refinement .party-member-empty { place-content: center; justify-items: center; min-height: 225px; border-style: dashed; color: #917c65; text-align: center; }
+.anime-party-refinement .party-waiting-avatar { position: relative; display: grid; place-items: center; width: min(100%, 70px); aspect-ratio: .8; color: #ac9f8a; opacity: .72; }
+.anime-party-refinement .party-waiting-avatar b { position: absolute; left: 50%; top: 44%; display: grid; place-items: center; width: 32px; aspect-ratio: 1; border: 1px solid #c5b295; border-radius: 50%; color: #8f7c67; background: #fff5de; font: 26px/1 sans-serif; transform: translate(-50%, -50%); }
+.anime-party-refinement .party-member-empty > span:last-child { font-family: 'STKaiti', 'KaiTi', serif; font-size: 14px; line-height: 1.6; }
+.anime-party-refinement .party-member-actions { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 7px; margin-top: 1px; }
+.anime-party-refinement .party-member-actions:has(> button:nth-child(2):last-child) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.anime-party-refinement .party-member-actions:has(> button:only-child) { grid-template-columns: minmax(0, 1fr); }
+.anime-party-refinement .party-member-actions > button { flex-direction: column; gap: 3px; min-height: 52px; padding: 9px 5px; font-size: 13px; }
+.anime-party-refinement .party-member-actions > button > span { font: 24px/18px sans-serif; }
+.anime-party-refinement .party-inline-form { display: flex; align-items: end; gap: 9px; padding: 10px 7px; border-top: 1px solid #cfb68e; }
+.anime-party-refinement .party-inline-form label { flex: 1; }
+.anime-party-refinement .party-inline-form > button { min-height: 42px; padding-right: 12px; padding-left: 12px; font-size: 14px; }
+.anime-party-refinement .party-leave-preview { border-image-source: var(--party-request-frame); }
+.anime-party-refinement .party-leave-preview h4 { color: #9c4e3c; }
+.anime-party-refinement .party-leave-preview p { overflow-wrap: anywhere; }
+.anime-party-refinement .party-current-recruitment { display: grid; gap: 5px; padding: 6px 7px; background: transparent; border: 6px solid transparent; border-image: var(--party-request-frame) 24 fill / 6px / 0 stretch; border-radius: 0; }
+.anime-party-refinement .party-current-recruitment p { overflow-wrap: anywhere; }
+.anime-party-refinement .party-current-recruitment small { color: var(--party-muted); font-size: 11px; }
+.anime-party-refinement .party-publish-form { grid-template-columns: minmax(0, 1fr) auto; align-items: end; }
+.anime-party-refinement .party-publish-form .party-target-field { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; }
+.anime-party-refinement .party-target-field select { width: 95px; }
+.anime-party-refinement .party-publish-form > .party-main-submit { min-width: 135px; min-height: 46px; margin: 0; font-size: 19px; }
+.anime-party-refinement .party-publish-preview { border-image: var(--party-request-frame) 24 / 10px / 0 stretch; background: linear-gradient(#f0f9fe, #e3f3fb); background-clip: padding-box; filter: drop-shadow(0 0 2px #80bacc66); }
+.anime-party-refinement .party-publish-preview > h4 { color: #326a79; }
+.anime-party-refinement .party-publish-thumbnail { flex: 0 0 72px; width: 72px; height: 88px; object-fit: cover; border: 5px solid transparent; border-image: var(--party-member-frame) 24 fill / 5px / 0 stretch; }
+.anime-party-refinement .party-application { display: grid; grid-template-columns: 76px minmax(0, 1fr) auto; align-items: center; gap: 10px; min-width: 0; padding: 9px 7px 10px; border: 8px solid transparent; border-image: var(--party-request-frame) 24 fill / 8px / 0 stretch; background: transparent; }
+.anime-party-refinement .party-application-avatar { width: 76px; height: 90px; }
+.anime-party-refinement .party-application-copy { display: grid; min-width: 0; gap: 4px; }
+.anime-party-refinement .party-application-copy > strong { font-family: 'STKaiti', 'KaiTi', serif; font-size: 19px; line-height: 1.3; overflow-wrap: anywhere; }
+.anime-party-refinement .party-application-copy :is(small, time) { color: var(--party-muted); font-size: 10px; line-height: 1.5; overflow-wrap: anywhere; }
+.anime-party-refinement .party-application-copy p { padding: 4px 6px; color: #62513e; background: #eee1c5a3; border-radius: 3px 7px 3px 6px; font-size: 12px; overflow-wrap: anywhere; }
+.anime-party-refinement .party-application-actions { display: grid; grid-template-columns: 1fr; gap: 7px; }
+.anime-party-refinement .party-application-actions > button { min-width: 70px; min-height: 40px; padding: 8px 10px; font-size: 14px; }
+.anime-party-refinement :is(.party-empty, .party-state) { display: grid; justify-items: center; gap: 8px; margin: 0; padding: 19px 9px; color: #8d7c66; font-size: 12px; line-height: 1.6; text-align: center; overflow-wrap: anywhere; }
+.anime-party-refinement .party-error { margin: 0; padding: 10px 12px; border: 1px solid #d4a08d; border-radius: 4px 8px 3px 7px; color: #9d4c3b; background: #fff0e1; overflow-wrap: anywhere; }
+.floating-social-panel .party-popup.anime-party-refinement { max-height: min(740px, calc(82dvh - 62px)); padding-right: 5px; overflow-y: auto; overscroll-behavior: contain; }
+@container party-layout (max-width: 580px) {
+  .anime-party-refinement .party-search-form { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .anime-party-refinement .party-search-form .party-keyword-field { grid-column: 1 / -1; }
+  .anime-party-refinement .party-search-form > button { align-self: end; }
+  .anime-party-refinement .party-application { grid-template-columns: 64px minmax(0, 1fr); gap: 9px; }
+  .anime-party-refinement .party-application-avatar { width: 64px; height: 80px; }
+  .anime-party-refinement .party-application-actions { grid-column: 1 / -1; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .anime-party-refinement .party-application-actions > button { min-height: 42px; }
+  .anime-party-refinement .party-preview-journey { flex-basis: 62px; width: 62px; height: 82px; }
+  .anime-party-refinement .party-create-preview .party-preview-body { flex-wrap: wrap; }
+  .anime-party-refinement .party-create-preview .party-preview-copy { flex-basis: calc(100% - 70px); }
+  .anime-party-refinement .party-create-preview .party-preview-journey { display: none; }
+}
+@container party-layout (max-width: 330px) {
+  .anime-party-refinement .party-section { padding: 9px 5px 11px; gap: 11px; border-width: 7px; border-image-width: 7px; }
+  .anime-party-refinement .party-tabs { gap: 5px; }
+  .anime-party-refinement .party-tabs > button { min-height: 46px; gap: 5px; padding: 8px 6px 13px; font-size: 17px; }
+  .anime-party-refinement .party-tabs .social-glyph { width: 20px; height: 20px; }
+  .anime-party-refinement .party-slot-preview { gap: 4px; }
+  .anime-party-refinement .party-empty-slot { padding: 2px 0 4px; border-width: 4px; border-image-width: 4px; }
+  .anime-party-refinement .party-empty-slot > small { padding: 0; font-size: 10px; }
+  .anime-party-refinement .party-slot-add { width: 23px; font-size: 22px; }
+  .anime-party-refinement .party-create-form { grid-template-columns: minmax(0, 1fr); gap: 9px; }
+  .anime-party-refinement .party-fixed-count { justify-content: start; padding: 0 2px; min-height: 26px; }
+  .anime-party-refinement .party-fixed-count strong { font-size: 20px; }
+  .anime-party-refinement .party-member-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .anime-party-refinement .party-member { padding: 6px 6px 9px; }
+  .anime-party-refinement .party-member-avatar { aspect-ratio: .95; }
+  .anime-party-refinement .party-member-name { font-size: 17px; }
+  .anime-party-refinement .party-member-data dd { font-size: 12px; }
+  .anime-party-refinement .party-member-empty { min-height: 205px; }
+  .anime-party-refinement .party-member-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .anime-party-refinement .party-member-actions > button { flex-direction: row; min-height: 44px; font-size: 13px; }
+  .anime-party-refinement .party-recruitment-avatar { flex-basis: 54px; width: 54px; height: 68px; }
+  .anime-party-refinement .party-recruitment-summary { gap: 8px; }
+  .anime-party-refinement .party-recruitment-heading > strong { font-size: 18px; }
+  .anime-party-refinement .party-publish-form { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .anime-party-refinement .party-publish-form > .party-main-submit { min-width: 150px; }
+  .anime-party-refinement .party-preview { padding: 8px 5px 10px; }
+  .anime-party-refinement .party-preview-actions { gap: 6px; }
+  .anime-party-refinement .party-preview-actions > button { min-height: 44px; padding: 9px 8px; font-size: 14px; }
+  .anime-party-refinement .party-preview-copy > strong { font-size: 17px; }
+  .anime-party-refinement .party-preview-copy { gap: 6px; }
+  .anime-party-refinement .party-preview-flag { flex-basis: 38px; width: 38px; height: 72px; }
+  .anime-party-refinement .party-publish-thumbnail { flex-basis: 54px; width: 54px; height: 72px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .anime-party-refinement { scroll-behavior: auto; }
+}

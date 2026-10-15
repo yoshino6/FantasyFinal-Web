@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="192" viewBox="0 0 256 192" fill="none">
+  <defs>
+    <linearGradient id="paper" x1="24" y1="9" x2="234" y2="181" gradientUnits="userSpaceOnUse"><stop stop-color="#fffcf0"/><stop offset=".48" stop-color="#fff7e5"/><stop offset="1" stop-color="#f6e9cd"/></linearGradient>
+    <linearGradient id="edge" x1="0" y1="5" x2="0" y2="187" gradientUnits="userSpaceOnUse"><stop stop-color="#d0b087"/><stop offset=".5" stop-color="#b18c64"/><stop offset="1" stop-color="#b99b72"/></linearGradient>
+    <mask id="frame-only"><path d="M0 0h256v192H0Z" fill="#fff"/><path d="M24 24h208v144H24Z" fill="#000"/></mask>
+    <g id="corner"><path d="M1 13C4 10 2 5 6 4c2-1 2-3 4-3l5 1" stroke="#b1936b" stroke-width="1.2"/><path d="M3 12c2-2 4-1 4-4 0-2 2-3 4-3" stroke="#ead4ae" stroke-width="1.3"/><path d="M5 11c0-3 1-4 3-4 1 2 0 3-3 4Zm5-7c0-2 2-3 4-2 0 2-1 3-4 2Z" fill="#ccb38c"/><path d="m2 4 3-2 4 1-3 1-1 4Z" fill="#e4cda6"/><circle cx="7.8" cy="5.2" r="1" fill="#f4dfb4"/></g>
+  </defs>
+  <g mask="url(#frame-only)">
+  <path d="m17 7 29 1 7-2 40 1 27-1 18 1 42-1 18 2 40-1 6 6 3 6-1 35 1 29-1 35 1 33-2 22-7 8-31 1-29-1-15 1-43-1-31 2-26-2-25 1-15-2-7-6-1-28 1-33-1-37 1-28-1-24 3-9Z" fill="#7f623f" opacity=".18" transform="translate(0 3)"/>
+  <path d="m17 7 29 1 7-2 40 1 27-1 18 1 42-1 18 2 40-1 6 6 3 6-1 35 1 29-1 35 1 33-2 22-7 8-31 1-29-1-15 1-43-1-31 2-26-2-25 1-15-2-7-6-1-28 1-33-1-37 1-28-1-24 3-9Z" fill="url(#paper)" stroke="url(#edge)" stroke-width="1.6"/>
+  <path d="m18 11 28 1 7-2 40 1 27-1 18 1 42-1 18 2 38-1 5 5 2 5-1 33 1 29-1 35 1 32-2 22-5 5-29 1-29-1-15 1-43-1-31 2-26-2-25 1-13-2-5-4-1-27 1-33-1-37 1-28-1-23 2-7Z" stroke="#fffdf3" stroke-width="2"/>
+  <path d="M26 15h57l5-1 53 1 35-1 52 2 10 9-1 58 1 74-10 13-53 1-55-1-34 1-60-1-10-12 1-56-1-75Z" stroke="#cfb28a" stroke-opacity=".78" stroke-width=".8"/>
+  <path d="M26 17h55m64-1 29 0m-150 155 58 1m63-1h80M15 30l1 47m0 40-1 41m225-124-1 46m1 43-1 35" stroke="#eee0c1" stroke-width=".8"/>
+  <path d="M17 7c1 6-4 10-7 12l2-8 5-4Zm221 0-2 10 10 2-3-7-5-5ZM10 172l12-2-5 12-5-4-2-6Zm229 7-10-8 13-2-3 10Z" fill="#e4caa0" stroke="#c9aa7d" stroke-width=".7"/>
+  <path d="m17 8-1 8-5 2m228-10-2 8 8 2M11 174l8-2-3 9m224-4-9-5 10-1" stroke="#fff9e7" stroke-width="1.4"/>
+  <use href="#corner" transform="translate(14 13)"/><use href="#corner" transform="translate(242 13) scale(-1 1)"/><use href="#corner" transform="translate(14 179) scale(1 -1)"/><use href="#corner" transform="translate(242 179) scale(-1 -1)"/>
+  </g>
+</svg>

@@ -1,0 +1,130 @@
+/* One painted square owns the border, rarity fill and light effects. */
+.app-shell[data-visual='light-anime'][data-viewport-layout][data-page] .item-rarity-slot[data-item-rarity] {
+  --item-rarity-edge:#848a90;
+  --item-rarity-fill:#e3e7eb;
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+  border:2px solid var(--item-rarity-edge);
+  border-image:none;
+  border-radius:7px;
+  outline:none;
+  background-color:var(--item-rarity-fill);
+  background-image:linear-gradient(145deg,#ffffff55,var(--item-rarity-fill) 75%);
+  background-size:100% 100%;
+  background-position:50% 50%;
+  box-shadow:none;
+  animation:none;
+}
+.app-shell[data-visual='light-anime'][data-viewport-layout][data-page] .item-rarity-slot[data-item-rarity='excellent'] { --item-rarity-edge:#347c43; --item-rarity-fill:#75c987; }
+.app-shell[data-visual='light-anime'][data-viewport-layout][data-page] .item-rarity-slot[data-item-rarity='fine'] { --item-rarity-edge:#2d72b2; --item-rarity-fill:#76b3ed; }
+.app-shell[data-visual='light-anime'][data-viewport-layout][data-page] .item-rarity-slot[data-item-rarity='rare'] { --item-rarity-edge:#7648a4; --item-rarity-fill:#b18bdf; }
+.app-shell[data-visual='light-anime'][data-viewport-layout][data-page] .item-rarity-slot[data-item-rarity='legendary'] { --item-rarity-edge:#af5b17; --item-rarity-fill:#f5a047; }
+.app-shell[data-visual='light-anime'][data-viewport-layout][data-page] .item-rarity-slot[data-item-rarity='epic'] { --item-rarity-edge:#967010; --item-rarity-fill:#edc64a; }
+.app-shell[data-visual='light-anime'][data-viewport-layout][data-page] .item-rarity-slot[data-item-rarity='artifact'] {
+  --item-rarity-edge:#ac78b9;
+  --item-rarity-fill:#bba0de;
+  background-image:linear-gradient(125deg,#ee8aa5 0%,#efae55 8%,#ece36c 16%,#74d6a1 24%,#6ec9ed 32%,#a589e9 40%,#ee8aa5 50%,#efae55 58%,#ece36c 66%,#74d6a1 74%,#6ec9ed 82%,#a589e9 90%,#ee8aa5 100%);
+  background-size:200% 200%;
+  animation:item-rarity-rainbow 4.8s ease-in-out infinite;
+}
+/* The existing raster art stays transparent; it must not paint a second cream tile. */
+.app-shell[data-visual='light-anime'][data-viewport-layout][data-page] .item-rarity-slot > .inventory-art-wrap {
+  position:relative;
+  z-index:1;
+  display:grid;
+  place-items:center;
+  width:88%;
+  height:88%;
+  max-width:88%;
+  max-height:88%;
+  min-width:0;
+  min-height:0;
+  margin:0;
+  padding:0;
+  border:0;
+  border-image:none;
+  border-radius:0;
+  outline:none;
+  background:transparent;
+  box-shadow:none;
+}
+.app-shell[data-visual='light-anime'][data-viewport-layout][data-page] .item-rarity-slot :is(.inventory-item-image,.inventory-art) {
+  position:relative;
+  z-index:1;
+  display:block;
+  width:100%;
+  height:100%;
+  max-width:100%;
+  max-height:100%;
+  object-fit:contain;
+  border:0;
+  background:transparent;
+  box-shadow:none;
+}
+/* Detail icons use InventoryItemIcon itself as the square, without a wrapper. */
+.app-shell[data-visual='light-anime'][data-viewport-layout][data-page] .equipment-details-icon.item-rarity-slot { padding:3px; }
+.app-shell[data-visual='light-anime'][data-viewport-layout][data-page] .inventory-slot:is(.is-previewed,:focus-visible) .item-rarity-slot[data-item-rarity] { outline:none; box-shadow:none; }
+.app-shell[data-visual='light-anime'][data-viewport-layout][data-page] .item-rarity-slot[data-item-rarity]::before,
+.app-shell[data-visual='light-anime'][data-viewport-layout][data-page] .item-rarity-slot[data-item-rarity]::after {
+  content:none;
+  position:absolute;
+  z-index:2;
+  pointer-events:none;
+  border:0;
+  box-shadow:none;
+  animation:none;
+}
+.app-shell[data-visual='light-anime'][data-viewport-layout][data-page] .item-rarity-slot:is([data-item-rarity='legendary'],[data-item-rarity='epic'],[data-item-rarity='artifact'])::before {
+  content:'';
+  inset:-55%;
+  background:linear-gradient(115deg,transparent 37%,#fff3 43%,#fffbd4cc 49%,#fff5 54%,transparent 62%);
+  transform:translateX(-80%);
+  mix-blend-mode:screen;
+  animation:item-rarity-shine 3.2s ease-in-out infinite;
+}
+.app-shell[data-visual='light-anime'][data-viewport-layout][data-page] .item-rarity-slot[data-item-rarity='epic']::before { animation-delay:-1.1s; }
+.app-shell[data-visual='light-anime'][data-viewport-layout][data-page] .item-rarity-slot[data-item-rarity='artifact']::before { animation-duration:2.4s; animation-delay:-.6s; }
+.app-shell[data-visual='light-anime'][data-viewport-layout][data-page] .item-rarity-slot:is([data-item-rarity='epic'],[data-item-rarity='artifact'])::after {
+  content:'';
+  inset:0;
+  background:radial-gradient(ellipse 3px var(--item-sparkle-radius,9px) at var(--item-sparkle-x,50%) var(--item-sparkle-y,50%),#fffef2 8%,#fff8bd99 30%,transparent 72%),radial-gradient(ellipse var(--item-sparkle-radius,9px) 3px at var(--item-sparkle-x,50%) var(--item-sparkle-y,50%),#fffef2 8%,#fff8bd99 30%,transparent 72%);
+  mask-image:var(--item-sparkle-source,linear-gradient(transparent,transparent));
+  mask-mode:alpha;
+  mask-position:var(--item-sparkle-image-left,0px) var(--item-sparkle-image-top,0px);
+  mask-size:var(--item-sparkle-image-width,0px) var(--item-sparkle-image-height,0px);
+  mask-repeat:no-repeat;
+  opacity:0;
+  animation:var(--item-sparkle-name,none) var(--item-sparkle-duration,900ms) ease-in-out var(--item-sparkle-delay,0ms) 1 both;
+}
+@keyframes item-rarity-shine {
+  0%,16% { transform:translateX(-80%); opacity:0; }
+  28% { opacity:.9; }
+  68% { opacity:.9; }
+  82%,100% { transform:translateX(80%); opacity:0; }
+}
+/* Alternating identical names restarts each newly randomized single flash. */
+@keyframes item-rarity-twinkle-a {
+  0%,100% { opacity:0; }
+  50% { opacity:.95; }
+}
+@keyframes item-rarity-twinkle-b {
+  0%,100% { opacity:0; }
+  50% { opacity:.95; }
+}
+@keyframes item-rarity-rainbow {
+  0%,100% { background-position:0% 20%; }
+  50% { background-position:100% 80%; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .app-shell[data-visual='light-anime'][data-viewport-layout][data-page] .item-rarity-slot[data-item-rarity],
+  .app-shell[data-visual='light-anime'][data-viewport-layout][data-page] .item-rarity-slot[data-item-rarity]::before,
+  .app-shell[data-visual='light-anime'][data-viewport-layout][data-page] .item-rarity-slot[data-item-rarity]::after { animation:none; }
+  .app-shell[data-visual='light-anime'][data-viewport-layout][data-page] .item-rarity-slot:is([data-item-rarity='legendary'],[data-item-rarity='epic'],[data-item-rarity='artifact'])::before { transform:none; opacity:.2; }
+  .app-shell[data-visual='light-anime'][data-viewport-layout][data-page] .item-rarity-slot:is([data-item-rarity='epic'],[data-item-rarity='artifact'])::after { opacity:calc(.45 * var(--item-sparkle-ready,0)); }
+}
+
+/* Keep the original detail-name colors while making equipment names bold. */
+.app-shell[data-visual='light-anime'][data-viewport-layout][data-page] :is(.equipment-details-heading h2,.inventory-dialog-heading h3).item-detail-name {
+  font-weight:800;
+}

@@ -1,0 +1,224 @@
+/* Painted shop and home controls preserve the existing viewport row geometry. */
+.commerce-painted.commerce-painted.anime-growth-commerce {
+  --gc-ink: var(--game-ui-ink, #535366);
+  --gc-muted: var(--game-ui-muted, #736c78);
+  color: var(--gc-ink);
+}
+
+.commerce-painted.commerce-painted.anime-growth-commerce:is(.market-panel, .home-purchase-panel) {
+  border-image: var(--game-ui-panel) 144 fill / 7px stretch;
+  border-radius: 0;
+  background: #fffcf4;
+  background-clip: padding-box;
+}
+
+.commerce-painted.commerce-painted.anime-growth-commerce :is(.market-tabs, .subtabs, .home-view-tabs, .home-floor-tabs, .home-storage-scope, .home-storage-categories, .home-purchase-tabs, .home-purchase-filters) > button,
+.commerce-painted.commerce-painted.anime-growth-commerce :is(.search > button, .home-refresh, .home-storage-search > button, .home-text-button, .home-storage-pager > button, .pager > button, .detail-close, .subtle-button, .primary-button, .danger-button, .confirm-actions > button, .home-storage-transfer button, .home-storage-quote-actions > button, .home-dialog-header > button, .home-dialog-footer > button, .home-purchase-refresh, .home-purchase-primary, .home-purchase-subtle-button, .home-purchase-site > button) {
+  border: 5px solid transparent;
+  border-image: var(--game-ui-paper) 144 fill / 5px 7px stretch;
+  border-radius: 0;
+  background: transparent;
+  background-clip: padding-box;
+  color: var(--game-ui-ink, #535366);
+  box-shadow: none;
+  font-weight: 700;
+  text-shadow: none;
+}
+
+.commerce-painted.commerce-painted.anime-growth-commerce :is(.market-tabs, .subtabs, .home-view-tabs, .home-floor-tabs, .home-storage-scope, .home-storage-categories, .home-purchase-tabs, .home-purchase-filters) > button:is(.active, .selected),
+.commerce-painted.commerce-painted.anime-growth-commerce :is(.search > button, .home-refresh, .home-storage-search > button, .primary-button, .home-storage-confirm, .home-dialog-footer > button:only-child, .home-purchase-primary) {
+  border-image-source: var(--game-ui-teal);
+  color: var(--game-ui-primary-ink, #245664);
+  text-shadow: none;
+}
+
+.commerce-painted.commerce-painted.anime-growth-commerce button:is(.danger-button, .subtle-button) {
+  border-image-source: var(--game-ui-coral);
+  color: var(--game-ui-danger-ink, #793f4a);
+  text-shadow: none;
+}
+
+.commerce-painted.commerce-painted.anime-growth-commerce :is(.market-header .close-button, .home-purchase-close) {
+  border: 0;
+  border-image: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+.commerce-painted.commerce-painted.anime-growth-commerce :is(.market-title h2, .home-heading h2, .home-purchase-title h2, .home-summary h3, .home-dialog-header h3) {
+  font-family: KaiTi, STKaiti, 'Noto Serif SC', serif;
+  color: var(--game-ui-ink, #535366);
+  font-weight: 900;
+  text-shadow: none;
+}
+
+.commerce-painted.commerce-painted.anime-growth-commerce :is(.wallet, .home-purchase-shop-head > span) {
+  padding: 2px 4px;
+  border: 4px solid transparent;
+  border-image: var(--game-ui-gold) 144 fill / 4px 6px stretch;
+  border-radius: 0;
+  background: transparent;
+  color: var(--game-ui-gold-ink, #735632);
+  text-shadow: none;
+  box-shadow: none;
+}
+
+.commerce-painted.commerce-painted.anime-growth-commerce :is(.filters select, .search input, .composer input, .home-storage-search input, .home-storage-transfer input, .home-purchase-count input, .viewport-pagination select) {
+  border: 3px solid transparent;
+  border-image: var(--game-ui-panel) 144 fill / 3px 5px stretch;
+  border-radius: 0;
+  background-color: #fffcf4;
+  background-image: none;
+  background-clip: padding-box;
+  color: var(--game-ui-ink, #535366);
+  box-shadow: none;
+}
+
+.commerce-painted.commerce-painted.anime-growth-commerce :is(.search, .home-storage-search) {
+  position: relative;
+}
+
+.commerce-painted.commerce-painted.anime-growth-commerce .commerce-search-art {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 9px;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.commerce-painted.commerce-painted.anime-growth-commerce :is(.search input, .home-storage-search input) {
+  padding-left: 32px;
+}
+
+.commerce-painted.commerce-painted.anime-growth-commerce :is(.item-card, .home-card, .home-summary, .home-unowned, .home-storage-item, .home-storage-selection, .home-storage-stats > div, .home-purchase-card, .home-purchase-detail, .home-purchase-result, .home-purchase-offer) {
+  border: 5px solid transparent;
+  border-image: var(--game-ui-panel) 144 fill / 5px stretch;
+  border-radius: 0;
+  background: transparent;
+  color: var(--gc-ink);
+  box-shadow: none;
+}
+
+.commerce-painted.commerce-painted.anime-growth-commerce :is(.item-card.chosen, .home-storage-item.selected, .home-purchase-offer.selected) {
+  border-image: var(--game-ui-teal) 144 fill / 5px stretch;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.commerce-painted.commerce-painted.anime-growth-commerce :is(.item-card:hover, .home-storage-item:not(:disabled):hover, .home-purchase-offer:not(:disabled):hover) {
+  background: transparent;
+}
+
+.commerce-painted.commerce-painted.anime-growth-commerce :is(.item-copy strong, .home-furniture-name, .home-storage-item-copy strong) {
+  color: var(--game-ui-ink, #535366);
+}
+
+.commerce-painted.commerce-painted.anime-growth-commerce :is(.item-copy b, .detail-card dd, .home-purchase-facts dd) {
+  color: var(--game-ui-primary-ink, #245664);
+  font-variant-numeric: tabular-nums;
+}
+
+.commerce-painted.commerce-painted.anime-growth-commerce :is(.market-detail-dialog, .confirm-card, .home-dialog-card) {
+  border: 6px solid transparent;
+  border-image: var(--game-ui-panel) 144 fill / 6px stretch;
+  border-radius: 0;
+  background: #fffcf4;
+  background-clip: padding-box;
+}
+
+.commerce-painted.commerce-painted.anime-growth-commerce :is(.quote, .home-storage-quote, .home-purchase-quote) {
+  border: 5px solid transparent;
+  border-image: var(--game-ui-paper) 144 fill / 5px stretch;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.commerce-painted.commerce-painted.anime-growth-commerce :is(.market-dialog-actions, .confirm-actions, .home-dialog-footer) {
+  background-color: #fffcf4;
+}
+
+.commerce-painted.commerce-painted.anime-growth-commerce :is(.home-badges span, .home-state-row span, .home-storage-remote) {
+  border: 0;
+  border-radius: 0;
+  background: var(--game-ui-paper) center / 100% 100% no-repeat;
+  color: var(--game-ui-primary-ink, #245664);
+}
+
+.commerce-painted.commerce-painted.anime-growth-commerce .home-furniture-viewport li {
+  border: 4px solid transparent;
+  border-image: var(--game-ui-paper) 144 fill / 4px stretch;
+  border-radius: 0;
+  background: transparent;
+}
+
+.commerce-painted.commerce-painted.anime-growth-commerce .home-furniture-viewport button {
+  border: 0;
+  border-image: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+.commerce-painted.commerce-painted.anime-growth-commerce .home-grid-scroll {
+  border-color: transparent;
+  border-image: var(--game-ui-gold) 144 / 3px stretch;
+  border-radius: 0;
+  background: url('/assets/light-anime/game-ui-v1/home-floor-oak.webp') center / 180px 180px repeat;
+}
+
+.commerce-painted.commerce-painted.anime-growth-commerce .home-room-grid {
+  border-color: transparent;
+  border-image: var(--game-ui-gold) 144 / 5px stretch;
+  border-radius: 0;
+  background: url('/assets/light-anime/game-ui-v1/home-floor-oak.webp') center / 180px 180px repeat;
+  box-shadow: none;
+}
+
+.commerce-painted.commerce-painted.anime-growth-commerce .home-room-furniture {
+  border: 3px solid transparent;
+  border-image: var(--game-ui-paper) 144 fill / 3px stretch;
+  border-radius: 0;
+  background: transparent;
+  color: var(--game-ui-ink, #535366);
+}
+
+.commerce-painted.commerce-painted.anime-growth-commerce .home-purchase-site {
+  border: 5px solid transparent;
+  border-image: var(--game-ui-paper) 144 fill / 5px stretch;
+  border-radius: 0;
+  background: transparent;
+}
+
+.commerce-painted.commerce-painted.anime-growth-commerce button:not(:disabled):not(.market-detail-backdrop):hover {
+  filter: brightness(1.05);
+}
+
+.commerce-painted.commerce-painted.anime-growth-commerce button:not(:disabled):not(.market-detail-backdrop):active {
+  transform: translateY(1px);
+}
+
+.commerce-painted.commerce-painted.anime-growth-commerce button:disabled {
+  opacity: .7;
+  filter: saturate(.45);
+  cursor: not-allowed;
+}
+
+.commerce-painted.commerce-painted.anime-growth-commerce :is(button, input, select):focus-visible {
+  outline: 2px solid #428e83;
+  outline-offset: 2px;
+}
+
+@media (max-height: 450px) {
+  .commerce-painted.commerce-painted.anime-growth-commerce :is(.market-tabs, .subtabs, .home-view-tabs, .home-floor-tabs, .home-storage-scope, .home-storage-categories) > button {
+    border-width: 4px;
+    border-image-width: 4px 6px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .commerce-painted.commerce-painted.anime-growth-commerce button {
+    transition: none;
+  }
+}

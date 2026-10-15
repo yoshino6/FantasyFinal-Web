@@ -15,6 +15,9 @@ export type ManualMessage = {
 </script>
 
 <script setup lang="ts">
+import AnimeIcon from './AnimeIcon.vue';
+import GameUiFeedbackArt from './GameUiFeedbackArt.vue';
+import './anime-adventure.css';
 import { computed, nextTick, ref, watch } from 'vue';
 import { storyImageUrl } from '../story-assets';
 
@@ -29,10 +32,12 @@ const props = withDefaults(defineProps<{
   error?: string;
   category?: ManualCategory;
   availableCategories?: ManualCategory[];
+  appearance?: 'default' | 'location';
 }>(), {
   busy: false,
   error: '',
-  caption: '冒险手册'
+  caption: '冒险手册',
+  appearance: 'default'
 });
 
 const emit = defineEmits<{
@@ -160,14 +165,14 @@ watch(() => [props.messages, props.open] as const, ([messages, open], _previous,
 
 <template>
   <Teleport to="body">
-    <div v-if="open" class="manual-backdrop" role="presentation" @click.self="emit('close')">
-      <section class="manual-dialog" :class="{ 'interaction-dialog': caption === '地点互动' }" role="dialog" aria-modal="true" aria-labelledby="manual-heading">
+    <div v-if="open" class="manual-backdrop" :class="{ 'anime-location-refinement': appearance === 'location' }" role="presentation" @click.self="emit('close')">
+      <section class="manual-dialog anime-adventure" :class="{ 'interaction-dialog': caption === '地点互动', 'location-paper-dialog': appearance === 'location' }" role="dialog" aria-modal="true" aria-labelledby="manual-heading">
         <header class="manual-header">
           <div class="manual-heading-group">
-            <span class="manual-mark" aria-hidden="true">✦</span>
+            <span class="manual-mark" aria-hidden="true"><AnimeIcon :name="appearance === 'location' ? 'book' : caption === '地点互动' ? 'home' : 'scroll'" :size="40" /></span>
             <div><p>{{ caption }}</p><h2 id="manual-heading">{{ title }}</h2></div>
           </div>
-          <button ref="closeButton" class="manual-close" type="button" :aria-label="`关闭${title}`" @click="emit('close')">×</button>
+          <button ref="closeButton" class="manual-close" type="button" :aria-label="`关闭${title}`" @click="emit('close')"><AnimeIcon name="close" :size="24" /></button>
         </header>
         <nav v-if="showCategories" class="manual-categories" aria-label="任务分类">
           <button
@@ -181,18 +186,18 @@ watch(() => [props.messages, props.open] as const, ([messages, open], _previous,
           >{{ item }}</button>
         </nav>
         <div class="manual-body" role="region" :aria-label="`${title}内容`">
-          <p v-if="busy" class="manual-state" role="status">正在读取{{ title }}…</p>
+          <p v-if="busy" class="manual-state game-ui-empty-message" role="status"><GameUiFeedbackArt name="loading" :size="36" /><span>正在读取{{ title }}…</span></p>
           <p v-if="error" class="manual-error" role="alert">{{ error }}</p>
           <div v-if="renderedMessages.some(message => message.text || message.images.length || message.buttons.length)" class="manual-messages">
-            <article v-for="(message, index) in renderedMessages" :key="index" class="manual-message">
+            <article v-for="(message, index) in renderedMessages" :key="index" class="manual-message" :class="{ 'has-art': message.images.length > 0 }">
               <img v-for="(src, imageIndex) in message.images" :key="imageIndex" class="manual-image" :src="src" :alt="`${title}图片`" loading="lazy" referrerpolicy="no-referrer" />
               <p v-if="message.text" class="manual-text">{{ message.text }}</p>
               <div v-if="message.buttons.length" class="manual-actions">
-                <button v-for="(button, buttonIndex) in message.buttons" :key="button.actionId ?? buttonIndex" type="button" :disabled="busy" @click="selectButton(button)">{{ button.label }}</button>
+                <button v-for="(button, buttonIndex) in message.buttons" :key="button.actionId ?? buttonIndex" type="button" :disabled="busy" @click="selectButton(button)"><AnimeIcon v-if="appearance === 'location'" :name="/返回|离开|地图/.test(button.label) ? 'map' : /售|购买|商店|兑换/.test(button.label) ? 'coin' : /书|典|卷/.test(button.label) ? 'book' : /前往|进入/.test(button.label) ? 'arrow' : 'search'" :size="30" /><span>{{ button.label }}</span></button>
               </div>
             </article>
           </div>
-          <p v-else class="manual-state">暂无{{ title }}内容。</p>
+          <p v-else class="manual-state game-ui-empty-message"><GameUiFeedbackArt name="empty" :size="36" /><span>暂无{{ title }}内容。</span></p>
         </div>
       </section>
     </div>

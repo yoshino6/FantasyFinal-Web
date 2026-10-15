@@ -1,0 +1,83 @@
+{
+  "reed_cluster": {
+    "north": {
+      "assetPath": "/assets/light-anime/map-surface-v3/reed-cluster-north-v1.png",
+      "width": 887,
+      "height": 1774,
+      "left": 0.15670800450958286,
+      "top": 0.04735062006764374,
+      "right": 0.887260428410372,
+      "bottom": 0.9526493799323562,
+      "alphaEnvelope": {
+        "left": 0,
+        "top": 0.018602029312288614,
+        "right": 0.9842164599774521,
+        "bottom": 1
+      }
+    }
+  },
+  "ruin_wall": {
+    "east": {
+      "assetPath": "/assets/light-anime/map-surface-v3/ruin-wall-east-v1.png",
+      "width": 2172,
+      "height": 724,
+      "left": 0.034530386740331494,
+      "top": 0.31353591160220995,
+      "right": 0.966390423572744,
+      "bottom": 0.7596685082872928,
+      "alphaEnvelope": {
+        "left": 0.016114180478821363,
+        "top": 0.020718232044198894,
+        "right": 0.9898710865561694,
+        "bottom": 1
+      }
+    },
+    "north": {
+      "assetPath": "/assets/light-anime/map-surface-v3/ruin-wall-north-v1.png",
+      "width": 724,
+      "height": 2172,
+      "left": 0.2223756906077348,
+      "top": 0.08747697974217311,
+      "right": 0.7776243093922652,
+      "bottom": 0.8853591160220995,
+      "alphaEnvelope": {
+        "left": 0,
+        "top": 0.0216390423572744,
+        "right": 0.9861878453038674,
+        "bottom": 0.9705340699815838
+      }
+    }
+  },
+  "forest_log": {
+    "east": {
+      "assetPath": "/assets/light-anime/map-surface-v3/forest-log-east-v2.png",
+      "width": 2172,
+      "height": 724,
+      "left": 0.029465930018416207,
+      "top": 0.16298342541436464,
+      "right": 0.9732965009208103,
+      "bottom": 0.8687845303867403,
+      "alphaEnvelope": {
+        "left": 0.0285451197053407,
+        "top": 0.11187845303867404,
+        "right": 0.9760589318600368,
+        "bottom": 1
+      }
+    },
+    "north": {
+      "assetPath": "/assets/light-anime/map-surface-v3/forest-log-north-v3.png",
+      "width": 724,
+      "height": 2172,
+      "left": 0.2154696132596685,
+      "top": 0.03130755064456722,
+      "right": 0.7679558011049724,
+      "bottom": 0.9576427255985267,
+      "alphaEnvelope": {
+        "left": 0,
+        "top": 0.02992633517495396,
+        "right": 0.9751381215469613,
+        "bottom": 0.9604051565377533
+      }
+    }
+  }
+}

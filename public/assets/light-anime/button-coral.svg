@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="80" viewBox="0 0 320 80" fill="none">
+<defs><pattern id="grain" width="22" height="18" patternUnits="userSpaceOnUse"><path d="m3 4 3 .5m8 6 4-.4M4 15l2 .2" stroke="#967457" stroke-opacity=".08" stroke-width=".8"/></pattern></defs>
+<path d="m15 10 143-1 146 1 8 11-1 42-9 9-143 1-145-2-7-11 1-39Z" fill="#c98179" stroke="#76524d" stroke-width="1.6"/>
+<path d="m15 7 143-1 146 1 8 11-1 41-9 9-143 1-145-2-7-11 1-38Z" fill="#efa396" stroke="#68474b" stroke-width="1.9"/>
+<path d="m20 13 137-1 142 1 6 7-1 35-6 8-140 1-140-2-6-8 1-33Z" stroke="#ffdeba" stroke-width="1.4"/>
+<path d="m26 16 123-1m29 0 114 1" stroke="#ffdeba" stroke-opacity=".7" stroke-width="1.6"/>
+<path d="m15 7 143-1 146 1 8 11-1 41-9 9-143 1-145-2-7-11 1-38Z" fill="url(#grain)"/>
+<circle cx="14" cy="38" r="2" fill="#ffdeba" stroke="#7b5852" stroke-width=".8"/><circle cx="306" cy="38" r="2" fill="#ffdeba" stroke="#7b5852" stroke-width=".8"/>
+</svg>

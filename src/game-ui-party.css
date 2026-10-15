@@ -1,0 +1,47 @@
+/* Finish the live party fields and avatar frames without changing party layout or actions. */
+.party-popup.anime-party-refinement.party-viewport-panel .party-search-form :is(input, select),
+.party-popup.anime-party-refinement.party-viewport-panel > .viewport-pagination select,
+.party-dialog-backdrop.anime-party-refinement .party-viewport-dialog .party-dialog-body :is(input, select, textarea) {
+  border-color: transparent;
+  border-image: var(--game-ui-paper) 144 fill / 3px 5px stretch;
+  border-radius: 0;
+  background: #fffaf0;
+  color: var(--game-ui-ink);
+  box-shadow: none;
+}
+
+.party-popup.anime-party-refinement.party-viewport-panel .party-viewport-row > .social-avatar {
+  border-color: transparent;
+  border-image: var(--game-ui-panel) 144 fill / 3px stretch;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: 0 1px 2px #53536610;
+}
+
+.app-shell[data-visual='light-anime'] .team-info-panel .floating-social-panel-heading > .floating-social-close {
+  border-color: transparent;
+  border-image: var(--game-ui-paper) 144 fill / 5px stretch;
+  border-radius: 0;
+  background: transparent;
+  color: var(--game-ui-ink);
+  box-shadow: 0 2px 3px #53536610;
+}
+
+.party-popup.anime-party-refinement.party-viewport-panel .party-error {
+  border-color: transparent;
+  border-image: var(--game-ui-paper) 144 fill / 3px stretch;
+  border-radius: 0;
+  background: #fff7f2;
+  color: var(--game-ui-danger-ink);
+}
+
+/* Match the existing party height so one whole row fits above its fixed pager on short screens. */
+@media (max-height: 450px) {
+  .app-shell[data-visual='light-anime'] .team-info-panel:has(> .party-viewport-panel) {
+    max-height: calc(var(--app-viewport-height, 100dvh) - 32px);
+  }
+
+  .party-popup.anime-party-refinement.party-viewport-panel .party-search-form {
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, .8fr) 82px 42px;
+  }
+}

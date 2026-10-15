@@ -1,0 +1,77 @@
+{
+  "living_oak": {
+    "assetPath": "/assets/light-anime/map-surface-v3/living-oak.webp",
+    "width": 1254,
+    "height": 1254,
+    "left": 0.0773524720893142,
+    "top": 0.05980861244019139,
+    "right": 0.9385964912280702,
+    "bottom": 0.9346092503987241,
+    "alphaEnvelope": {
+      "left": 0,
+      "top": 0.01674641148325359,
+      "right": 0.9840510366826156,
+      "bottom": 1
+    }
+  },
+  "living_birch": {
+    "assetPath": "/assets/light-anime/map-surface-v3/living-birch.webp",
+    "width": 1024,
+    "height": 1536,
+    "left": 0.1171875,
+    "top": 0.0546875,
+    "right": 0.94140625,
+    "bottom": 0.916015625,
+    "alphaEnvelope": {
+      "left": 0,
+      "top": 0.020182291666666668,
+      "right": 0.98828125,
+      "bottom": 1
+    }
+  },
+  "living_pine": {
+    "assetPath": "/assets/light-anime/map-surface-v3/living-pine.webp",
+    "width": 1024,
+    "height": 1536,
+    "left": 0.09765625,
+    "top": 0.057291666666666664,
+    "right": 0.92578125,
+    "bottom": 0.9427083333333334,
+    "alphaEnvelope": {
+      "left": 0,
+      "top": 0.005208333333333333,
+      "right": 0.9990234375,
+      "bottom": 1
+    }
+  },
+  "moss_boulder": {
+    "assetPath": "/assets/light-anime/map-surface-v3/moss-boulder.webp",
+    "width": 1254,
+    "height": 1254,
+    "left": 0.08931419457735247,
+    "top": 0.215311004784689,
+    "right": 0.9362041467304625,
+    "bottom": 0.8317384370015949,
+    "alphaEnvelope": {
+      "left": 0,
+      "top": 0.018341307814992026,
+      "right": 0.9992025518341308,
+      "bottom": 1
+    }
+  },
+  "root_cluster": {
+    "assetPath": "/assets/light-anime/map-surface-v3/root-cluster-v1.png",
+    "width": 1254,
+    "height": 1254,
+    "left": 0.05901116427432217,
+    "top": 0.16666666666666666,
+    "right": 0.9513556618819776,
+    "bottom": 0.8668261562998405,
+    "alphaEnvelope": {
+      "left": 0,
+      "top": 0.007177033492822967,
+      "right": 0.9824561403508771,
+      "bottom": 1
+    }
+  }
+}

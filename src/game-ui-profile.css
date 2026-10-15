@@ -1,0 +1,41 @@
+/* Painted controls only. Profile geometry and complete attribute data stay in profile-layout.css. */
+.app-shell[data-visual='light-anime'] .profile-viewport-panel .profile-viewport-tabs > button {
+  border-color: transparent;
+  border-image: var(--game-ui-paper) 144 fill / 3px 7px stretch;
+  border-radius: 0;
+  background: transparent;
+  color: var(--game-ui-ink);
+  text-shadow: none;
+  box-shadow: none;
+}
+
+.app-shell[data-visual='light-anime'] .profile-viewport-panel .profile-viewport-tabs > button[aria-selected='true'] {
+  border-image-source: var(--game-ui-teal);
+  color: var(--game-ui-primary-ink);
+  text-shadow: none;
+}
+
+.profile-viewport-backdrop .profile-viewport-help.profile-viewport-help {
+  border-color: transparent;
+  border-image: var(--game-ui-panel) 144 fill / 9px stretch;
+  border-radius: 0;
+  background: #fffaf0;
+  box-shadow: 0 8px 22px #53536626;
+}
+
+.profile-viewport-backdrop .profile-viewport-help.profile-viewport-help > header {
+  border-bottom-color: var(--game-ui-line);
+}
+
+.profile-viewport-backdrop .profile-viewport-help.profile-viewport-help > header > button {
+  border-radius: 0;
+  background: var(--game-ui-paper) center / 100% 100% no-repeat;
+  color: var(--game-ui-ink);
+  text-shadow: none;
+  box-shadow: 0 2px 3px #53536610;
+}
+
+.profile-viewport-backdrop .profile-viewport-help.profile-viewport-help > header > button:focus-visible {
+  outline: 3px solid #32a7ac;
+  outline-offset: 1px;
+}

@@ -1,0 +1,25 @@
+/* Original imagegen artwork; only the background layer is translucent. */
+.app-shell[data-visual='light-anime'] .profile-viewport-panel :is(.profile-viewport-identity,.profile-viewport-paper) {
+  position:relative;
+  isolation:isolate;
+  border:0;
+  border-image:none;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+}
+.app-shell[data-visual='light-anime'] .profile-viewport-panel :is(.profile-viewport-identity,.profile-viewport-paper)::before {
+  content:'';
+  position:absolute;
+  z-index:-1;
+  inset:0;
+  box-sizing:border-box;
+  pointer-events:none;
+  border:10px solid transparent;
+  border-image:url('/assets/light-anime/profile-panels-v1/identity.png') 80 fill / 10px / 0 stretch;
+  opacity:.9;
+}
+.app-shell[data-visual='light-anime'] .profile-viewport-panel .profile-viewport-paper::before {
+  border-width:8px;
+  border-image:url('/assets/light-anime/profile-panels-v1/attributes.png') 48 fill / 8px / 0 stretch;
+}

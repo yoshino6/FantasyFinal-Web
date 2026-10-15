@@ -1,0 +1,2978 @@
+{
+  "/assets/character/light-anime-v1/advanced-aegis_priest-female-equipment.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 528.0,
+    "footY": 1611.0,
+    "visibleBounds": [
+      49,
+      90,
+      921,
+      1615
+    ],
+    "minX": 49,
+    "minY": 90,
+    "maxX": 921,
+    "maxY": 1615
+  },
+  "/assets/character/light-anime-v1/advanced-aegis_priest-female-profile.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 843,
+    "footY": 1573,
+    "visibleBounds": [
+      14,
+      36,
+      940,
+      1580
+    ],
+    "minX": 14,
+    "minY": 36,
+    "maxX": 940,
+    "maxY": 1580
+  },
+  "/assets/character/light-anime-v1/advanced-aegis_priest-male-equipment.webp": {
+    "width": 948,
+    "height": 1659,
+    "footX": 515.0,
+    "footY": 1569.5,
+    "visibleBounds": [
+      18,
+      70,
+      924,
+      1601
+    ],
+    "minX": 18,
+    "minY": 70,
+    "maxX": 924,
+    "maxY": 1601
+  },
+  "/assets/character/light-anime-v1/advanced-aegis_priest-male-profile.webp": {
+    "width": 948,
+    "height": 1660,
+    "footX": 810,
+    "footY": 1548,
+    "visibleBounds": [
+      8,
+      152,
+      947,
+      1554
+    ],
+    "minX": 8,
+    "minY": 152,
+    "maxX": 947,
+    "maxY": 1554
+  },
+  "/assets/character/light-anime-v1/advanced-arcane_magister-female-equipment.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 534.25,
+    "footY": 1606.0,
+    "visibleBounds": [
+      116,
+      78,
+      875,
+      1622
+    ],
+    "minX": 116,
+    "minY": 78,
+    "maxX": 875,
+    "maxY": 1622
+  },
+  "/assets/character/light-anime-v1/advanced-arcane_magister-female-profile.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 360,
+    "footY": 1598,
+    "visibleBounds": [
+      16,
+      100,
+      936,
+      1601
+    ],
+    "minX": 16,
+    "minY": 100,
+    "maxX": 936,
+    "maxY": 1601
+  },
+  "/assets/character/light-anime-v1/advanced-arcane_magister-male-equipment.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 509.5,
+    "footY": 1595.5,
+    "visibleBounds": [
+      84,
+      55,
+      872,
+      1615
+    ],
+    "minX": 84,
+    "minY": 55,
+    "maxX": 872,
+    "maxY": 1615
+  },
+  "/assets/character/light-anime-v1/advanced-arcane_magister-male-profile.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 350,
+    "footY": 1622,
+    "visibleBounds": [
+      7,
+      14,
+      935,
+      1624
+    ],
+    "minX": 7,
+    "minY": 14,
+    "maxX": 935,
+    "maxY": 1624
+  },
+  "/assets/character/light-anime-v1/advanced-bulwark_guard-female-equipment.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 564.25,
+    "footY": 1587.5,
+    "visibleBounds": [
+      49,
+      103,
+      893,
+      1597
+    ],
+    "minX": 49,
+    "minY": 103,
+    "maxX": 893,
+    "maxY": 1597
+  },
+  "/assets/character/light-anime-v1/advanced-bulwark_guard-female-profile.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 196,
+    "footY": 1641,
+    "visibleBounds": [
+      9,
+      16,
+      940,
+      1642
+    ],
+    "minX": 9,
+    "minY": 16,
+    "maxX": 940,
+    "maxY": 1642
+  },
+  "/assets/character/light-anime-v1/advanced-bulwark_guard-male-equipment.webp": {
+    "width": 940,
+    "height": 1674,
+    "footX": 509.25,
+    "footY": 1575.0,
+    "visibleBounds": [
+      46,
+      101,
+      908,
+      1609
+    ],
+    "minX": 46,
+    "minY": 101,
+    "maxX": 908,
+    "maxY": 1609
+  },
+  "/assets/character/light-anime-v1/advanced-bulwark_guard-male-profile.webp": {
+    "width": 940,
+    "height": 1673,
+    "footX": 815,
+    "footY": 1610,
+    "visibleBounds": [
+      7,
+      104,
+      937,
+      1616
+    ],
+    "minX": 7,
+    "minY": 104,
+    "maxX": 937,
+    "maxY": 1616
+  },
+  "/assets/character/light-anime-v1/advanced-dawn_inquisitor-female-equipment.webp": {
+    "width": 948,
+    "height": 1659,
+    "footX": 557.0,
+    "footY": 1551.0,
+    "visibleBounds": [
+      81,
+      115,
+      890,
+      1556
+    ],
+    "minX": 81,
+    "minY": 115,
+    "maxX": 890,
+    "maxY": 1556
+  },
+  "/assets/character/light-anime-v1/advanced-dawn_inquisitor-female-profile.webp": {
+    "width": 948,
+    "height": 1659,
+    "footX": 483,
+    "footY": 1583,
+    "visibleBounds": [
+      7,
+      16,
+      942,
+      1586
+    ],
+    "minX": 7,
+    "minY": 16,
+    "maxX": 942,
+    "maxY": 1586
+  },
+  "/assets/character/light-anime-v1/advanced-dawn_inquisitor-male-equipment.webp": {
+    "width": 948,
+    "height": 1659,
+    "footX": 445.75,
+    "footY": 1593.0,
+    "visibleBounds": [
+      44,
+      79,
+      914,
+      1608
+    ],
+    "minX": 44,
+    "minY": 79,
+    "maxX": 914,
+    "maxY": 1608
+  },
+  "/assets/character/light-anime-v1/advanced-dawn_inquisitor-male-profile.webp": {
+    "width": 948,
+    "height": 1659,
+    "footX": 371,
+    "footY": 1536,
+    "visibleBounds": [
+      33,
+      116,
+      915,
+      1540
+    ],
+    "minX": 33,
+    "minY": 116,
+    "maxX": 915,
+    "maxY": 1540
+  },
+  "/assets/character/light-anime-v1/advanced-elementalist-female-equipment.webp": {
+    "width": 940,
+    "height": 1672,
+    "footX": 552.5,
+    "footY": 1606.5,
+    "visibleBounds": [
+      72,
+      81,
+      912,
+      1619
+    ],
+    "minX": 72,
+    "minY": 81,
+    "maxX": 912,
+    "maxY": 1619
+  },
+  "/assets/character/light-anime-v1/advanced-elementalist-female-profile.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 470,
+    "footY": 1597,
+    "visibleBounds": [
+      23,
+      49,
+      922,
+      1601
+    ],
+    "minX": 23,
+    "minY": 49,
+    "maxX": 922,
+    "maxY": 1601
+  },
+  "/assets/character/light-anime-v1/advanced-elementalist-male-equipment.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 517.0,
+    "footY": 1597.0,
+    "visibleBounds": [
+      79,
+      75,
+      885,
+      1612
+    ],
+    "minX": 79,
+    "minY": 75,
+    "maxX": 885,
+    "maxY": 1612
+  },
+  "/assets/character/light-anime-v1/advanced-elementalist-male-profile.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 355,
+    "footY": 1626,
+    "visibleBounds": [
+      11,
+      13,
+      940,
+      1630
+    ],
+    "minX": 11,
+    "minY": 13,
+    "maxX": 940,
+    "maxY": 1630
+  },
+  "/assets/character/light-anime-v1/advanced-gunner-female-equipment.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 544.5,
+    "footY": 1574.0,
+    "visibleBounds": [
+      169,
+      60,
+      889,
+      1592
+    ],
+    "minX": 169,
+    "minY": 60,
+    "maxX": 889,
+    "maxY": 1592
+  },
+  "/assets/character/light-anime-v1/advanced-gunner-female-profile.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 160,
+    "footY": 1585,
+    "visibleBounds": [
+      10,
+      64,
+      940,
+      1591
+    ],
+    "minX": 10,
+    "minY": 64,
+    "maxX": 940,
+    "maxY": 1591
+  },
+  "/assets/character/light-anime-v1/advanced-gunner-male-equipment.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 505.25,
+    "footY": 1582.5,
+    "visibleBounds": [
+      168,
+      82,
+      892,
+      1589
+    ],
+    "minX": 168,
+    "minY": 82,
+    "maxX": 892,
+    "maxY": 1589
+  },
+  "/assets/character/light-anime-v1/advanced-gunner-male-profile.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 144,
+    "footY": 1583,
+    "visibleBounds": [
+      52,
+      121,
+      940,
+      1586
+    ],
+    "minX": 52,
+    "minY": 121,
+    "maxX": 940,
+    "maxY": 1586
+  },
+  "/assets/character/light-anime-v1/advanced-holy_knight-female-equipment.webp": {
+    "width": 948,
+    "height": 1659,
+    "footX": 502.0,
+    "footY": 1574.5,
+    "visibleBounds": [
+      110,
+      122,
+      867,
+      1589
+    ],
+    "minX": 110,
+    "minY": 122,
+    "maxX": 867,
+    "maxY": 1589
+  },
+  "/assets/character/light-anime-v1/advanced-holy_knight-female-profile.webp": {
+    "width": 948,
+    "height": 1659,
+    "footX": 444,
+    "footY": 1507,
+    "visibleBounds": [
+      80,
+      186,
+      890,
+      1508
+    ],
+    "minX": 80,
+    "minY": 186,
+    "maxX": 890,
+    "maxY": 1508
+  },
+  "/assets/character/light-anime-v1/advanced-holy_knight-male-equipment.webp": {
+    "width": 948,
+    "height": 1659,
+    "footX": 517.5,
+    "footY": 1558.0,
+    "visibleBounds": [
+      111,
+      120,
+      862,
+      1574
+    ],
+    "minX": 111,
+    "minY": 120,
+    "maxX": 862,
+    "maxY": 1574
+  },
+  "/assets/character/light-anime-v1/advanced-holy_knight-male-profile.webp": {
+    "width": 948,
+    "height": 1659,
+    "footX": 759,
+    "footY": 1510,
+    "visibleBounds": [
+      75,
+      173,
+      911,
+      1510
+    ],
+    "minX": 75,
+    "minY": 173,
+    "maxX": 911,
+    "maxY": 1510
+  },
+  "/assets/character/light-anime-v1/advanced-inventor-female-equipment.webp": {
+    "width": 948,
+    "height": 1659,
+    "footX": 500.25,
+    "footY": 1580.5,
+    "visibleBounds": [
+      184,
+      67,
+      838,
+      1587
+    ],
+    "minX": 184,
+    "minY": 67,
+    "maxX": 838,
+    "maxY": 1587
+  },
+  "/assets/character/light-anime-v1/advanced-inventor-female-profile.webp": {
+    "width": 948,
+    "height": 1659,
+    "footX": 207,
+    "footY": 1512,
+    "visibleBounds": [
+      73,
+      152,
+      921,
+      1512
+    ],
+    "minX": 73,
+    "minY": 152,
+    "maxX": 921,
+    "maxY": 1512
+  },
+  "/assets/character/light-anime-v1/advanced-inventor-male-equipment.webp": {
+    "width": 948,
+    "height": 1659,
+    "footX": 527.5,
+    "footY": 1550.0,
+    "visibleBounds": [
+      136,
+      90,
+      844,
+      1576
+    ],
+    "minX": 136,
+    "minY": 90,
+    "maxX": 844,
+    "maxY": 1576
+  },
+  "/assets/character/light-anime-v1/advanced-inventor-male-profile.webp": {
+    "width": 948,
+    "height": 1659,
+    "footX": 199,
+    "footY": 1531,
+    "visibleBounds": [
+      82,
+      128,
+      907,
+      1532
+    ],
+    "minX": 82,
+    "minY": 128,
+    "maxX": 907,
+    "maxY": 1532
+  },
+  "/assets/character/light-anime-v1/advanced-ironbreaker-female-equipment.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 536.75,
+    "footY": 1618.0,
+    "visibleBounds": [
+      152,
+      57,
+      868,
+      1631
+    ],
+    "minX": 152,
+    "minY": 57,
+    "maxX": 868,
+    "maxY": 1631
+  },
+  "/assets/character/light-anime-v1/advanced-ironbreaker-female-profile.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 201,
+    "footY": 1598,
+    "visibleBounds": [
+      24,
+      58,
+      925,
+      1603
+    ],
+    "minX": 24,
+    "minY": 58,
+    "maxX": 925,
+    "maxY": 1603
+  },
+  "/assets/character/light-anime-v1/advanced-ironbreaker-male-equipment.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 540.75,
+    "footY": 1616.5,
+    "visibleBounds": [
+      56,
+      42,
+      870,
+      1636
+    ],
+    "minX": 56,
+    "minY": 42,
+    "maxX": 870,
+    "maxY": 1636
+  },
+  "/assets/character/light-anime-v1/advanced-ironbreaker-male-profile.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 153,
+    "footY": 1633,
+    "visibleBounds": [
+      12,
+      29,
+      934,
+      1633
+    ],
+    "minX": 12,
+    "minY": 29,
+    "maxX": 934,
+    "maxY": 1633
+  },
+  "/assets/character/light-anime-v1/advanced-magical_scholar-female-equipment.webp": {
+    "width": 948,
+    "height": 1660,
+    "footX": 572.5,
+    "footY": 1603.5,
+    "visibleBounds": [
+      123,
+      58,
+      913,
+      1611
+    ],
+    "minX": 123,
+    "minY": 58,
+    "maxX": 913,
+    "maxY": 1611
+  },
+  "/assets/character/light-anime-v1/advanced-magical_scholar-female-profile.webp": {
+    "width": 948,
+    "height": 1659,
+    "footX": 233,
+    "footY": 1493,
+    "visibleBounds": [
+      107,
+      169,
+      892,
+      1493
+    ],
+    "minX": 107,
+    "minY": 169,
+    "maxX": 892,
+    "maxY": 1493
+  },
+  "/assets/character/light-anime-v1/advanced-magical_scholar-male-equipment.webp": {
+    "width": 948,
+    "height": 1659,
+    "footX": 546.0,
+    "footY": 1613.5,
+    "visibleBounds": [
+      55,
+      8,
+      921,
+      1638
+    ],
+    "minX": 55,
+    "minY": 8,
+    "maxX": 921,
+    "maxY": 1638
+  },
+  "/assets/character/light-anime-v1/advanced-magical_scholar-male-profile.webp": {
+    "width": 948,
+    "height": 1659,
+    "footX": 329,
+    "footY": 1498,
+    "visibleBounds": [
+      94,
+      160,
+      868,
+      1499
+    ],
+    "minX": 94,
+    "minY": 160,
+    "maxX": 868,
+    "maxY": 1499
+  },
+  "/assets/character/light-anime-v1/advanced-master_thief-female-equipment.webp": {
+    "width": 1024,
+    "height": 1536,
+    "footX": 620.5,
+    "footY": 1498.5,
+    "visibleBounds": [
+      67,
+      5,
+      970,
+      1508
+    ],
+    "minX": 67,
+    "minY": 5,
+    "maxX": 970,
+    "maxY": 1508
+  },
+  "/assets/character/light-anime-v1/advanced-master_thief-female-profile.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 867,
+    "footY": 1575,
+    "visibleBounds": [
+      10,
+      74,
+      937,
+      1578
+    ],
+    "minX": 10,
+    "minY": 74,
+    "maxX": 937,
+    "maxY": 1578
+  },
+  "/assets/character/light-anime-v1/advanced-master_thief-male-equipment.webp": {
+    "width": 1024,
+    "height": 1536,
+    "footX": 532.5,
+    "footY": 1502.0,
+    "visibleBounds": [
+      159,
+      9,
+      916,
+      1513
+    ],
+    "minX": 159,
+    "minY": 9,
+    "maxX": 916,
+    "maxY": 1513
+  },
+  "/assets/character/light-anime-v1/advanced-master_thief-male-profile.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 810,
+    "footY": 1592,
+    "visibleBounds": [
+      22,
+      62,
+      930,
+      1598
+    ],
+    "minX": 22,
+    "minY": 62,
+    "maxX": 930,
+    "maxY": 1598
+  },
+  "/assets/character/light-anime-v1/advanced-nightblade-female-equipment.webp": {
+    "width": 1024,
+    "height": 1536,
+    "footX": 579.0,
+    "footY": 1505.5,
+    "visibleBounds": [
+      90,
+      8,
+      938,
+      1526
+    ],
+    "minX": 90,
+    "minY": 8,
+    "maxX": 938,
+    "maxY": 1526
+  },
+  "/assets/character/light-anime-v1/advanced-nightblade-female-profile.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 440,
+    "footY": 1645,
+    "visibleBounds": [
+      4,
+      23,
+      936,
+      1649
+    ],
+    "minX": 4,
+    "minY": 23,
+    "maxX": 936,
+    "maxY": 1649
+  },
+  "/assets/character/light-anime-v1/advanced-nightblade-male-equipment.webp": {
+    "width": 948,
+    "height": 1659,
+    "footX": 524.5,
+    "footY": 1625.5,
+    "visibleBounds": [
+      48,
+      12,
+      922,
+      1634
+    ],
+    "minX": 48,
+    "minY": 12,
+    "maxX": 922,
+    "maxY": 1634
+  },
+  "/assets/character/light-anime-v1/advanced-nightblade-male-profile.webp": {
+    "width": 948,
+    "height": 1659,
+    "footX": 190,
+    "footY": 1635,
+    "visibleBounds": [
+      10,
+      12,
+      943,
+      1641
+    ],
+    "minX": 10,
+    "minY": 12,
+    "maxX": 943,
+    "maxY": 1641
+  },
+  "/assets/character/light-anime-v1/advanced-saint_healer-female-equipment.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 573.0,
+    "footY": 1613.5,
+    "visibleBounds": [
+      52,
+      62,
+      921,
+      1625
+    ],
+    "minX": 52,
+    "minY": 62,
+    "maxX": 921,
+    "maxY": 1625
+  },
+  "/assets/character/light-anime-v1/advanced-saint_healer-female-profile.webp": {
+    "width": 941,
+    "height": 1670,
+    "footX": 249,
+    "footY": 1638,
+    "visibleBounds": [
+      5,
+      12,
+      934,
+      1641
+    ],
+    "minX": 5,
+    "minY": 12,
+    "maxX": 934,
+    "maxY": 1641
+  },
+  "/assets/character/light-anime-v1/advanced-saint_healer-male-equipment.webp": {
+    "width": 948,
+    "height": 1659,
+    "footX": 540.25,
+    "footY": 1587.0,
+    "visibleBounds": [
+      48,
+      61,
+      916,
+      1610
+    ],
+    "minX": 48,
+    "minY": 61,
+    "maxX": 916,
+    "maxY": 1610
+  },
+  "/assets/character/light-anime-v1/advanced-saint_healer-male-profile.webp": {
+    "width": 948,
+    "height": 1660,
+    "footX": 815,
+    "footY": 1594,
+    "visibleBounds": [
+      19,
+      53,
+      940,
+      1601
+    ],
+    "minX": 19,
+    "minY": 53,
+    "maxX": 940,
+    "maxY": 1601
+  },
+  "/assets/character/light-anime-v1/advanced-sharpshooter-female-equipment.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 433.25,
+    "footY": 1593.0,
+    "visibleBounds": [
+      165,
+      107,
+      833,
+      1600
+    ],
+    "minX": 165,
+    "minY": 107,
+    "maxX": 833,
+    "maxY": 1600
+  },
+  "/assets/character/light-anime-v1/advanced-sharpshooter-female-profile.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 805,
+    "footY": 1549,
+    "visibleBounds": [
+      75,
+      94,
+      927,
+      1554
+    ],
+    "minX": 75,
+    "minY": 94,
+    "maxX": 927,
+    "maxY": 1554
+  },
+  "/assets/character/light-anime-v1/advanced-sharpshooter-male-equipment.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 464.0,
+    "footY": 1558.0,
+    "visibleBounds": [
+      140,
+      105,
+      798,
+      1578
+    ],
+    "minX": 140,
+    "minY": 105,
+    "maxX": 798,
+    "maxY": 1578
+  },
+  "/assets/character/light-anime-v1/advanced-sharpshooter-male-profile.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 869,
+    "footY": 1622,
+    "visibleBounds": [
+      7,
+      10,
+      934,
+      1624
+    ],
+    "minX": 7,
+    "minY": 10,
+    "maxX": 934,
+    "maxY": 1624
+  },
+  "/assets/character/light-anime-v1/advanced-spellblade-female-equipment.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 610.75,
+    "footY": 1595.0,
+    "visibleBounds": [
+      110,
+      95,
+      897,
+      1613
+    ],
+    "minX": 110,
+    "minY": 95,
+    "maxX": 897,
+    "maxY": 1613
+  },
+  "/assets/character/light-anime-v1/advanced-spellblade-female-profile.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 292,
+    "footY": 1598,
+    "visibleBounds": [
+      33,
+      78,
+      930,
+      1601
+    ],
+    "minX": 33,
+    "minY": 78,
+    "maxX": 930,
+    "maxY": 1601
+  },
+  "/assets/character/light-anime-v1/advanced-spellblade-male-equipment.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 518.25,
+    "footY": 1597.5,
+    "visibleBounds": [
+      71,
+      63,
+      903,
+      1610
+    ],
+    "minX": 71,
+    "minY": 63,
+    "maxX": 903,
+    "maxY": 1610
+  },
+  "/assets/character/light-anime-v1/advanced-spellblade-male-profile.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 163,
+    "footY": 1593,
+    "visibleBounds": [
+      8,
+      82,
+      934,
+      1595
+    ],
+    "minX": 8,
+    "minY": 82,
+    "maxX": 934,
+    "maxY": 1595
+  },
+  "/assets/character/light-anime-v1/advanced-spirit_summoner-female-equipment.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 523.25,
+    "footY": 1612.5,
+    "visibleBounds": [
+      40,
+      65,
+      919,
+      1614
+    ],
+    "minX": 40,
+    "minY": 65,
+    "maxX": 919,
+    "maxY": 1614
+  },
+  "/assets/character/light-anime-v1/advanced-spirit_summoner-female-profile.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 445,
+    "footY": 1610,
+    "visibleBounds": [
+      12,
+      59,
+      929,
+      1614
+    ],
+    "minX": 12,
+    "minY": 59,
+    "maxX": 929,
+    "maxY": 1614
+  },
+  "/assets/character/light-anime-v1/advanced-spirit_summoner-male-equipment.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 521.75,
+    "footY": 1594.0,
+    "visibleBounds": [
+      60,
+      80,
+      903,
+      1608
+    ],
+    "minX": 60,
+    "minY": 80,
+    "maxX": 903,
+    "maxY": 1608
+  },
+  "/assets/character/light-anime-v1/advanced-spirit_summoner-male-profile.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 348,
+    "footY": 1608,
+    "visibleBounds": [
+      14,
+      125,
+      930,
+      1609
+    ],
+    "minX": 14,
+    "minY": 125,
+    "maxX": 930,
+    "maxY": 1609
+  },
+  "/assets/character/light-anime-v1/advanced-stringblade-female-equipment.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 516.75,
+    "footY": 1603.5,
+    "visibleBounds": [
+      80,
+      45,
+      878,
+      1639
+    ],
+    "minX": 80,
+    "minY": 45,
+    "maxX": 878,
+    "maxY": 1639
+  },
+  "/assets/character/light-anime-v1/advanced-stringblade-female-profile.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 796,
+    "footY": 1566,
+    "visibleBounds": [
+      53,
+      167,
+      899,
+      1567
+    ],
+    "minX": 53,
+    "minY": 167,
+    "maxX": 899,
+    "maxY": 1567
+  },
+  "/assets/character/light-anime-v1/advanced-stringblade-male-equipment.webp": {
+    "width": 981,
+    "height": 1602,
+    "footX": 486.0,
+    "footY": 1517.0,
+    "visibleBounds": [
+      172,
+      58,
+      901,
+      1548
+    ],
+    "minX": 172,
+    "minY": 58,
+    "maxX": 901,
+    "maxY": 1548
+  },
+  "/assets/character/light-anime-v1/advanced-stringblade-male-profile.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 180,
+    "footY": 1548,
+    "visibleBounds": [
+      90,
+      191,
+      914,
+      1549
+    ],
+    "minX": 90,
+    "minY": 191,
+    "maxX": 914,
+    "maxY": 1549
+  },
+  "/assets/character/light-anime-v1/advanced-sword_shadow-female-equipment.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 630.5,
+    "footY": 1614.5,
+    "visibleBounds": [
+      80,
+      59,
+      903,
+      1630
+    ],
+    "minX": 80,
+    "minY": 59,
+    "maxX": 903,
+    "maxY": 1630
+  },
+  "/assets/character/light-anime-v1/advanced-sword_shadow-female-profile.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 263,
+    "footY": 1610,
+    "visibleBounds": [
+      25,
+      57,
+      921,
+      1613
+    ],
+    "minX": 25,
+    "minY": 57,
+    "maxX": 921,
+    "maxY": 1613
+  },
+  "/assets/character/light-anime-v1/advanced-sword_shadow-male-equipment.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 502.0,
+    "footY": 1602.5,
+    "visibleBounds": [
+      42,
+      49,
+      917,
+      1632
+    ],
+    "minX": 42,
+    "minY": 49,
+    "maxX": 917,
+    "maxY": 1632
+  },
+  "/assets/character/light-anime-v1/advanced-sword_shadow-male-profile.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 159,
+    "footY": 1603,
+    "visibleBounds": [
+      12,
+      118,
+      937,
+      1604
+    ],
+    "minX": 12,
+    "minY": 118,
+    "maxX": 937,
+    "maxY": 1604
+  },
+  "/assets/character/light-anime-v1/advanced-tactician-female-equipment.webp": {
+    "width": 948,
+    "height": 1659,
+    "footX": 515.5,
+    "footY": 1566.5,
+    "visibleBounds": [
+      114,
+      100,
+      884,
+      1587
+    ],
+    "minX": 114,
+    "minY": 100,
+    "maxX": 884,
+    "maxY": 1587
+  },
+  "/assets/character/light-anime-v1/advanced-tactician-female-profile.webp": {
+    "width": 948,
+    "height": 1659,
+    "footX": 765,
+    "footY": 1447,
+    "visibleBounds": [
+      72,
+      158,
+      929,
+      1447
+    ],
+    "minX": 72,
+    "minY": 158,
+    "maxX": 929,
+    "maxY": 1447
+  },
+  "/assets/character/light-anime-v1/advanced-tactician-male-equipment.webp": {
+    "width": 948,
+    "height": 1659,
+    "footX": 512.0,
+    "footY": 1567.5,
+    "visibleBounds": [
+      93,
+      86,
+      899,
+      1601
+    ],
+    "minX": 93,
+    "minY": 86,
+    "maxX": 899,
+    "maxY": 1601
+  },
+  "/assets/character/light-anime-v1/advanced-tactician-male-profile.webp": {
+    "width": 948,
+    "height": 1659,
+    "footX": 664,
+    "footY": 1575,
+    "visibleBounds": [
+      37,
+      90,
+      930,
+      1576
+    ],
+    "minX": 37,
+    "minY": 90,
+    "maxX": 930,
+    "maxY": 1576
+  },
+  "/assets/character/light-anime-v1/advanced-titan-female-equipment.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 500.25,
+    "footY": 1588.0,
+    "visibleBounds": [
+      139,
+      86,
+      870,
+      1607
+    ],
+    "minX": 139,
+    "minY": 86,
+    "maxX": 870,
+    "maxY": 1607
+  },
+  "/assets/character/light-anime-v1/advanced-titan-female-profile.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 150,
+    "footY": 1590,
+    "visibleBounds": [
+      19,
+      100,
+      927,
+      1594
+    ],
+    "minX": 19,
+    "minY": 100,
+    "maxX": 927,
+    "maxY": 1594
+  },
+  "/assets/character/light-anime-v1/advanced-titan-male-equipment.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 495.5,
+    "footY": 1579.0,
+    "visibleBounds": [
+      172,
+      97,
+      881,
+      1596
+    ],
+    "minX": 172,
+    "minY": 97,
+    "maxX": 881,
+    "maxY": 1596
+  },
+  "/assets/character/light-anime-v1/advanced-titan-male-profile.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 789,
+    "footY": 1559,
+    "visibleBounds": [
+      5,
+      149,
+      940,
+      1564
+    ],
+    "minX": 5,
+    "minY": 149,
+    "maxX": 940,
+    "maxY": 1564
+  },
+  "/assets/character/light-anime-v1/advanced-trickster_ranger-female-equipment.webp": {
+    "width": 1024,
+    "height": 1536,
+    "footX": 540.5,
+    "footY": 1513.5,
+    "visibleBounds": [
+      141,
+      5,
+      877,
+      1520
+    ],
+    "minX": 141,
+    "minY": 5,
+    "maxX": 877,
+    "maxY": 1520
+  },
+  "/assets/character/light-anime-v1/advanced-trickster_ranger-female-profile.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 827,
+    "footY": 1568,
+    "visibleBounds": [
+      17,
+      180,
+      936,
+      1570
+    ],
+    "minX": 17,
+    "minY": 180,
+    "maxX": 936,
+    "maxY": 1570
+  },
+  "/assets/character/light-anime-v1/advanced-trickster_ranger-male-equipment.webp": {
+    "width": 1024,
+    "height": 1536,
+    "footX": 507.5,
+    "footY": 1511.5,
+    "visibleBounds": [
+      150,
+      7,
+      935,
+      1523
+    ],
+    "minX": 150,
+    "minY": 7,
+    "maxX": 935,
+    "maxY": 1523
+  },
+  "/assets/character/light-anime-v1/advanced-trickster_ranger-male-profile.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 117,
+    "footY": 1627,
+    "visibleBounds": [
+      8,
+      50,
+      940,
+      1630
+    ],
+    "minX": 8,
+    "minY": 50,
+    "maxX": 940,
+    "maxY": 1630
+  },
+  "/assets/character/light-anime-v1/advanced-venomancer-female-equipment.webp": {
+    "width": 948,
+    "height": 1659,
+    "footX": 547.75,
+    "footY": 1627.0,
+    "visibleBounds": [
+      74,
+      11,
+      911,
+      1638
+    ],
+    "minX": 74,
+    "minY": 11,
+    "maxX": 911,
+    "maxY": 1638
+  },
+  "/assets/character/light-anime-v1/advanced-venomancer-female-profile.webp": {
+    "width": 948,
+    "height": 1659,
+    "footX": 305,
+    "footY": 1617,
+    "visibleBounds": [
+      18,
+      75,
+      937,
+      1622
+    ],
+    "minX": 18,
+    "minY": 75,
+    "maxX": 937,
+    "maxY": 1622
+  },
+  "/assets/character/light-anime-v1/advanced-venomancer-male-equipment.webp": {
+    "width": 948,
+    "height": 1659,
+    "footX": 476.25,
+    "footY": 1629.0,
+    "visibleBounds": [
+      50,
+      9,
+      916,
+      1635
+    ],
+    "minX": 50,
+    "minY": 9,
+    "maxX": 916,
+    "maxY": 1635
+  },
+  "/assets/character/light-anime-v1/advanced-venomancer-male-profile.webp": {
+    "width": 948,
+    "height": 1659,
+    "footX": 286,
+    "footY": 1608,
+    "visibleBounds": [
+      34,
+      46,
+      935,
+      1615
+    ],
+    "minX": 34,
+    "minY": 46,
+    "maxX": 935,
+    "maxY": 1615
+  },
+  "/assets/character/light-anime-v1/advanced-war_lord-female-equipment.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 521.75,
+    "footY": 1634.0,
+    "visibleBounds": [
+      86,
+      23,
+      873,
+      1638
+    ],
+    "minX": 86,
+    "minY": 23,
+    "maxX": 873,
+    "maxY": 1638
+  },
+  "/assets/character/light-anime-v1/advanced-war_lord-female-profile.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 300,
+    "footY": 1624,
+    "visibleBounds": [
+      50,
+      42,
+      928,
+      1627
+    ],
+    "minX": 50,
+    "minY": 42,
+    "maxX": 928,
+    "maxY": 1627
+  },
+  "/assets/character/light-anime-v1/advanced-war_lord-male-equipment.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 539.0,
+    "footY": 1610.0,
+    "visibleBounds": [
+      83,
+      14,
+      888,
+      1635
+    ],
+    "minX": 83,
+    "minY": 14,
+    "maxX": 888,
+    "maxY": 1635
+  },
+  "/assets/character/light-anime-v1/advanced-war_lord-male-profile.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 281,
+    "footY": 1626,
+    "visibleBounds": [
+      18,
+      11,
+      924,
+      1631
+    ],
+    "minX": 18,
+    "minY": 11,
+    "maxX": 924,
+    "maxY": 1631
+  },
+  "/assets/character/light-anime-v1/advanced-weapon_master-female-equipment.webp": {
+    "width": 948,
+    "height": 1659,
+    "footX": 499.5,
+    "footY": 1543.5,
+    "visibleBounds": [
+      91,
+      58,
+      892,
+      1574
+    ],
+    "minX": 91,
+    "minY": 58,
+    "maxX": 892,
+    "maxY": 1574
+  },
+  "/assets/character/light-anime-v1/advanced-weapon_master-female-profile.webp": {
+    "width": 948,
+    "height": 1660,
+    "footX": 198,
+    "footY": 1566,
+    "visibleBounds": [
+      37,
+      76,
+      935,
+      1567
+    ],
+    "minX": 37,
+    "minY": 76,
+    "maxX": 935,
+    "maxY": 1567
+  },
+  "/assets/character/light-anime-v1/advanced-weapon_master-male-equipment.webp": {
+    "width": 948,
+    "height": 1659,
+    "footX": 506.75,
+    "footY": 1567.0,
+    "visibleBounds": [
+      113,
+      89,
+      897,
+      1599
+    ],
+    "minX": 113,
+    "minY": 89,
+    "maxX": 897,
+    "maxY": 1599
+  },
+  "/assets/character/light-anime-v1/advanced-weapon_master-male-profile.webp": {
+    "width": 948,
+    "height": 1660,
+    "footX": 202,
+    "footY": 1477,
+    "visibleBounds": [
+      96,
+      184,
+      866,
+      1478
+    ],
+    "minX": 96,
+    "minY": 184,
+    "maxX": 866,
+    "maxY": 1478
+  },
+  "/assets/character/light-anime-v1/player-female-initial-equipment.webp": {
+    "width": 948,
+    "height": 1659,
+    "footX": 534.0,
+    "footY": 1624.0,
+    "visibleBounds": [
+      164,
+      21,
+      873,
+      1625
+    ],
+    "minX": 164,
+    "minY": 21,
+    "maxX": 873,
+    "maxY": 1625
+  },
+  "/assets/character/light-anime-v1/player-female-initial-profile.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 818,
+    "footY": 1641,
+    "visibleBounds": [
+      9,
+      24,
+      933,
+      1644
+    ],
+    "minX": 9,
+    "minY": 24,
+    "maxX": 933,
+    "maxY": 1644
+  },
+  "/assets/character/light-anime-v1/player-male-initial-equipment.webp": {
+    "width": 948,
+    "height": 1659,
+    "footX": 534.0,
+    "footY": 1593.5,
+    "visibleBounds": [
+      180,
+      20,
+      796,
+      1627
+    ],
+    "minX": 180,
+    "minY": 20,
+    "maxX": 796,
+    "maxY": 1627
+  },
+  "/assets/character/light-anime-v1/player-male-initial-profile.webp": {
+    "width": 948,
+    "height": 1659,
+    "footX": 155,
+    "footY": 1608,
+    "visibleBounds": [
+      18,
+      92,
+      927,
+      1616
+    ],
+    "minX": 18,
+    "minY": 92,
+    "maxX": 927,
+    "maxY": 1616
+  },
+  "/assets/character/light-anime-v1/profession-archer-female-equipment.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 524.5,
+    "footY": 1615.5,
+    "visibleBounds": [
+      54,
+      91,
+      895,
+      1619
+    ],
+    "minX": 54,
+    "minY": 91,
+    "maxX": 895,
+    "maxY": 1619
+  },
+  "/assets/character/light-anime-v1/profession-archer-female-profile.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 859,
+    "footY": 1619,
+    "visibleBounds": [
+      3,
+      33,
+      938,
+      1623
+    ],
+    "minX": 3,
+    "minY": 33,
+    "maxX": 938,
+    "maxY": 1623
+  },
+  "/assets/character/light-anime-v1/profession-archer-male-equipment.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 430.75,
+    "footY": 1628.5,
+    "visibleBounds": [
+      86,
+      37,
+      855,
+      1644
+    ],
+    "minX": 86,
+    "minY": 37,
+    "maxX": 855,
+    "maxY": 1644
+  },
+  "/assets/character/light-anime-v1/profession-archer-male-profile.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 810,
+    "footY": 1643,
+    "visibleBounds": [
+      21,
+      17,
+      940,
+      1643
+    ],
+    "minX": 21,
+    "minY": 17,
+    "maxX": 940,
+    "maxY": 1643
+  },
+  "/assets/character/light-anime-v1/profession-mage-female-equipment.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 552.75,
+    "footY": 1623.5,
+    "visibleBounds": [
+      74,
+      51,
+      911,
+      1646
+    ],
+    "minX": 74,
+    "minY": 51,
+    "maxX": 911,
+    "maxY": 1646
+  },
+  "/assets/character/light-anime-v1/profession-mage-female-profile.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 239,
+    "footY": 1600,
+    "visibleBounds": [
+      23,
+      69,
+      932,
+      1605
+    ],
+    "minX": 23,
+    "minY": 69,
+    "maxX": 932,
+    "maxY": 1605
+  },
+  "/assets/character/light-anime-v1/profession-mage-male-equipment.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 516.5,
+    "footY": 1608.0,
+    "visibleBounds": [
+      96,
+      24,
+      878,
+      1632
+    ],
+    "minX": 96,
+    "minY": 24,
+    "maxX": 878,
+    "maxY": 1632
+  },
+  "/assets/character/light-anime-v1/profession-mage-male-profile.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 795,
+    "footY": 1646,
+    "visibleBounds": [
+      11,
+      38,
+      940,
+      1646
+    ],
+    "minX": 11,
+    "minY": 38,
+    "maxX": 940,
+    "maxY": 1646
+  },
+  "/assets/character/light-anime-v1/profession-priest-female-equipment.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 493.5,
+    "footY": 1653.5,
+    "visibleBounds": [
+      94,
+      12,
+      874,
+      1655
+    ],
+    "minX": 94,
+    "minY": 12,
+    "maxX": 874,
+    "maxY": 1655
+  },
+  "/assets/character/light-anime-v1/profession-priest-female-profile.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 350,
+    "footY": 1595,
+    "visibleBounds": [
+      26,
+      79,
+      924,
+      1597
+    ],
+    "minX": 26,
+    "minY": 79,
+    "maxX": 924,
+    "maxY": 1597
+  },
+  "/assets/character/light-anime-v1/profession-priest-male-equipment.webp": {
+    "width": 941,
+    "height": 1670,
+    "footX": 507.25,
+    "footY": 1569.0,
+    "visibleBounds": [
+      96,
+      95,
+      877,
+      1589
+    ],
+    "minX": 96,
+    "minY": 95,
+    "maxX": 877,
+    "maxY": 1589
+  },
+  "/assets/character/light-anime-v1/profession-priest-male-profile.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 405,
+    "footY": 1546,
+    "visibleBounds": [
+      10,
+      85,
+      940,
+      1548
+    ],
+    "minX": 10,
+    "minY": 85,
+    "maxX": 940,
+    "maxY": 1548
+  },
+  "/assets/character/light-anime-v1/profession-rogue-female-equipment.webp": {
+    "width": 948,
+    "height": 1660,
+    "footX": 580.0,
+    "footY": 1628.5,
+    "visibleBounds": [
+      108,
+      13,
+      910,
+      1629
+    ],
+    "minX": 108,
+    "minY": 13,
+    "maxX": 910,
+    "maxY": 1629
+  },
+  "/assets/character/light-anime-v1/profession-rogue-female-profile.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 290,
+    "footY": 1623,
+    "visibleBounds": [
+      28,
+      62,
+      924,
+      1626
+    ],
+    "minX": 28,
+    "minY": 62,
+    "maxX": 924,
+    "maxY": 1626
+  },
+  "/assets/character/light-anime-v1/profession-rogue-male-equipment.webp": {
+    "width": 948,
+    "height": 1659,
+    "footX": 499.0,
+    "footY": 1620.0,
+    "visibleBounds": [
+      102,
+      8,
+      932,
+      1635
+    ],
+    "minX": 102,
+    "minY": 8,
+    "maxX": 932,
+    "maxY": 1635
+  },
+  "/assets/character/light-anime-v1/profession-rogue-male-profile.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 270,
+    "footY": 1604,
+    "visibleBounds": [
+      8,
+      133,
+      934,
+      1610
+    ],
+    "minX": 8,
+    "minY": 133,
+    "maxX": 934,
+    "maxY": 1610
+  },
+  "/assets/character/light-anime-v1/profession-warrior-female-equipment.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 640.0,
+    "footY": 1622.5,
+    "visibleBounds": [
+      24,
+      16,
+      901,
+      1633
+    ],
+    "minX": 24,
+    "minY": 16,
+    "maxX": 901,
+    "maxY": 1633
+  },
+  "/assets/character/light-anime-v1/profession-warrior-female-profile.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 315,
+    "footY": 1619,
+    "visibleBounds": [
+      13,
+      75,
+      940,
+      1626
+    ],
+    "minX": 13,
+    "minY": 75,
+    "maxX": 940,
+    "maxY": 1626
+  },
+  "/assets/character/light-anime-v1/profession-warrior-male-equipment.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 513.0,
+    "footY": 1622.5,
+    "visibleBounds": [
+      73,
+      17,
+      930,
+      1646
+    ],
+    "minX": 73,
+    "minY": 17,
+    "maxX": 930,
+    "maxY": 1646
+  },
+  "/assets/character/light-anime-v1/profession-warrior-male-profile.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 811,
+    "footY": 1610,
+    "visibleBounds": [
+      32,
+      70,
+      937,
+      1615
+    ],
+    "minX": 32,
+    "minY": 70,
+    "maxX": 937,
+    "maxY": 1615
+  },
+  "/assets/character/ranger-three-beasts-v2/advanced-ranger_warden-female-equipment.webp": {
+    "width": 941,
+    "height": 1672,
+    "footX": 410,
+    "footY": 1447,
+    "visibleBounds": [
+      140,
+      269,
+      839,
+      1447
+    ],
+    "minX": 140,
+    "minY": 269,
+    "maxX": 839,
+    "maxY": 1447
+  },
+  "/assets/character/ranger-three-beasts-v2/advanced-ranger_warden-female-profile.webp": {
+    "width": 941,
+    "height": 1671,
+    "footX": 374,
+    "footY": 1527,
+    "visibleBounds": [
+      68,
+      179,
+      891,
+      1528
+    ],
+    "minX": 68,
+    "minY": 179,
+    "maxX": 891,
+    "maxY": 1528
+  },
+  "/assets/character/ranger-three-beasts-v2/advanced-ranger_warden-male-equipment.webp": {
+    "width": 941,
+    "height": 1671,
+    "footX": 373,
+    "footY": 1417,
+    "visibleBounds": [
+      132,
+      308,
+      841,
+      1418
+    ],
+    "minX": 132,
+    "minY": 308,
+    "maxX": 841,
+    "maxY": 1418
+  },
+  "/assets/character/ranger-three-beasts-v2/advanced-ranger_warden-male-profile.webp": {
+    "width": 941,
+    "height": 1671,
+    "footX": 248,
+    "footY": 1472,
+    "visibleBounds": [
+      74,
+      211,
+      876,
+      1473
+    ],
+    "minX": 74,
+    "minY": 211,
+    "maxX": 876,
+    "maxY": 1473
+  },
+  "/assets/character/v2/advanced-aegis_priest-female.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 520.25,
+    "footY": 1651.5,
+    "visibleBounds": [
+      21,
+      11,
+      916,
+      1653
+    ],
+    "minX": 21,
+    "minY": 11,
+    "maxX": 916,
+    "maxY": 1653
+  },
+  "/assets/character/v2/advanced-aegis_priest-male.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 500.0,
+    "footY": 1631.5,
+    "visibleBounds": [
+      3,
+      19,
+      915,
+      1658
+    ],
+    "minX": 3,
+    "minY": 19,
+    "maxX": 915,
+    "maxY": 1658
+  },
+  "/assets/character/v2/advanced-arcane_magister-female.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 397.5,
+    "footY": 1595.0,
+    "visibleBounds": [
+      75,
+      70,
+      901,
+      1604
+    ],
+    "minX": 75,
+    "minY": 70,
+    "maxX": 901,
+    "maxY": 1604
+  },
+  "/assets/character/v2/advanced-arcane_magister-male.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 500.25,
+    "footY": 1584.5,
+    "visibleBounds": [
+      47,
+      72,
+      936,
+      1610
+    ],
+    "minX": 47,
+    "minY": 72,
+    "maxX": 936,
+    "maxY": 1610
+  },
+  "/assets/character/v2/advanced-bulwark_guard-female.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 491.75,
+    "footY": 1620.5,
+    "visibleBounds": [
+      37,
+      47,
+      905,
+      1639
+    ],
+    "minX": 37,
+    "minY": 47,
+    "maxX": 905,
+    "maxY": 1639
+  },
+  "/assets/character/v2/advanced-bulwark_guard-male.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 492.25,
+    "footY": 1610.5,
+    "visibleBounds": [
+      16,
+      38,
+      932,
+      1644
+    ],
+    "minX": 16,
+    "minY": 38,
+    "maxX": 932,
+    "maxY": 1644
+  },
+  "/assets/character/v2/advanced-dawn_inquisitor-female.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 449.25,
+    "footY": 1600.5,
+    "visibleBounds": [
+      68,
+      56,
+      861,
+      1602
+    ],
+    "minX": 68,
+    "minY": 56,
+    "maxX": 861,
+    "maxY": 1602
+  },
+  "/assets/character/v2/advanced-dawn_inquisitor-male.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 494.5,
+    "footY": 1583.0,
+    "visibleBounds": [
+      56,
+      36,
+      901,
+      1613
+    ],
+    "minX": 56,
+    "minY": 36,
+    "maxX": 901,
+    "maxY": 1613
+  },
+  "/assets/character/v2/advanced-elementalist-female.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 458.0,
+    "footY": 1575.0,
+    "visibleBounds": [
+      12,
+      92,
+      920,
+      1607
+    ],
+    "minX": 12,
+    "minY": 92,
+    "maxX": 920,
+    "maxY": 1607
+  },
+  "/assets/character/v2/advanced-elementalist-male.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 529.0,
+    "footY": 1585.5,
+    "visibleBounds": [
+      24,
+      127,
+      923,
+      1619
+    ],
+    "minX": 24,
+    "minY": 127,
+    "maxX": 923,
+    "maxY": 1619
+  },
+  "/assets/character/v2/advanced-gunner-female.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 515.0,
+    "footY": 1623.0,
+    "visibleBounds": [
+      213,
+      15,
+      800,
+      1641
+    ],
+    "minX": 213,
+    "minY": 15,
+    "maxX": 800,
+    "maxY": 1641
+  },
+  "/assets/character/v2/advanced-gunner-male.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 511.0,
+    "footY": 1632.0,
+    "visibleBounds": [
+      185,
+      16,
+      859,
+      1655
+    ],
+    "minX": 185,
+    "minY": 16,
+    "maxX": 859,
+    "maxY": 1655
+  },
+  "/assets/character/v2/advanced-holy_knight-female.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 506.5,
+    "footY": 1654.5,
+    "visibleBounds": [
+      173,
+      7,
+      800,
+      1661
+    ],
+    "minX": 173,
+    "minY": 7,
+    "maxX": 800,
+    "maxY": 1661
+  },
+  "/assets/character/v2/advanced-holy_knight-male.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 507.0,
+    "footY": 1644.0,
+    "visibleBounds": [
+      153,
+      8,
+      848,
+      1667
+    ],
+    "minX": 153,
+    "minY": 8,
+    "maxX": 848,
+    "maxY": 1667
+  },
+  "/assets/character/v2/advanced-inventor-female.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 484.25,
+    "footY": 1624.5,
+    "visibleBounds": [
+      109,
+      43,
+      817,
+      1629
+    ],
+    "minX": 109,
+    "minY": 43,
+    "maxX": 817,
+    "maxY": 1629
+  },
+  "/assets/character/v2/advanced-inventor-male.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 518.0,
+    "footY": 1627.5,
+    "visibleBounds": [
+      97,
+      21,
+      847,
+      1656
+    ],
+    "minX": 97,
+    "minY": 21,
+    "maxX": 847,
+    "maxY": 1656
+  },
+  "/assets/character/v2/advanced-ironbreaker-female.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 501.5,
+    "footY": 1569.0,
+    "visibleBounds": [
+      15,
+      69,
+      937,
+      1601
+    ],
+    "minX": 15,
+    "minY": 69,
+    "maxX": 937,
+    "maxY": 1601
+  },
+  "/assets/character/v2/advanced-ironbreaker-male.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 505.0,
+    "footY": 1607.5,
+    "visibleBounds": [
+      134,
+      30,
+      858,
+      1640
+    ],
+    "minX": 134,
+    "minY": 30,
+    "maxX": 858,
+    "maxY": 1640
+  },
+  "/assets/character/v2/advanced-magical_scholar-female.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 452.75,
+    "footY": 1648.0,
+    "visibleBounds": [
+      171,
+      6,
+      858,
+      1652
+    ],
+    "minX": 171,
+    "minY": 6,
+    "maxX": 858,
+    "maxY": 1652
+  },
+  "/assets/character/v2/advanced-magical_scholar-male.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 501.75,
+    "footY": 1589.0,
+    "visibleBounds": [
+      179,
+      106,
+      875,
+      1609
+    ],
+    "minX": 179,
+    "minY": 106,
+    "maxX": 875,
+    "maxY": 1609
+  },
+  "/assets/character/v2/advanced-master_thief-female.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 550.25,
+    "footY": 1642.0,
+    "visibleBounds": [
+      207,
+      7,
+      779,
+      1659
+    ],
+    "minX": 207,
+    "minY": 7,
+    "maxX": 779,
+    "maxY": 1659
+  },
+  "/assets/character/v2/advanced-master_thief-male.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 472.25,
+    "footY": 1616.5,
+    "visibleBounds": [
+      173,
+      10,
+      771,
+      1659
+    ],
+    "minX": 173,
+    "minY": 10,
+    "maxX": 771,
+    "maxY": 1659
+  },
+  "/assets/character/v2/advanced-nightblade-female.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 500.0,
+    "footY": 1619.0,
+    "visibleBounds": [
+      93,
+      13,
+      906,
+      1651
+    ],
+    "minX": 93,
+    "minY": 13,
+    "maxX": 906,
+    "maxY": 1651
+  },
+  "/assets/character/v2/advanced-nightblade-male.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 510.25,
+    "footY": 1618.5,
+    "visibleBounds": [
+      121,
+      26,
+      907,
+      1647
+    ],
+    "minX": 121,
+    "minY": 26,
+    "maxX": 907,
+    "maxY": 1647
+  },
+  "/assets/character/v2/advanced-saint_healer-female.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 453.25,
+    "footY": 1601.5,
+    "visibleBounds": [
+      72,
+      69,
+      904,
+      1602
+    ],
+    "minX": 72,
+    "minY": 69,
+    "maxX": 904,
+    "maxY": 1602
+  },
+  "/assets/character/v2/advanced-saint_healer-male.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 505.0,
+    "footY": 1597.0,
+    "visibleBounds": [
+      45,
+      76,
+      939,
+      1617
+    ],
+    "minX": 45,
+    "minY": 76,
+    "maxX": 939,
+    "maxY": 1617
+  },
+  "/assets/character/v2/advanced-sharpshooter-female.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 434.25,
+    "footY": 1611.5,
+    "visibleBounds": [
+      192,
+      13,
+      844,
+      1617
+    ],
+    "minX": 192,
+    "minY": 13,
+    "maxX": 844,
+    "maxY": 1617
+  },
+  "/assets/character/v2/advanced-sharpshooter-male.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 482.25,
+    "footY": 1607.0,
+    "visibleBounds": [
+      122,
+      41,
+      905,
+      1631
+    ],
+    "minX": 122,
+    "minY": 41,
+    "maxX": 905,
+    "maxY": 1631
+  },
+  "/assets/character/v2/advanced-spellblade-female.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 504.75,
+    "footY": 1593.5,
+    "visibleBounds": [
+      0,
+      86,
+      934,
+      1628
+    ],
+    "minX": 0,
+    "minY": 86,
+    "maxX": 934,
+    "maxY": 1628
+  },
+  "/assets/character/v2/advanced-spellblade-male.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 506.5,
+    "footY": 1621.5,
+    "visibleBounds": [
+      104,
+      46,
+      927,
+      1647
+    ],
+    "minX": 104,
+    "minY": 46,
+    "maxX": 927,
+    "maxY": 1647
+  },
+  "/assets/character/v2/advanced-stringblade-female.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 527.5,
+    "footY": 1628.5,
+    "visibleBounds": [
+      97,
+      19,
+      890,
+      1648
+    ],
+    "minX": 97,
+    "minY": 19,
+    "maxX": 890,
+    "maxY": 1648
+  },
+  "/assets/character/v2/advanced-stringblade-male.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 454.25,
+    "footY": 1606.0,
+    "visibleBounds": [
+      126,
+      10,
+      876,
+      1653
+    ],
+    "minX": 126,
+    "minY": 10,
+    "maxX": 876,
+    "maxY": 1653
+  },
+  "/assets/character/v2/advanced-sword_shadow-female.png": {
+    "width": 940,
+    "height": 1672,
+    "footX": 464.75,
+    "footY": 1637.5,
+    "visibleBounds": [
+      92,
+      7,
+      919,
+      1667
+    ],
+    "minX": 92,
+    "minY": 7,
+    "maxX": 919,
+    "maxY": 1667
+  },
+  "/assets/character/v2/advanced-sword_shadow-male.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 485.0,
+    "footY": 1620.0,
+    "visibleBounds": [
+      56,
+      7,
+      892,
+      1657
+    ],
+    "minX": 56,
+    "minY": 7,
+    "maxX": 892,
+    "maxY": 1657
+  },
+  "/assets/character/v2/advanced-tactician-female.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 440.25,
+    "footY": 1610.5,
+    "visibleBounds": [
+      178,
+      47,
+      901,
+      1612
+    ],
+    "minX": 178,
+    "minY": 47,
+    "maxX": 901,
+    "maxY": 1612
+  },
+  "/assets/character/v2/advanced-tactician-male.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 492.25,
+    "footY": 1601.0,
+    "visibleBounds": [
+      170,
+      10,
+      844,
+      1628
+    ],
+    "minX": 170,
+    "minY": 10,
+    "maxX": 844,
+    "maxY": 1628
+  },
+  "/assets/character/v2/advanced-titan-female.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 506.75,
+    "footY": 1630.0,
+    "visibleBounds": [
+      178,
+      2,
+      856,
+      1655
+    ],
+    "minX": 178,
+    "minY": 2,
+    "maxX": 856,
+    "maxY": 1655
+  },
+  "/assets/character/v2/advanced-titan-male.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 458.0,
+    "footY": 1616.0,
+    "visibleBounds": [
+      129,
+      3,
+      850,
+      1666
+    ],
+    "minX": 129,
+    "minY": 3,
+    "maxX": 850,
+    "maxY": 1666
+  },
+  "/assets/character/v2/advanced-trickster_ranger-female.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 513.75,
+    "footY": 1657.5,
+    "visibleBounds": [
+      58,
+      7,
+      837,
+      1659
+    ],
+    "minX": 58,
+    "minY": 7,
+    "maxX": 837,
+    "maxY": 1659
+  },
+  "/assets/character/v2/advanced-trickster_ranger-male.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 522.5,
+    "footY": 1637.0,
+    "visibleBounds": [
+      65,
+      18,
+      875,
+      1653
+    ],
+    "minX": 65,
+    "minY": 18,
+    "maxX": 875,
+    "maxY": 1653
+  },
+  "/assets/character/v2/advanced-venomancer-female.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 460.75,
+    "footY": 1638.0,
+    "visibleBounds": [
+      125,
+      3,
+      833,
+      1639
+    ],
+    "minX": 125,
+    "minY": 3,
+    "maxX": 833,
+    "maxY": 1639
+  },
+  "/assets/character/v2/advanced-venomancer-male.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 500.75,
+    "footY": 1613.0,
+    "visibleBounds": [
+      180,
+      14,
+      852,
+      1640
+    ],
+    "minX": 180,
+    "minY": 14,
+    "maxX": 852,
+    "maxY": 1640
+  },
+  "/assets/character/v2/advanced-war_lord-female.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 480.75,
+    "footY": 1602.0,
+    "visibleBounds": [
+      111,
+      4,
+      906,
+      1612
+    ],
+    "minX": 111,
+    "minY": 4,
+    "maxX": 906,
+    "maxY": 1612
+  },
+  "/assets/character/v2/advanced-war_lord-male.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 505.75,
+    "footY": 1577.0,
+    "visibleBounds": [
+      118,
+      1,
+      916,
+      1599
+    ],
+    "minX": 118,
+    "minY": 1,
+    "maxX": 916,
+    "maxY": 1599
+  },
+  "/assets/character/v2/advanced-weapon_master-female.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 475.25,
+    "footY": 1602.5,
+    "visibleBounds": [
+      46,
+      31,
+      872,
+      1611
+    ],
+    "minX": 46,
+    "minY": 31,
+    "maxX": 872,
+    "maxY": 1611
+  },
+  "/assets/character/v2/advanced-weapon_master-male.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 511.25,
+    "footY": 1601.5,
+    "visibleBounds": [
+      39,
+      16,
+      925,
+      1626
+    ],
+    "minX": 39,
+    "minY": 16,
+    "maxX": 925,
+    "maxY": 1626
+  },
+  "/assets/character/v2/player-female-initial.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 446.75,
+    "footY": 1628.0,
+    "visibleBounds": [
+      211,
+      28,
+      765,
+      1630
+    ],
+    "minX": 211,
+    "minY": 28,
+    "maxX": 765,
+    "maxY": 1630
+  },
+  "/assets/character/v2/player-male-initial.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 495.5,
+    "footY": 1618.5,
+    "visibleBounds": [
+      204,
+      39,
+      799,
+      1642
+    ],
+    "minX": 204,
+    "minY": 39,
+    "maxX": 799,
+    "maxY": 1642
+  },
+  "/assets/character/v2/profession-archer-female.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 451.25,
+    "footY": 1629.0,
+    "visibleBounds": [
+      165,
+      27,
+      770,
+      1631
+    ],
+    "minX": 165,
+    "minY": 27,
+    "maxX": 770,
+    "maxY": 1631
+  },
+  "/assets/character/v2/profession-archer-male.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 496.75,
+    "footY": 1620.0,
+    "visibleBounds": [
+      182,
+      39,
+      894,
+      1643
+    ],
+    "minX": 182,
+    "minY": 39,
+    "maxX": 894,
+    "maxY": 1643
+  },
+  "/assets/character/v2/profession-mage-female.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 447.25,
+    "footY": 1629.0,
+    "visibleBounds": [
+      88,
+      25,
+      917,
+      1631
+    ],
+    "minX": 88,
+    "minY": 25,
+    "maxX": 917,
+    "maxY": 1631
+  },
+  "/assets/character/v2/profession-mage-male.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 496.25,
+    "footY": 1619.0,
+    "visibleBounds": [
+      103,
+      34,
+      926,
+      1642
+    ],
+    "minX": 103,
+    "minY": 34,
+    "maxX": 926,
+    "maxY": 1642
+  },
+  "/assets/character/v2/profession-priest-female.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 446.75,
+    "footY": 1629.5,
+    "visibleBounds": [
+      115,
+      27,
+      803,
+      1632
+    ],
+    "minX": 115,
+    "minY": 27,
+    "maxX": 803,
+    "maxY": 1632
+  },
+  "/assets/character/v2/profession-priest-male.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 497.75,
+    "footY": 1620.5,
+    "visibleBounds": [
+      41,
+      41,
+      937,
+      1644
+    ],
+    "minX": 41,
+    "minY": 41,
+    "maxX": 937,
+    "maxY": 1644
+  },
+  "/assets/character/v2/profession-rogue-female.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 448.0,
+    "footY": 1630.0,
+    "visibleBounds": [
+      209,
+      27,
+      770,
+      1633
+    ],
+    "minX": 209,
+    "minY": 27,
+    "maxX": 770,
+    "maxY": 1633
+  },
+  "/assets/character/v2/profession-rogue-male.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 498.75,
+    "footY": 1621.5,
+    "visibleBounds": [
+      201,
+      39,
+      807,
+      1645
+    ],
+    "minX": 201,
+    "minY": 39,
+    "maxX": 807,
+    "maxY": 1645
+  },
+  "/assets/character/v2/profession-warrior-female.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 514.75,
+    "footY": 1627.5,
+    "visibleBounds": [
+      169,
+      26,
+      874,
+      1634
+    ],
+    "minX": 169,
+    "minY": 26,
+    "maxX": 874,
+    "maxY": 1634
+  },
+  "/assets/character/v2/profession-warrior-male.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 503.75,
+    "footY": 1620.5,
+    "visibleBounds": [
+      19,
+      35,
+      913,
+      1645
+    ],
+    "minX": 19,
+    "minY": 35,
+    "maxX": 913,
+    "maxY": 1645
+  },
+  "/assets/character/v4/advanced-ranger_warden-female.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 464,
+    "footY": 1630,
+    "visibleBounds": [
+      5,
+      7,
+      936,
+      1662
+    ],
+    "minX": 5,
+    "minY": 7,
+    "maxX": 936,
+    "maxY": 1662
+  },
+  "/assets/character/v4/advanced-ranger_warden-male.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 476,
+    "footY": 1592,
+    "visibleBounds": [
+      6,
+      28,
+      917,
+      1612
+    ],
+    "minX": 6,
+    "minY": 28,
+    "maxX": 917,
+    "maxY": 1612
+  },
+  "/assets/character/v4/advanced-spirit_summoner-female.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 630,
+    "footY": 1561,
+    "visibleBounds": [
+      6,
+      54,
+      936,
+      1621
+    ],
+    "minX": 6,
+    "minY": 54,
+    "maxX": 936,
+    "maxY": 1621
+  },
+  "/assets/character/v4/advanced-spirit_summoner-male.png": {
+    "width": 941,
+    "height": 1672,
+    "footX": 482.25,
+    "footY": 1589.0,
+    "visibleBounds": [
+      3,
+      99,
+      940,
+      1610
+    ],
+    "minX": 3,
+    "minY": 99,
+    "maxX": 940,
+    "maxY": 1610
+  }
+}

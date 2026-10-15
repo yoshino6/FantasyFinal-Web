@@ -1,16 +1,19 @@
 <script setup lang="ts">
+import '../anime-growth-commerce.css';
+import AnimeIcon from './AnimeIcon.vue';
 import { computed, ref, watch } from 'vue';
 import type { PanelEquippedItem, PanelPortrait } from '../api';
-import { portraitAssetCandidates } from '../character-assets';
+import { portraitAssetCandidates, type CharacterPortraitVariant } from '../character-assets';
 
 const props = withDefaults(defineProps<{
   portrait?: PanelPortrait;
+  variant?: CharacterPortraitVariant;
   /** 兼容角色页的轻量装备视图；接口完整装备仍可直接传入。 */
   equipment?: Array<Partial<PanelEquippedItem> & { slot?: string; name?: string; instanceId?: number | null }>;
   alt?: string;
-}>(), { alt: '人类冒险者立绘' });
+}>(), { alt: '人类冒险者立绘', variant: 'default' });
 
-const assetCandidates = computed(() => portraitAssetCandidates(props.portrait));
+const assetCandidates = computed(() => portraitAssetCandidates(props.portrait, props.variant));
 const assetIndex = ref(0);
 const baseSrc = computed(() => assetCandidates.value[assetIndex.value]);
 const imageFailed = computed(() => !baseSrc.value);
@@ -25,14 +28,14 @@ const labelForSlot = (slot?: string) => slot ? (slotLabel[slot] ?? slot) : '装�
 </script>
 
 <template>
-  <section class="character-portrait" aria-label="人物立绘与穿戴">
+  <section class="character-portrait anime-growth-commerce" :data-portrait-variant="variant" aria-label="人物立绘与穿戴">
     <div class="character-portrait-stage">
       <img v-if="!imageFailed" class="character-portrait-base" :src="baseSrc" :alt="alt" @error="tryNextAsset" />
       <div v-else class="character-portrait-fallback" role="img" :aria-label="alt"><span>人类<br />冒险者</span></div>
     </div>
     <div v-if="equipment?.length" class="character-portrait-loadout">
       <span v-for="item in equipment" :key="`${item.slot}:${item.id ?? item.code}`" class="character-portrait-chip">
-        <small>{{ labelForSlot(item.slot) }}</small>
+        <AnimeIcon :name="item.slot === 'weapon' ? 'sword' : item.slot === 'offhand' ? 'shield' : 'star'" :size="21" /><small>{{ labelForSlot(item.slot) }}</small>
         <strong>{{ item.appearanceName || item.name }}</strong>
       </span>
     </div>

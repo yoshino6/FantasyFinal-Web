@@ -1,0 +1,497 @@
+/* Painted handbook and guild documents. Icons, rows and operations stay live. */
+.magic-journal-painted.magic-journal-painted.skill-journal.skill-journal.anime-growth-commerce > .journal-workspace > .error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  max-height: none;
+  overflow: visible;
+  overflow-wrap: anywhere;
+}
+
+.magic-journal-painted.magic-journal-painted.skill-journal.skill-journal.anime-growth-commerce > .journal-workspace > .error > button {
+  flex: 0 0 auto;
+  min-height: 32px;
+  white-space: nowrap;
+}
+
+.magic-journal-painted.magic-journal-painted.skill-journal.skill-journal.anime-growth-commerce {
+  --gc-ink: var(--game-ui-ink, #535366);
+  --gc-muted: var(--game-ui-muted, #736c78);
+  color: var(--gc-ink);
+}
+
+.magic-journal-painted.magic-journal-painted.skill-journal.skill-journal.anime-growth-commerce .skill-tabs {
+  gap: 3px;
+  margin-bottom: 0;
+}
+
+.magic-journal-painted.magic-journal-painted.skill-journal.skill-journal.anime-growth-commerce .skill-tabs > button,
+.magic-journal-painted.magic-journal-painted.skill-journal.skill-journal.anime-growth-commerce :is(.search-row > button, .skill-viewport-config-actions > button, .pager > button, .configuration-context > button, .configuration-entry, .action-row button, .confirm-actions > button, .skill-viewport-learning-preview > button, .dialog-header > button) {
+  box-sizing: border-box;
+  border: 4px solid transparent;
+  border-image: var(--game-ui-paper) 144 fill / 4px 7px stretch;
+  border-radius: 0;
+  background: transparent;
+  color: var(--game-ui-ink, #535366);
+  box-shadow: none;
+  text-shadow: none;
+  clip-path: none;
+  transform: none;
+  font-weight: 700;
+}
+
+.magic-journal-painted.magic-journal-painted.skill-journal.skill-journal.anime-growth-commerce .skill-tabs > button.active,
+.magic-journal-painted.magic-journal-painted.skill-journal.skill-journal.anime-growth-commerce :is(.search-row > button, .primary-button, .confirm-actions > .primary-button) {
+  border-image: var(--game-ui-teal) 144 fill / 4px 7px stretch;
+  background: transparent;
+  color: var(--game-ui-primary-ink, #245664);
+  text-shadow: none;
+  box-shadow: none;
+}
+
+.magic-journal-painted.magic-journal-painted.skill-journal.skill-journal.anime-growth-commerce :is(.journal-workspace, .inline-detail),
+.magic-journal-painted.magic-journal-painted.skill-journal.skill-journal.anime-growth-commerce.skill-dialog {
+  border-image: var(--game-ui-journal) var(--game-ui-journal-slice) fill / 6px stretch;
+  border-radius: 0;
+  background: #fffcf4;
+  background-clip: padding-box;
+  box-shadow: none;
+}
+
+.magic-journal-painted.magic-journal-painted.skill-journal.skill-journal.anime-growth-commerce .journal-workspace::after {
+  content: none;
+}
+
+.magic-journal-painted.magic-journal-painted.skill-journal.skill-journal.anime-growth-commerce .points {
+  gap: 4px;
+  color: var(--game-ui-muted, #736c78);
+}
+
+.magic-journal-painted.magic-journal-painted.skill-journal.skill-journal.anime-growth-commerce .points strong {
+  color: var(--game-ui-primary-ink, #245664);
+  font-variant-numeric: tabular-nums;
+}
+
+.magic-journal-painted.magic-journal-painted.skill-journal.skill-journal.anime-growth-commerce .search-row {
+  position: relative;
+  align-items: center;
+}
+
+.magic-journal-painted.magic-journal-painted.skill-journal.skill-journal.anime-growth-commerce .search-row > .handbook-search-art {
+  position: absolute;
+  left: 9px;
+  top: 50%;
+  z-index: 1;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.magic-journal-painted.magic-journal-painted.skill-journal.skill-journal.anime-growth-commerce .search-row input {
+  box-sizing: border-box;
+  padding-left: 31px;
+  border: 3px solid transparent;
+  border-image: var(--game-ui-panel) 144 fill / 3px 5px stretch;
+  border-radius: 0;
+  background: #fffcf4;
+  background-clip: padding-box;
+  box-shadow: none;
+  color: var(--game-ui-ink, #535366);
+}
+
+.magic-journal-painted.magic-journal-painted.skill-journal.skill-journal.anime-growth-commerce .skill-list .skill-card,
+.magic-journal-painted.magic-journal-painted.skill-journal.skill-journal.anime-growth-commerce .skill-list .skill-card:hover:not(:disabled) {
+  border: 4px solid transparent;
+  border-image: var(--game-ui-panel) 144 fill / 4px 7px stretch;
+  border-radius: 0;
+  background: #fffcf4;
+  background-clip: padding-box;
+  box-shadow: none;
+  transform: none;
+}
+
+.magic-journal-painted.magic-journal-painted.skill-journal.skill-journal.anime-growth-commerce .skill-list .skill-card.selected,
+.magic-journal-painted.magic-journal-painted.skill-journal.skill-journal.anime-growth-commerce .skill-list .skill-card.selected:hover:not(:disabled) {
+  border-image-source: var(--game-ui-teal);
+  background: transparent;
+  box-shadow: none;
+}
+
+.magic-journal-painted.magic-journal-painted.skill-journal.skill-journal.anime-growth-commerce .skill-list .skill-copy strong {
+  color: var(--game-ui-ink, #535366);
+  letter-spacing: .01em;
+}
+
+.magic-journal-painted.magic-journal-painted.skill-journal.skill-journal.anime-growth-commerce .skill-list.config-list {
+  border-color: transparent;
+  border-radius: 0;
+  background: transparent;
+}
+
+.magic-journal-painted.magic-journal-painted.skill-journal.skill-journal.anime-growth-commerce :is(.category-tag, .level-tag, .skill-badge, .slot-number, .choice-state, .page-count) {
+  border: 0;
+  border-radius: 0;
+  background: var(--game-ui-paper) center / 100% 100% no-repeat;
+  box-shadow: none;
+  color: var(--game-ui-ink, #535366);
+  text-shadow: none;
+}
+
+.magic-journal-painted.magic-journal-painted.skill-journal.skill-journal.anime-growth-commerce .category-tag {
+  min-height: 15px;
+  box-sizing: border-box;
+  padding: 2px 6px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.magic-journal-painted.magic-journal-painted.skill-journal.skill-journal.anime-growth-commerce .category-tag[data-category='magic'] {
+  background-image: linear-gradient(#ece5f4ad, #ece5f4ad), var(--game-ui-paper);
+  color: #6d5488;
+  text-shadow: none;
+}
+
+.magic-journal-painted.magic-journal-painted.skill-journal.skill-journal.anime-growth-commerce :is(.category-tag[data-category='utility'], .skill-badge, .choice-state) {
+  background-image: var(--game-ui-teal);
+  color: var(--game-ui-primary-ink, #245664);
+  text-shadow: none;
+}
+
+.magic-journal-painted.magic-journal-painted.skill-journal.skill-journal.anime-growth-commerce :is(.category-tag[data-category='passive'], .category-tag[data-category='bound'], .linked-badge, .slot-number) {
+  background-image: var(--game-ui-gold);
+  color: var(--game-ui-gold-ink, #735632);
+  text-shadow: none;
+}
+
+.magic-journal-painted.magic-journal-painted.skill-journal.skill-journal.anime-growth-commerce .skill-list .skill-badge {
+  position: static;
+  align-self: center;
+  flex: 0 0 auto;
+  max-width: 55px;
+  padding: 5px 6px;
+  font-size: 9px;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.magic-journal-painted.magic-journal-painted.skill-journal.skill-journal.anime-growth-commerce .skill-card:has(> .skill-badge) .skill-copy {
+  padding-top: 0;
+}
+
+.magic-journal-painted.magic-journal-painted.skill-journal.skill-journal.anime-growth-commerce .skill-list .learning-cost {
+  padding-left: 6px;
+  border-left-color: #cbd3d566;
+}
+
+.magic-journal-painted.magic-journal-painted.skill-journal.skill-journal.anime-growth-commerce .learning-cost b,
+.magic-journal-painted.magic-journal-painted.skill-journal.skill-journal.anime-growth-commerce .preview-sp strong {
+  color: var(--game-ui-primary-ink, #245664);
+  font-variant-numeric: tabular-nums;
+}
+
+.magic-journal-painted.magic-journal-painted.skill-journal.skill-journal.anime-growth-commerce :is(.slot-row button, .linked-row > button, .configuration-choice, .effect-overview, .effect-overview p, .stat-grid > span, .specialization-list > span, .action-row, .skill-viewport-learning-preview) {
+  border: 4px solid transparent;
+  border-image: var(--game-ui-panel) 144 fill / 4px 6px stretch;
+  border-radius: 0;
+  background: #fffcf4;
+  background-clip: padding-box;
+  color: var(--game-ui-ink, #535366);
+  box-shadow: none;
+}
+
+.magic-journal-painted.magic-journal-painted.skill-journal.skill-journal.anime-growth-commerce .slot-row button {
+  gap: 6px;
+  padding: 8px 3px 5px;
+}
+
+.magic-journal-painted.magic-journal-painted.skill-journal.skill-journal.anime-growth-commerce .slot-number {
+  top: -2px;
+  left: -1px;
+  padding: 3px 6px;
+  min-width: 15px;
+  font-size: 14px;
+}
+
+.magic-journal-painted.magic-journal-painted.skill-journal.skill-journal.anime-growth-commerce .empty-shortcut {
+  border: 0;
+  border-radius: 0;
+  background: var(--game-ui-paper) center / 100% 100% no-repeat;
+  box-shadow: none;
+}
+
+.magic-journal-painted.magic-journal-painted.skill-journal.skill-journal.anime-growth-commerce :is(.detail-section h3, .skill-parameters summary) {
+  border: 4px solid transparent;
+  border-image: var(--game-ui-paper) 144 fill / 4px 7px stretch;
+  border-radius: 0;
+  padding: 4px 9px;
+  background: transparent;
+  color: var(--game-ui-ink, #535366);
+}
+
+.magic-journal-painted.magic-journal-painted.skill-journal.skill-journal.anime-growth-commerce .skill-parameters summary {
+  margin-bottom: 6px;
+}
+
+.magic-journal-painted.magic-journal-painted.skill-journal.skill-journal.anime-growth-commerce .confirm-box {
+  border: 6px solid transparent;
+  border-image: var(--game-ui-panel) 144 fill / 6px stretch;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.magic-journal-painted.magic-journal-painted.skill-journal.skill-journal.anime-growth-commerce .confirm-box h3 {
+  margin: 0 0 9px;
+  padding: 0 0 8px;
+  background: transparent;
+  color: var(--game-ui-gold-ink, #735632);
+  border-bottom: 1px solid #a9854e4a;
+}
+
+.magic-journal-painted.magic-journal-painted.skill-journal.skill-journal.anime-growth-commerce :is(.dialog-header h2, .configuration-choice strong, .linked-row strong, .slot-row strong, .action-row strong) {
+  max-height: none;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  color: var(--game-ui-ink, #535366);
+}
+
+.magic-journal-painted.magic-journal-painted.skill-journal.skill-journal.anime-growth-commerce .dialog-header > button {
+  display: grid;
+  place-items: center;
+  padding: 0;
+}
+
+.magic-journal-painted.magic-journal-painted.skill-journal.skill-journal.anime-growth-commerce .dialog-header {
+  padding-right: 39px;
+}
+
+.magic-journal-painted.magic-journal-painted.skill-journal.skill-journal.anime-growth-commerce .handbook-arrow-back {
+  transform: rotate(180deg);
+}
+
+/* The page remains a viewport; guild documents live inside its existing rows. */
+.guild-trials-painted.guild-trials-painted.anime-growth-commerce.anime-growth-commerce {
+  color: var(--game-ui-ink, #535366);
+  --gc-ink: var(--game-ui-ink, #535366);
+}
+
+.guild-trials-painted.guild-trials-painted.anime-growth-commerce.anime-growth-commerce :is(.advanced-refresh, .advanced-close, .advanced-filters > button, .advanced-viewport-summary-button, .advanced-viewport-message, .advanced-retry, .advanced-locate, .advanced-actions button, .advanced-confirm, .advanced-quote > div button, .advanced-viewport-dialog > header button) {
+  box-sizing: border-box;
+  border: 4px solid transparent;
+  border-image: var(--game-ui-paper) 144 fill / 4px 6px stretch;
+  border-radius: 0;
+  background: transparent;
+  color: var(--game-ui-ink, #535366);
+  font-weight: 700;
+  text-shadow: none;
+  box-shadow: none;
+}
+
+.guild-trials-painted.guild-trials-painted.anime-growth-commerce.anime-growth-commerce :is(.advanced-filters > button.active, .advanced-locate, .advanced-actions button, .advanced-confirm) {
+  border-image-source: var(--game-ui-teal);
+  background: transparent;
+  color: var(--game-ui-primary-ink, #245664);
+  text-shadow: none;
+}
+
+.guild-trials-painted.guild-trials-painted.anime-growth-commerce.anime-growth-commerce :is(.advanced-mark, .advanced-candidate-mark) {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.guild-trials-painted.guild-trials-painted.anime-growth-commerce.anime-growth-commerce .advanced-header {
+  background: transparent;
+  border-bottom-color: #cbd3d566;
+}
+
+.guild-trials-painted.guild-trials-painted.anime-growth-commerce.anime-growth-commerce :is(.advanced-header h2, .advanced-title h3, .advanced-detail h4, .advanced-viewport-dialog > header h3) {
+  color: var(--game-ui-ink, #535366);
+  font-family: KaiTi, STKaiti, 'Noto Serif SC', serif;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.guild-trials-painted.guild-trials-painted.anime-growth-commerce.anime-growth-commerce .advanced-catalog-tools {
+  position: relative;
+}
+
+.guild-trials-painted.guild-trials-painted.anime-growth-commerce.anime-growth-commerce .guild-search-art {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  z-index: 1;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.guild-trials-painted.guild-trials-painted.anime-growth-commerce.anime-growth-commerce .advanced-catalog-tools > input,
+.app-shell[data-visual='light-anime'] .character-page .guild-trials-painted.guild-trials-painted .advanced-catalog-tools > input {
+  box-sizing: border-box;
+  border: 3px solid transparent;
+  border-image: var(--game-ui-panel) 144 fill / 3px 5px stretch;
+  border-radius: 0;
+  padding-left: 29px;
+  background: #fffcf4;
+  background-clip: padding-box;
+  box-shadow: none;
+  color: var(--game-ui-ink, #535366);
+}
+
+.app-shell[data-visual='light-anime'] .character-page .guild-trials-painted.guild-trials-painted .advanced-header {
+  background: transparent;
+}
+
+.app-shell[data-visual='light-anime'] .character-page .guild-trials-painted.guild-trials-painted .advanced-header .advanced-mark {
+  padding: 0;
+  background: transparent;
+}
+
+.app-shell[data-visual='light-anime'] .character-page .guild-trials-painted.guild-trials-painted .advanced-catalog-tools .advanced-filters > button {
+  border: 3px solid transparent;
+  border-image: var(--game-ui-paper) 144 fill / 3px 5px stretch;
+  border-radius: 0;
+  background: transparent;
+  color: var(--game-ui-ink, #535366);
+  text-shadow: none;
+}
+
+.app-shell[data-visual='light-anime'] .character-page .guild-trials-painted.guild-trials-painted .advanced-catalog-tools .advanced-filters > button.active {
+  border-image-source: var(--game-ui-teal);
+  color: var(--game-ui-primary-ink, #245664);
+  text-shadow: none;
+}
+
+.guild-trials-painted.guild-trials-painted.anime-growth-commerce.anime-growth-commerce .advanced-candidate,
+.app-shell[data-visual='light-anime'] .character-page .guild-trials-painted.guild-trials-painted .advanced-viewport-body .advanced-candidate {
+  border: 4px solid transparent;
+  border-image: var(--game-ui-panel) 144 fill / 4px 7px stretch;
+  border-radius: 0;
+  background: #fffcf4;
+  background-clip: padding-box;
+  box-shadow: none;
+}
+
+.guild-trials-painted.guild-trials-painted.anime-growth-commerce.anime-growth-commerce .advanced-candidate.selected,
+.app-shell[data-visual='light-anime'] .character-page .guild-trials-painted.guild-trials-painted .advanced-viewport-body .advanced-candidate.selected {
+  border-image-source: var(--game-ui-teal);
+  background: transparent;
+  box-shadow: none;
+}
+
+.guild-trials-painted.guild-trials-painted.anime-growth-commerce.anime-growth-commerce :is(.advanced-current, .advanced-candidate em, .advanced-step > b) {
+  box-sizing: border-box;
+  border: 0;
+  border-radius: 0;
+  background: var(--game-ui-gold) center / 100% 100% no-repeat;
+  color: var(--game-ui-gold-ink, #735632);
+  text-shadow: none;
+  padding: 4px 7px;
+}
+
+.guild-trials-painted.guild-trials-painted.anime-growth-commerce.anime-growth-commerce .advanced-candidate em {
+  align-self: center;
+  font-style: normal;
+  line-height: 1.3;
+  text-align: center;
+}
+
+.guild-trials-painted.guild-trials-painted.anime-growth-commerce.anime-growth-commerce :is(.advanced-detail, .advanced-summary > div, .advanced-info-grid > section, .advanced-feature, .advanced-timeline, .advanced-limit, .advanced-blocked, .advanced-notice, .advanced-error) {
+  border: 4px solid transparent;
+  border-image: var(--game-ui-panel) 144 fill / 4px 6px stretch;
+  border-radius: 0;
+  background: #fffcf4;
+  background-clip: padding-box;
+  box-shadow: none;
+}
+
+.guild-trials-painted.guild-trials-painted.anime-growth-commerce.anime-growth-commerce .advanced-quote {
+  border: 6px solid transparent;
+  border-image: var(--game-ui-panel) 144 fill / 6px stretch;
+  border-radius: 0;
+  background: transparent;
+  color: var(--game-ui-gold-ink, #735632);
+}
+
+.guild-trials-painted.guild-trials-painted.anime-growth-commerce.anime-growth-commerce .advanced-viewport-dialog,
+.guild-trials-painted.guild-trials-painted.anime-growth-commerce.anime-growth-commerce.advanced-dialog {
+  border: 8px solid transparent;
+  border-image: var(--game-ui-panel) 144 fill / 8px stretch;
+  border-radius: 0;
+  background: #fffcf4;
+  background-clip: padding-box;
+  box-shadow: 0 8px 24px #59697b1a;
+}
+
+.guild-trials-painted.guild-trials-painted.anime-growth-commerce.anime-growth-commerce .advanced-viewport-dialog > header button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 2px 6px;
+}
+
+.guild-trials-painted.guild-trials-painted.anime-growth-commerce.anime-growth-commerce .advanced-viewport-summary-button > .anime-icon {
+  vertical-align: middle;
+  margin-left: 4px;
+}
+
+.guild-trials-painted.guild-trials-painted.anime-growth-commerce.anime-growth-commerce :is(.advanced-title p, .advanced-feature p, .advanced-step p, .advanced-info-grid p, .advanced-quote p) {
+  color: var(--game-ui-muted, #736c78);
+  overflow-wrap: anywhere;
+}
+
+.guild-trials-painted.guild-trials-painted.anime-growth-commerce.anime-growth-commerce .advanced-step.reached > b {
+  background-image: var(--game-ui-teal);
+  color: var(--game-ui-primary-ink, #245664);
+  text-shadow: none;
+}
+
+.magic-journal-painted.magic-journal-painted.skill-journal.skill-journal.anime-growth-commerce .viewport-pagination :is(button, select, input),
+.guild-trials-painted.guild-trials-painted.anime-growth-commerce.anime-growth-commerce .viewport-pagination :is(button, select, input) {
+  box-sizing: border-box;
+  border: 4px solid transparent;
+  border-image: var(--game-ui-paper) 144 fill / 4px 6px stretch;
+  border-radius: 0;
+  background: transparent;
+  color: var(--game-ui-ink, #535366);
+}
+
+.magic-journal-painted.magic-journal-painted.skill-journal.skill-journal.anime-growth-commerce button:focus-visible,
+.guild-trials-painted.guild-trials-painted.anime-growth-commerce.anime-growth-commerce button:focus-visible {
+  outline: 2px solid #268c94;
+  outline-offset: 2px;
+}
+
+.magic-journal-painted.magic-journal-painted.skill-journal.skill-journal.anime-growth-commerce button:disabled,
+.guild-trials-painted.guild-trials-painted.anime-growth-commerce.anime-growth-commerce button:disabled {
+  opacity: .7;
+  filter: saturate(.35);
+  cursor: not-allowed;
+}
+
+@media (max-width: 420px) {
+  .magic-journal-painted.magic-journal-painted.skill-journal.skill-journal.anime-growth-commerce .skill-viewport-learning-preview {
+    padding: 2px 5px;
+    gap: 4px;
+  }
+  .magic-journal-painted.magic-journal-painted.skill-journal.skill-journal.anime-growth-commerce .skill-viewport-learning-preview button {
+    padding-inline: 5px;
+  }
+  .magic-journal-painted.magic-journal-painted.skill-journal.skill-journal.anime-growth-commerce .confirm-actions {
+    flex-wrap: wrap;
+  }
+  .magic-journal-painted.magic-journal-painted.skill-journal.skill-journal.anime-growth-commerce .confirm-actions > button {
+    flex: 1 1 100px;
+    white-space: normal;
+  }
+  .guild-trials-painted.guild-trials-painted.anime-growth-commerce.anime-growth-commerce .advanced-viewport-dialog {
+    padding: 8px;
+    border-width: 6px;
+    border-image-width: 6px;
+  }
+}

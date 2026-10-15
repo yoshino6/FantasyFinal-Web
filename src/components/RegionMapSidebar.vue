@@ -1,5 +1,11 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import AnimeIcon from './AnimeIcon.vue';
+import AnimatedMapAvatar from './AnimatedMapAvatar.vue';
+import type { PanelPortrait } from '../api';
+import { mapTargetArt, terrainForRegion } from '../exploration-assets';
+import './anime-adventure.css';
+import './anime-exploration-map.css';
 
 export type RegionMapPosition = {
   x: number;
@@ -13,6 +19,7 @@ export type RegionOverview = {
   danger?: string | number;
   isCurrent?: boolean;
   current?: RegionMapPosition;
+  bounds?: { minX: number; maxX: number; minY: number; maxY: number; minZ?: number; maxZ?: number };
 };
 
 export type PartyMapMember = RegionMapPosition & {
@@ -22,6 +29,7 @@ export type PartyMapMember = RegionMapPosition & {
   regionCode?: string;
   icon?: string;
   isCurrent?: boolean;
+  portrait?: PanelPortrait;
 };
 
 export type MapLandmark = RegionMapPosition & {
@@ -32,6 +40,9 @@ export type MapLandmark = RegionMapPosition & {
   type?: string;
   icon?: string;
   description?: string;
+  code?: string;
+  templateCode?: string;
+  portrait?: PanelPortrait;
 };
 
 export type RegionTravelRequest = RegionMapPosition & {
@@ -67,6 +78,7 @@ const emit = defineEmits<{
 const open = ref(false);
 const selectedRegionCode = ref('');
 const pendingDestination = ref<RegionTravelRequest | null>(null);
+const selectedMarkerGroup = ref<MapMarker[] | null>(null);
 
 const currentRegion = computed(() => {
   const code = selectedRegionCode.value || props.currentRegionCode;
@@ -74,6 +86,7 @@ const currentRegion = computed(() => {
 });
 
 const activeRegionCode = computed(() => currentRegion.value?.code || selectedRegionCode.value || props.currentRegionCode || '');
+const terrainStyle = computed(() => ({ '--exploration-terrain': `url("${terrainForRegion(activeRegionCode.value, currentRegion.value?.name)}")` }));
 // A few server snapshots only include a region code on the region itself. Keep
 // unscoped entries visible in that case instead of silently dropping markers.
 const activeMembers = computed(() => props.members.filter((member) => !activeRegionCode.value || !member.regionCode || member.regionCode === activeRegionCode.value));
@@ -91,6 +104,10 @@ type MapMarker = {
   regionCode?: string;
   regionName?: string;
   type?: string;
+  code?: string;
+  templateCode?: string;
+  portrait?: PanelPortrait;
+  isCurrent?: boolean;
 };
 
 const mapMarkers = computed<MapMarker[]>(() => [
@@ -105,6 +122,8 @@ const mapMarkers = computed<MapMarker[]>(() => [
     icon: member.icon || '●',
     regionCode: member.regionCode || activeRegionCode.value,
     regionName: member.regionName || currentRegion.value?.name,
+    portrait: member.portrait,
+    isCurrent: member.isCurrent,
   })),
   ...activeLandmarks.value.map((landmark) => ({
     key: `landmark:${landmark.id}`,
@@ -118,10 +137,14 @@ const mapMarkers = computed<MapMarker[]>(() => [
     regionCode: landmark.regionCode || activeRegionCode.value,
     regionName: landmark.regionName || currentRegion.value?.name,
     type: landmark.type,
+    code: landmark.code,
+    templateCode: landmark.templateCode,
+    portrait: landmark.portrait,
   })),
 ]);
 
 const bounds = computed(() => {
+  if (currentRegion.value?.bounds) return currentRegion.value.bounds;
   const values = mapMarkers.value.length
     ? mapMarkers.value
     : currentRegion.value?.current
@@ -137,6 +160,17 @@ const bounds = computed(() => {
   };
 });
 
+const markerGroups = computed(() => {
+  const groups = new Map<string, MapMarker[]>();
+  for (const marker of mapMarkers.value) {
+    const key = `${marker.x}:${marker.y}`;
+    groups.set(key, [...(groups.get(key) ?? []), marker]);
+  }
+  return [...groups].map(([key, markers]) => ({ key, markers, position: markers[0]! }));
+});
+const markerArt = (marker: { kind?: string; type?: string; name: string; code?: string; templateCode?: string; portrait?: PanelPortrait }) => mapTargetArt({ ...marker, type: marker.kind === 'member' ? '玩家' : marker.type || '建筑' }).src;
+const pointTypeLabel = (type?: string) => ({ building: '建筑', landmark: '地标', npc: '域民', resource: '资源', entrance: '入口' } as Record<string, string>)[type || ''] || (type && /[\u4e00-\u9fff]/.test(type) ? type : '地点');
+
 const markerStyle = (marker: MapMarker) => {
   const xSpan = Math.max(1, bounds.value.maxX - bounds.value.minX);
   const ySpan = Math.max(1, bounds.value.maxY - bounds.value.minY);
@@ -149,6 +183,7 @@ const markerStyle = (marker: MapMarker) => {
 const formatCoordinate = (position: RegionMapPosition) => `(${position.x}, ${position.y}${position.z === undefined ? '' : `, ${position.z}`})`;
 
 const selectRegion = (region: RegionOverview) => {
+  selectedMarkerGroup.value = null;
   selectedRegionCode.value = region.code;
   emit('selected-region', region);
 };
@@ -164,11 +199,13 @@ const openSidebar = (regionCode?: string) => {
 const closeSidebar = () => {
   open.value = false;
   pendingDestination.value = null;
+  selectedMarkerGroup.value = null;
   emit('update:open', false);
 };
 
 const requestTravel = (marker: MapMarker) => {
   if (props.disabled || props.loading) return;
+  selectedMarkerGroup.value = null;
   pendingDestination.value = {
     targetId: marker.id,
     targetName: marker.name,
@@ -190,10 +227,17 @@ const confirmTravel = () => {
 };
 
 const cancelTravel = () => { pendingDestination.value = null; };
+const selectMarkerGroup = (markers: MapMarker[]) => {
+  if (props.disabled || props.loading) return;
+  if (markers.length === 1) requestTravel(markers[0]!);
+  else selectedMarkerGroup.value = markers;
+};
 
 const onKeydown = (event: KeyboardEvent) => {
   if (event.key === 'Escape' && pendingDestination.value) {
     cancelTravel();
+  } else if (event.key === 'Escape' && selectedMarkerGroup.value) {
+    selectedMarkerGroup.value = null;
   } else if (event.key === 'Escape' && open.value) {
     closeSidebar();
   }
@@ -218,13 +262,13 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown));
     </Transition>
 
     <Transition name="region-map-slide">
-      <aside v-if="open" id="region-map-drawer" class="region-map-drawer" role="dialog" aria-modal="true" aria-label="世界地图">
+      <aside v-if="open" id="region-map-drawer" class="region-map-drawer anime-adventure exploration-region" :style="terrainStyle" :data-region-code="activeRegionCode" role="dialog" aria-modal="true" aria-label="世界地图">
         <header class="drawer-header">
           <div>
             <p class="drawer-kicker">WORLD MAP</p>
-            <h2>世界地图</h2>
+            <h2><AnimeIcon name="map" :size="30" />世界地图</h2>
           </div>
-          <button type="button" class="drawer-close" aria-label="收起地图" @click="closeSidebar">×</button>
+          <button type="button" class="drawer-close" aria-label="收起地图" @click="closeSidebar"><AnimeIcon name="close" /></button>
         </header>
 
         <div v-if="regions.length" class="region-tabs" aria-label="区域选择">
@@ -234,10 +278,11 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown));
             type="button"
             class="region-tab"
             :class="{ active: region.code === activeRegionCode }"
+            :aria-pressed="region.code === activeRegionCode"
             @click="selectRegion(region)"
           >
-            <span>{{ region.name }}</span>
-            <small v-if="region.danger !== undefined">危险 {{ region.danger }}</small>
+            <img class="region-tab-terrain" :src="terrainForRegion(region.code, region.name)" alt="" />
+            <span class="region-tab-copy"><span>{{ region.name }}</span><small v-if="region.danger !== undefined">危险 {{ region.danger }}</small></span>
           </button>
         </div>
 
@@ -246,28 +291,30 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown));
             <div class="region-map-card-heading">
               <div>
                 <strong>{{ currentRegion?.name || '未知区域' }}</strong>
-                <small v-if="currentRegion?.code">{{ currentRegion.code }}</small>
               </div>
               <span v-if="loading" class="drawer-loading">更新中</span>
             </div>
-            <div class="region-mini-map" role="img" :aria-label="`${currentRegion?.name || '当前区域'}的队员与关键坐标`">
+            <div class="region-mini-map" role="group" :aria-label="`${currentRegion?.name || '当前区域'}的队员与关键坐标`">
+              <span class="region-compass" aria-hidden="true"><AnimeIcon name="star" :size="42" /><b>北 ↑</b></span>
               <button
-                v-for="marker in mapMarkers"
-                :key="marker.key"
+                v-for="group in markerGroups"
+                :key="group.key"
                 type="button"
                 class="region-map-marker"
-                :class="`marker-${marker.kind}`"
-                :style="markerStyle(marker)"
-                :aria-label="`${marker.name} ${formatCoordinate(marker)}`"
-                @click="requestTravel(marker)"
+                :class="[`marker-${group.position.kind}`, { 'has-many': group.markers.length > 1 }]"
+                :style="markerStyle(group.position)"
+                :disabled="disabled || loading"
+                :aria-label="`${group.markers.map(marker => marker.name).join('、')} ${formatCoordinate(group.position)}`"
+                @click="selectMarkerGroup(group.markers)"
               >
-                <span class="region-map-marker-icon">{{ marker.icon }}</span>
-                <span class="region-map-marker-name">{{ marker.name }}</span>
+                <span class="region-map-marker-icon"><AnimatedMapAvatar v-if="group.position.portrait" :portrait="group.position.portrait" :running="false" direction="down" /><img v-else-if="markerArt(group.position)" :src="markerArt(group.position)" alt="" /><AnimeIcon v-else :name="group.position.kind === 'member' ? 'party' : 'home'" :size="30" /></span>
+                <span class="region-map-marker-name">{{ group.markers.length > 1 ? `${group.markers.length} 个目标` : group.position.name }}</span>
+                <b v-if="group.markers.length > 1" class="region-marker-count">{{ group.markers.length }}</b>
               </button>
               <span class="map-axis map-axis-x" aria-hidden="true" />
               <span class="map-axis map-axis-y" aria-hidden="true" />
-              <small class="map-axis-label map-axis-label-x">东西</small>
-              <small class="map-axis-label map-axis-label-y">南北</small>
+              <small class="map-axis-label map-axis-label-x">← 西 · 东 →</small>
+              <small class="map-axis-label map-axis-label-y">↑ 北 · 南 ↓</small>
             </div>
             <p class="region-map-hint">点击队员或关键坐标，确认后前往。</p>
           </section>
@@ -275,8 +322,8 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown));
           <section v-if="activeMembers.length" class="drawer-section">
             <div class="drawer-section-heading"><strong>队员位置</strong><small>{{ activeMembers.length }} 人</small></div>
             <button v-for="member in activeMembers" :key="member.id" type="button" class="destination-row" @click="requestTravel({ ...member, kind: 'member', icon: member.icon || '●', regionCode: member.regionCode || activeRegionCode, regionName: member.regionName || currentRegion?.name, id: member.id, name: member.name, key: `member:${member.id}` })">
-              <span class="destination-icon member-icon">{{ member.icon || '●' }}</span>
-              <span class="destination-copy"><strong>{{ member.name }}</strong><small>{{ member.regionName || currentRegion?.name || '未知区域' }} · {{ formatCoordinate(member) }}</small></span>
+              <span class="destination-icon member-icon"><AnimatedMapAvatar v-if="member.portrait" :portrait="member.portrait" :running="false" direction="down" /><img v-else-if="markerArt({ ...member, kind: 'member' })" :src="markerArt({ ...member, kind: 'member' })" alt="" /><AnimeIcon v-else name="party" :size="32" /></span>
+              <span class="destination-copy"><strong>{{ member.name }}<small v-if="member.isCurrent" class="destination-self">我</small></strong><small>{{ member.regionName || currentRegion?.name || '未知区域' }} · {{ formatCoordinate(member) }}</small></span>
               <span class="destination-arrow" aria-hidden="true">›</span>
             </button>
           </section>
@@ -284,8 +331,8 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown));
           <section v-if="activeLandmarks.length" class="drawer-section">
             <div class="drawer-section-heading"><strong>关键坐标</strong><small>{{ activeLandmarks.length }} 处</small></div>
             <button v-for="landmark in activeLandmarks" :key="landmark.id" type="button" class="destination-row" @click="requestTravel({ ...landmark, kind: 'landmark', icon: landmark.icon || '✦', regionCode: landmark.regionCode || activeRegionCode, regionName: landmark.regionName || currentRegion?.name, id: landmark.id, name: landmark.name, key: `landmark:${landmark.id}` })">
-              <span class="destination-icon landmark-icon">{{ landmark.icon || '✦' }}</span>
-              <span class="destination-copy"><strong>{{ landmark.name }}</strong><small>{{ landmark.type || '地点' }} · {{ formatCoordinate(landmark) }}</small></span>
+              <span class="destination-icon landmark-icon"><img v-if="markerArt(landmark)" :src="markerArt(landmark)" alt="" /><AnimeIcon v-else name="home" :size="32" /></span>
+              <span class="destination-copy"><strong>{{ landmark.name }}</strong><small>{{ pointTypeLabel(landmark.type) }} · {{ formatCoordinate(landmark) }}</small></span>
               <span class="destination-arrow" aria-hidden="true">›</span>
             </button>
           </section>
@@ -293,10 +340,24 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown));
           <p v-if="!activeMembers.length && !activeLandmarks.length" class="drawer-empty">当前区域还没有可标记的队员或坐标。</p>
         </div>
 
+        <div v-if="selectedMarkerGroup" class="travel-confirm-wrap" role="presentation" @click.self="selectedMarkerGroup = null">
+          <div class="travel-confirm region-target-chooser" role="dialog" aria-modal="true" aria-labelledby="region-target-chooser-title">
+            <button type="button" class="drawer-close chooser-close" aria-label="关闭同坐标目标" @click="selectedMarkerGroup = null"><AnimeIcon name="close" /></button>
+            <p class="drawer-kicker">同坐标目标</p>
+            <h3 id="region-target-chooser-title">选择目的地（{{ selectedMarkerGroup.length }}）</h3>
+            <div class="region-target-choices">
+              <button v-for="marker in selectedMarkerGroup" :key="marker.key" type="button" class="destination-row" :disabled="disabled || loading" @click="requestTravel(marker)">
+                <span class="destination-icon"><AnimatedMapAvatar v-if="marker.portrait" :portrait="marker.portrait" :running="false" direction="down" /><img v-else-if="markerArt(marker)" :src="markerArt(marker)" alt="" /><AnimeIcon v-else name="map" :size="32" /></span>
+                <span class="destination-copy"><strong>{{ marker.name }}</strong><small>{{ marker.kind === 'member' ? '队员' : pointTypeLabel(marker.type) }} · {{ formatCoordinate(marker) }}</small></span><AnimeIcon name="arrow" :size="20" />
+              </button>
+            </div>
+          </div>
+        </div>
+
         <Transition name="region-map-dialog">
           <div v-if="pendingDestination" class="travel-confirm-wrap" role="presentation" @click.self="cancelTravel">
             <div class="travel-confirm" role="dialog" aria-modal="true" aria-labelledby="travel-confirm-title">
-              <span class="confirm-icon">{{ pendingDestination.targetKind === 'member' ? '●' : '✦' }}</span>
+              <span class="confirm-icon"><AnimeIcon :name="pendingDestination.targetKind === 'member' ? 'party' : 'map'" :size="44" /></span>
               <p class="drawer-kicker">确认前往</p>
               <h3 id="travel-confirm-title">{{ pendingDestination.targetName }}</h3>
               <p>{{ pendingDestination.regionName || '未知区域' }} · {{ formatCoordinate(pendingDestination) }}</p>
@@ -315,7 +376,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown));
 <style scoped>
 .region-map-sidebar-shell { position: relative; z-index: 30; }
 .region-map-toggle { position: fixed; right: 12px; bottom: calc(76px + env(safe-area-inset-bottom, 0px)); z-index: 32; display: grid; place-items: center; width: 48px; height: 48px; padding: 4px; color: #66596f; background: rgba(255,250,244,.96); border: 1px solid rgba(255,255,255,.95); border-radius: 16px; box-shadow: 0 8px 22px rgba(65, 49, 72, .17); backdrop-filter: blur(8px); transition: transform .15s ease, color .15s ease, background .15s ease; }
-.region-map-toggle:hover, .region-map-toggle.is-open { color: #fff; background: linear-gradient(135deg, #8170ba, #ac91d0); transform: translateY(-2px); }
+.region-map-toggle.is-open { color: #fff; background: linear-gradient(135deg, #8170ba, #ac91d0); transform: translateY(-2px); }
 .region-map-toggle:disabled { cursor: not-allowed; opacity: .45; }
 .region-map-toggle span { font-size: 20px; line-height: 1; }
 .region-map-toggle small { margin-top: 2px; font-size: 8px; line-height: 1; }
@@ -357,7 +418,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown));
 .drawer-section-heading { display: flex; align-items: baseline; justify-content: space-between; padding: 0 2px; color: #66596f; font-size: 12px; }
 .drawer-section-heading small { color: #a6949f; font-size: 9px; }
 .destination-row { display: flex; align-items: center; gap: 8px; min-width: 0; padding: 8px 9px; color: #5f526b; background: #fcf7f2; border: 1px solid transparent; border-radius: 11px; text-align: left; }
-.destination-row:hover { background: #f5efff; border-color: #dfd3f1; }
+
 .destination-icon { display: grid; place-items: center; flex: 0 0 27px; width: 27px; height: 27px; color: #fff; border-radius: 9px; font-size: 12px; }
 .member-icon { background: #de847a; }
 .landmark-icon { background: #a58ac2; }

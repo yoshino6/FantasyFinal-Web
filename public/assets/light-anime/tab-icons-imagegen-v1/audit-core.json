@@ -1,0 +1,506 @@
+[
+  {
+    "key": "skills",
+    "label": "技能：青蓝魔法水晶与星光",
+    "tool": "functions.exec tools.image_gen__imagegen (built-in)",
+    "transparent_background": true,
+    "generatedSource": "C:\\Users\\afshu\\.codex\\generated_images\\01a12765-b012-7c53-b055-9fb96662851a\\exec-4b50abb0-b2c4-470c-a4f6-c218b567166a.png",
+    "sourcePath": "E:\\猫拉瑞亚\\FantasyFinal\\web\\public\\assets\\light-anime\\tab-icons-imagegen-v1\\sources\\skills.png",
+    "runtimePath": "E:\\猫拉瑞亚\\FantasyFinal\\web\\public\\assets\\light-anime\\tab-icons-imagegen-v1\\skills.png",
+    "sourceSha256": "85f41a276110fb2dfd0e61680b1acc2950514c5b3b2b486c6af2ac10d36615ea",
+    "runtimeSha256": "3c932fccb91814e0216345d8966e792d72d5f63681da088b4ebe8900ee7e00a4",
+    "source": {
+      "width": 1254,
+      "height": 1254,
+      "channels": 4,
+      "transparentPixels": 1072195,
+      "partialAlphaPixels": 500170,
+      "opaquePixels": 151,
+      "transparentRatio": 0.681834079907613,
+      "alphaBounds": {
+        "left": 0,
+        "top": 31,
+        "width": 1172,
+        "height": 1213
+      },
+      "subjectBounds": {
+        "left": 243,
+        "top": 100,
+        "width": 784,
+        "height": 1047
+      },
+      "corners": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "runtime": {
+      "width": 128,
+      "height": 128,
+      "channels": 4,
+      "transparentPixels": 12569,
+      "partialAlphaPixels": 3636,
+      "opaquePixels": 179,
+      "transparentRatio": 0.76715087890625,
+      "alphaBounds": {
+        "left": 31,
+        "top": 20,
+        "width": 66,
+        "height": 88
+      },
+      "subjectBounds": {
+        "left": 31,
+        "top": 20,
+        "width": 66,
+        "height": 88
+      },
+      "corners": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "extraction": {
+      "left": 241,
+      "top": 98,
+      "width": 788,
+      "height": 1051
+    },
+    "prompt": "Use case: stylized-concept\nAsset type: FantasyFinal Chinese fantasy RPG navigation category tab icon, one raster PNG asset.\nStyle/medium: Japanese light anime, cute chibi hand-painted fantasy game item illustration. Soft rounded proportions, polished painterly gouache shading and cream highlights, warm dark-brown hand-drawn contour lines; cozy storybook game artwork matching a sunny medieval fantasy village. Clear chunky compact silhouette readable at 20–28 pixels. Richly illustrated bitmap, not a flat vector symbol or 3D plastic render.\nColor palette: warm cream and honey gold, turquoise teal and soft blue, restrained warm brown outlines. Friendly soft warm illumination.\nComposition/framing: One centered object group in a square canvas, with complete silhouette visible. Subject occupies about 70 percent of width and height, leaving at least 15 percent clean transparent margin on every edge. Few strong shapes with carefully painted material details.\nScene/backdrop: Truly transparent alpha background, isolated cutout.\nConstraints: Exactly one navigation icon per image. No text, writing, letters, numbers, watermark, decorative UI frame, card, tile, badge or disc behind the subject, border, background scene, ground plane, external cast shadow, white backdrop, checkerboard, SVG or flat vector look. Background pixels must genuinely have transparent alpha.\nPrimary request: A beautiful large cyan-blue magic crystal with a few tiny soft golden star sparkles, the clear icon for skills. A chunky polished faceted aqua-blue crystal with luminous cyan highlights and a subtle warm-gold accent at its base. Compact, soft-edged fantasy gemstone silhouette. Keep the sparkle count small and the main crystal dominant."
+  },
+  {
+    "key": "evolution",
+    "label": "进化：青绿金色羽翼与嫩芽",
+    "tool": "functions.exec tools.image_gen__imagegen (built-in)",
+    "transparent_background": true,
+    "generatedSource": "C:\\Users\\afshu\\.codex\\generated_images\\01a12765-b012-7c53-b055-9fb96662851a\\exec-fd61018b-8cb7-42ce-a1eb-038121453b5b.png",
+    "sourcePath": "E:\\猫拉瑞亚\\FantasyFinal\\web\\public\\assets\\light-anime\\tab-icons-imagegen-v1\\sources\\evolution.png",
+    "runtimePath": "E:\\猫拉瑞亚\\FantasyFinal\\web\\public\\assets\\light-anime\\tab-icons-imagegen-v1\\evolution.png",
+    "sourceSha256": "c3c336dacd6fcd865dfdee534b4a79759b7f4ec06c47b9bb459dcb185ba043c1",
+    "runtimeSha256": "e617594335d05492503de100f73bfab4a6343c76b082843d6c65dbdc0fdad4a6",
+    "source": {
+      "width": 1254,
+      "height": 1254,
+      "channels": 4,
+      "transparentPixels": 1034926,
+      "partialAlphaPixels": 536921,
+      "opaquePixels": 669,
+      "transparentRatio": 0.6581338441071506,
+      "alphaBounds": {
+        "left": 47,
+        "top": 28,
+        "width": 1193,
+        "height": 1202
+      },
+      "subjectBounds": {
+        "left": 162,
+        "top": 62,
+        "width": 1038,
+        "height": 1095
+      },
+      "corners": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "runtime": {
+      "width": 128,
+      "height": 128,
+      "channels": 4,
+      "transparentPixels": 12541,
+      "partialAlphaPixels": 3575,
+      "opaquePixels": 268,
+      "transparentRatio": 0.76544189453125,
+      "alphaBounds": {
+        "left": 22,
+        "top": 20,
+        "width": 83,
+        "height": 88
+      },
+      "subjectBounds": {
+        "left": 22,
+        "top": 20,
+        "width": 83,
+        "height": 88
+      },
+      "corners": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "extraction": {
+      "left": 160,
+      "top": 60,
+      "width": 1042,
+      "height": 1099
+    },
+    "prompt": "Use case: stylized-concept\nAsset type: FantasyFinal Chinese fantasy RPG navigation category tab icon, one raster PNG asset.\nStyle/medium: Japanese light anime, cute chibi hand-painted fantasy game item illustration. Soft rounded proportions, polished painterly gouache shading and cream highlights, warm dark-brown hand-drawn contour lines; cozy storybook game artwork matching a sunny medieval fantasy village. Clear chunky compact silhouette readable at 20–28 pixels. Richly illustrated bitmap, not a flat vector symbol or 3D plastic render.\nColor palette: warm cream and honey gold, turquoise teal and soft blue, restrained warm brown outlines. Friendly soft warm illumination.\nComposition/framing: One centered object group in a square canvas, with complete silhouette visible. Subject occupies about 70 percent of width and height, leaving at least 15 percent clean transparent margin on every edge. Few strong shapes with carefully painted material details.\nScene/backdrop: Truly transparent alpha background, isolated cutout.\nConstraints: Exactly one navigation icon per image. No text, writing, letters, numbers, watermark, decorative UI frame, card, tile, badge or disc behind the subject, border, background scene, ground plane, external cast shadow, white backdrop, checkerboard, SVG or flat vector look. Background pixels must genuinely have transparent alpha.\nPrimary request: A graceful soft teal-and-gold feathered wing unfurling beside a fresh little green sprout, the clear symbol for character evolution and new growth. Rounded overlapping mint-teal feathers with warm gold edges; a simple two-leaf tender sprout nestles at the wing base. Compact upward growth silhouette, carefully hand-painted and gentle."
+  },
+  {
+    "key": "advanced-profession",
+    "label": "职业进阶：金边盾牌与打开的职业册",
+    "tool": "functions.exec tools.image_gen__imagegen (built-in)",
+    "transparent_background": true,
+    "generatedSource": "C:\\Users\\afshu\\.codex\\generated_images\\01a12765-b012-7c53-b055-9fb96662851a\\exec-8d7e23ab-5199-49fb-8029-46e9a97ec13f.png",
+    "sourcePath": "E:\\猫拉瑞亚\\FantasyFinal\\web\\public\\assets\\light-anime\\tab-icons-imagegen-v1\\sources\\advanced-profession.png",
+    "runtimePath": "E:\\猫拉瑞亚\\FantasyFinal\\web\\public\\assets\\light-anime\\tab-icons-imagegen-v1\\advanced-profession.png",
+    "sourceSha256": "19ef27f7c59be65e7b0eb6237873a24ff9d28ccc3a5169cebb233c0f6a07c89a",
+    "runtimeSha256": "58d128dae9e10b0628280fc657938eb78adbaf22f166fe45c96cc5f188f3b24c",
+    "source": {
+      "width": 1254,
+      "height": 1254,
+      "channels": 4,
+      "transparentPixels": 799674,
+      "partialAlphaPixels": 772233,
+      "opaquePixels": 609,
+      "transparentRatio": 0.5085315507123616,
+      "alphaBounds": {
+        "left": 0,
+        "top": 20,
+        "width": 1230,
+        "height": 1234
+      },
+      "subjectBounds": {
+        "left": 84,
+        "top": 46,
+        "width": 1110,
+        "height": 1115
+      },
+      "corners": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "runtime": {
+      "width": 128,
+      "height": 128,
+      "channels": 4,
+      "transparentPixels": 11252,
+      "partialAlphaPixels": 4917,
+      "opaquePixels": 215,
+      "transparentRatio": 0.686767578125,
+      "alphaBounds": {
+        "left": 20,
+        "top": 20,
+        "width": 88,
+        "height": 88
+      },
+      "subjectBounds": {
+        "left": 20,
+        "top": 20,
+        "width": 88,
+        "height": 88
+      },
+      "corners": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "extraction": {
+      "left": 82,
+      "top": 44,
+      "width": 1114,
+      "height": 1119
+    },
+    "prompt": "Use case: stylized-concept\nAsset type: FantasyFinal Chinese fantasy RPG navigation category tab icon, one raster PNG asset.\nStyle/medium: Japanese light anime, cute chibi hand-painted fantasy game item illustration. Soft rounded proportions, polished painterly gouache shading and cream highlights, warm dark-brown hand-drawn contour lines; cozy storybook game artwork matching a sunny medieval fantasy village. Clear chunky compact silhouette readable at 20–28 pixels. Richly illustrated bitmap, not a flat vector symbol or 3D plastic render.\nColor palette: warm cream and honey gold, turquoise teal and soft blue, restrained warm brown outlines. Friendly soft warm illumination.\nComposition/framing: One centered object group in a square canvas, with complete silhouette visible. Subject occupies about 70 percent of width and height, leaving at least 15 percent clean transparent margin on every edge. Few strong shapes with carefully painted material details.\nScene/backdrop: Truly transparent alpha background, isolated cutout.\nConstraints: Exactly one navigation icon per image. No text, writing, letters, numbers, watermark, decorative UI frame, card, tile, badge or disc behind the subject, border, background scene, ground plane, external cast shadow, white backdrop, checkerboard, SVG or flat vector look. Background pixels must genuinely have transparent alpha.\nPrimary request: An open small fantasy profession handbook placed in front of a gold-rimmed teal shield, the clear icon for profession advancement. Cream parchment pages, a honey-brown book cover, thick warm-gold book corners and a compact elegant blue-teal shield behind. Pages have no writing or glyphs, only subtle blank parchment texture. Strong layered silhouette and polished hand-painted materials."
+  },
+  {
+    "key": "overview",
+    "label": "概览：蓝绿地球与小罗盘",
+    "tool": "functions.exec tools.image_gen__imagegen (built-in)",
+    "transparent_background": true,
+    "generatedSource": "C:\\Users\\afshu\\.codex\\generated_images\\01a12765-b012-7c53-b055-9fb96662851a\\exec-73c5e01a-871e-4768-a510-f103051bcfbc.png",
+    "sourcePath": "E:\\猫拉瑞亚\\FantasyFinal\\web\\public\\assets\\light-anime\\tab-icons-imagegen-v1\\sources\\overview.png",
+    "runtimePath": "E:\\猫拉瑞亚\\FantasyFinal\\web\\public\\assets\\light-anime\\tab-icons-imagegen-v1\\overview.png",
+    "sourceSha256": "6bbd998f5d5e4cce921994dd4489f67798ed0535f0000c0192655f644b37a295",
+    "runtimeSha256": "5f64b613da317546178c7adfcf85f340e40c41eb019d6ea20380130dbe618ad5",
+    "source": {
+      "width": 1254,
+      "height": 1254,
+      "channels": 4,
+      "transparentPixels": 976800,
+      "partialAlphaPixels": 595107,
+      "opaquePixels": 609,
+      "transparentRatio": 0.6211701502560228,
+      "alphaBounds": {
+        "left": 0,
+        "top": 29,
+        "width": 1218,
+        "height": 1207
+      },
+      "subjectBounds": {
+        "left": 188,
+        "top": 102,
+        "width": 894,
+        "height": 1011
+      },
+      "corners": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "runtime": {
+      "width": 128,
+      "height": 128,
+      "channels": 4,
+      "transparentPixels": 11566,
+      "partialAlphaPixels": 4528,
+      "opaquePixels": 290,
+      "transparentRatio": 0.7059326171875,
+      "alphaBounds": {
+        "left": 25,
+        "top": 20,
+        "width": 78,
+        "height": 88
+      },
+      "subjectBounds": {
+        "left": 25,
+        "top": 20,
+        "width": 78,
+        "height": 88
+      },
+      "corners": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "extraction": {
+      "left": 186,
+      "top": 100,
+      "width": 898,
+      "height": 1015
+    },
+    "prompt": "Use case: stylized-concept\nAsset type: FantasyFinal Chinese fantasy RPG navigation category tab icon, one raster PNG asset.\nStyle/medium: Japanese light anime, cute chibi hand-painted fantasy game item illustration. Soft rounded proportions, polished painterly gouache shading and cream highlights, warm dark-brown hand-drawn contour lines; cozy storybook game artwork matching a sunny medieval fantasy village. Clear chunky compact silhouette readable at 20–28 pixels. Richly illustrated bitmap, not a flat vector symbol or 3D plastic render.\nColor palette: warm cream and honey gold, turquoise teal and soft blue, restrained warm brown outlines. Friendly soft warm illumination.\nComposition/framing: One centered object group in a square canvas, with complete silhouette visible. Subject occupies about 70 percent of width and height, leaving at least 15 percent clean transparent margin on every edge. Few strong shapes with carefully painted material details.\nScene/backdrop: Truly transparent alpha background, isolated cutout.\nConstraints: Exactly one navigation icon per image. No text, writing, letters, numbers, watermark, decorative UI frame, card, tile, badge or disc behind the subject, border, background scene, ground plane, external cast shadow, white backdrop, checkerboard, SVG or flat vector look. Background pixels must genuinely have transparent alpha.\nPrimary request: A small bright blue-and-green fantasy globe with a little brass compass resting in front, the clear icon for world overview. Rounded blue oceans and soft green land shapes, a modest warm-gold rim and stand, and one compact golden compass with a bold teal needle. No country labels or writing. Cozy hand-painted miniature object group."
+  },
+  {
+    "key": "market",
+    "label": "市场：金币袋与三枚金币",
+    "tool": "functions.exec tools.image_gen__imagegen (built-in)",
+    "transparent_background": true,
+    "generatedSource": "C:\\Users\\afshu\\.codex\\generated_images\\01a12765-b012-7c53-b055-9fb96662851a\\exec-d11f6c9d-759b-4939-a845-da175ac45018.png",
+    "sourcePath": "E:\\猫拉瑞亚\\FantasyFinal\\web\\public\\assets\\light-anime\\tab-icons-imagegen-v1\\sources\\market.png",
+    "runtimePath": "E:\\猫拉瑞亚\\FantasyFinal\\web\\public\\assets\\light-anime\\tab-icons-imagegen-v1\\market.png",
+    "sourceSha256": "82231d83a54d7d98827570f57b97b9ddfda4c3c20ec817144090fd8dcac3087a",
+    "runtimeSha256": "8f3fe71e2a5578f6de38fda9acfedbc7fd8f60263c53b43b45a20c4ca7c747f7",
+    "source": {
+      "width": 1254,
+      "height": 1254,
+      "channels": 4,
+      "transparentPixels": 836778,
+      "partialAlphaPixels": 735091,
+      "opaquePixels": 647,
+      "transparentRatio": 0.5321268591225781,
+      "alphaBounds": {
+        "left": 51,
+        "top": 64,
+        "width": 1189,
+        "height": 1190
+      },
+      "subjectBounds": {
+        "left": 97,
+        "top": 115,
+        "width": 1047,
+        "height": 1004
+      },
+      "corners": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "runtime": {
+      "width": 128,
+      "height": 128,
+      "channels": 4,
+      "transparentPixels": 10835,
+      "partialAlphaPixels": 5301,
+      "opaquePixels": 248,
+      "transparentRatio": 0.66131591796875,
+      "alphaBounds": {
+        "left": 20,
+        "top": 22,
+        "width": 88,
+        "height": 84
+      },
+      "subjectBounds": {
+        "left": 20,
+        "top": 22,
+        "width": 88,
+        "height": 84
+      },
+      "corners": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "extraction": {
+      "left": 95,
+      "top": 113,
+      "width": 1051,
+      "height": 1008
+    },
+    "prompt": "Use case: stylized-concept\nAsset type: FantasyFinal Chinese fantasy RPG navigation category tab icon, one raster PNG asset.\nStyle/medium: Japanese light anime, cute chibi hand-painted fantasy game item illustration. Soft rounded proportions, polished painterly gouache shading and cream highlights, warm dark-brown hand-drawn contour lines; cozy storybook game artwork matching a sunny medieval fantasy village. Clear chunky compact silhouette readable at 20–28 pixels. Richly illustrated bitmap, not a flat vector symbol or 3D plastic render.\nColor palette: warm cream and honey gold, turquoise teal and soft blue, restrained warm brown outlines. Friendly soft warm illumination.\nComposition/framing: One centered object group in a square canvas, with complete silhouette visible. Subject occupies about 70 percent of width and height, leaving at least 15 percent clean transparent margin on every edge. Few strong shapes with carefully painted material details.\nScene/backdrop: Truly transparent alpha background, isolated cutout.\nConstraints: Exactly one navigation icon per image. No text, writing, letters, numbers, watermark, decorative UI frame, card, tile, badge or disc behind the subject, border, background scene, ground plane, external cast shadow, white backdrop, checkerboard, SVG or flat vector look. Background pixels must genuinely have transparent alpha.\nPrimary request: A plump small golden coin pouch with exactly three shiny gold coins beside it, the clear icon for a market. Warm honey-brown leather pouch tied at the top, a restrained teal ribbon, cream-gold highlights and three thick readable gold coin discs. Coins have no letters or numbers. Rounded friendly proportions and a compact silhouette."
+  },
+  {
+    "key": "home",
+    "label": "家园：奶油墙蓝顶小屋",
+    "tool": "functions.exec tools.image_gen__imagegen (built-in)",
+    "transparent_background": true,
+    "generatedSource": "C:\\Users\\afshu\\.codex\\generated_images\\01a12765-b012-7c53-b055-9fb96662851a\\exec-d839c13d-164d-42a7-aabc-42508b04c6da.png",
+    "sourcePath": "E:\\猫拉瑞亚\\FantasyFinal\\web\\public\\assets\\light-anime\\tab-icons-imagegen-v1\\sources\\home.png",
+    "runtimePath": "E:\\猫拉瑞亚\\FantasyFinal\\web\\public\\assets\\light-anime\\tab-icons-imagegen-v1\\home.png",
+    "sourceSha256": "f83f0b51e50352445ab640c598f6d7e344c920f4e729c56ee56de21d641c9fcb",
+    "runtimeSha256": "4be071d81105c0ee41d1f26e05aadccbdc060ccc56ffb1b17e1fedb9cbe1b1a1",
+    "source": {
+      "width": 1254,
+      "height": 1254,
+      "channels": 4,
+      "transparentPixels": 898651,
+      "partialAlphaPixels": 673381,
+      "opaquePixels": 484,
+      "transparentRatio": 0.5714733586176548,
+      "alphaBounds": {
+        "left": 0,
+        "top": 0,
+        "width": 1218,
+        "height": 1236
+      },
+      "subjectBounds": {
+        "left": 145,
+        "top": 100,
+        "width": 1006,
+        "height": 1044
+      },
+      "corners": [
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    "runtime": {
+      "width": 128,
+      "height": 128,
+      "channels": 4,
+      "transparentPixels": 11277,
+      "partialAlphaPixels": 4883,
+      "opaquePixels": 224,
+      "transparentRatio": 0.68829345703125,
+      "alphaBounds": {
+        "left": 21,
+        "top": 20,
+        "width": 85,
+        "height": 88
+      },
+      "subjectBounds": {
+        "left": 21,
+        "top": 20,
+        "width": 85,
+        "height": 88
+      },
+      "corners": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "extraction": {
+      "left": 143,
+      "top": 98,
+      "width": 1010,
+      "height": 1048
+    },
+    "prompt": "Use case: stylized-concept\nAsset type: FantasyFinal Chinese fantasy RPG navigation category tab icon, one raster PNG asset.\nStyle/medium: Japanese light anime, cute chibi hand-painted fantasy game item illustration. Soft rounded proportions, polished painterly gouache shading and cream highlights, warm dark-brown hand-drawn contour lines; cozy storybook game artwork matching a sunny medieval fantasy village. Clear chunky compact silhouette readable at 20–28 pixels. Richly illustrated bitmap, not a flat vector symbol or 3D plastic render.\nColor palette: warm cream and honey gold, turquoise teal and soft blue, restrained warm brown outlines. Friendly soft warm illumination.\nComposition/framing: One centered object group in a square canvas, with complete silhouette visible. Subject occupies about 70 percent of width and height, leaving at least 15 percent clean transparent margin on every edge. Few strong shapes with carefully painted material details.\nScene/backdrop: Truly transparent alpha background, isolated cutout.\nConstraints: Exactly one navigation icon per image. No text, writing, letters, numbers, watermark, decorative UI frame, card, tile, badge or disc behind the subject, border, background scene, ground plane, external cast shadow, white backdrop, checkerboard, SVG or flat vector look. Background pixels must genuinely have transparent alpha.\nPrimary request: A charming cute chibi fantasy village cottage, the clear icon for home. Cream plaster walls, a soft blue-teal pitched roof, honey-brown wooden front door, one simple warm-lit window and subtle gold trim. Compact tiny storybook house with rounded roof edges, fully visible isolated cutout. No surrounding landscape or ground, no sign or text."
+  },
+  {
+    "key": "profile",
+    "label": "角色：棕发青披风冒险者头像（主代理生成）",
+    "tool": "functions.exec tools.image_gen__imagegen (built-in)",
+    "transparent_background": true,
+    "generatedSource": "C:/Users/afshu/.codex/generated_images/01a1260b-fd64-7f12-ace6-a0827c96c041/exec-ffca224e-336e-4369-bfbd-5e635b357213.png",
+    "sourcePath": "E:\\猫拉瑞亚\\FantasyFinal\\web\\public\\assets\\light-anime\\tab-icons-imagegen-v1\\sources\\profile.png",
+    "runtimePath": "E:\\猫拉瑞亚\\FantasyFinal\\web\\public\\assets\\light-anime\\tab-icons-imagegen-v1\\profile.png",
+    "sourceSha256": "2597f2e87bfc46028c31050218791cd0291105d0a91cb6855eab6c2ed482c192",
+    "runtimeSha256": "47777e0d73e6f8d16cf78ee977ce9e91467debbf6fbf9bfebbcb919536a1b957",
+    "source": {
+      "width": 1254,
+      "height": 1254,
+      "channels": 4,
+      "transparentPixels": 748373,
+      "partialAlphaPixels": 823375,
+      "opaquePixels": 768,
+      "transparentRatio": 0.47590803527595266,
+      "alphaBounds": {
+        "left": 0,
+        "top": 33,
+        "width": 1230,
+        "height": 1221
+      },
+      "subjectBounds": {
+        "left": 128,
+        "top": 45,
+        "width": 1017,
+        "height": 1165
+      },
+      "corners": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "runtime": {
+      "width": 128,
+      "height": 128,
+      "channels": 4,
+      "transparentPixels": 11326,
+      "partialAlphaPixels": 4842,
+      "opaquePixels": 216,
+      "transparentRatio": 0.6912841796875,
+      "alphaBounds": {
+        "left": 25,
+        "top": 20,
+        "width": 77,
+        "height": 88
+      },
+      "subjectBounds": {
+        "left": 25,
+        "top": 20,
+        "width": 77,
+        "height": 88
+      },
+      "corners": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "extraction": {
+      "left": 126,
+      "top": 43,
+      "width": 1021,
+      "height": 1169
+    },
+    "prompt": "Use case: stylized-concept. Asset type: one transparent PNG navigation tab icon for a Chinese fantasy anime RPG. Subject: a single cute chibi adventurer portrait bust, tousled chestnut brown hair, warm amber eyes, gentle confident smile, cream shirt and deep teal hooded cape with a small warm gold clasp. Style: carefully hand-painted Japanese light-anime game item illustration, rounded appealing Q proportions, soft gouache shading, delicate dark brown contour, cream highlights, polished high quality matching a sunny medieval fantasy village game. Centered square icon, head and cape fill 70 percent of the square, full silhouette visible, 15 percent empty margin on every side; bold clear shape legible at 24 px. Truly transparent alpha background. No text, letters, numbers, frames, tile background, checkerboard, watermark, SVG, flat vector style, photographic rendering or 3D plastic."
+  }
+]

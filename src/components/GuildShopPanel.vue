@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import '../anime-growth-commerce.css';
+import '../game-ui-shops.css';
+import AnimeIcon from './AnimeIcon.vue';
+import GameUiFeedbackArt from './GameUiFeedbackArt.vue';
 import { computed, nextTick, ref, watch } from 'vue';
 import { userFacingErrorMessage } from '../api';
 import InventoryItemIcon from './InventoryItemIcon.vue';
@@ -276,12 +280,12 @@ watch([() => props.open, () => props.targetId], async ([open, targetId], _old, o
 <template>
   <Teleport to="body">
     <div v-if="open" class="guild-shop-backdrop" role="presentation" @click.self="requestClose">
-      <section class="guild-shop-panel" role="dialog" aria-modal="true" aria-label="公会商店" @keydown.esc="requestClose">
+      <section class="guild-shop-panel anime-growth-commerce shop-ledger-painted" role="dialog" aria-modal="true" aria-label="公会商店" @keydown.esc="requestClose">
         <header class="guild-shop-header">
-          <div class="guild-shop-emblem" aria-hidden="true">✦</div>
-          <div class="guild-shop-title"><small>ADVENTURERS GUILD · SHOP</small><h2>{{ target?.guildName ?? '冒险者公会' }}商店</h2><span v-if="target">{{ target.regionCode }}</span></div>
+          <div class="guild-shop-emblem"><AnimeIcon name="shield" :size="37" /></div>
+          <div class="guild-shop-title"><small>冒险者补给 · 公会商店</small><h2>{{ target?.guildName ?? '冒险者公会' }}商店</h2><span v-if="target">{{ target.regionCode }}</span></div>
           <div v-if="contribution !== null" class="guild-shop-balance"><small>当前贡献度</small><strong>{{ numberText(contribution) }}</strong></div>
-          <button ref="closeButton" class="guild-shop-close" type="button" aria-label="关闭公会商店" :disabled="pending || canRetryConfirmation" @click="requestClose">×</button>
+          <button ref="closeButton" class="guild-shop-close" type="button" aria-label="关闭公会商店" :disabled="pending || canRetryConfirmation" @click="requestClose"><AnimeIcon name="close" :size="25" /></button>
         </header>
 
         <nav class="guild-shop-tabs" aria-label="公会商店栏目">
@@ -293,11 +297,12 @@ watch([() => props.open, () => props.targetId], async ([open, targetId], _old, o
           <p v-if="notice" class="guild-shop-notice" role="status">{{ notice }}</p>
           <p v-if="error" class="guild-shop-error" role="alert">{{ error }}</p>
           <p v-if="canRetryConfirmation" class="guild-shop-error" role="status">确认结果尚未确定，请用原凭据核对。核对完成前暂不能关闭；网络持续不可用时请保持页面打开，稍后重试。</p>
-          <p v-if="loading && !gateOpen" class="guild-shop-empty" role="status">正在读取当前公会商店…</p>
+          <p v-if="loading && !gateOpen" class="guild-shop-empty game-ui-empty-message" role="status"><GameUiFeedbackArt name="loading" :size="36" /><span>正在读取当前公会商店…</span></p>
 
           <template v-if="gateOpen">
             <p class="guild-shop-intro">{{ side === 'buy' ? '货架价格为当前参考值。实际贡献度与库存以服务端报价为准。' : '只能出售背包中当前可售的物品。实际贡献度以服务端报价为准。' }}</p>
             <form class="guild-shop-search" @submit.prevent="search">
+              <AnimeIcon class="shop-ledger-search-art" name="search" :size="19" />
               <input v-if="side === 'buy'" v-model="buySearchDraft" type="search" maxlength="80" placeholder="搜索货架商品" aria-label="搜索货架商品" :disabled="pending" />
               <input v-else v-model="sellSearchDraft" type="search" maxlength="80" placeholder="搜索可售背包物品" aria-label="搜索可售背包物品" :disabled="pending" />
               <button type="submit" :disabled="pending || canRetryConfirmation || loading">搜索</button>
@@ -306,26 +311,26 @@ watch([() => props.open, () => props.targetId], async ([open, targetId], _old, o
 
             <div class="guild-shop-content">
               <div class="guild-shop-results">
-                <p v-if="loading" class="guild-shop-empty" role="status">正在更新商品…</p>
+                <p v-if="loading" class="guild-shop-empty game-ui-empty-message" role="status"><GameUiFeedbackArt name="loading" :size="36" /><span>正在更新商品…</span></p>
                 <template v-else-if="side === 'buy'">
                   <div v-if="shelf?.items.length" class="guild-shop-list">
                     <button v-for="item in shelf.items" :key="item.id" type="button" class="guild-shop-item" :class="{ selected: selectedBuy?.id === item.id }" :disabled="pending || canRetryConfirmation" @click="chooseBuy(item)">
                       <InventoryItemIcon :name="item.name" :codex-id="item.codexId" :item-category="item.category" />
-                      <span class="guild-shop-item-text"><strong>{{ item.name }}</strong><small>{{ item.category }} · 当前参考 {{ numberText(item.price) }} 贡献度</small><span>库存 {{ item.stockQuantity === null ? '不设数量' : `${numberText(item.stockQuantity)} 件` }} · 已持有 {{ numberText(item.ownedQuantity) }}</span></span>
-                      <span class="guild-shop-arrow" aria-hidden="true">›</span>
+                      <span class="guild-shop-item-text"><strong :title="item.name">{{ item.name }}</strong><small>{{ item.category }} · 当前参考 <b class="shop-price">{{ numberText(item.price) }}</b> 贡献度</small><span>库存 {{ item.stockQuantity === null ? '不设数量' : `${numberText(item.stockQuantity)} 件` }} · 已持有 {{ numberText(item.ownedQuantity) }}</span></span>
+                      <span class="guild-shop-arrow" aria-hidden="true"><AnimeIcon name="arrow" :size="19" /></span>
                     </button>
                   </div>
-                  <p v-else class="guild-shop-empty">当前搜索下没有货架商品。</p>
+                  <p v-else class="guild-shop-empty game-ui-empty-message"><GameUiFeedbackArt name="empty" :size="36" /><span>当前搜索下没有货架商品。</span></p>
                 </template>
                 <template v-else>
                   <div v-if="sellable?.items.length" class="guild-shop-list">
                     <button v-for="item in sellable.items" :key="item.id" type="button" class="guild-shop-item" :class="{ selected: selectedSell?.id === item.id }" :disabled="pending || canRetryConfirmation" @click="chooseSell(item)">
                       <InventoryItemIcon :name="item.name" :item-category="item.category" />
-                      <span class="guild-shop-item-text"><strong>{{ item.name }}</strong><small>{{ item.category }} · 当前参考 {{ numberText(item.price) }} 贡献度 / 件</small><span>可售 {{ numberText(item.sellableQuantity) }} 件 · 背包共 {{ numberText(item.quantity) }} 件</span></span>
-                      <span class="guild-shop-arrow" aria-hidden="true">›</span>
+                      <span class="guild-shop-item-text"><strong :title="item.name">{{ item.name }}</strong><small>{{ item.category }} · 当前参考 <b class="shop-price">{{ numberText(item.price) }}</b> 贡献度 / 件</small><span>可售 {{ numberText(item.sellableQuantity) }} 件 · 背包共 {{ numberText(item.quantity) }} 件</span></span>
+                      <span class="guild-shop-arrow" aria-hidden="true"><AnimeIcon name="arrow" :size="19" /></span>
                     </button>
                   </div>
-                  <p v-else class="guild-shop-empty">背包中没有符合搜索条件的可售物品。</p>
+                  <p v-else class="guild-shop-empty game-ui-empty-message"><GameUiFeedbackArt name="empty" :size="36" /><span>背包中没有符合搜索条件的可售物品。</span></p>
                 </template>
                 <div v-if="pageData" class="guild-shop-pager"><button type="button" :disabled="pending || loading || pageData.page <= 1" @click="changePage(pageData.page - 1)">上一页</button><span>第 {{ pageData.page }} / {{ pageData.totalPages }} 页</span><button type="button" :disabled="pending || loading || pageData.page >= pageData.totalPages" @click="changePage(pageData.page + 1)">下一页</button></div>
               </div>
@@ -346,7 +351,7 @@ watch([() => props.open, () => props.targetId], async ([open, targetId], _old, o
                   <label class="guild-shop-quantity">出售数量<input v-model.number="quantity" type="number" min="1" :max="Math.min(999, selectedSell.sellableQuantity)" step="1" inputmode="numeric" :disabled="pending || canRetryConfirmation" /></label>
                   <button class="guild-shop-primary" type="button" :disabled="pending || canRetryConfirmation || loading || selectedSell.sellableQuantity < 1" @click="previewTrade">预览真实报价</button>
                 </template>
-                <p v-else class="guild-shop-empty">从{{ side === 'buy' ? '货架' : '可售背包' }}选择物品，查看详情并获取报价。</p>
+                <p v-else class="guild-shop-empty game-ui-empty-message"><GameUiFeedbackArt name="message" :size="36" /><span>从{{ side === 'buy' ? '货架' : '可售背包' }}选择物品，查看详情并获取报价。</span></p>
 
                 <div v-if="activeQuote && activeQuote.side === side" class="guild-shop-quote">
                   <strong>{{ side === 'buy' ? '购买确认' : '出售确认' }}</strong>
@@ -384,7 +389,7 @@ watch([() => props.open, () => props.targetId], async ([open, targetId], _old, o
 .guild-shop-tabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); flex: none; padding: 0 18px; background: #fff; border-bottom: 1px solid #eee3e5; }.guild-shop-tabs button { min-height: 45px; color: #938494; background: none; border: 0; border-bottom: 3px solid transparent; font-size: 13px; }.guild-shop-tabs button.active { color: #875c84; border-bottom-color: #b787ae; font-weight: 800; }
 .guild-shop-body { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 17px 20px max(25px, env(safe-area-inset-bottom)); }.guild-shop-intro { margin: 0 0 13px; color: #8d7f8d; font-size: 12px; line-height: 1.55; }
 .guild-shop-search { display: flex; gap: 8px; margin-bottom: 15px; }.guild-shop-search input, .guild-shop-quantity input { min-height: 38px; padding: 8px 10px; color: #4d3b53; background: white; border: 1px solid #dfd1dd; border-radius: 9px; font: inherit; font-size: 13px; }.guild-shop-search input { flex: 1; min-width: 0; }.guild-shop-search button { min-height: 38px; padding: 8px 15px; color: #fff; background: #9d6b95; border-radius: 9px; font-size: 12px; font-weight: 700; }.guild-shop-search .guild-shop-reload { color: #856786; background: #f3e9f2; }
-.guild-shop-content { display: grid; grid-template-columns: minmax(0, 1fr) minmax(250px, 330px); gap: 15px; align-items: start; }.guild-shop-results { min-width: 0; }.guild-shop-list { display: grid; gap: 8px; }.guild-shop-item { display: flex; align-items: center; gap: 10px; width: 100%; min-width: 0; padding: 11px; color: inherit; text-align: left; background: #fff; border: 1px solid #ecdee7; border-radius: 12px; box-shadow: 0 3px 10px #7547780d; }.guild-shop-item:hover, .guild-shop-item.selected { border-color: #c69ac0; background: #fffafd; }.guild-shop-item :deep(.inventory-art-wrap), .guild-shop-picked :deep(.inventory-art-wrap) { flex: 0 0 44px; width: 44px; height: 44px; margin: 0; background: #f9edf4; border-radius: 10px; }.guild-shop-item :deep(.inventory-item-image), .guild-shop-picked :deep(.inventory-item-image) { width: 40px; height: 40px; }.guild-shop-item-text { display: grid; gap: 3px; flex: 1; min-width: 0; overflow-wrap: anywhere; }.guild-shop-item-text strong { color: #59425d; font-size: 13px; }.guild-shop-item-text small { color: #987b90; font-size: 11px; }.guild-shop-item-text > span { color: #837889; font-size: 11px; }.guild-shop-arrow { color: #bd94b6; font-size: 21px; }
+.guild-shop-content { display: grid; grid-template-columns: minmax(0, 1fr) minmax(250px, 330px); gap: 15px; align-items: start; }.guild-shop-results { min-width: 0; }.guild-shop-list { display: grid; gap: 8px; }.guild-shop-item { display: flex; align-items: center; gap: 10px; width: 100%; min-width: 0; padding: 11px; color: inherit; text-align: left; background: #fff; border: 1px solid #ecdee7; border-radius: 12px; box-shadow: 0 3px 10px #7547780d; }.guild-shop-item.selected { border-color: #c69ac0; background: #fffafd; }.guild-shop-item :deep(.inventory-art-wrap), .guild-shop-picked :deep(.inventory-art-wrap) { flex: 0 0 44px; width: 44px; height: 44px; margin: 0; background: #f9edf4; border-radius: 10px; }.guild-shop-item :deep(.inventory-item-image), .guild-shop-picked :deep(.inventory-item-image) { width: 40px; height: 40px; }.guild-shop-item-text { display: grid; gap: 3px; flex: 1; min-width: 0; overflow-wrap: anywhere; }.guild-shop-item-text strong { color: #59425d; font-size: 13px; }.guild-shop-item-text small { color: #987b90; font-size: 11px; }.guild-shop-item-text > span { color: #837889; font-size: 11px; }.guild-shop-arrow { color: #bd94b6; font-size: 21px; }
 .guild-shop-pager { display: flex; align-items: center; justify-content: center; gap: 13px; margin: 15px 0; color: #938595; font-size: 12px; }.guild-shop-pager button { min-height: 34px; padding: 7px 10px; color: #865e83; background: #f3e9f2; border-radius: 8px; }
 .guild-shop-detail { min-width: 0; padding: 16px; background: #fff; border: 1px solid #eadddf; border-radius: 13px; box-shadow: 0 4px 14px #77517511; }.guild-shop-picked { display: flex; align-items: center; gap: 10px; margin-bottom: 11px; }.guild-shop-picked div { min-width: 0; }.guild-shop-picked small { color: #ab91a6; font-size: 11px; }.guild-shop-picked h3 { margin: 2px 0; color: #5a435d; font-size: 16px; overflow-wrap: anywhere; }.guild-shop-description { margin: 9px 0 14px; color: #817681; font-size: 12px; line-height: 1.55; }.guild-shop-facts { margin: 10px 0; }.guild-shop-facts div { display: flex; justify-content: space-between; gap: 8px; padding: 7px 0; border-top: 1px solid #f0e8ed; font-size: 12px; }.guild-shop-facts dt { color: #9b8d9c; }.guild-shop-facts dd { margin: 0; color: #68546c; text-align: right; }.guild-shop-quantity { display: grid; gap: 5px; margin-top: 14px; color: #746679; font-size: 12px; }.guild-shop-quantity input { width: 100%; }.guild-shop-primary { width: 100%; min-height: 39px; margin-top: 11px; padding: 9px 12px; color: white; background: #96648f; border-radius: 9px; font-size: 12px; font-weight: 800; }
 .guild-shop-quote { display: grid; gap: 5px; margin-top: 17px; padding: 13px; color: #68586e; background: #f8eff8; border: 1px solid #e9d9e7; border-radius: 11px; font-size: 12px; line-height: 1.5; }.guild-shop-quote > strong { color: #744d78; font-size: 14px; }.guild-shop-quote p { margin: 0; }.guild-shop-quote b { color: #8b5983; }.guild-shop-quote small { color: #927f93; }

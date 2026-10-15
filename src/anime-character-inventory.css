@@ -1,0 +1,378 @@
+/* 006 / 016 refinement. Only display geometry changes here; values and asset
+   identities continue to come from the existing components and panel state. */
+
+.app-shell .character-page .character-profile-card {
+  display: grid;
+  grid-template-columns: minmax(0, 47fr) minmax(0, 53fr);
+  align-items: stretch;
+  gap: 0;
+  min-height: 0;
+  padding: 3px;
+  background: linear-gradient(90deg, #f8ecd108, #fff7e72b), var(--anime-forest) 28% center / cover;
+  background-clip: padding-box;
+}
+
+.app-shell .character-page .character-profile-card .character-profile-portrait {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  min-height: 430px;
+  margin: 0;
+  padding: 0;
+  align-self: stretch;
+}
+
+/* Higher specificity than the portrait's scoped style and commerce skin.
+   Crop the original registered portrait with CSS; never replace its identity. */
+.app-shell .character-page .character-profile-card .character-profile-portrait .character-portrait-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 430px;
+  max-height: none;
+  aspect-ratio: auto;
+  margin: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 4px 0 0 5px;
+  background: linear-gradient(#fff6d511, #dae6c92e), var(--anime-forest) 42% center / cover;
+  box-shadow: none;
+}
+
+.app-shell .character-page .character-profile-card .character-profile-portrait .character-portrait-base {
+  inset: auto;
+  top: -2%;
+  left: 52%;
+  width: auto;
+  min-width: 100%;
+  max-width: none;
+  height: 190%;
+  max-height: none;
+  object-fit: contain;
+  object-position: center top;
+  transform: translateX(-50%);
+  filter: drop-shadow(0 5px 5px #26394328);
+}
+
+.app-shell .character-page .character-profile-info {
+  display: grid;
+  align-content: start;
+  min-width: 0;
+  margin: 0;
+  padding: 7px 6px;
+  color: var(--ink, #383043);
+  border: 8px solid transparent;
+  border-image: url('/assets/light-anime/paper-frame.svg') 24 fill / 8px / 0 stretch;
+  border-radius: 0;
+  background: #fff8e9ed;
+  background-clip: padding-box;
+  box-shadow: 0 3px 5px #6d584321;
+}
+
+.app-shell .character-page .character-profile-info .eyebrow {
+  margin: 0 0 4px;
+  color: #a17c51;
+  font-size: 9px;
+  letter-spacing: .12em;
+}
+
+.app-shell .character-page .character-profile-info h1 {
+  margin: 0 0 5px;
+  color: #302b3c;
+  font-size: clamp(20px, 2.3vw, 30px);
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.app-shell .character-page .character-profile-info > .muted {
+  margin: 0;
+  color: #765d49;
+  font-size: 13px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.app-shell .character-page .character-identity {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  margin-top: 10px;
+  padding-top: 3px;
+  border-top: 1px solid #cbb798;
+}
+
+.app-shell .character-page .character-identity > div {
+  grid-template-columns: 55px minmax(0, 1fr);
+  align-items: baseline;
+  gap: 4px;
+  min-width: 0;
+  padding: 7px 0;
+  border-bottom: 1px solid #ddccb0;
+}
+
+.app-shell .character-page .character-identity :is(span, strong) {
+  min-width: 0;
+  color: #4e4039;
+  font-size: 12px;
+  line-height: 1.45;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.app-shell .character-page .character-identity strong {
+  color: #383143;
+  font-variant-numeric: tabular-nums;
+}
+
+.app-shell .character-page .character-resource-list {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 6px;
+  margin-top: 9px;
+  padding: 7px 0 0;
+  border-top: 1px solid #d5c0a0;
+}
+
+.app-shell .character-page .character-resource-list > div {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 3px;
+  padding: 5px;
+  border: 1px solid #d9c1a1;
+  border-radius: 4px 7px 3px 5px;
+  background: #fff5dd;
+  box-shadow: inset 0 0 0 2px #fffcf0;
+}
+
+.app-shell .character-page .character-resource-list > div > span {
+  font-size: 11px;
+  color: #4f413c;
+}
+
+.app-shell .character-page .character-resource-list strong {
+  min-width: 0;
+  font-size: 12px;
+  line-height: 1.3;
+  text-align: right;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+}
+
+.app-shell .character-page .character-resource-list i {
+  grid-column: 1 / -1;
+  height: 8px;
+  border: 1px solid #bba991;
+  background: #e6dccb;
+  box-shadow: inset 0 1px 2px #6a58471b;
+}
+
+.app-shell .character-page .character-resource-list i b {
+  background: linear-gradient(#fc9588, #df5854);
+  box-shadow: inset 0 1px 0 #ffe5d9a8;
+}
+
+.app-shell .character-page .character-resource-list i.mana b { background: linear-gradient(#79d7f2, #309bcb); }
+.app-shell .character-page .character-resource-list i.stamina b { background: linear-gradient(#9cd99c, #55ad83); }
+
+.app-shell .character-page .character-battle-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+  padding: 9px;
+  align-content: start;
+}
+
+.app-shell .character-page .character-battle-stats > h2 { grid-column: 1 / -1; margin: 0; font-size: 20px; }
+.app-shell .character-page .character-battle-section {
+  min-width: 0;
+  gap: 6px;
+  padding: 8px;
+  border: 1px solid #d9c09b;
+  border-radius: 5px 8px 4px 6px;
+  background: #fff5de;
+  box-shadow: inset 0 0 0 2px #fffaf0;
+}
+
+.app-shell .character-page .character-battle-section:has(.character-battle-grid .attribute-help-label) { grid-column: 1 / -1; }
+.app-shell .character-page .character-battle-section h3 { color: #4d3b37; font-size: 14px; line-height: 1.5; }
+.app-shell .character-page .character-battle-grid { gap: 4px 8px; }
+.app-shell .character-page .character-battle-item {
+  gap: 5px;
+  min-width: 0;
+  padding: 6px;
+  border: 1px solid #e4d2b4;
+  background: linear-gradient(90deg, #fffaf0, #f5e8d1);
+}
+.app-shell .character-page .character-battle-item > strong { font-size: 13px; overflow-wrap: anywhere; }
+.app-shell .character-page .character-battle-item span { font-size: 11px; color: #65503e; }
+.app-shell .character-page .attribute-help-trigger { background: #bf9972; color: #fffaf0; border-color: #a98462; }
+
+/* The inventory keeps real quantity / equipment quality badges. There is no
+   rarity or selected class on these slots, so generic rarity corners are removed. */
+.app-shell .inventory-page .inventory-frame {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 8px;
+  background-clip: padding-box;
+}
+.app-shell .inventory-page .inventory-tabs { order: 0; margin: 0; }
+.app-shell .inventory-page .inventory-preview-card { order: 5; display: grid; grid-template-columns: 76px minmax(0, 1fr); align-items: center; gap: 6px 9px; padding: 9px; margin-top: 3px; border: 9px solid transparent; border-image: url('/assets/light-anime/paper-frame.svg') 24 fill / 9px; background: #fff6d9; background-clip: padding-box; }
+.app-shell .inventory-page .inventory-preview-card > .inventory-art-wrap { width: 76px; height: 91px; padding: 0; margin: 0; border: 0; border-radius: 0; background: radial-gradient(ellipse, #e4e5c9, #f9e9c344 58%, transparent 70%); box-shadow: none; }
+.app-shell .inventory-page .inventory-preview-card .inventory-art-wrap > :is(.inventory-item-image, .inventory-art) { width: 100%; height: 100%; max-width: none; max-height: none; object-fit: contain; }
+.app-shell .inventory-page .inventory-preview-copy { min-width: 0; }
+.app-shell .inventory-page .inventory-preview-copy h2 { margin: 0 0 5px; color: #413440; font-size: 18px; line-height: 1.4; overflow-wrap: anywhere; }
+.app-shell .inventory-page .inventory-preview-copy p { margin: 0 0 4px; color: #6e5942; font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+.app-shell .inventory-page .inventory-preview-copy small { color: #987442; font-size: 11px; overflow-wrap: anywhere; }
+.app-shell .inventory-page .inventory-preview-card > button { grid-column: 1 / -1; justify-self: end; min-height: 43px; min-width: 110px; font-size: 13px; }
+.app-shell .inventory-page .inventory-grid .inventory-slot.is-previewed { border-color: #76b5a8; box-shadow: inset 0 0 0 2px #a1d6c8, 0 2px 3px #698b7536; }
+.app-shell .inventory-page .inventory-search { order: 1; margin: 0; min-height: 43px; }
+.app-shell .inventory-page .inventory-equipment-tabs { order: 2; margin: 0; }
+.app-shell .inventory-page .inventory-subtabs { order: 3; margin: 0; }
+.app-shell .inventory-page :is(.inventory-grid, .inventory-empty) { order: 4; }
+.app-shell .inventory-page .inventory-tabs > button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  gap: 4px;
+  min-height: 48px;
+  padding: 5px 2px;
+  font-size: 14px;
+}
+.app-shell .inventory-page .inventory-tabs .inventory-category-icon.inventory-art-wrap {
+  flex: 0 0 25px;
+  width: 25px;
+  height: 25px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.app-shell .inventory-page .inventory-tabs .inventory-category-label { font-size: inherit; }
+.app-shell .inventory-page .inventory-search input { min-width: 0; }
+.app-shell .inventory-page .inventory-result-count { font-size: 10px; white-space: nowrap; }
+.app-shell .inventory-page .inventory-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  align-items: stretch;
+}
+.app-shell .inventory-page .inventory-grid .inventory-slot {
+  position: relative;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  min-height: 124px;
+  padding: 8px 3px 7px;
+  border: 1px solid #c6ac85;
+  border-radius: 7px 10px 6px 8px;
+  background: linear-gradient(135deg, #fffbed, #f4e9cf);
+  box-shadow: inset 0 0 0 2px #fffaf0, 0 2px 0 #9e83591a;
+  transition: border-color .15s, box-shadow .15s;
+}
+.app-shell .inventory-page .inventory-grid .inventory-slot::before { content: none; }
+.app-shell .inventory-page .inventory-grid .inventory-slot > .inventory-art-wrap {
+  display: grid;
+  place-items: center;
+  width: 74%;
+  height: auto;
+  aspect-ratio: 1;
+  margin: 2px auto;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.app-shell .inventory-page .inventory-grid .inventory-slot .inventory-art-wrap > :is(.inventory-item-image, .inventory-art) {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 1px #75573324);
+}
+.app-shell .inventory-page .inventory-grid .inventory-slot > strong {
+  display: block;
+  min-height: 2.8em;
+  margin: 0;
+  color: #342d3e;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.4;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  overflow-wrap: anywhere;
+}
+.app-shell .inventory-page .inventory-grid .inventory-slot > small {
+  position: absolute;
+  right: 5px;
+  bottom: 42px;
+  min-width: 21px;
+  padding: 2px 4px;
+  color: #fffdf0;
+  border: 1px solid #fff7de;
+  border-radius: 4px;
+  background: #665c50e8;
+  font-size: 11px;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+.app-shell .inventory-page .inventory-grid .inventory-slot:focus-visible {
+  transform: none;
+  border-color: #339d9f;
+  background: linear-gradient(135deg, #effcfa, #daeee6);
+  box-shadow: inset 0 0 0 2px #70c4c1, 0 0 0 1px #f8fff0;
+  outline: 2px solid #46b4b6;
+  outline-offset: 1px;
+}
+
+@media (min-width: 761px) {
+  .app-shell .character-page .character-profile-info { padding: 14px; border-width: 11px; border-image-width: 11px; }
+  .app-shell .character-page .character-profile-card .character-profile-portrait { min-height: 515px; }
+  .app-shell .character-page .character-profile-card .character-profile-portrait .character-portrait-stage { min-height: 515px; }
+  .app-shell .character-page .character-identity > div { grid-template-columns: 75px minmax(0, 1fr); padding: 9px 0; }
+  .app-shell .character-page .character-identity :is(span, strong) { font-size: 14px; }
+  .app-shell .character-page .character-resource-list > div { grid-template-columns: auto minmax(0, 1fr); }
+  .app-shell .inventory-page .inventory-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; }
+  .app-shell .inventory-page .inventory-grid .inventory-slot { min-height: 164px; padding-top: 10px; }
+  .app-shell .inventory-page .inventory-grid .inventory-slot > strong { font-size: 14px; }
+  .app-shell .inventory-page .inventory-grid .inventory-slot > small { bottom: 49px; font-size: 12px; }
+}
+
+/* At 320px a readable full-width dossier matters more than side-by-side copy. */
+@media (max-width: 360px) {
+  .app-shell .character-page .character-profile-card { grid-template-columns: minmax(0, 1fr); gap: 7px; }
+  .app-shell .character-page .character-profile-card .character-profile-portrait { min-height: 0; height: 260px; }
+  .app-shell .character-page .character-profile-card .character-profile-portrait .character-portrait-stage { min-height: 0; height: 260px; border-radius: 4px; }
+  .app-shell .character-page .character-profile-card .character-profile-portrait .character-portrait-base { left: 50%; height: 205%; }
+  .app-shell .character-page .character-profile-info { padding: 9px; }
+  .app-shell .character-page .character-profile-info h1 { font-size: 23px; }
+  .app-shell .character-page .character-identity > div { grid-template-columns: 66px minmax(0, 1fr); padding: 6px 0; }
+  .app-shell .character-page .character-identity :is(span, strong) { font-size: 12px; }
+  .app-shell .character-page .character-resource-list > div { grid-template-columns: auto minmax(0, 1fr); }
+  .app-shell .character-page .character-battle-stats { padding: 5px; }
+  .app-shell .character-page .character-battle-section { padding: 6px; }
+  .app-shell .character-page .character-battle-section h3 { font-size: 12px; }
+  .app-shell .character-page .character-battle-item { padding: 5px 3px; }
+  .app-shell .inventory-page .inventory-frame { padding: 6px; gap: 8px; }
+  .app-shell .inventory-page .inventory-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; }
+  .app-shell .inventory-page .inventory-tabs { gap: 2px; padding: 3px; }
+  .app-shell .inventory-page .inventory-tabs > button { gap: 3px; padding: 5px 1px; font-size: 11px; }
+  .app-shell .inventory-page .inventory-tabs .inventory-category-icon.inventory-art-wrap { flex-basis: 19px; width: 19px; height: 19px; }
+  .app-shell .inventory-page .inventory-grid .inventory-slot { min-height: 122px; }
+  .app-shell .inventory-page .inventory-grid .inventory-slot > strong { font-size: 11px; }
+  .app-shell .inventory-page .inventory-grid .inventory-slot > small { bottom: 38px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-shell .inventory-page .inventory-grid .inventory-slot { transition: none; }
+}

@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview",
-    "test:boot": "node scripts/verify-boot-assets.mjs"
+    "test:boot": "node scripts/verify-boot-assets.mjs",
+    "test:dev": "node scripts/verify-dev-server.mjs"
   },
   "dependencies": {
     "vue": "^3.5.13"

@@ -1,0 +1,26 @@
+[
+  {
+    "key": "identity",
+    "source": "C:/Users/afshu/.codex/generated_images/01a1260b-fd64-7f12-ace6-a0827c96c041/exec-8038af91-b108-4b9b-9040-ccf4f3e26a47.png",
+    "sourceSha256": "fc9b381c0e25644e28ca356e7803f03f39f3ffc0d0c9cc23d549dd43a3141d79",
+    "runtimeSha256": "c7f59c3fe82f0057a187edc9af08da456998987ca25ae983501daabd757fcedc",
+    "width": 543,
+    "height": 724,
+    "hasAlpha": true,
+    "transparent": 37678,
+    "partial": 354759,
+    "slice": 80
+  },
+  {
+    "key": "attributes",
+    "source": "C:/Users/afshu/.codex/generated_images/01a1260b-fd64-7f12-ace6-a0827c96c041/exec-e60a6c25-b847-49e9-99ad-3dca6d8a9ff2.png",
+    "sourceSha256": "c2f8029fe281395623deaba89873545aa63829b223ee72db5b82961e302b4e62",
+    "runtimeSha256": "a8595ee249bc07148a70c32ca413fb46d06f9c4a61a187ee30b95c23b976c52d",
+    "width": 768,
+    "height": 512,
+    "hasAlpha": true,
+    "transparent": 36050,
+    "partial": 355585,
+    "slice": 48
+  }
+]

@@ -1,5 +1,12 @@
 <script setup lang="ts">
+import '../anime-growth-commerce.css';
+import '../world-commerce-viewport.css';
+import '../game-ui-commerce.css';
+import AnimeIcon from './AnimeIcon.vue';
+import GameUiFeedbackArt from './GameUiFeedbackArt.vue';
+import ViewportPagination from './ViewportPagination.vue';
 import { computed, ref, watch } from 'vue';
+import { useViewportPagination } from '../useViewportPagination';
 import { userFacingErrorMessage } from '../api';
 import { confirmHomeStorageTransfer, homeFloor, homeOverview, homeStoragePage, previewHomeStorageTransfer } from '../home-api';
 import type { HomeFloor, HomeFurniture, HomeOverview, HomeStorageCategory, HomeStorageItem,
@@ -16,6 +23,13 @@ const loading = ref(false);
 const floorLoading = ref(false);
 const error = ref('');
 const floorError = ref('');
+const homeView = ref<'overview' | 'floor' | 'furniture' | 'storage'>('floor');
+const homeViews = [{ id: 'overview', label: '概况' }, { id: 'floor', label: '楼层布局' },
+  { id: 'furniture', label: '本层家具' }, { id: 'storage', label: '家园储物' }] as const;
+const showStorageInfo = ref(false);
+const selectedFurniture = ref<HomeFurniture | null>(null);
+const furnitureViewport = ref<HTMLElement | null>(null);
+const storageViewport = ref<HTMLElement | null>(null);
 const storageScope = ref<HomeStorageScope>('storage');
 const storageCategory = ref<HomeStorageCategory>('材料');
 const storageCategories: HomeStorageCategory[] = ['装备', '道具', '材料'];
@@ -65,6 +79,27 @@ function canDraw(item: HomeFurniture, selected: HomeFloor | null): boolean {
 }
 
 const placedFurniture = computed(() => currentFloor.value?.furniture.filter(item => canDraw(item, currentFloor.value)) ?? []);
+function listRowHeight(element: HTMLElement | null) {
+  return Number.parseFloat(element ? getComputedStyle(element).getPropertyValue('--home-row-height') : '') || 64;
+}
+function listColumns(element: HTMLElement | null) {
+  return Number.parseInt(element ? getComputedStyle(element).getPropertyValue('--home-list-columns') : '', 10) || 1;
+}
+const furniturePagination = useViewportPagination(() => currentFloor.value?.furniture ?? [], {
+  container: furnitureViewport, rowHeight: () => listRowHeight(furnitureViewport.value),
+  columns: () => listColumns(furnitureViewport.value), gap: 6
+});
+const storagePagination = useViewportPagination(() => storageList.value?.items ?? [], {
+  container: storageViewport, rowHeight: () => listRowHeight(storageViewport.value),
+  columns: () => listColumns(storageViewport.value), gap: 6
+});
+watch(selectedFloorNumber, furniturePagination.reset);
+watch([storageScope, storageCategory, storagePageNumber, storageKeyword], storagePagination.reset);
+function closeStorageItem() {
+  if (transferBusy.value) return;
+  selectedStorageItem.value = null;
+  transferQuote.value = null;
+}
 
 function furnitureStyle(item: HomeFurniture) {
   return {
@@ -283,18 +318,18 @@ defineExpose({ refresh });
 </script>
 
 <template>
-  <section v-if="active" class="home-panel" aria-label="家园总览">
+  <section v-if="active" class="home-panel viewport-commerce anime-growth-commerce commerce-painted" aria-label="家园总览">
     <header class="home-heading">
-      <span class="home-muted">楼层 · 储物</span>
+      <h2><AnimeIcon name="home" :size="28" />家园<small>楼层 · 储物</small></h2>
       <button type="button" class="home-refresh" :disabled="loading || transferPending" @click="refresh">{{ loading ? '加载中…' : '刷新' }}</button>
     </header>
 
     <p v-if="error" class="home-error" role="alert">{{ error }}</p>
-    <p v-if="loading && !overview" class="home-empty">正在读取家园…</p>
+    <p v-if="loading && !overview" class="home-empty game-ui-empty-message"><GameUiFeedbackArt name="loading" :size="36" /><span>正在读取家园…</span></p>
 
     <template v-if="overview && !overview.owned">
       <div class="home-unowned">
-        <div class="home-unowned-mark" aria-hidden="true">⌂</div>
+        <div class="home-unowned-mark"><AnimeIcon name="home" :size="52" /></div>
         <div>
           <h3>尚未拥有小屋</h3>
           <p>购置地点标识：{{ overview.purchase.siteCode }}</p>
@@ -305,7 +340,11 @@ defineExpose({ refresh });
     </template>
 
     <template v-else-if="home">
-      <div class="home-summary">
+      <nav class="home-view-tabs" aria-label="家园内部标签">
+        <button v-for="view in homeViews" :key="view.id" type="button" :class="{ selected: homeView === view.id }"
+          :aria-pressed="homeView === view.id" :disabled="transferBusy" @click="homeView = view.id">{{ view.label }}</button>
+      </nav>
+      <div v-if="homeView === 'overview'" class="home-summary">
         <div class="home-title-row">
           <div>
             <h3>{{ home.name }}</h3>
@@ -324,11 +363,11 @@ defineExpose({ refresh });
         </div>
       </div>
 
-      <div class="home-content-grid">
-        <section class="home-card home-floor-card" aria-label="楼层布局">
+      <div v-if="homeView !== 'overview'" class="home-content-grid">
+        <section v-if="homeView === 'floor' || homeView === 'furniture'" class="home-card home-floor-card" aria-label="楼层布局">
           <div class="home-section-head">
             <div>
-              <h3>楼层布局</h3>
+              <h3><AnimeIcon name="home" :size="24" />楼层布局</h3>
             </div>
             <span v-if="floorLoading" class="home-muted">同步中…</span>
           </div>
@@ -345,52 +384,51 @@ defineExpose({ refresh });
               <span>{{ room.columns }} × {{ room.rows }} 格</span>
               <span>家具槽 {{ currentFloor.slotsUsed }}/{{ currentFloor.slotsTotal }}</span>
             </div>
-            <div class="home-grid-scroll">
+            <div v-if="homeView === 'floor'" class="home-grid-scroll">
               <div class="home-room-grid" :style="{ '--cols': room.columns, '--rows': room.rows }">
                 <span v-for="cell in cells" :key="cell" class="home-room-cell" aria-hidden="true"
                   :style="{ gridColumn: String(cell % room.columns + 1), gridRow: String(Math.floor(cell / room.columns) + 1) }"></span>
-                <div v-for="item in placedFurniture" :key="item.id" class="home-room-furniture"
+                <div v-for="item in placedFurniture" :key="item.id" :data-furniture-id="item.id" class="home-room-furniture"
                   :style="furnitureStyle(item)" :title="`${item.name} · (${item.gridX}, ${item.gridY}) · ${item.width}×${item.height} 格`"
                   :aria-label="`${item.name}，位置 ${item.gridX}, ${item.gridY}，占 ${item.width} × ${item.height} 格`">
-                  <span>{{ item.name }}</span>
+                  <InventoryItemIcon :name="item.name" item-category="家具" /><span>{{ item.name }}</span>
                 </div>
               </div>
             </div>
-            <p class="home-grid-note">格子位置以服务端记录为准；家具坐标见下方列表。</p>
-            <p v-if="currentFloor.layoutPending" class="home-layout-notice">部分旧家具尚无格子位置，已列在下方，未绘入房间。</p>
-            <div v-if="currentFloor.furniture.length" class="home-furniture-list">
+            <p v-if="homeView === 'floor'" class="home-grid-note">格子位置以服务端记录为准；完整坐标与说明见“本层家具”。</p>
+            <p v-if="homeView === 'floor' && currentFloor.layoutPending" class="home-layout-notice">部分旧家具尚无格子位置，可在“本层家具”查看，未绘入房间。</p>
+            <div v-if="homeView === 'furniture' && currentFloor.furniture.length" class="home-furniture-list">
               <h4>本层家具 <span>{{ currentFloor.furniture.length }} 件</span></h4>
-              <ul>
-                <li v-for="item in currentFloor.furniture" :key="item.id">
-                  <span class="home-furniture-symbol" aria-hidden="true">▦</span>
+              <ul ref="furnitureViewport" class="home-furniture-viewport">
+                <li v-for="item in furniturePagination.visibleItems.value" :key="item.id" :data-item-id="item.id">
+                  <button type="button" :aria-label="`查看家具：${item.name}`" @click="selectedFurniture = item">
+                  <InventoryItemIcon :name="item.name" item-category="家具" />
                   <span class="home-furniture-name">{{ item.name }}</span>
                   <small v-if="canDraw(item, currentFloor)">({{ item.gridX }}, {{ item.gridY }}) · {{ item.width }}×{{ item.height }} 格</small>
                   <small v-else>{{ item.gridX == null || item.gridY == null ? '位置未记录' : '坐标无法绘制' }}</small>
+                  </button>
                 </li>
               </ul>
+              <ViewportPagination :page="furniturePagination.page.value" :total-pages="furniturePagination.totalPages.value" :total="currentFloor.furniture.length" label="本层家具翻页" @update:page="furniturePagination.setPage" />
             </div>
-            <p v-else class="home-empty">这一层还没有摆放家具。</p>
+            <p v-else-if="homeView === 'furniture'" class="home-empty game-ui-empty-message"><GameUiFeedbackArt name="empty" :size="36" /><span>这一层还没有摆放家具。</span></p>
           </template>
         </section>
 
-        <section class="home-card home-storage-card" aria-label="家园储物">
+        <section v-if="homeView === 'storage'" class="home-card home-storage-card" aria-label="家园储物">
+          <div class="home-storage-heading">
           <div class="home-section-head">
             <div>
-              <h3>家园储物</h3>
+              <h3><AnimeIcon name="home" :size="24" />家园储物</h3>
             </div>
             <span class="home-storage-remote">可远程管理</span>
           </div>
-          <div class="home-storage-amount"><strong>{{ kilograms(storageList?.usedKg ?? home.storage.usedKg) }}</strong><span> / {{ kilograms(storageList?.capacityKg ?? home.storage.capacityKg) }}</span></div>
+          <div class="home-storage-summary"><div class="home-storage-amount"><strong>{{ kilograms(storageList?.usedKg ?? home.storage.usedKg) }}</strong><span> / {{ kilograms(storageList?.capacityKg ?? home.storage.capacityKg) }}</span></div><button type="button" class="home-text-button" @click="showStorageInfo = true">容量明细</button></div>
+          </div>
           <div class="home-storage-track" role="progressbar" :aria-valuenow="Math.min(storageList?.usedKg ?? home.storage.usedKg, storageList?.capacityKg ?? home.storage.capacityKg)" :aria-valuemax="storageList?.capacityKg ?? home.storage.capacityKg" aria-valuemin="0" aria-label="储物重量">
             <span :style="{ width: `${Math.min(100, (storageList?.capacityKg ?? home.storage.capacityKg) > 0 ? (storageList?.usedKg ?? home.storage.usedKg) / (storageList?.capacityKg ?? home.storage.capacityKg) * 100 : 0)}%` }"></span>
           </div>
-          <p v-if="(storageList?.capacityKg ?? home.storage.capacityKg) === 0" class="home-layout-notice">尚未摆放储物箱，暂不能放入；仓储中已有的物品仍可查看和取出。</p>
-          <div class="home-storage-stats">
-            <div><strong>{{ amount(home.storage.stackedKinds) }}</strong><span>堆叠种类</span></div>
-            <div><strong>{{ amount(home.storage.stackedQuantity) }}</strong><span>堆叠数量</span></div>
-            <div><strong>{{ amount(home.storage.instanceCount) }}</strong><span>独立物品</span></div>
-          </div>
-          <div class="home-storage-scope" role="group" aria-label="查看储物来源">
+          <div class="home-storage-controls"><div class="home-storage-scope" role="group" aria-label="查看储物来源">
             <button type="button" :class="{ selected: storageScope === 'storage' }" :disabled="transferBusy" @click="selectStorageScope('storage')">仓储</button>
             <button type="button" :class="{ selected: storageScope === 'backpack' }" :disabled="transferBusy" @click="selectStorageScope('backpack')">可放入</button>
           </div>
@@ -398,36 +436,49 @@ defineExpose({ refresh });
             <button v-for="category in storageCategories" :key="category" type="button" :class="{ selected: storageCategory === category }" :disabled="transferBusy" @click="selectStorageCategory(category)">{{ category }}</button>
           </div>
           <form class="home-storage-search" @submit.prevent="searchStorage">
+            <AnimeIcon class="commerce-search-art" name="search" :size="19" />
             <input v-model="storageKeywordInput" type="search" maxlength="80" placeholder="搜索物品名称" aria-label="搜索储物物品" :disabled="transferBusy" />
             <button type="submit" :disabled="transferBusy || storageLoading">搜索</button>
-          </form>
+          </form></div>
           <p v-if="storageError" class="home-error" role="alert">{{ storageError }} <button type="button" class="home-text-button" :disabled="storageLoading" @click="loadStorage">重试</button></p>
-          <p v-if="storageLoading" class="home-empty">正在读取{{ storageScope === 'storage' ? '仓储' : '可放入' }}物品…</p>
+          <p v-if="storageLoading" class="home-empty game-ui-empty-message"><GameUiFeedbackArt name="loading" :size="36" /><span>正在读取{{ storageScope === 'storage' ? '仓储' : '可放入' }}物品…</span></p>
           <template v-if="storageList">
             <p class="home-storage-count">{{ storageScope === 'storage' ? '仓储' : '可放入物品' }} · 共 {{ storageList.count }} 项 · 第 {{ storageList.page }}/{{ storageList.pages }} 页</p>
-            <div v-if="storageList.items.length" class="home-storage-items">
-              <button v-for="item in storageList.items" :key="`${item.kind}:${item.id}`" type="button" class="home-storage-item"
+            <div v-if="storageList.items.length" ref="storageViewport" class="home-storage-items">
+              <button v-for="item in storagePagination.visibleItems.value" :key="`${item.kind}:${item.id}`" :data-item-id="item.id" type="button" class="home-storage-item"
                 :class="{ selected: selectedStorageItem?.kind === item.kind && selectedStorageItem?.id === item.id }" :disabled="transferBusy || storageLoading" @click="selectStorageItem(item)">
                 <InventoryItemIcon :name="item.name" :code="item.code" :codex-id="item.codexId" :item-category="item.itemCategory" :instance="item.kind === 'instance'" />
                 <span class="home-storage-item-copy"><strong>{{ item.name }}</strong><small>{{ item.itemCategory }} · {{ item.kind === 'stacked' ? `×${item.quantity}` : `品质 ${item.quality}% · 仅查看` }}</small></span>
                 <span class="home-storage-item-weight">{{ kilograms(item.weight) }}{{ item.kind === 'stacked' ? '/个' : '' }}</span>
               </button>
             </div>
-            <p v-else-if="!storageLoading" class="home-empty">当前筛选没有物品。</p>
-            <div class="home-storage-pager"><button type="button" :disabled="transferBusy || storageLoading || storageList.page <= 1" @click="turnStoragePage(storageList.page - 1)">上一页</button><span>{{ storageList.page }} / {{ storageList.pages }}</span><button type="button" :disabled="transferBusy || storageLoading || storageList.page >= storageList.pages" @click="turnStoragePage(storageList.page + 1)">下一页</button></div>
+            <p v-else-if="!storageLoading" class="home-empty game-ui-empty-message"><GameUiFeedbackArt name="empty" :size="36" /><span>当前筛选没有物品。</span></p>
+            <div class="home-storage-pagination">
+              <div v-if="storageList.items.length" class="home-local-pager"><small class="home-paging-caption">本页</small><ViewportPagination :page="storagePagination.page.value" :total-pages="storagePagination.totalPages.value" :total="storageList.items.length" :disabled="transferBusy || storageLoading" label="储物本页翻页" @update:page="storagePagination.setPage" /></div>
+              <div class="home-server-pager"><small class="home-paging-caption">数据</small><div class="home-storage-pager" aria-label="储物服务页翻页"><button type="button" aria-label="储物服务页：上一页" :disabled="transferBusy || storageLoading || storageList.page <= 1" @click="turnStoragePage(storageList.page - 1)">上一页</button><span>{{ storageList.page }} / {{ storageList.pages }}</span><button type="button" aria-label="储物服务页：下一页" :disabled="transferBusy || storageLoading || storageList.page >= storageList.pages" @click="turnStoragePage(storageList.page + 1)">下一页</button></div></div>
+            </div>
           </template>
-          <div v-if="selectedStorageItem" class="home-storage-selection">
-            <strong>{{ selectedStorageItem.name }}</strong>
+          <p v-if="transferNotice" class="home-storage-success" role="status">{{ transferNotice }}</p>
+          <p v-if="transferError" class="home-error" role="alert">{{ transferError }}</p>
+
+        </section>
+      </div>
+    </template>
+    <Teleport to="body">
+      <div v-if="selectedStorageItem" class="home-viewport-modal anime-growth-commerce commerce-painted" @click.self="closeStorageItem" @keydown.esc="closeStorageItem">
+        <section class="home-dialog-card" role="dialog" aria-modal="true" aria-label="储物物品详情">
+          <header class="home-dialog-header"><h3>储物物品详情</h3><button type="button" aria-label="关闭储物详情" :disabled="transferBusy" @click="closeStorageItem">关闭 ×</button></header>
+          <div class="home-dialog-scroll">
+          <div class="home-storage-selection">
+            <div class="home-storage-picked"><InventoryItemIcon :name="selectedStorageItem.name" :code="selectedStorageItem.code" :item-category="selectedStorageItem.itemCategory" /><strong>{{ selectedStorageItem.name }}</strong></div>
             <p v-if="selectedStorageItem.description">{{ selectedStorageItem.description }}</p>
             <template v-if="selectedStorageItem.kind === 'stacked'">
               <p>当前{{ storageScope === 'storage' ? '仓储' : '可放入' }} {{ selectedStorageItem.quantity }} 个 · {{ bindingText(selectedStorageItem.binding) }}</p>
-              <div class="home-storage-transfer"><label>数量 <input v-model.number="transferQuantity" type="number" min="1" :max="selectedStorageItem.quantity" step="1" inputmode="numeric" :disabled="transferBusy || Boolean(transferQuote)" /></label><button type="button" :disabled="transferBusy || Boolean(transferQuote) || !transferAllowed(selectedStorageItem)" @click="previewTransfer">查看{{ transferName(transferSide) }}报价</button></div>
+              <div class="home-storage-transfer"><label>数量 <input v-model.number="transferQuantity" type="number" min="1" :max="selectedStorageItem.quantity" step="1" inputmode="numeric" :disabled="transferBusy || Boolean(transferQuote)" /></label></div>
               <small v-if="storageScope === 'backpack' && !transferAllowed(selectedStorageItem)">摆放储物箱后才能放入。</small>
             </template>
             <p v-else>独立物品仅供查看，当前不支持在网页存取。</p>
           </div>
-          <p v-if="transferNotice" class="home-storage-success" role="status">{{ transferNotice }}</p>
-          <p v-if="transferError" class="home-error" role="alert">{{ transferError }}</p>
           <div v-if="transferQuote" class="home-storage-quote" aria-label="储物转移确认">
             <h4>{{ transferName(transferQuote.quote.side) }}预览 · {{ transferQuote.quote.name }} × {{ transferQuote.quote.quantity }}</h4>
             <p>当前 {{ kilograms(transferQuote.quote.usedWeightBefore) }} → 操作后 {{ kilograms(transferQuote.quote.usedWeightAfter) }} / 容量 {{ kilograms(transferQuote.quote.capacity) }}</p>
@@ -437,11 +488,43 @@ defineExpose({ refresh });
             <small>报价有效至 {{ new Date(transferQuote.expiresAt).toLocaleString('zh-CN') }}；确认时服务端会重新核对数量、绑定和容量。</small>
             <p v-if="confirmUncertain" class="home-storage-warning">确认响应尚未明确，已保留原凭据。请用原凭据核对结果，完成前不要离开此页。</p>
             <p v-else-if="quoteExpired" class="home-storage-warning">报价已过期，请重新预览。</p>
-            <div class="home-storage-quote-actions"><button type="button" :disabled="transferBusy" @click="transferQuote = null">返回修改</button><button type="button" class="home-storage-confirm" :disabled="transferPending || (quoteExpired && !confirmUncertain)" @click="confirmTransfer">{{ confirmUncertain ? '用原凭据核对结果' : `确认${transferName(transferQuote.quote.side)}` }}</button></div>
+
+          </div>
+            <p v-if="transferError" class="home-error" role="alert">{{ transferError }}</p>
+          </div>
+            <div v-if="transferQuote" class="home-dialog-footer home-storage-quote-actions"><button type="button" :disabled="transferBusy" @click="transferQuote = null">返回修改</button><button type="button" class="home-storage-confirm" :disabled="transferPending || (quoteExpired && !confirmUncertain)" @click="confirmTransfer">{{ confirmUncertain ? '用原凭据核对结果' : `确认${transferName(transferQuote.quote.side)}` }}</button></div>
+          <footer v-else-if="selectedStorageItem.kind === 'stacked'" class="home-dialog-footer">
+            <button type="button" :disabled="transferBusy || !transferAllowed(selectedStorageItem)" @click="previewTransfer">查看{{ transferName(transferSide) }}报价</button>
+          </footer>
+        </section>
+      </div>
+      <div v-if="showStorageInfo && home" class="home-viewport-modal anime-growth-commerce commerce-painted" @click.self="showStorageInfo = false" @keydown.esc="showStorageInfo = false">
+        <section class="home-dialog-card" role="dialog" aria-modal="true" aria-label="储物容量明细">
+          <header class="home-dialog-header"><h3>储物容量明细</h3><button type="button" aria-label="关闭容量明细" @click="showStorageInfo = false">关闭 ×</button></header>
+          <div class="home-dialog-scroll">
+            <p>已用 {{ kilograms(storageList?.usedKg ?? home.storage.usedKg) }} / 容量 {{ kilograms(storageList?.capacityKg ?? home.storage.capacityKg) }}</p>
+            <p v-if="(storageList?.capacityKg ?? home.storage.capacityKg) === 0" class="home-layout-notice">尚未摆放储物箱，暂不能放入；仓储中已有的物品仍可查看和取出。</p>
+          <div class="home-storage-stats">
+            <div><strong>{{ amount(home.storage.stackedKinds) }}</strong><span>堆叠种类</span></div>
+            <div><strong>{{ amount(home.storage.stackedQuantity) }}</strong><span>堆叠数量</span></div>
+            <div><strong>{{ amount(home.storage.instanceCount) }}</strong><span>独立物品</span></div>
+          </div>
+
           </div>
         </section>
       </div>
-    </template>
+      <div v-if="selectedFurniture" class="home-viewport-modal anime-growth-commerce commerce-painted" @click.self="selectedFurniture = null" @keydown.esc="selectedFurniture = null">
+        <section class="home-dialog-card" role="dialog" aria-modal="true" aria-label="家具详情">
+          <header class="home-dialog-header"><h3>{{ selectedFurniture.name }}</h3><button type="button" aria-label="关闭家具详情" @click="selectedFurniture = null">关闭 ×</button></header>
+          <div class="home-dialog-scroll home-furniture-detail">
+            <p>{{ selectedFurniture.description || '暂无家具说明。' }}</p>
+            <p>位置 {{ selectedFurniture.gridX ?? '未记录' }}, {{ selectedFurniture.gridY ?? '未记录' }} · 占 {{ selectedFurniture.width }} × {{ selectedFurniture.height }} 格</p>
+            <p>家具槽 {{ selectedFurniture.slotCost }} · 旋转 {{ selectedFurniture.rotation }} · 层级 {{ selectedFurniture.layerOrder }}</p>
+            <p v-for="(value, effect) in selectedFurniture.effects" :key="effect">{{ effect }}：{{ value }}</p>
+          </div>
+        </section>
+      </div>
+    </Teleport>
   </section>
 </template>
 
@@ -454,7 +537,7 @@ defineExpose({ refresh });
 .home-subtitle, .home-location { margin: 0; font-size: 13px; }
 .home-eyebrow, .home-kicker { margin: 0; color: #a786a3; font-size: 10px; font-weight: 800; letter-spacing: .16em; }
 .home-refresh { flex: none; border: 1px solid #d8cadd; border-radius: 999px; padding: 8px 17px; background: #fff; color: #705775; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
-.home-refresh:hover:not(:disabled) { background: #faf2fc; }
+
 .home-refresh:disabled { opacity: .6; cursor: default; }
 .home-error { background: #fff0ed; color: #aa4f44; border: 1px solid #efd2c9; border-radius: 10px; padding: 10px 12px; font-size: 13px; }
 .home-unowned, .home-summary, .home-card { border: 1px solid #e9e0e9; border-radius: 18px; background: #fffdfd; box-shadow: 0 8px 28px #6d4e7910; }

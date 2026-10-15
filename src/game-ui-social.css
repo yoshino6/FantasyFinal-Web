@@ -1,0 +1,233 @@
+/* Painted social surfaces; keep the existing paginated viewport geometry. */
+.app-shell[data-visual='light-anime'][data-viewport-layout][data-page='social'] {
+  --social-ui-rose: url('/assets/light-anime/game-ui-v1/oath-ribbon.webp');
+}
+
+.app-shell[data-visual='light-anime'][data-viewport-layout][data-page='social'] nav.social-section-tabs > button {
+  border-width: 2px;
+  border-image: var(--game-ui-paper) 144 fill / 7px 10px stretch;
+  background: transparent;
+  color: var(--game-ui-ink);
+  box-shadow: none;
+}
+.app-shell[data-visual='light-anime'][data-viewport-layout][data-page='social'] nav.social-section-tabs > button > span:last-child {
+  color: inherit;
+  -webkit-text-stroke: 0;
+  text-shadow: none;
+}
+.app-shell[data-visual='light-anime'][data-viewport-layout][data-page='social'] nav.social-section-tabs > button.active {
+  border-image-source: var(--game-ui-teal);
+  color: var(--game-ui-primary-ink);
+}
+.app-shell[data-visual='light-anime'][data-viewport-layout][data-page='social'] nav.social-section-tabs > button.active > span:last-child {
+  text-shadow: none;
+}
+
+.app-shell[data-visual='light-anime'][data-viewport-layout] .anime-social-refinement :is(.social-paper, .social-person-card, .social-add-friend) {
+  border-image-source: var(--game-ui-panel);
+  border-image-slice: 144 fill;
+  border-image-repeat: stretch;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: 0 2px 3px #53536610;
+}
+.app-shell[data-visual='light-anime'][data-viewport-layout] .anime-social-refinement .social-person-card {
+  border-image-width: 5px;
+}
+.app-shell[data-visual='light-anime'][data-viewport-layout] .anime-social-refinement .social-add-friend {
+  border-image-width: 5px;
+  color: var(--game-ui-muted);
+}
+.app-shell[data-visual='light-anime'][data-viewport-layout] .anime-social-refinement :is(.social-person-identity, .social-request-identity, .social-oath-identity) h3 {
+  color: var(--game-ui-ink);
+  text-shadow: none;
+}
+
+/* Three-pixel borders fit the existing 30/28 px secondary tab heights. */
+.app-shell[data-visual='light-anime'][data-viewport-layout] .anime-social-refinement .viewport-subtabs > button,
+.party-popup.anime-party-refinement.party-viewport-panel .party-viewport-tabs > button {
+  border: 3px solid transparent;
+  border-image: var(--game-ui-paper) 144 fill / 4px 7px stretch;
+  border-radius: 0;
+  background: transparent;
+  color: var(--game-ui-ink);
+  box-shadow: none;
+  text-shadow: none;
+}
+.app-shell[data-visual='light-anime'][data-viewport-layout] .anime-social-refinement .viewport-subtabs > button.active,
+.party-popup.anime-party-refinement.party-viewport-panel .party-viewport-tabs > button[aria-selected='true'] {
+  border-image-source: var(--game-ui-teal);
+  color: var(--game-ui-primary-ink);
+  text-shadow: none;
+}
+.app-shell[data-visual='light-anime'][data-viewport-layout] .anime-social-refinement .social-oath-screen .viewport-subtabs > button.active {
+  border-image: none;
+  background: var(--social-ui-rose) center / 100% 172% no-repeat;
+  color: #784558;
+  text-shadow: 0 1px #fff8ed;
+}
+
+/* Background layers do not add width to relation labels or compact actions. */
+.app-shell[data-visual='light-anime'][data-viewport-layout] .anime-social-refinement :is(.social-stage-badge, .social-relationship-badge) {
+  position: relative;
+  isolation: isolate;
+  border: 0;
+  background: transparent;
+  color: var(--game-ui-gold-ink);
+  text-shadow: none;
+}
+.app-shell[data-visual='light-anime'][data-viewport-layout] .anime-social-refinement :is(.social-stage-badge, .social-relationship-badge)::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  border: 3px solid transparent;
+  border-image: var(--game-ui-gold) 144 fill / 4px 7px stretch;
+  pointer-events: none;
+}
+.app-shell[data-visual='light-anime'][data-viewport-layout] .anime-social-refinement .social-relationship-badge:not(.oath)::before {
+  border-image-source: var(--game-ui-paper);
+}
+.app-shell[data-visual='light-anime'][data-viewport-layout] .anime-social-refinement .social-relationship-badge.oath {
+  color: #81465b;
+}
+.app-shell[data-visual='light-anime'][data-viewport-layout] .anime-social-refinement .social-relationship-badge.oath::before {
+  border: 0;
+  border-image: none;
+  background: var(--social-ui-rose) center / 100% 172% no-repeat;
+}
+
+.app-shell[data-visual='light-anime'][data-viewport-layout] .anime-social-refinement .social-ui-button {
+  border-width: 3px;
+  border-image: var(--game-ui-paper) 144 fill / 5px 8px stretch;
+  border-radius: 0;
+  background: transparent;
+  color: var(--game-ui-ink);
+  text-shadow: none;
+  box-shadow: 0 2px 2px #53536610;
+}
+.app-shell[data-visual='light-anime'][data-viewport-layout] .anime-social-refinement .social-ui-button.social-button-teal {
+  border-image-source: var(--game-ui-teal);
+  color: var(--game-ui-primary-ink);
+  text-shadow: none;
+}
+.app-shell[data-visual='light-anime'][data-viewport-layout] .anime-social-refinement .social-ui-button.social-button-red {
+  border-image-source: var(--game-ui-coral);
+  color: var(--game-ui-danger-ink);
+  text-shadow: none;
+}
+
+.app-shell[data-visual='light-anime'][data-viewport-layout] .anime-social-refinement .social-oath-heading {
+  border-bottom-color: #d9acb5;
+  color: #794659;
+  background: var(--social-ui-rose) center / 100% 172% no-repeat;
+  text-shadow: 0 1px #fff8ed;
+}
+/* The keepsake slot keeps its existing footprint and displays the new star rings. */
+.app-shell[data-visual='light-anime'][data-viewport-layout] .anime-social-refinement .social-oath-keepsake > .social-glyph {
+  background-image: url('/assets/light-anime/game-ui-v1/social-icons.webp');
+  background-size: 467.910448% 467.910448%;
+  background-position: 97.667343% 96.044625%;
+}
+.app-shell[data-visual='light-anime'][data-viewport-layout] .anime-social-refinement .social-oath-keepsake > .social-glyph > :is(.anime-icon-sprite, .social-glyph-art) {
+  visibility: hidden;
+}
+
+/* Party screens and teleported confirmations share the painted materials. */
+.party-popup.anime-party-refinement.party-viewport-panel :is(.party-viewport-row, .party-section, .party-preview),
+.party-dialog-backdrop.anime-party-refinement .party-viewport-dialog {
+  border-image-source: var(--game-ui-panel);
+  border-image-slice: 144 fill;
+  border-image-repeat: stretch;
+  border-radius: 0;
+  background: transparent;
+}
+.party-popup.anime-party-refinement.party-viewport-panel :is(.party-text-button, .party-primary, .party-secondary, .party-quiet, .party-danger, .party-gold, .party-blue, .party-load-more),
+.party-dialog-backdrop.anime-party-refinement .party-viewport-dialog :is(.party-primary, .party-secondary, .party-quiet, .party-danger, .party-text-button, .party-gold, .party-blue, .party-load-more) {
+  border: 3px solid transparent;
+  border-image: var(--game-ui-paper) 144 fill / 5px 8px stretch;
+  border-radius: 0;
+  background: transparent;
+  color: var(--game-ui-ink);
+  text-shadow: none;
+}
+.party-popup.anime-party-refinement.party-viewport-panel .party-primary,
+.party-dialog-backdrop.anime-party-refinement .party-viewport-dialog .party-primary {
+  border-image-source: var(--game-ui-teal);
+  color: var(--game-ui-primary-ink);
+  text-shadow: none;
+}
+.party-popup.anime-party-refinement.party-viewport-panel .party-gold,
+.party-dialog-backdrop.anime-party-refinement .party-viewport-dialog .party-gold {
+  border-image-source: var(--game-ui-gold);
+  color: var(--game-ui-gold-ink);
+}
+.party-popup.anime-party-refinement.party-viewport-panel .party-blue,
+.party-dialog-backdrop.anime-party-refinement .party-viewport-dialog .party-blue {
+  border-image-source: var(--game-ui-teal);
+  color: var(--game-ui-primary-ink);
+  text-shadow: none;
+}
+.party-popup.anime-party-refinement.party-viewport-panel .party-danger,
+.party-dialog-backdrop.anime-party-refinement .party-viewport-dialog .party-danger {
+  border-image-source: var(--game-ui-coral);
+  color: var(--game-ui-danger-ink);
+  text-shadow: none;
+}
+.party-popup.anime-party-refinement.party-viewport-panel :is(.party-preview-ribbon, .party-leader-ribbon),
+.app-shell[data-visual='light-anime'][data-viewport-layout] .anime-social-refinement .social-section-ribbon {
+  border-image: none;
+  background: var(--game-ui-gold) center / 100% 100% no-repeat;
+  color: var(--game-ui-gold-ink);
+}
+
+/* The same material continues into world/party/friend channel windows. */
+.app-shell[data-visual='light-anime'][data-viewport-layout] .floating-social-panel.anime-social-chat,
+.app-shell[data-visual='light-anime'][data-viewport-layout] .anime-social-chat :is(.chat-composer-field, .chat-recruitment-card) {
+  border-image-source: var(--game-ui-panel);
+  border-image-slice: 144 fill;
+  border-image-repeat: stretch;
+  border-radius: 0;
+  background: transparent;
+}
+.app-shell[data-visual='light-anime'][data-viewport-layout] .anime-social-chat :is(.chat-history-button, .chat-latest-button, .floating-social-tabs > button) {
+  border: 3px solid transparent;
+  border-image: var(--game-ui-paper) 144 fill / 5px 8px stretch;
+  border-radius: 0;
+  background: transparent;
+  color: var(--game-ui-ink);
+  text-shadow: none;
+}
+.app-shell[data-visual='light-anime'][data-viewport-layout] .anime-social-chat :is(.floating-social-tabs > button.active, .chat-latest-button) {
+  border-image-source: var(--game-ui-teal);
+  color: var(--game-ui-primary-ink);
+  text-shadow: none;
+}
+.app-shell[data-visual='light-anime'][data-viewport-layout] .anime-social-chat .message-row p.social-message-bubble {
+  position: relative;
+  isolation: isolate;
+  background: transparent;
+}
+.app-shell[data-visual='light-anime'][data-viewport-layout] .anime-social-chat .message-row p.social-message-bubble::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  border: 6px solid transparent;
+  border-image: var(--game-ui-panel) 144 fill / 6px stretch;
+  pointer-events: none;
+}
+.app-shell[data-visual='light-anime'][data-viewport-layout] .anime-social-chat .friend-channel-option.active {
+  background: var(--game-ui-teal) center / 100% 100% no-repeat;
+  color: var(--game-ui-primary-ink);
+  text-shadow: none;
+}
+
+@media (max-width: 360px) {
+  .app-shell[data-visual='light-anime'][data-viewport-layout] .anime-social-refinement .social-person-card .social-ui-button {
+    border-width: 2px;
+    padding-right: 5px;
+    padding-left: 5px;
+    gap: 3px;
+  }
+}

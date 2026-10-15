@@ -1,0 +1,182 @@
+/* Battle and negotiation keep their state-driven lists and native hit areas. */
+.turn-battle-panel.battle-viewport-panel.anime-adventure :is(.battle-header, .battle-status) {
+  border: 4px solid transparent;
+  border-image: var(--game-ui-panel) 144 fill / 4px stretch;
+  border-radius: 0;
+  background: transparent;
+  padding: 2px 5px;
+}
+
+.turn-battle-panel.battle-viewport-panel.anime-adventure :is(.battle-viewport-tabs, .battle-action-tabs, .battle-viewport-side-tabs) > button {
+  border: 4px solid transparent;
+  border-image: var(--game-ui-paper) 144 fill / 4px 7px stretch;
+  border-radius: 0;
+  background: transparent;
+  color: var(--game-ui-ink);
+  padding: 2px 4px;
+  box-shadow: none;
+  font-weight: 700;
+}
+
+.turn-battle-panel.battle-viewport-panel.anime-adventure :is(.battle-viewport-tabs, .battle-action-tabs, .battle-viewport-side-tabs) > button.active {
+  border-image-source: var(--game-ui-teal);
+  color: var(--game-ui-primary-ink);
+  text-shadow: none;
+}
+
+.turn-battle-panel.battle-viewport-panel.anime-adventure .battle-viewport-action-row .battle-action,
+.turn-battle-panel.battle-viewport-panel.anime-adventure :is(.battle-viewport-member, .battle-viewport-log-entry) {
+  border: 5px solid transparent;
+  border-image: var(--game-ui-panel) 144 fill / 5px stretch;
+  border-radius: 0;
+  background: transparent;
+  color: var(--game-ui-ink);
+  box-shadow: 0 2px 4px #3a627618;
+}
+
+.turn-battle-panel.battle-viewport-panel.anime-adventure .battle-viewport-action-row .battle-action.selected,
+.turn-battle-panel.battle-viewport-panel.anime-adventure .battle-viewport-member.active {
+  border-image-source: var(--game-ui-teal);
+  color: var(--game-ui-primary-ink);
+  background: transparent;
+  box-shadow: 0 0 0 1px #6bafb6;
+}
+
+.turn-battle-panel.battle-viewport-panel.anime-adventure .battle-viewport-member.targetable {
+  border-image-source: var(--game-ui-teal);
+  color: var(--game-ui-primary-ink);
+  background: transparent;
+  box-shadow: 0 0 0 1px #6bafb6;
+}
+
+.turn-battle-panel.battle-viewport-panel.anime-adventure .battle-viewport-member.targetable .battle-viewport-member-copy small {
+  color: var(--game-ui-primary-ink);
+}
+
+.turn-battle-panel.battle-viewport-panel.anime-adventure .battle-viewport-member:disabled {
+  opacity: 1;
+  filter: none;
+  cursor: default;
+}
+
+.turn-battle-panel.battle-viewport-panel.anime-adventure .battle-viewport-member.defeated {
+  opacity: .5;
+  filter: grayscale(.7);
+}
+
+.turn-battle-panel.battle-viewport-panel.anime-adventure :is(.battle-viewport-action-info, .battle-viewport-status-info, .cancel-targeting) {
+  border: 3px solid transparent;
+  border-image: var(--game-ui-paper) 144 fill / 3px 5px stretch;
+  border-radius: 0;
+  background: transparent;
+  color: var(--game-ui-muted);
+}
+
+.turn-battle-panel.battle-viewport-panel.anime-adventure .battle-bar {
+  border: 0;
+  border-radius: 2px;
+  background: var(--game-ui-paper) center / 100% 100% no-repeat;
+}
+
+.turn-battle-panel.battle-viewport-panel.anime-adventure .battle-bar i {
+  border-radius: 2px;
+  background: var(--game-ui-coral) center / 100% 100% no-repeat;
+}
+
+.turn-battle-panel.battle-viewport-panel.anime-adventure .battle-bar.mp i {
+  background-image: var(--game-ui-teal);
+}
+
+.battle-viewport-backdrop > .battle-viewport-dialog {
+  border: 11px solid transparent;
+  border-image: var(--game-ui-panel) 144 fill / 11px stretch;
+  border-radius: 0;
+  background: var(--game-ui-surface);
+  background-clip: padding-box;
+  box-shadow: 0 14px 40px #334b6b33;
+}
+
+.battle-viewport-backdrop > .battle-viewport-dialog header button {
+  border: 5px solid transparent;
+  border-image: var(--game-ui-paper) 144 fill / 5px 8px stretch;
+  border-radius: 0;
+  background: transparent;
+  color: var(--game-ui-ink);
+}
+
+.app-shell[data-visual='light-anime'][data-viewport-layout] .negotiation-panel.anime-adventure {
+  border-image: var(--game-ui-panel) 144 fill / 12px stretch;
+  background: var(--game-ui-surface);
+  background-clip: padding-box;
+}
+
+.app-shell[data-visual='light-anime'][data-viewport-layout] .negotiation-panel.anime-adventure :is(.negotiation-header, .negotiation-bars > div, .negotiation-dialogue, .negotiation-result, .negotiation-note) {
+  border: 5px solid transparent;
+  border-image: var(--game-ui-panel) 144 fill / 5px stretch;
+  border-radius: 0;
+  background: transparent;
+}
+
+.app-shell[data-visual='light-anime'][data-viewport-layout] .negotiation-panel.anime-adventure .negotiation-header {
+  padding: 3px 5px;
+}
+
+.negotiation-panel.anime-adventure .negotiation-bars > div > .anime-icon {
+  grid-row: span 2;
+}
+
+.app-shell[data-visual='light-anime'][data-viewport-layout] .negotiation-panel.anime-adventure .negotiation-action {
+  border: 6px solid transparent;
+  border-image: var(--game-ui-paper) 144 fill / 6px 9px stretch;
+  border-radius: 0;
+  background: transparent;
+  color: var(--game-ui-ink);
+  box-shadow: 0 2px 3px #3a627618;
+}
+
+.app-shell[data-visual='light-anime'][data-viewport-layout] .negotiation-panel.anime-adventure .negotiation-action.primary {
+  border-image-source: var(--game-ui-teal);
+  color: var(--game-ui-primary-ink);
+}
+
+.app-shell[data-visual='light-anime'][data-viewport-layout] .negotiation-panel.anime-adventure .negotiation-action.gift.active {
+  border-image-source: var(--game-ui-gold);
+  color: var(--game-ui-gold-ink);
+  box-shadow: 0 0 0 1px var(--game-ui-line);
+}
+
+.app-shell[data-visual='light-anime'][data-viewport-layout] .negotiation-panel.anime-adventure .negotiation-action.danger {
+  border-image-source: var(--game-ui-coral);
+  color: var(--game-ui-danger-ink);
+}
+
+.app-shell[data-visual='light-anime'][data-viewport-layout] .negotiation-panel.anime-adventure .negotiation-action .anime-icon {
+  filter: none;
+}
+
+.app-shell[data-visual='light-anime'][data-viewport-layout] .negotiation-panel.anime-adventure .negotiation-dialogue .dialogue-tail {
+  display: none;
+}
+
+.app-shell[data-visual='light-anime'][data-viewport-layout] .negotiation-panel.anime-adventure :is(.negotiation-gifts, .negotiation-dialogue-detail) {
+  border: 10px solid transparent;
+  border-image: var(--game-ui-panel) 144 fill / 10px stretch;
+  border-radius: 0;
+  background: var(--game-ui-surface);
+  background-clip: padding-box;
+}
+
+.app-shell[data-visual='light-anime'][data-viewport-layout] .negotiation-panel.anime-adventure .negotiation-item {
+  border: 4px solid transparent;
+  border-image: var(--game-ui-panel) 144 fill / 4px stretch;
+  border-radius: 0;
+  background: transparent;
+}
+
+.app-shell[data-visual='light-anime'][data-viewport-layout] .negotiation-panel.anime-adventure .negotiation-read {
+  border: 4px solid transparent;
+  border-image: var(--game-ui-paper) 144 fill / 4px 7px stretch;
+  border-radius: 0;
+  background: transparent;
+  color: var(--game-ui-ink);
+}

@@ -1,0 +1,492 @@
+/* These selectors belong to the adventure components; page chrome stays in App. */
+.anime-adventure { --adventure-paper: url('/assets/light-anime/paper-frame.svg'); --adventure-tab: url('/assets/light-anime/tab-frame.svg'); --adventure-teal: url('/assets/light-anime/button-teal.svg'); --adventure-coral: url('/assets/light-anime/button-coral.svg'); --adventure-neutral: url('/assets/light-anime/button-paper.svg'); --adventure-wood: url('/assets/light-anime/wood-sign.svg'); color: var(--ink, #483842); }
+.anime-adventure button:focus-visible, .anime-adventure input:focus-visible, .anime-adventure textarea:focus-visible, .anime-adventure select:focus-visible { outline: 3px solid #268e94; outline-offset: 3px; }
+.anime-adventure button { font-weight: 700; }
+.anime-adventure :is(h2, h3, h4) { color: var(--ink, #483842); }
+.anime-adventure .anime-icon { flex-shrink: 0; vertical-align: middle; }
+
+/* 001 / 060 / 062: the terrain sits underneath a real square coordinate grid. */
+.world-map-panel.anime-adventure { padding: 8px 0 0; background: transparent; border: 0; border-radius: 0; box-shadow: none; overflow: visible; }
+.world-map-panel.anime-adventure .world-map-heading { margin: 0 4px 8px; }
+.world-map-panel.anime-adventure .world-map-heading > div { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.world-map-panel.anime-adventure .world-map-heading h3 { display: flex; align-items: center; gap: 6px; min-height: 34px; padding: 2px 12px; border: 9px solid transparent; border-image: var(--adventure-wood) 18 fill / 9px; font-size: 15px; }
+.world-map-panel.anime-adventure .world-map-location-line { margin: 0; padding: 4px 9px; color: #725543; background: #fff4dc; border: 1px solid #b79a75; border-radius: 2px 8px 3px 6px; }
+.world-map-panel.anime-adventure .world-map-location-line strong { color: inherit; }
+.world-map-panel.anime-adventure .world-map-layout { min-width: 0; }
+.world-map-panel.anime-adventure .world-map-layout.has-footer { display: grid; grid-template-areas: 'map' 'targets' 'footer'; gap: 8px; }
+.world-map-panel.anime-adventure .world-map-layout.has-footer > .world-map-grid-shell { grid-area: map; }
+.world-map-panel.anime-adventure .world-map-layout.has-footer > .world-map-sidebar { grid-area: targets; }
+.world-map-panel.anime-adventure .world-map-footer { grid-area: footer; min-width: 0; width: min(100%, 660px); margin: 0 auto; }
+.world-map-panel.anime-adventure .world-map-sidebar { display: grid; gap: 12px; min-width: 0; }
+.world-map-panel.anime-adventure .world-map-sidebar-extra { min-width: 0; }
+.world-map-panel.anime-adventure .world-map-legend { padding: 0 4px; margin-bottom: 5px; color: #624d45; background: none; border: 0; border-image: none; font-size: 9px; }
+.world-map-panel.anime-adventure .world-map-range span { padding: 1px 3px; color: #317c73; background: none; border-radius: 0; }
+.world-map-panel.anime-adventure .legend-dot.movable { background: #83c7b5; }
+.world-map-panel.anime-adventure .world-map-grid-shell { width: min(100%, 660px); aspect-ratio: 1; background: var(--adventure-scene) center / cover; border: 2px solid #8c7861; border-radius: 6px; box-shadow: 0 5px 0 #6e4e3730, 0 12px 24px #384d3c20; }
+.world-map-panel.anime-adventure .world-map-grid { padding: 0; gap: 0; background: transparent; border: 0; border-radius: 4px; }
+.world-map-panel.anime-adventure .world-map-cell { aspect-ratio: 1; border: 1px solid #fff6d77a; border-radius: 0; background: #ecf5d914; box-shadow: none; }
+.world-map-panel.anime-adventure .world-map-cell.is-movable { color: #276f66; background: #b5ead729; }
+
+.world-map-panel.anime-adventure .world-map-cell.has-point,
+.world-map-panel.anime-adventure .world-map-cell.has-point.is-movable,
+.world-map-panel.anime-adventure .world-map-cell.has-point.is-out-of-range { background: #e5fff00c; border-color: #f3ffe3a6; box-shadow: none; }
+
+.world-map-panel.anime-adventure .world-map-cell.is-out-of-range { color: #f4eddb; background: #39544224; }
+.world-map-panel.anime-adventure .world-map-cell.is-current { background: #61dbd54a; border: 2px solid #cbfff5; box-shadow: inset 0 0 12px #bcfff4, 0 0 10px #63cbbb; }
+.world-map-panel.anime-adventure .world-map-cell.has-point.is-current { background: #61dbd54a; border: 2px solid #cbfff5; box-shadow: inset 0 0 12px #bcfff4, 0 0 10px #63cbbb; }
+.world-map-panel.anime-adventure .map-player-marker { width: 68%; height: 68%; background: #fff7dfdc; border-color: #2e9891; box-shadow: 0 4px 0 #277a6d55, 0 0 0 5px #bdfcf565; border-radius: 45% 48% 40% 43%; }
+.world-map-panel.anime-adventure .map-player-marker.has-portrait { z-index: 2; width: 64%; height: 88%; padding: 0; background: transparent; border: 0; box-shadow: none; }
+.world-map-panel.anime-adventure .map-player-marker img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 3px 1px #31544170); }
+.world-map-panel.anime-adventure .world-map-cell.has-point .map-player-marker.has-portrait { width: 45%; height: 75%; transform: translateX(-35%); }
+.world-map-panel.anime-adventure .world-map-grid-coordinate { display: flex; align-items: center; top: 7px; left: 7px; gap: 4px; max-width: 60%; padding: 4px 7px; color: #493d38; background: #fff7dfef; border: 1px solid #94775a; border-radius: 3px 9px 4px 7px; }
+.world-map-panel.anime-adventure .world-map-grid-coordinate strong { color: inherit; font-size: clamp(10px, 3vw, 16px); letter-spacing: 0; }
+.world-map-panel.anime-adventure .map-north { border-left: 1px solid #c9b695; padding-left: 5px; font-weight: 800; }
+.world-map-panel.anime-adventure .world-map-grid-overlay { padding: 0; gap: 0; }
+.world-map-panel.anime-adventure :is(.world-map-sidebar-button, .world-map-auto-button) { width: min(85%, 72px); height: min(85%, 76px); margin: 6px; padding: 3px; color: #374c47; background: none; border: 10px solid transparent; border-image: var(--adventure-paper) 24 fill / 10px; border-radius: 0; box-shadow: 0 4px 6px #34523c2a; }
+.world-map-panel.anime-adventure .world-map-sidebar-button { align-self: start; justify-self: end; }
+.world-map-panel.anime-adventure .world-map-auto-button { align-self: end; justify-self: start; }
+.world-map-panel.anime-adventure :is(.world-map-sidebar-button, .world-map-auto-button):hover:not(:disabled) { color: #176e67; background: none; filter: brightness(1.08); }
+.world-map-panel.anime-adventure :is(.world-map-sidebar-button, .world-map-auto-button) small { font-size: clamp(9px, 2.5vw, 11px); white-space: nowrap; }
+.world-map-panel.anime-adventure .map-point-icon { width: 78%; height: 78%; display: grid; place-items: center; filter: drop-shadow(0 3px 2px #29472c50); }
+.world-map-panel.anime-adventure .map-point-icon img { width: 100%; height: 100%; object-fit: contain; }
+.world-map-panel.anime-adventure .map-point-visual { text-shadow: none; padding: 0; }
+.world-map-panel.anime-adventure .map-point-marker { width: clamp(13px, 3vw, 20px); height: clamp(13px, 3vw, 20px); font-size: clamp(8px, 1.8vw, 11px); border-width: 1px; color: #fff; background: #337e77; box-shadow: 0 1px 3px #384c3980; }
+.world-map-panel.anime-adventure .map-point-visual small { bottom: 0; right: 0; left: 0; font-size: clamp(7px, 1.8vw, 11px); color: #403d2d; background: #fff4d9dc; }
+.world-map-panel.anime-adventure .point-count-2 .map-point-visual { width: 50%; }
+.world-map-panel.anime-adventure .point-count-2 .point-index-1 { left: 50%; }
+.world-map-panel.anime-adventure :is(.point-count-3, .point-count-4) .map-point-visual { width: 50%; height: 50%; }
+.world-map-panel.anime-adventure :is(.point-count-3, .point-count-4) .point-index-1 { left: 50%; }
+.world-map-panel.anime-adventure :is(.point-count-3, .point-count-4) .point-index-2 { top: 50%; }
+.world-map-panel.anime-adventure .point-count-4 .point-index-3 { top: 50%; left: 50%; }
+.world-map-panel.anime-adventure .map-overflow-count { position: absolute; bottom: 1px; right: 1px; z-index: 4; padding: 2px 3px; color: #fff6db; background: #456f60; border: 1px solid #e4f4d2; border-radius: 3px; font-size: 9px; }
+.world-map-panel.anime-adventure .move-arrow { color: #ebfff2; text-shadow: 0 1px 3px #2b6051; opacity: .6; }
+.world-map-panel.anime-adventure .nearby-target-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; margin-top: 8px; }
+.world-map-panel.anime-adventure .nearby-target-title { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.world-map-panel.anime-adventure .nearby-target { position: relative; display: grid; grid-template-columns: 72px minmax(0, 1fr); align-items: center; gap: 4px 6px; min-height: 146px; padding: 5px; background: none; border: 10px solid transparent; border-image: var(--adventure-paper) 24 fill / 10px; border-radius: 0; }
+.world-map-panel.anime-adventure .nearby-target-number { position: absolute; top: 2px; left: 2px; z-index: 1; width: 14px; height: 14px; font-size: 8px; background: #6c9285; box-shadow: 0 0 0 2px #fff8e5; }
+.world-map-panel.anime-adventure .nearby-target-icon { display: grid; place-items: center; width: 72px; height: 88px; background: radial-gradient(ellipse, #b6d9cf80 0%, #d4e4ca45 47%, transparent 69%); border: 0; border-radius: 0; }
+.world-map-panel.anime-adventure .nearby-target-icon img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 2px 1px #3c615239); }
+.world-map-panel.anime-adventure .nearby-target-copy { gap: 3px; align-content: start; }
+.world-map-panel.anime-adventure .nearby-target-heading { display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 5px; min-width: 0; }
+.world-map-panel.anime-adventure .nearby-target-copy strong { overflow: visible; font-size: 15px; line-height: 1.2; white-space: normal; overflow-wrap: anywhere; }
+.world-map-panel.anime-adventure .nearby-target-copy .nearby-target-level { color: #704d46; font-size: 11px; white-space: nowrap; }
+.world-map-panel.anime-adventure .nearby-target-meta { color: #87745b; font-size: 9px; }
+.world-map-panel.anime-adventure .nearby-target-description { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; color: #655346; font-size: 11px; line-height: 1.35; overflow-wrap: anywhere; }
+.world-map-panel.anime-adventure .nearby-target-actions { grid-column: 1 / -1; display: flex; align-items: stretch; flex-wrap: wrap; gap: 4px; max-width: none; width: 100%; justify-content: flex-start; margin: 0; }
+.world-map-panel.anime-adventure .nearby-target-action { display: flex; flex-direction: column; justify-content: center; gap: 2px; flex: 1 1 36px; width: auto; min-width: 36px; height: auto; min-height: 46px; padding: 3px 2px; font-size: 11px; color: #fff7e1; background: none; border: 7px solid transparent; border-image: var(--adventure-teal) 17 fill / 7px; border-radius: 0; text-shadow: 0 1px 1px #316a62; }
+.world-map-panel.anime-adventure .nearby-target-actions.is-single-action .nearby-target-action { flex-direction: row; gap: 5px; min-height: 44px; }
+.world-map-panel.anime-adventure .nearby-action-icon { flex: 0 0 21px; width: 21px; height: 21px; }
+.world-map-panel.anime-adventure .nearby-target-action .anime-icon { filter: brightness(0) invert(1) drop-shadow(0 1px 0 #316a6266); }
+.world-map-panel.anime-adventure .nearby-target-action.tone-danger { border-image-source: var(--adventure-coral); }
+.world-map-panel.anime-adventure .nearby-target-action:is(.tone-primary, .tone-soft, .tone-danger) { background: none; color: #fff7e1; }
+.world-map-panel.anime-adventure .nearby-target.has-single-action { min-height: 112px; }
+.world-map-panel.anime-adventure .nearby-target.has-single-action .nearby-target-icon { grid-row: span 2; }
+.world-map-panel.anime-adventure .nearby-target.has-single-action .nearby-target-actions { grid-column: 2; }
+.world-map-panel.anime-adventure .world-map-action-lock { align-items: center; padding: 15px; background: #253d426e; border-radius: 3px; backdrop-filter: blur(1px); }
+.world-map-panel.anime-adventure .world-map-action-card { gap: 7px; padding: 15px; color: #3c4b42; background: none; border: 16px solid transparent; border-image: var(--adventure-paper) 24 fill / 16px; border-radius: 0; }
+.world-map-panel.anime-adventure .world-map-action-card p b { color: #167f80; font-variant-numeric: tabular-nums; }
+.world-map-panel.anime-adventure .world-map-action-card button { background: none; border: 9px solid transparent; border-image: var(--adventure-coral) 18 fill / 9px; border-radius: 0; }
+.world-map-panel.anime-adventure .map-point-dialog-backdrop { z-index: 94; background: #243e466e; }
+.world-map-panel.anime-adventure .map-point-dialog { width: min(460px, 100%); padding: 22px 15px; background: none; border: 16px solid transparent; border-image: var(--adventure-paper) 24 fill / 16px; border-radius: 0; }
+.world-map-panel.anime-adventure .dialog-point-icon { width: 100px; height: 100px; background: #dfeadc; border: 1px solid #b49b75; border-radius: 6px 16px 8px 12px; }
+.world-map-panel.anime-adventure .dialog-point-icon img { width: 100%; height: 100%; object-fit: contain; }
+.world-map-panel.anime-adventure .map-dialog-button { color: #fff; background: none; border: 10px solid transparent; border-image: var(--adventure-teal) 18 fill / 10px; border-radius: 0; }
+.world-map-panel.anime-adventure .map-dialog-button.tone-danger { border-image-source: var(--adventure-coral); }
+
+/* 050: a map sheet, region index, location cards and a distinct travel preview. */
+.region-map-drawer.anime-adventure { width: min(960px, calc(100vw - 20px)); height: min(90dvh, 900px); background: none; border: 16px solid transparent; border-image: var(--adventure-paper) 24 fill / 16px; border-radius: 0; color: #493d38; }
+.region-map-drawer.anime-adventure .drawer-header { padding: 7px 10px 12px; border-bottom: 1px solid #c3a784; }
+.region-map-drawer.anime-adventure .drawer-header h2 { display: flex; align-items: center; gap: 8px; font-size: 21px; }
+.region-map-drawer.anime-adventure .drawer-kicker { color: #96734e; }
+.region-map-drawer.anime-adventure .drawer-close { display: grid; place-items: center; width: 35px; height: 35px; background: #fff2d7; border: 1px solid #b79a75; border-radius: 50%; }
+.region-map-drawer.anime-adventure .region-tabs { gap: 5px; padding: 8px 4px; border-bottom: 1px solid #c3a784; }
+.region-map-drawer.anime-adventure .region-tab { min-width: 98px; padding: 4px 8px; color: #594736; background: none; border: 9px solid transparent; border-image: var(--adventure-paper) 24 fill / 9px; border-radius: 0; }
+.region-map-drawer.anime-adventure .region-tab.active { color: #fff; border-image-source: var(--adventure-teal); }
+.region-map-drawer.anime-adventure .region-tab.active small { color: #effff4; }
+.region-map-drawer.anime-adventure .drawer-content { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-content: start; gap: 12px; padding: 10px 4px 12px; }
+.region-map-drawer.anime-adventure .region-map-card { grid-column: 1 / -1; padding: 0; background: none; border: 0; border-radius: 0; }
+.region-map-drawer.anime-adventure .region-map-card-heading { padding: 0 5px; }
+.region-map-drawer.anime-adventure .region-mini-map { height: auto; min-height: 0; aspect-ratio: 1.25; background: var(--adventure-scene) center / cover; border: 2px solid #967556; border-radius: 3px; }
+.region-map-drawer.anime-adventure .region-mini-map::before { background-image: linear-gradient(#faffed55 1px, transparent 1px), linear-gradient(90deg, #faffed55 1px, transparent 1px); background-size: 12.5% 12.5%; }
+.region-map-drawer.anime-adventure .region-compass { position: absolute; z-index: 1; top: 10px; left: 10px; display: grid; justify-items: center; padding: 4px; color: #5a4739; background: #fff6dce6; border-radius: 50% 50% 30% 30%; font-size: 10px; }
+.region-map-drawer.anime-adventure .map-axis { background: #fff5d2; }
+.region-map-drawer.anime-adventure .map-axis-label { padding: 4px 7px; color: #564b3e; background: #fff7d9d9; border-radius: 3px; font-size: 9px; }
+.region-map-drawer.anime-adventure .map-axis-label-x { bottom: 6px; top: auto; right: 12px; }
+.region-map-drawer.anime-adventure .map-axis-label-y { top: auto; bottom: 32px; left: 8px; }
+.region-map-drawer.anime-adventure .region-map-marker { width: 38px; height: 38px; background: #fff3dbe8; border-color: #efffe1; border-radius: 50% 50% 40% 40%; }
+.region-map-drawer.anime-adventure .marker-member { box-shadow: 0 0 0 4px #65d3c589; }
+.region-map-drawer.anime-adventure .marker-landmark { box-shadow: 0 0 0 4px #f4ca5789; }
+.region-map-drawer.anime-adventure .region-map-marker-name { color: #524436; background: #fff5dc; border-color: #a18964; border-radius: 2px 7px 2px 5px; }
+.region-map-drawer.anime-adventure .drawer-section { margin: 0; padding: 8px; background: none; border: 10px solid transparent; border-image: var(--adventure-paper) 24 fill / 10px; border-radius: 0; }
+.region-map-drawer.anime-adventure .destination-row { background: #fff9e6; border: 1px solid #d2bd93; border-radius: 3px 10px 5px 8px; }
+.region-map-drawer.anime-adventure .destination-icon { width: 36px; height: 36px; flex-basis: 36px; background: #dbe9db; border-radius: 5px; }
+.region-map-drawer.anime-adventure .destination-copy small { white-space: normal; color: #83735b; }
+.region-map-drawer.anime-adventure .travel-confirm { width: min(390px, 100%); padding: 14px; background: none; border: 16px solid transparent; border-image: var(--adventure-paper) 24 fill / 16px; border-radius: 0; }
+.region-map-drawer.anime-adventure .confirm-icon { width: 52px; height: 52px; background: #dceade; border-radius: 7px; }
+.region-map-drawer.anime-adventure .confirm-button { background: none; border: 9px solid transparent; border-image: var(--adventure-neutral) 18 fill / 9px; border-radius: 0; color: #554339; }
+.region-map-drawer.anime-adventure .confirm-button.primary { color: #fff; border-image-source: var(--adventure-teal); }
+
+/* 051 / 063: status cards above the arena, four action families below it. */
+.turn-battle-panel.anime-adventure { padding: 12px; background: #f9f1de; border: 12px solid transparent; border-image: var(--adventure-paper) 24 fill / 12px; border-radius: 0; }
+.turn-battle-panel.anime-adventure .battle-header h3 { display: flex; align-items: center; gap: 7px; }
+.turn-battle-panel.anime-adventure .battle-header .eyebrow { display: none; }
+.turn-battle-panel.anime-adventure .battle-round { display: flex; align-items: center; gap: 7px; min-width: 0; color: #fff8df; background: none; border: 10px solid transparent; border-image: var(--adventure-wood) 18 fill / 10px; border-radius: 0; }
+.turn-battle-panel.anime-adventure .battle-round :is(span, strong) { color: #62462f; margin: 0; }
+.turn-battle-panel.anime-adventure .battle-status { flex-wrap: wrap; gap: 6px; margin-bottom: 10px; color: #2e6d65; background: #dbeedb; border: 1px solid #9bbfa7; border-radius: 3px 10px 5px 8px; }
+.turn-battle-panel.anime-adventure .battle-status.phase-enemy, .turn-battle-panel.anime-adventure .battle-status.phase-defeat { color: #ab4a44; background: #fce2d7; border-color: #dfac92; }
+.turn-battle-panel.anime-adventure .battle-status.phase-waiting { color: #397d9a; background: #e0f0f4; }
+.turn-battle-panel.anime-adventure .battle-status small { white-space: normal; }
+.turn-battle-panel.anime-adventure .battle-field { grid-template-columns: minmax(0, 1fr) 20px minmax(0, 1fr); gap: 6px; }
+.turn-battle-panel.anime-adventure .battle-side { gap: 5px; max-height: 29dvh; overflow-y: auto; }
+.turn-battle-panel.anime-adventure .side-heading { color: #34767f; padding: 4px 6px; background: #d3e9e6; border-radius: 3px; font-weight: 800; }
+.turn-battle-panel.anime-adventure .enemy-side .side-heading { color: #aa504d; background: #f8dbd1; }
+.turn-battle-panel.anime-adventure .battle-member { gap: 6px; padding: 6px; background: #fff9e8; border: 1px solid #cfb48b; border-radius: 2px 9px 3px 6px; }
+.turn-battle-panel.anime-adventure .battle-member.targetable { background: #d9faf0; border-color: #35a39a; box-shadow: 0 0 0 2px #57c7b74a; }
+.turn-battle-panel.anime-adventure .battle-member:disabled, .turn-battle-panel.anime-adventure .arena-unit:disabled { opacity: 1; cursor: default; }
+.turn-battle-panel.anime-adventure .battle-member.defeated:disabled, .turn-battle-panel.anime-adventure .arena-unit.defeated:disabled { opacity: .45; }
+.turn-battle-panel.anime-adventure .member-portrait { width: 40px; height: 52px; flex-basis: 40px; border: 1px solid #ae8c66; border-radius: 3px; background: #dfebdd; }
+.turn-battle-panel.anime-adventure .member-title { flex-wrap: wrap; }
+.turn-battle-panel.anime-adventure .member-title strong { font-size: 11px; }
+.turn-battle-panel.anime-adventure .member-role { font-size: 9px; }
+.turn-battle-panel.anime-adventure .member-status-tags em { color: #2d7a8a; background: #d9edf1; border-radius: 3px; }
+.turn-battle-panel.anime-adventure .battle-arena { position: relative; display: grid; grid-template-columns: 1fr 1fr; align-items: end; gap: 10px; min-height: 235px; margin-top: 12px; padding: 56px 10px 18px; background: var(--adventure-scene) center / cover; border: 2px solid #897b5d; border-radius: 4px 13px 5px 9px; }
+.turn-battle-panel.anime-adventure .arena-party { display: flex; flex-wrap: wrap; align-items: end; justify-content: center; gap: 9px 4px; }
+.turn-battle-panel.anime-adventure .arena-unit { position: relative; display: grid; justify-items: center; gap: 3px; width: clamp(52px, 12vw, 96px); min-height: 105px; padding: 0; color: #3b4c3b; background: transparent; border: 0; border-radius: 0; }
+.turn-battle-panel.anime-adventure .arena-unit img { width: 100%; height: clamp(74px, 18vw, 130px); object-fit: contain; filter: drop-shadow(0 6px 2px #294b3b70); }
+.turn-battle-panel.anime-adventure .arena-unit strong { max-width: 100%; padding: 2px 4px; background: #fff6d9dc; border-radius: 3px; font-size: 10px; overflow-wrap: anywhere; }
+.turn-battle-panel.anime-adventure .arena-unit-hp { display: block; width: 90%; height: 6px; background: #f7e5c8; border: 1px solid #4e6150; border-radius: 6px; overflow: hidden; }
+.turn-battle-panel.anime-adventure .arena-unit-hp i { display: block; height: 100%; background: #68bc89; }
+.turn-battle-panel.anime-adventure .arena-enemies .arena-unit-hp i { background: #eb8073; }
+.turn-battle-panel.anime-adventure .arena-unit.targetable { filter: drop-shadow(0 0 6px #c8fff6); cursor: pointer; }
+.turn-battle-panel.anime-adventure .arena-unit.targetable::after { content: ''; position: absolute; bottom: -7px; left: 2px; right: 2px; height: 14px; border: 3px solid #cafff1; border-radius: 50%; box-shadow: 0 0 7px #56ccb7; }
+.turn-battle-panel.anime-adventure .arena-unit.defeated { opacity: .45; filter: grayscale(.7); }
+.turn-battle-panel.anime-adventure .arena-phase { position: absolute; top: 9px; left: 50%; display: flex; align-items: center; justify-content: center; gap: 6px; width: max-content; max-width: 90%; padding: 3px 12px; background: none; border: 9px solid transparent; border-image: var(--adventure-paper) 24 fill / 9px; transform: translateX(-50%); font-size: 13px; text-align: center; }
+.turn-battle-panel.anime-adventure.battle-phase-victory .arena-phase { color: #fff; border-image-source: var(--adventure-teal); }
+.turn-battle-panel.anime-adventure.battle-phase-defeat .arena-phase { color: #fff; border-image-source: var(--adventure-coral); }
+.turn-battle-panel.anime-adventure.battle-phase-defeat .battle-arena { filter: saturate(.65); }
+.turn-battle-panel.anime-adventure .battle-log { position: relative; gap: 3px; max-height: 130px; padding: 8px 9px; color: #5d4a3d; background: none; border: 10px solid transparent; border-image: var(--adventure-paper) 24 fill / 10px; border-radius: 0; }
+.turn-battle-panel.anime-adventure .battle-log-title { display: flex; align-items: center; gap: 5px; padding-bottom: 4px; border-bottom: 1px solid #c8b089; }
+.turn-battle-panel.anime-adventure .battle-actions { border-top-color: #b89b77; margin-top: 10px; padding-top: 10px; }
+.turn-battle-panel.anime-adventure .battle-action-tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 3px; padding: 0; overflow: visible; background: none; border-radius: 0; }
+.turn-battle-panel.anime-adventure .battle-action-tabs button { display: flex; align-items: center; justify-content: center; gap: 4px; min-width: 0; padding: 4px 2px; color: #584b3d; background: none; border: 8px solid transparent; border-image: var(--adventure-tab) 18 fill / 8px; border-radius: 0; }
+.turn-battle-panel.anime-adventure .battle-action-tabs button.active { color: #fff; border-image-source: var(--adventure-teal); box-shadow: none; }
+.turn-battle-panel.anime-adventure .battle-action-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; }
+.turn-battle-panel.anime-adventure .battle-action { flex-direction: column; align-items: center; gap: 4px; padding: 7px; color: #594637; background: none; border: 9px solid transparent; border-image: var(--adventure-paper) 24 fill / 9px; border-radius: 0; text-align: center; }
+.turn-battle-panel.anime-adventure .battle-action.selected { background: #d7f6eb; box-shadow: inset 0 0 0 2px #58bbaa; }
+.turn-battle-panel.anime-adventure .battle-action-icon { width: 42px; height: 42px; background: #dfebdd; border: 1px solid #bdab83; border-radius: 5px; }
+.turn-battle-panel.anime-adventure .battle-action-copy strong { font-size: 12px; }
+.turn-battle-panel.anime-adventure .battle-action-copy small { color: #6d7d7b; white-space: normal; overflow-wrap: anywhere; }
+.turn-battle-panel.anime-adventure .battle-action-cost { justify-self: center; padding: 2px 6px; color: #286d90; background: #daecf4; border: 1px solid #87b8cb; border-radius: 9px; font-size: 9px; font-style: normal; }
+.turn-battle-panel.anime-adventure .cancel-targeting { color: #63503e; background: #fff2d7; border: 1px solid #c5aa83; border-radius: 4px; }
+
+/* 052: an encounter vignette, separate three-step meters and a gift tray. */
+.negotiation-panel.anime-adventure { padding: 10px; background: #fff4dd; border: 12px solid transparent; border-image: var(--adventure-paper) 24 fill / 12px; border-radius: 0; }
+.negotiation-panel.anime-adventure .negotiation-target-mark { background: #d9eada; border: 1px solid #b9a17d; border-radius: 5px; }
+.negotiation-panel.anime-adventure .negotiation-header { align-items: center; }
+.negotiation-panel.anime-adventure .negotiation-mood { color: #5b774e; background: #e0efd0; border: 1px solid #9fb48d; border-radius: 4px; }
+.negotiation-panel.anime-adventure .negotiation-scene { display: flex; align-items: end; justify-content: space-around; gap: 8px; min-height: 190px; padding: 65px 15px 22px; margin-bottom: 10px; background: var(--adventure-scene) center / cover; border: 2px solid #8e825f; border-radius: 4px 14px 5px 9px; }
+.negotiation-panel.anime-adventure .negotiation-scene > :is(svg, img) { width: min(32%, 130px); height: 110px; object-fit: contain; filter: drop-shadow(0 6px 2px #28433466); }
+.negotiation-panel.anime-adventure .negotiation-scene-path { width: 18%; height: 8px; border-bottom: 2px dashed #fff6d4; margin-bottom: 20px; }
+.negotiation-panel.anime-adventure .negotiation-bars > div { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; gap: 4px; padding: 8px; background: none; border: 9px solid transparent; border-image: var(--adventure-paper) 24 fill / 9px; border-radius: 0; }
+.negotiation-panel.anime-adventure .negotiation-bars > div > svg { grid-row: span 2; }
+.negotiation-panel.anime-adventure .negotiation-bars > div > i { grid-column: 2 / -1; width: 100%; height: 9px; border: 1px solid #b3a58b; background: repeating-linear-gradient(90deg, #d5cdbd 0 calc(33.33% - 1px), #a39885 calc(33.33% - 1px) 33.33%); }
+.negotiation-panel.anime-adventure .negotiation-bars .goodwill { background: #55b8b2; }
+.negotiation-panel.anime-adventure .negotiation-bars .protection { background: #eb8479; }
+.negotiation-panel.anime-adventure .negotiation-dialogue { color: #564738; background: #fff9e7; border: 1px solid #b99d7a; border-radius: 14px 17px 15px 4px; }
+.negotiation-panel.anime-adventure .dialogue-tail { background: #fff9e7; border-color: #b99d7a; }
+.negotiation-panel.anime-adventure .negotiation-actions { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; }
+.negotiation-panel.anime-adventure .negotiation-action { color: #4c5846; background: none; border: 9px solid transparent; border-image: var(--adventure-paper) 24 fill / 9px; border-radius: 0; padding: 7px 3px; }
+.negotiation-panel.anime-adventure .negotiation-action small { display: none; }
+.negotiation-panel.anime-adventure .negotiation-action.gift.active { color: #176d65; background: #d6f3e6; box-shadow: 0 0 0 2px #54c2b2; }
+.negotiation-panel.anime-adventure .negotiation-action.danger { color: #fff; border-image-source: var(--adventure-coral); }
+.negotiation-panel.anime-adventure .negotiation-gifts { margin-top: 12px; padding: 12px 0 0; border-top: 1px solid #b99d7a; }
+.negotiation-panel.anime-adventure .negotiation-item-grid { grid-template-columns: 1fr; }
+.negotiation-panel.anime-adventure .negotiation-item { gap: 10px; padding: 6px; background: none; border: 10px solid transparent; border-image: var(--adventure-paper) 24 fill / 10px; border-radius: 0; }
+.negotiation-panel.anime-adventure .negotiation-item-icon { width: 47px; height: 47px; flex-basis: 47px; background: #dcebdd; border-radius: 6px; }
+.negotiation-panel.anime-adventure .negotiation-item-icon .inventory-art-wrap { width: 100%; height: 100%; margin: 0; }
+.negotiation-panel.anime-adventure .negotiation-item strong { font-size: 13px; }
+.negotiation-panel.anime-adventure .negotiation-item small { font-size: 10px; }
+
+/* 040 / 072 / 005: layered journal pages with artwork and issued actions. */
+.manual-dialog.anime-adventure, .story-dialog.anime-adventure, .handbook-dialog.anime-adventure, .inbox-dialog.anime-adventure { background: none; border: 16px solid transparent; border-image: var(--adventure-paper) 24 fill / 16px; border-radius: 0; color: var(--ink, #4d3e36); box-shadow: 0 20px 55px #2f3d3b55; }
+.manual-dialog.anime-adventure .manual-header { padding: 8px 10px 12px; border-bottom-color: #c7b08b; }
+.manual-dialog.anime-adventure .manual-mark { width: 44px; height: 44px; background: transparent; border-radius: 0; }
+.manual-dialog.anime-adventure .manual-heading-group p { color: #978060; }
+.manual-dialog.anime-adventure .manual-close { display: grid; place-items: center; width: 34px; height: 34px; color: #6c4d36; background: #fff0d0; border: 1px solid #b6a077; border-radius: 50%; }
+.manual-dialog.anime-adventure .manual-categories { gap: 4px; padding: 9px 3px; border-bottom-color: #c7b08b; }
+.manual-dialog.anime-adventure .manual-categories button { flex: 1; min-width: 58px; color: #564737; background: none; border: 9px solid transparent; border-image: var(--adventure-tab) 18 fill / 9px; border-radius: 0; }
+.manual-dialog.anime-adventure .manual-categories button.active { color: #fff; border-image-source: var(--adventure-teal); }
+.manual-dialog.anime-adventure .manual-body { padding: 12px 4px 18px; }
+.manual-dialog.anime-adventure .manual-message { position: relative; padding: 13px; background: none; border: 12px solid transparent; border-image: var(--adventure-paper) 24 fill / 12px; border-radius: 0; }
+.manual-dialog.anime-adventure .manual-message::after { content: '✧'; position: absolute; bottom: 3px; right: 7px; color: #b7a178; font-size: 24px; pointer-events: none; }
+.manual-dialog.anime-adventure .manual-message.has-art { display: flex; flex-direction: column; }
+.manual-dialog.anime-adventure .manual-image { width: 100%; max-height: 340px; object-fit: contain; margin: 0 0 12px; border-radius: 4px 12px 5px 8px; }
+.manual-dialog.anime-adventure .manual-text { color: #554638; line-height: 1.85; }
+.manual-dialog.anime-adventure .manual-actions { gap: 7px; }
+.manual-dialog.anime-adventure .manual-actions button { flex: 1 1 100px; color: #fff; background: none; border: 9px solid transparent; border-image: var(--adventure-teal) 18 fill / 9px; border-radius: 0; }
+.manual-dialog.anime-adventure.interaction-dialog .manual-heading-group { padding: 2px 10px; border: 9px solid transparent; border-image: var(--adventure-wood) 18 fill / 9px; }
+.story-dialog.anime-adventure { width: min(760px, 100%); }
+.story-dialog.anime-adventure .story-dialog-header { justify-content: center; gap: 10px; padding: 6px 12px 10px; border-bottom-color: #c7b08b; }
+.story-dialog.anime-adventure .story-dialog-header h2 { font-size: 21px; }
+.story-dialog.anime-adventure .story-dialog-body { padding: 10px 5px 15px; }
+.story-guide-content.anime-adventure .story-message { border: 0; padding: 0; }
+.story-guide-content.anime-adventure .story-image { width: 100%; max-height: min(44dvh, 450px); object-fit: contain; margin: 0 0 10px; border: 2px solid #ab8e66; border-radius: 4px 12px 5px 8px; background: #dce9d9; }
+.story-guide-content.anime-adventure .story-narration { display: flex; align-items: flex-start; gap: 10px; padding: 13px; border: 11px solid transparent; border-image: var(--adventure-paper) 24 fill / 11px; font-size: 13px; line-height: 1.8; }
+.story-guide-content.anime-adventure .story-guide-text { margin: 0; }
+.story-guide-content.anime-adventure .story-actions { margin: 8px 0 14px; }
+.story-guide-content.anime-adventure .story-actions button { flex: 1 1 100px; color: #fff; background: none; border: 10px solid transparent; border-image: var(--adventure-teal) 18 fill / 10px; border-radius: 0; }
+.story-dialog.anime-adventure .story-finish { display: flex; align-items: center; justify-content: center; gap: 8px; width: min(340px, 100%); color: #fff; background: none; border: 11px solid transparent; border-image: var(--adventure-teal) 18 fill / 11px; border-radius: 0; }
+.story-dialog.anime-adventure .story-finish.is-battle { border-image-source: var(--adventure-coral); }
+.adventure-manual-dock.anime-adventure { padding: 0; filter: drop-shadow(0 4px 6px #29473850); }
+.adventure-manual-dock.anime-adventure .manual-circle { color: #534132; background: none; border: 8px solid transparent; border-image: var(--adventure-paper) 24 fill / 8px; border-radius: 0; box-shadow: none; gap: 3px; }
+.adventure-manual-dock.anime-adventure .manual-main { border-image-source: var(--adventure-teal); color: #fff; }
+.adventure-manual-dock.anime-adventure .manual-art { width: 36px; height: 36px; }
+.adventure-manual-dock.anime-adventure .manual-label { font-size: 11px; }
+.adventure-manual-dock.anime-adventure.is-inline { position: static; z-index: auto; display: block; width: 100%; max-width: none; height: auto; margin-top: 10px; filter: none; --manual-button-size: 70px; }
+.adventure-manual-dock.anime-adventure.is-inline .manual-actions { position: static; inset: auto; z-index: auto; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); width: 100%; max-width: none; height: auto; gap: 3px; overflow: visible; }
+.adventure-manual-dock.anime-adventure.is-inline .manual-circle { width: 100%; height: 70px; min-width: 0; }
+.world-map-footer .adventure-manual-dock.anime-adventure.is-inline { margin-top: 0; padding: 0 12px; background: url('/assets/light-anime/manual-scroll-v2.svg') center / 100% 100% no-repeat; filter: drop-shadow(0 3px 2px #6c51392b); }
+.world-map-footer .adventure-manual-dock.anime-adventure.is-inline .manual-actions { gap: 0; }
+.world-map-footer .adventure-manual-dock.anime-adventure.is-inline .manual-circle { height: 68px; padding: 2px 3px 9px; border: 0; border-image: none; background: transparent; gap: 0; }
+.world-map-footer .adventure-manual-dock.anime-adventure.is-inline .manual-circle + .manual-circle { border-left: 1px solid #bda17152; }
+.world-map-footer .adventure-manual-dock.anime-adventure .manual-art { width: 38px; height: 38px; }
+.world-map-footer .adventure-manual-dock.anime-adventure .manual-label { color: #3c3536; font-family: KaiTi, STKaiti, serif; font-size: 13px; font-weight: 900; }
+
+
+/* 041–045 / 069: scrapbook, book spread and public warrant ledgers. */
+.handbook-dialog.anime-adventure .handbook-header { padding: 6px 8px 12px; background: none; border-bottom-color: #c6ad85; }
+.handbook-dialog.anime-adventure .heading-mark { width: 47px; height: 47px; background: transparent; box-shadow: none; }
+.handbook-dialog.anime-adventure .heading-copy small { color: #927957; }
+.handbook-dialog.anime-adventure .icon-button { display: grid; place-items: center; background: #fff1d5; border-color: #b9a07a; border-radius: 50%; }
+.handbook-dialog.anime-adventure .handbook-body { padding: 12px 6px 18px; }
+.handbook-dialog.anime-adventure .chip-row { gap: 4px; margin: 9px 0; }
+.handbook-dialog.anime-adventure .chip-row button { display: inline-flex; align-items: center; justify-content: center; gap: 4px; padding: 3px 9px; color: #5a4937; background: none; border: 8px solid transparent; border-image: var(--adventure-tab) 18 fill / 8px; border-radius: 0; }
+.handbook-dialog.anime-adventure .chip-row button.selected { color: #fff; border-image-source: var(--adventure-teal); }
+.handbook-dialog.anime-adventure :is(.reward-card, .detail-card, .entry-card) { color: #554438; background: none; border: 12px solid transparent; border-image: var(--adventure-paper) 24 fill / 12px; border-radius: 0; box-shadow: none; }
+.handbook-dialog.anime-adventure .section-heading { margin-bottom: 9px; padding: 3px 7px; width: max-content; max-width: 100%; background: none; border: 7px solid transparent; border-image: var(--adventure-wood) 18 fill / 7px; color: #80683f; }
+.handbook-dialog.anime-adventure .section-heading h3 { color: #654c2f; }
+.handbook-dialog.anime-adventure .box-row { display: grid; grid-template-columns: 54px minmax(0, 1fr) auto; align-items: center; padding: 5px; background: none; }
+.handbook-dialog.anime-adventure .box-controls { align-items: center; }
+.handbook-dialog.anime-adventure :is(.box-controls button, .search-row button, .primary-button) { background: none; border: 9px solid transparent; border-image: var(--adventure-teal) 18 fill / 9px; border-radius: 0; }
+.handbook-dialog.anime-adventure .entry-card { position: relative; gap: 12px; padding: 10px; }
+
+.handbook-dialog.anime-adventure .entry-icon { position: relative; width: 56px; height: 65px; flex-basis: 56px; color: #8f7146; background: #e8ecd8; border: 1px solid #b39971; border-radius: 3px 8px 5px 6px; }
+.handbook-dialog.anime-adventure .entry-icon img { width: 100%; height: 100%; object-fit: contain; }
+.handbook-dialog.anime-adventure .entry-icon b { position: absolute; bottom: 3px; left: 50%; color: #654635; font-size: 12px; transform: translateX(-50%); }
+.handbook-dialog.anime-adventure .achievement-emblem { border-radius: 50% 50% 35% 35%; background: #eedab0; border-color: #bd9a53; }
+.handbook-dialog.anime-adventure .achievement-stamp { position: absolute; bottom: 8px; right: 10px; padding: 3px 7px; color: #bd655b; border: 2px solid #c8796a; transform: rotate(-12deg); font-size: 10px; opacity: .75; pointer-events: none; }
+.handbook-dialog.anime-adventure .entry-main strong { font-size: 15px; }
+.handbook-dialog.anime-adventure .entry-main small { color: #937d61; }
+.handbook-dialog.anime-adventure .entry-main > span { color: #695745; }
+.handbook-dialog.anime-adventure .codex-gallery { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.handbook-dialog.anime-adventure .codex-gallery .entry-card { flex-direction: column; justify-content: flex-start; padding: 8px 4px; text-align: center; }
+.handbook-dialog.anime-adventure .codex-gallery .entry-icon { width: min(100%, 104px); height: 92px; flex-basis: 92px; background: #dcead9; }
+.handbook-dialog.anime-adventure .codex-gallery .entry-icon .inventory-art-wrap { width: 100%; height: 100%; margin: 0; }
+.handbook-dialog.anime-adventure .codex-gallery .entry-arrow { display: none; }
+.handbook-dialog.anime-adventure .codex-gallery .entry-main { gap: 4px; }
+.handbook-dialog.anime-adventure .codex-gallery .entry-main strong { font-size: 13px; }
+.handbook-dialog.anime-adventure .codex-spread { display: grid; grid-template-columns: .85fr 1.15fr; gap: 22px; padding: 18px 15px; background: linear-gradient(90deg, transparent 49.5%, #b29a782a 50%, transparent 50.5%); }
+.handbook-dialog.anime-adventure .codex-illustration { display: grid; justify-items: center; align-content: center; gap: 14px; padding: 12px; color: #907653; background: #e7eddc; border: 1px solid #c4b18d; border-radius: 4px 14px 6px 10px; font-size: 11px; }
+.handbook-dialog.anime-adventure .codex-illustration img { width: 100%; max-height: 260px; object-fit: contain; }
+.handbook-dialog.anime-adventure .codex-spread .eyebrow { margin-top: 0; }
+.handbook-dialog.anime-adventure .facts dt { color: #75603f; padding: 4px 6px; background: #edddba; border-radius: 3px; }
+.handbook-dialog.anime-adventure .facts div { align-items: start; border-top-color: #d2b994; }
+.handbook-dialog.anime-adventure .warrant-icon { background: #ddded7; border-color: #b49b7b; }
+.handbook-dialog.anime-adventure .warrant-icon::before { content: ''; position: absolute; top: -5px; left: calc(50% - 4px); width: 8px; height: 8px; border: 1px solid #884c38; border-radius: 50%; background: #d8806b; box-shadow: 0 2px 1px #67523638; }
+.handbook-dialog.anime-adventure .warrant-trace { justify-self: start; padding: 2px 7px; background: #dce6d9; border-radius: 3px; font-size: 10px; }
+.handbook-dialog.anime-adventure .warrant-trace.trace-exposed { color: #ab5045; background: #f9d7c9; }
+.handbook-dialog.anime-adventure .warrant-trace.trace-recent { color: #8a6828; background: #f2e2b3; }
+.handbook-dialog.anime-adventure .warrant-reward { display: grid; justify-items: center; gap: 5px; min-width: 92px; padding: 7px; border: 1px solid #bda17a; border-radius: 3px; background: #fbefcf; font-size: 10px; }
+.handbook-dialog.anime-adventure .warrant-reward > small { width: 100%; padding: 2px 5px; color: #fff8dd; text-align: center; background: #cd7466; }
+.handbook-dialog.anime-adventure .warrant-reward strong { display: flex; align-items: center; gap: 3px; font-size: 11px; }
+.handbook-dialog.anime-adventure .ledger-heading { display: grid; grid-template-columns: 1fr 1fr; text-align: center; color: #71593b; border-bottom: 1px solid #b6a17c; padding: 7px 5px; font-size: 12px; font-weight: 700; }
+.handbook-dialog.anime-adventure .ledger-amount { display: grid; gap: 5px; width: 43%; font-size: 12px; }
+.handbook-dialog.anime-adventure .ledger-amount em { justify-self: start; padding: 3px 7px; color: #527d57; border: 1px solid #97af80; border-radius: 50%; transform: rotate(-8deg); font-style: normal; font-size: 10px; }
+.handbook-dialog.anime-adventure .ledger-amount small { color: #978262; font-size: 10px; }
+.handbook-dialog.anime-adventure .pursuit-stamp { color: #ba6759; border: 2px solid #c88771; padding: 4px 7px; font-style: normal; font-size: 10px; transform: rotate(-8deg); }
+.handbook-dialog.anime-adventure :is(.pager button, .back-button) { background: none; border: 8px solid transparent; border-image: var(--adventure-neutral) 18 fill / 8px; color: #624d39; border-radius: 0; }
+.handbook-dialog.anime-adventure .warrant-detail-card { display: grid; grid-template-columns: 108px minmax(0, 1fr); gap: 8px 16px; }
+.handbook-dialog.anime-adventure .warrant-person { position: relative; grid-column: 1; grid-row: 1 / span 3; width: 108px; height: 140px; color: #78654d; background: #dfdfd1; border: 1px solid #9f8563; border-radius: 3px; }
+.handbook-dialog.anime-adventure .warrant-person strong { position: absolute; bottom: 13px; padding: 2px 7px; color: #fff3d4; background: #ad7665; font-size: 18px; }
+.handbook-dialog.anime-adventure .warrant-detail-card .eyebrow { margin: 5px 0 0; }
+.handbook-dialog.anime-adventure .warrant-detail-card h3 { margin: 0; }
+.handbook-dialog.anime-adventure .warrant-detail-card .detail-grid { grid-column: 2; margin: 0; gap: 5px; }
+.handbook-dialog.anime-adventure .warrant-detail-card .detail-grid strong { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.handbook-dialog.anime-adventure .detail-grid span { background: #f0e4c9; color: #8b7559; border-radius: 3px; padding: 8px; }
+.handbook-dialog.anime-adventure .detail-grid strong { color: #574731; }
+.handbook-dialog.anime-adventure .preview { padding: 12px; background: #e0f2e9; border: 1px solid #8ebeb3; border-radius: 3px; }
+.handbook-dialog.anime-adventure .reward-preview-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.handbook-dialog.anime-adventure .reward-preview-actions .back-button { margin: 5px 0 0; }
+.handbook-dialog.anime-adventure .reward-preview-actions .primary-button { border-image-source: var(--adventure-coral); }
+
+/* 046 / 047: the mailbox keeps its master/detail reading behavior. */
+.inbox-dialog.anime-adventure { width: min(880px, calc(100vw - 24px)); height: min(760px, calc(100dvh - 28px)); }
+.inbox-dialog.anime-adventure .inbox-header { padding: 5px 8px 12px; }
+.inbox-dialog.anime-adventure .inbox-envelope { width: 47px; height: 47px; background: transparent; border-radius: 0; }
+.inbox-dialog.anime-adventure .inbox-heading-group h2 { font-size: 22px; }
+.inbox-dialog.anime-adventure .inbox-close { display: grid; place-items: center; width: 35px; height: 35px; background: #fff1d3; border: 1px solid #b79b77; border-radius: 50%; }
+.inbox-dialog.anime-adventure .inbox-tabs { gap: 4px; padding: 0 4px 7px; border-bottom-color: #bda580; }
+.inbox-dialog.anime-adventure .inbox-tabs button { flex: 1; padding: 5px 8px; color: #6b533e; background: none; border: 9px solid transparent; border-image: var(--adventure-tab) 18 fill / 9px; border-radius: 0; }
+.inbox-dialog.anime-adventure .inbox-tabs button.active { color: #fff; border-image-source: var(--adventure-teal); }
+.inbox-dialog.anime-adventure .inbox-tabs .inbox-refresh { flex: .55; border-image-source: var(--adventure-neutral); }
+.inbox-dialog.anime-adventure .inbox-body { gap: 8px; padding-top: 9px; grid-template-columns: minmax(220px, .9fr) minmax(0, 1.1fr); }
+.inbox-dialog.anime-adventure .inbox-list { border-right-color: #c8b18d; }
+.inbox-dialog.anime-adventure .inbox-row { gap: 9px; width: calc(100% - 4px); margin: 0 2px 5px; padding: 7px; border: 9px solid transparent; border-image: var(--adventure-paper) 24 fill / 9px; border-radius: 0; min-height: 75px; background: none; }
+.inbox-dialog.anime-adventure .inbox-row.selected { background: #bfecef; box-shadow: inset 0 0 0 2px #66bfd0; }
+.inbox-dialog.anime-adventure .inbox-row.unread { background: #fff1d2; }
+.inbox-dialog.anime-adventure .inbox-row.unread.selected { background: #cdeef0; }
+.inbox-dialog.anime-adventure .inbox-row-icon { width: 38px; height: 44px; flex-basis: 38px; background: transparent; border-radius: 0; }
+.inbox-dialog.anime-adventure .inbox-row-title { font-size: 13px; color: #4e3f37; }
+.inbox-dialog.anime-adventure .inbox-row-preview, .inbox-dialog.anime-adventure .inbox-row-meta { color: #8a7965; }
+.inbox-dialog.anime-adventure .inbox-detail { padding: 12px; background: none; border: 11px solid transparent; border-image: var(--adventure-paper) 24 fill / 11px; border-radius: 0; }
+.inbox-dialog.anime-adventure .inbox-detail h3 { font-size: 20px; }
+.inbox-dialog.anime-adventure .inbox-message { padding: 12px 0; background: none; border: 0; border-top: 1px solid #ccb28c; border-radius: 0; }
+.inbox-dialog.anime-adventure .inbox-mail-attachment { padding: 8px; background: #fcf5e1; border-color: #c6b08c; border-radius: 3px 9px 4px 7px; }
+.inbox-dialog.anime-adventure .inbox-mail-attachment :is(strong, b) { font-size: 12px; }
+.inbox-dialog.anime-adventure .inbox-mail-filters { padding: 3px 5px 7px; border-bottom-color: #c6b08c; }
+.inbox-dialog.anime-adventure .inbox-mail-filters button { background: #f3e7cc; border: 1px solid #c1ab84; border-radius: 16px; color: #786047; }
+.inbox-dialog.anime-adventure .inbox-mail-filters button.active { color: #fff; background: #59a9a0; border-color: #327c78; }
+.inbox-dialog.anime-adventure :is(.inbox-mark-read, .inbox-message-actions button, .inbox-mail-claim) { color: #fff; background: none; border: 9px solid transparent; border-image: var(--adventure-teal) 18 fill / 9px; border-radius: 0; }
+.inbox-dialog.anime-adventure .inbox-mail-delete { color: #fff; background: none; border: 9px solid transparent; border-image: var(--adventure-coral) 18 fill / 9px; border-radius: 0; }
+.inbox-dialog.anime-adventure .inbox-mail-delete:disabled { filter: grayscale(1); opacity: .45; }
+.inbox-dialog.anime-adventure .inbox-delete-hint { margin: 6px 0 0; color: #9c7d5f; font-size: 11px; text-align: right; }
+.inbox-dialog.anime-adventure .inbox-mail-footer { background: none; border-top-color: #c1ab84; }
+.inbox-dialog.anime-adventure .inbox-mail-footer button { color: #695039; background: none; border: 9px solid transparent; border-image: var(--adventure-neutral) 18 fill / 9px; border-radius: 0; }
+
+/* 019–021 / 071: four companion slots, recruitment sheets and a publish preview. */
+.party-popup.anime-adventure { gap: 12px; max-height: min(740px, calc(82dvh - 50px)); padding: 3px 2px 12px; font-size: 13px; color: #574536; }
+.party-popup.anime-adventure .party-tabs { gap: 4px; padding: 0; background: none; border-radius: 0; }
+.party-popup.anime-adventure .party-tabs button { color: #5c4935; background: none; border: 10px solid transparent; border-image: var(--adventure-tab) 18 fill / 10px; border-radius: 0; }
+.party-popup.anime-adventure .party-tabs button.active { color: #fff; border-image-source: var(--adventure-teal); box-shadow: none; }
+.party-popup.anime-adventure .party-section { padding: 12px; gap: 12px; background: none; border: 12px solid transparent; border-image: var(--adventure-paper) 24 fill / 12px; border-radius: 0; }
+.party-popup.anime-adventure .party-section-heading strong { display: flex; align-items: center; gap: 6px; font-size: 16px; }
+.party-popup.anime-adventure .party-slot-preview { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.party-popup.anime-adventure .party-empty-slot { display: grid; justify-items: center; align-content: center; min-height: 86px; padding: 5px; color: #9c8b6d; background: #f2e7d0; border: 1px solid #bda680; border-radius: 3px 8px 4px 6px; font-size: 10px; }
+.party-popup.anime-adventure .party-empty-slot .anime-icon { opacity: .55; }
+.party-popup.anime-adventure .party-form { grid-template-columns: minmax(0, 1fr) auto; gap: 10px; }
+.party-popup.anime-adventure .party-form label:has(textarea), .party-popup.anime-adventure .party-form > button { grid-column: 1 / -1; }
+.party-popup.anime-adventure .party-form > button { justify-self: center; min-width: 150px; }
+.party-popup.anime-adventure .party-fixed-count { align-self: center; color: #806d4d; background: #f1e3c4; border-radius: 3px; }
+.party-popup.anime-adventure .party-fixed-count strong { color: #d47456; font-size: 19px; }
+.party-popup.anime-adventure :is(.party-form, .party-search-form, .party-inline-form) :is(input, textarea, select) { min-height: 38px; border-color: #b4a38b; background: #fffbee; border-radius: 3px 7px 4px 6px; color: #604d3f; }
+.party-popup.anime-adventure :is(.party-primary, .party-quiet, .party-danger, .party-load-more) { padding: 4px 9px; background: none; border: 9px solid transparent; border-image: var(--adventure-teal) 18 fill / 9px; border-radius: 0; color: #fff; font-size: 12px; }
+.party-popup.anime-adventure .party-quiet { border-image-source: var(--adventure-neutral); color: #5b4935; }
+.party-popup.anime-adventure .party-danger { border-image-source: var(--adventure-coral); }
+.party-popup.anime-adventure .party-preview { position: relative; gap: 9px; padding: 12px; background: #d9f0e7; border: 2px solid #88bfae; border-radius: 4px 11px 5px 9px; }
+.party-popup.anime-adventure .party-preview > strong { color: #32776b; padding-bottom: 5px; border-bottom: 1px solid #a7cabc; font-size: 14px; }
+.party-popup.anime-adventure .party-preview .party-actions { justify-content: center; }
+.party-popup.anime-adventure .party-preview .party-primary { border-image-source: var(--adventure-coral); }
+.party-popup.anime-adventure .party-recruitment-card { position: relative; background: none; border: 11px solid transparent; border-image: var(--adventure-paper) 24 fill / 11px; border-radius: 0; }
+.party-popup.anime-adventure .party-recruitment-summary { gap: 9px; padding: 5px; }
+.party-popup.anime-adventure .party-avatar { position: relative; width: 46px; height: 54px; flex-basis: 46px; background: #d8e5d3; border: 1px solid #b4a17d; border-radius: 3px 8px 5px 6px; }
+.party-popup.anime-adventure .party-avatar b { position: absolute; bottom: 2px; right: 2px; padding: 1px 3px; color: #705544; background: #fff1cd; border-radius: 3px; font-size: 10px; }
+.party-popup.anime-adventure .party-recruitment-heading strong { font-size: 15px; }
+.party-popup.anime-adventure .party-recruitment-detail { padding: 9px; margin-top: 5px; border-top: 1px solid #c4ae83; }
+.party-popup.anime-adventure .party-recruitment-detail p { padding: 10px; background: #f7ebcf; border-radius: 3px 7px 5px 8px; }
+.party-popup.anime-adventure .party-current-heading { gap: 10px; padding: 7px 10px; background: none; border: 9px solid transparent; border-image: var(--adventure-wood) 18 fill / 9px; border-radius: 0; }
+.party-popup.anime-adventure .party-current-heading strong { font-size: 16px; }
+.party-popup.anime-adventure .party-member-list { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.party-popup.anime-adventure .party-member { display: grid; align-content: start; justify-items: center; gap: 7px; padding: 8px 5px; background: #fff6df; border: 1px solid #bda982; border-radius: 3px 9px 4px 6px; }
+.party-popup.anime-adventure .party-member .party-avatar { width: 72px; max-width: 100%; height: 86px; flex-basis: 86px; }
+.party-popup.anime-adventure .party-member > div { width: 100%; text-align: center; gap: 5px; }
+.party-popup.anime-adventure .party-member strong { overflow: visible; white-space: normal; font-size: 12px; }
+.party-popup.anime-adventure .party-member small { overflow: visible; text-overflow: clip; white-space: normal; overflow-wrap: anywhere; font-size: 9px; color: #8e775a; }
+.party-popup.anime-adventure .party-member em { display: inline-block; margin: 2px; padding: 2px 4px; color: #fff4dc; background: #b38647; border-radius: 3px; font-size: 9px; }
+.party-popup.anime-adventure .party-member-empty { align-content: center; min-height: 136px; border-style: dashed; color: #a99573; background: #eee4cd77; text-align: center; font-size: 10px; }
+.party-popup.anime-adventure .party-status { color: #327b69; background: #e0eddd; border-radius: 3px; }
+.party-popup.anime-adventure .party-application { padding: 10px; background: #fff6de; border: 1px solid #c4ae84; border-radius: 3px 9px 5px 7px; }
+.party-popup.anime-adventure .party-application .party-actions button:last-child { color: #fff; border-image-source: var(--adventure-coral); }
+
+@media (max-width: 600px) {
+  .world-map-panel.anime-adventure .nearby-target { grid-template-columns: 60px minmax(0, 1fr); gap: 3px 4px; padding: 3px; border-width: 8px; border-image-width: 8px; }
+  .world-map-panel.anime-adventure .nearby-target-icon { width: 60px; height: 80px; }
+  .world-map-panel.anime-adventure .nearby-target-copy strong { font-size: 14px; }
+  .world-map-panel.anime-adventure .nearby-target-description { font-size: 10px; }
+  .turn-battle-panel.anime-adventure { padding: 5px; border-width: 10px; }
+  .turn-battle-panel.anime-adventure .battle-header { align-items: center; gap: 6px; margin-bottom: 6px; }
+  .turn-battle-panel.anime-adventure .battle-header h3 { gap: 4px; font-size: 15px; }
+  .turn-battle-panel.anime-adventure .battle-round { gap: 3px; padding: 3px 6px; border-width: 7px; }
+  .turn-battle-panel.anime-adventure .battle-round strong { font-size: 18px; }
+  .turn-battle-panel.anime-adventure .battle-round span { font-size: 8px; }
+  .turn-battle-panel.anime-adventure .battle-status { min-height: 25px; margin-bottom: 7px; padding: 4px 7px; font-size: 11px; }
+  .turn-battle-panel.anime-adventure .battle-side { max-height: 22dvh; gap: 4px; }
+  .turn-battle-panel.anime-adventure .side-heading { padding: 3px 5px; font-size: 10px; }
+  .turn-battle-panel.anime-adventure .battle-member { gap: 4px; padding: 5px; }
+  .turn-battle-panel.anime-adventure .member-portrait { width: 25px; height: 34px; flex-basis: 25px; }
+  .turn-battle-panel.anime-adventure .member-main { gap: 2px; }
+  .turn-battle-panel.anime-adventure .member-role { display: none; }
+  .turn-battle-panel.anime-adventure .battle-bar { height: 4px; }
+  .turn-battle-panel.anime-adventure .member-numbers { font-size: 8px; }
+  .turn-battle-panel.anime-adventure .battle-arena { min-height: 128px; margin-top: 8px; padding: 38px 8px 9px; gap: 5px; }
+  .turn-battle-panel.anime-adventure .arena-unit { min-height: 70px; width: clamp(44px, 12vw, 66px); gap: 2px; }
+  .turn-battle-panel.anime-adventure .arena-unit img { height: 65px; }
+  .turn-battle-panel.anime-adventure .arena-unit > svg { width: 38px; height: 44px; }
+  .turn-battle-panel.anime-adventure .arena-phase { top: 3px; padding: 1px 9px; border-width: 7px; font-size: 11px; }
+  .turn-battle-panel.anime-adventure .arena-phase > svg { width: 19px; height: 19px; }
+  .turn-battle-panel.anime-adventure .battle-log { max-height: 70px; margin-top: 8px; padding: 3px 5px; border-width: 8px; font-size: 10px; }
+  .turn-battle-panel.anime-adventure .battle-log-title { padding-bottom: 1px; font-size: 10px; }
+  .turn-battle-panel.anime-adventure .battle-log-title > svg { width: 15px; height: 15px; }
+  .turn-battle-panel.anime-adventure .battle-actions { margin-top: 7px; padding-top: 7px; }
+  .turn-battle-panel.anime-adventure .battle-action-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .turn-battle-panel.anime-adventure .battle-action { padding: 4px; border-width: 7px; }
+  .turn-battle-panel.anime-adventure .battle-action-icon { width: 30px; height: 30px; }
+  .turn-battle-panel.anime-adventure .battle-action-copy strong { font-size: 11px; }
+  .turn-battle-panel.anime-adventure .battle-action.action-normal .battle-action-copy small { display: none; }
+  .turn-battle-panel.anime-adventure .action-heading { flex-wrap: wrap; gap: 4px; }
+  .turn-battle-panel.anime-adventure .action-heading small { font-size: 9px; }
+  .turn-battle-panel.anime-adventure .battle-action-tabs button { font-size: 10px; border-width: 6px; gap: 2px; }
+  .turn-battle-panel.anime-adventure .battle-action-tabs .anime-icon { width: 18px; }
+  .manual-dialog.anime-adventure, .handbook-dialog.anime-adventure { height: min(94dvh, 820px); border-width: 12px; }
+  .manual-dialog.anime-adventure.interaction-dialog { height: auto; max-height: 94dvh; }
+  .handbook-dialog.anime-adventure .box-row { grid-template-columns: 44px minmax(0, 1fr); gap: 7px; }
+  .handbook-dialog.anime-adventure .box-row .box-controls { grid-column: 1 / -1; justify-content: end; }
+  .handbook-dialog.anime-adventure .codex-spread { grid-template-columns: .75fr 1.25fr; gap: 12px; padding: 8px; }
+  .handbook-dialog.anime-adventure .codex-illustration { padding: 5px; min-width: 0; }
+  .handbook-dialog.anime-adventure .facts div { grid-template-columns: 56px minmax(0, 1fr); gap: 5px; font-size: 11px; }
+  .handbook-dialog.anime-adventure .warrant-reward { min-width: 78px; padding: 5px; }
+  .handbook-dialog.anime-adventure .entry-card { gap: 7px; padding: 5px; border-width: 9px; }
+  .handbook-dialog.anime-adventure .entry-icon { width: 43px; height: 55px; flex-basis: 43px; }
+  .handbook-dialog.anime-adventure .entry-main strong { font-size: 13px; }
+  .handbook-dialog.anime-adventure .entry-main small { font-size: 10px; }
+  .handbook-dialog.anime-adventure .warrant-detail-card { grid-template-columns: 84px minmax(0, 1fr); gap: 9px; padding: 10px; }
+  .handbook-dialog.anime-adventure .warrant-person { width: 84px; height: 122px; }
+  .handbook-dialog.anime-adventure .warrant-detail-card .detail-grid { grid-template-columns: 1fr; }
+  .handbook-dialog.anime-adventure .pursuit-stamp { max-width: 52px; font-size: 9px; padding: 3px; }
+  .inbox-dialog.anime-adventure .inbox-body { display: block; position: relative; }
+  .inbox-dialog.anime-adventure .inbox-detail { position: absolute; inset: 0; background: #fff7e4; }
+  .inbox-dialog.anime-adventure .inbox-detail-placeholder { display: none; }
+  .inbox-dialog.anime-adventure .inbox-list { height: 100%; border: 0; }
+  .inbox-dialog.anime-adventure .inbox-heading-group h2 { font-size: 19px; }
+  .party-popup.anime-adventure .party-member-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .party-popup.anime-adventure .party-member { grid-template-columns: 43px minmax(0, 1fr); justify-items: start; align-items: center; min-height: 111px; }
+  .party-popup.anime-adventure .party-member .party-avatar { width: 43px; height: 67px; }
+  .party-popup.anime-adventure .party-member > div { text-align: left; }
+  .party-popup.anime-adventure .party-member-empty { display: flex; justify-content: center; }
+  .party-popup.anime-adventure .party-section-heading { flex-wrap: wrap; }
+  .party-popup.anime-adventure .party-search-form { grid-template-columns: 1fr 1fr; }
+  .party-popup.anime-adventure .party-search-form > button { grid-column: 1 / -1; }
+}
+@media (min-width: 900px) {
+  .world-map-panel.anime-adventure .world-map-layout { display: grid; grid-template-columns: 1fr; gap: 12px; align-items: start; }
+  .world-map-panel.anime-adventure .world-map-layout.has-sidebar { grid-template-columns: minmax(0, 1fr) minmax(230px, 320px); }
+  .world-map-panel.anime-adventure .world-map-layout.has-footer.has-sidebar { grid-template-areas: 'map targets' 'footer targets'; grid-template-rows: auto 1fr; }
+  .world-map-panel.anime-adventure .world-map-grid-shell { width: min(100%, calc(100dvh - 260px)); max-width: none; }
+  .world-map-panel.anime-adventure .world-map-footer { width: min(100%, calc(100dvh - 260px)); }
+  .world-map-panel.anime-adventure .nearby-target-list { grid-template-columns: 1fr; margin-top: 0; }
+  .world-map-panel.anime-adventure .nearby-target { grid-template-columns: 76px minmax(0, 1fr); padding: 6px; }
+  .world-map-panel.anime-adventure .nearby-target-icon { width: 76px; height: 90px; }
+}
+@media (max-width: 359px) {
+  .world-map-panel.anime-adventure .nearby-target-list { grid-template-columns: 1fr; }
+  .world-map-panel.anime-adventure .nearby-target { grid-template-columns: 72px minmax(0, 1fr); min-height: 122px; }
+  .world-map-panel.anime-adventure .nearby-target-icon { width: 72px; height: 76px; }
+}
+@media (max-width: 370px) {
+  .handbook-dialog.anime-adventure .codex-gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .handbook-dialog.anime-adventure .codex-spread { grid-template-columns: 1fr; }
+  .handbook-dialog.anime-adventure .codex-illustration { min-height: 150px; }
+  .handbook-dialog.anime-adventure .codex-illustration img { max-height: 160px; }
+  .region-map-drawer.anime-adventure .drawer-content { grid-template-columns: 1fr; }
+  .turn-battle-panel.anime-adventure .battle-member { padding: 4px; gap: 3px; }
+  .turn-battle-panel.anime-adventure .member-portrait { width: 24px; height: 32px; flex-basis: 24px; }
+}

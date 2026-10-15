@@ -1,11 +1,19 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
+import { useViewportPagination } from '../useViewportPagination';
+import ViewportPagination from './ViewportPagination.vue';
 import type { NegotiationPanel as NegotiationState } from '../api';
+import AnimeIcon from './AnimeIcon.vue';
+import InventoryItemIcon from './InventoryItemIcon.vue';
+import { ANIME_SCENES } from '../anime-assets';
+import { gameAssetUrl } from '../game-assets';
+import './anime-adventure.css';
 
 type NegotiationAction = 'view' | 'talk' | 'gift' | 'fight' | 'leave';
 
 const props = defineProps<{
   negotiation: NegotiationState;
+  playerPortrait?: string;
   disabled?: boolean;
 }>();
 
@@ -14,10 +22,14 @@ const emit = defineEmits<{
 }>();
 
 const giftMode = ref(false);
+const dialogueOpen = ref(false);
 const quantity = ref(1);
 
 const isOngoing = computed(() => props.negotiation.kind === 'ongoing');
 const inventory = computed(() => props.negotiation.inventory?.items ?? []);
+const giftViewport = ref<HTMLElement | null>(null);
+const giftPaging = useViewportPagination(() => inventory.value, {container:giftViewport,rowHeight:64,gap:6});
+watch(() => props.negotiation.inventory?.page, giftPaging.reset);
 const moodLabel = computed(() => props.negotiation.mood || '未判明');
 // 交涉规则中的善意、开战保护是“次数”而不是百分比（善意累计三次获得一层保护）。
 // 这里用三格进度展示，避免把 0～3 的整数误当成百万分比后几乎看不见。
@@ -43,9 +55,9 @@ const changePage = (offset: number) => {
 </script>
 
 <template>
-  <section class="negotiation-panel card-surface" aria-label="交涉面板">
+  <section class="negotiation-panel card-surface anime-adventure" :style="{ '--adventure-scene': `url(${ANIME_SCENES.forest})` }" aria-label="交涉面板">
     <header class="negotiation-header">
-      <div class="negotiation-target-mark">☻</div>
+      <div class="negotiation-target-mark"><AnimeIcon name="paw" :size="32" /></div>
       <div class="negotiation-heading">
         <p class="eyebrow">NEGOTIATION</p>
         <h3>与 {{ negotiation.name || '未知目标' }} 交涉</h3>
@@ -54,9 +66,10 @@ const changePage = (offset: number) => {
       <span class="negotiation-mood">{{ moodLabel }}</span>
     </header>
 
+    <div class="negotiation-scene" aria-hidden="true"><img v-if="playerPortrait" :src="playerPortrait" alt="" /><AnimeIcon v-else name="party" :size="76" /><span class="negotiation-scene-path" /><img v-if="negotiation.name?.includes('球兔')" :src="gameAssetUrl('/assets/loading/ball-rabbit.png')" alt="" /><AnimeIcon v-else name="paw" :size="76" /></div>
     <div class="negotiation-bars" aria-label="交涉状态">
-      <div><span>善意</span><strong>{{ negotiation.goodwill ?? 0 }}</strong><i><b class="goodwill" :style="{ width: `${goodwill}%` }" /></i></div>
-      <div><span>戒备</span><strong>{{ negotiation.protection ?? 0 }}</strong><i><b class="protection" :style="{ width: `${protection}%` }" /></i></div>
+      <div><AnimeIcon name="heart" :size="28" /><span>善意</span><strong>{{ negotiation.goodwill ?? 0 }}</strong><i><b class="goodwill" :style="{ width: `${goodwill}%` }" /></i></div>
+      <div><AnimeIcon name="shield" :size="28" /><span>戒备</span><strong>{{ negotiation.protection ?? 0 }}</strong><i><b class="protection" :style="{ width: `${protection}%` }" /></i></div>
     </div>
 
     <div class="negotiation-dialogue">
@@ -65,24 +78,32 @@ const changePage = (offset: number) => {
     </div>
 
     <div v-if="negotiation.completionText" class="negotiation-note">{{ negotiation.completionText }}</div>
+    <button type="button" class="negotiation-read" @click="dialogueOpen = true">查看完整交涉记录</button>
+    <div v-if="dialogueOpen" class="negotiation-dialogue-backdrop" @click.self="dialogueOpen = false"><section class="negotiation-dialogue-detail" role="dialog" aria-modal="true" aria-label="完整交涉记录"><header><h3>交涉记录</h3><button type="button" class="dialog-close" aria-label="关闭交涉记录" @click="dialogueOpen = false">×</button></header><div><p>{{ negotiation.text || '对方正在观察你的举动。' }}</p><p v-if="negotiation.completionText">{{ negotiation.completionText }}</p></div></section></div>
 
     <div v-if="isOngoing" class="negotiation-actions">
-      <button type="button" class="negotiation-action primary" :disabled="disabled" @click="emitAction('talk')"><span>◈</span><strong>交谈</strong><small>试探对方态度</small></button>
-      <button type="button" class="negotiation-action gift" :class="{ active: giftMode }" :disabled="disabled" @click="giftMode = !giftMode"><span>✦</span><strong>赠礼</strong><small>选择可交涉物品</small></button>
-      <button type="button" class="negotiation-action danger" :disabled="disabled" @click="emitAction('fight')"><span>⚔</span><strong>开战</strong><small>结束交涉并进入战斗</small></button>
-      <button type="button" class="negotiation-action soft" :disabled="disabled" @click="emitAction('leave')"><span>↩</span><strong>离开</strong><small>保留目标记忆</small></button>
+      <button type="button" class="negotiation-action primary" :disabled="disabled" @click="emitAction('talk')"><AnimeIcon name="scroll" :size="30" /><strong>交谈</strong><small>试探对方态度</small></button>
+      <button type="button" class="negotiation-action gift" :class="{ active: giftMode }" :disabled="disabled" @click="giftMode = !giftMode"><AnimeIcon name="star" :size="30" /><strong>赠礼</strong><small>选择可交涉物品</small></button>
+      <button type="button" class="negotiation-action danger" :disabled="disabled" @click="emitAction('fight')"><AnimeIcon name="sword" :size="30" /><strong>开战</strong><small>结束交涉并进入战斗</small></button>
+      <button type="button" class="negotiation-action soft" :disabled="disabled" @click="emitAction('leave')"><AnimeIcon name="arrow" :size="30" /><strong>离开</strong><small>保留目标记忆</small></button>
     </div>
 
-    <div v-if="isOngoing && giftMode" class="negotiation-gifts">
+    <div v-if="isOngoing && giftMode" class="negotiation-gift-backdrop" @click.self="!disabled && (giftMode = false)">
+    <div class="negotiation-gifts" role="dialog" aria-modal="true" aria-label="选择交涉礼物">
+      <button type="button" class="dialog-close" aria-label="关闭礼物选择" :disabled="disabled" @click="giftMode = false">×</button>
       <div class="negotiation-gift-heading"><div><p class="eyebrow">OFFER</p><strong>选择一份礼物</strong></div><label>数量 <input v-model.number="quantity" type="number" min="1" max="999999" /></label></div>
+      <div ref="giftViewport" class="negotiation-gift-viewport">
       <div v-if="inventory.length" class="negotiation-item-grid">
-        <button v-for="item in inventory" :key="`${item.id ?? item.code}`" type="button" class="negotiation-item" :disabled="disabled" @click="selectGift(item.id)">
-          <span class="negotiation-item-icon">✦</span>
+        <button v-for="item in giftPaging.visibleItems.value" :key="`${item.id ?? item.code}`" type="button" class="negotiation-item" :disabled="disabled" @click="selectGift(item.id)">
+          <span class="negotiation-item-icon"><InventoryItemIcon :name="item.name" :code="item.code" :item-type="item.item_type" /></span>
           <span><strong>{{ item.name }}</strong><small>{{ item.policy?.subtype || item.item_category || '材料' }} · ×{{ item.available ?? item.quantity ?? 0 }}</small></span>
         </button>
       </div>
       <div v-else class="empty-state">没有可用于交涉的材料。</div>
+      </div>
+      <ViewportPagination :page="giftPaging.page.value" :total-pages="giftPaging.totalPages.value" :total="inventory.length" label="交涉礼物本页翻页" :disabled="disabled" @update:page="giftPaging.setPage" />
       <div v-if="(negotiation.inventory?.totalPages ?? 1) > 1" class="negotiation-pagination"><button type="button" class="ghost-button" :disabled="disabled || (negotiation.inventory?.page ?? 1) <= 1" @click="changePage(-1)">上一页</button><span>{{ negotiation.inventory?.page ?? 1 }} / {{ negotiation.inventory?.totalPages ?? 1 }}</span><button type="button" class="ghost-button" :disabled="disabled || (negotiation.inventory?.page ?? 1) >= (negotiation.inventory?.totalPages ?? 1)" @click="changePage(1)">下一页</button></div>
+    </div>
     </div>
 
     <div v-if="!isOngoing" class="negotiation-result"><strong>{{ negotiation.kind === 'success' ? '交涉成功' : negotiation.kind === 'closed' ? '交涉结束' : negotiation.kind === 'combat_started' || negotiation.kind === 'combat_resumed' ? '交涉转为战斗' : '交涉状态已更新' }}</strong><p>{{ negotiation.text }}</p></div>
@@ -126,7 +147,7 @@ const changePage = (offset: number) => {
 .negotiation-gift-heading input { width: 72px; padding: 5px 6px; color: var(--ink, #4d4354); background: #fffaf5; border: 1px solid var(--line, #eadfd8); border-radius: 7px; font-size: 11px; }
 .negotiation-item-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
 .negotiation-item { display: flex; align-items: center; gap: 7px; min-width: 0; padding: 8px; color: #554c5d; background: #faf4ee; border: 1px solid transparent; border-radius: 10px; text-align: left; }
-.negotiation-item:hover { border-color: #c9b3a6; }
+
 .negotiation-item-icon { display: grid; place-items: center; flex: 0 0 25px; width: 25px; height: 25px; color: #bd8b55; background: #fff; border-radius: 8px; }
 .negotiation-item > span:last-child { display: grid; min-width: 0; gap: 2px; }
 .negotiation-item strong, .negotiation-item small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

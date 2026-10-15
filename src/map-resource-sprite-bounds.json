@@ -1,0 +1,42 @@
+{
+  "ore_iron": {
+    "width": 1254,
+    "height": 1254,
+    "left": 55,
+    "top": 275,
+    "right": 1197,
+    "bottom": 1028
+  },
+  "ore_crystal": {
+    "width": 1254,
+    "height": 1254,
+    "left": 211,
+    "top": 202,
+    "right": 1073,
+    "bottom": 1051
+  },
+  "plant_herb": {
+    "width": 1254,
+    "height": 1254,
+    "left": 188,
+    "top": 117,
+    "right": 1095,
+    "bottom": 1103
+  },
+  "plant_mushroom": {
+    "width": 1254,
+    "height": 1254,
+    "left": 194,
+    "top": 241,
+    "right": 1093,
+    "bottom": 1029
+  },
+  "plant_tree": {
+    "width": 1254,
+    "height": 1254,
+    "left": 145,
+    "top": 146,
+    "right": 1113,
+    "bottom": 1116
+  }
+}

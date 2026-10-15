@@ -1,0 +1,127 @@
+/* Painted interface chrome only; terrain, whole-cell occupancy and hit masks
+   are owned by the map renderer and are deliberately independent of this file. */
+.world-map-panel.anime-adventure.exploration-map.exploration-canvas :is(.map-canvas-sidebar, .map-point-dialog, .world-map-action-card),
+.region-map-drawer.anime-adventure.exploration-region {
+  border: 9px solid transparent;
+  border-image: var(--game-ui-panel) 144 fill / 9px stretch;
+  border-radius: 0;
+  background: transparent;
+  background-clip: padding-box;
+}
+
+.world-map-panel.anime-adventure.exploration-map.exploration-canvas .map-canvas-coordinate {
+  padding: 6px 10px;
+  border: 1px solid #d1c39acc;
+  border-image: none;
+  border-radius: 8px;
+  background: var(--game-ui-explore-surface);
+  color: var(--game-ui-ink);
+}
+
+.world-map-panel.anime-adventure.exploration-map.exploration-canvas :is(.map-point-dialog, .world-map-action-card) {
+  padding: 10px 12px 12px;
+  box-shadow: 0 -4px 24px #3a627629;
+}
+
+.world-map-panel.anime-adventure.exploration-map.exploration-canvas .map-canvas-shortcuts > button,
+.world-map-panel.anime-adventure.exploration-map.exploration-canvas .world-map-zoom {
+  border: 6px solid transparent;
+  border-image: var(--game-ui-panel) 144 fill / 6px stretch;
+  border-radius: 0;
+  background: transparent;
+}
+
+.world-map-panel.anime-adventure.exploration-map.exploration-canvas .map-canvas-shortcuts > button {
+  padding: 1px;
+  color: var(--game-ui-ink);
+}
+
+.world-map-panel.anime-adventure.exploration-map.exploration-canvas .world-map-zoom {
+  padding: 4px 0;
+  border-width: 5px;
+  border-image-width: 5px;
+}
+
+.world-map-panel.anime-adventure.exploration-map.exploration-canvas .map-follow-toggle {
+  padding: 5px 9px;
+  border: 1px solid #d1c39acc;
+  border-image: none;
+  border-radius: 8px;
+  background: var(--game-ui-explore-surface);
+}
+
+.world-map-panel.anime-adventure.exploration-map.exploration-canvas :is(.world-map-zoom > button, .map-sidebar-close, .dialog-close),
+.region-map-drawer.anime-adventure.exploration-region :is(.drawer-close, .chooser-close) {
+  border: 6px solid transparent;
+  border-image: var(--game-ui-paper) 144 fill / 6px stretch;
+  border-radius: 0;
+  background: transparent;
+  color: var(--game-ui-ink);
+  box-shadow: none;
+  padding: 0;
+}
+
+.world-map-panel.anime-adventure.exploration-map.exploration-canvas :is(.map-dialog-button, .world-map-action-card > button),
+.region-map-drawer.anime-adventure.exploration-region .confirm-button {
+  border: 7px solid transparent;
+  border-image: var(--game-ui-paper) 144 fill / 7px 10px stretch;
+  border-radius: 0;
+  background: transparent;
+  color: var(--game-ui-ink);
+  padding: 3px 10px;
+  font-weight: 700;
+  box-shadow: 0 2px 3px #3a627618;
+}
+
+.world-map-panel.anime-adventure.exploration-map.exploration-canvas .map-dialog-button.tone-primary,
+.region-map-drawer.anime-adventure.exploration-region .confirm-button.primary {
+  border-image-source: var(--game-ui-teal);
+  color: var(--game-ui-primary-ink);
+  text-shadow: none;
+}
+
+.world-map-panel.anime-adventure.exploration-map.exploration-canvas .map-dialog-button.tone-danger,
+.world-map-panel.anime-adventure.exploration-map.exploration-canvas .world-map-action-card > button {
+  border-image-source: var(--game-ui-coral);
+  color: var(--game-ui-danger-ink);
+  text-shadow: none;
+}
+
+.world-map-panel.anime-adventure.exploration-map.exploration-canvas .map-cell-target,
+.region-map-drawer.anime-adventure.exploration-region :is(.region-compass, .region-map-marker-name, .drawer-section, .travel-confirm) {
+  border-image: var(--game-ui-panel) 144 fill / 7px stretch;
+  border-radius: 0;
+  background: transparent;
+}
+
+.region-map-drawer.anime-adventure.exploration-region .region-tab {
+  border: 7px solid transparent;
+  border-image: var(--game-ui-paper) 144 fill / 7px 10px stretch;
+  border-radius: 0;
+  background: transparent;
+  padding: 3px 5px;
+}
+
+.region-map-drawer.anime-adventure.exploration-region .region-tab.active {
+  border-image-source: var(--game-ui-teal);
+  color: var(--game-ui-primary-ink);
+}
+
+.world-map-panel.exploration-canvas .map-canvas-manual .adventure-manual-dock.anime-adventure .manual-label {
+  font-size: 11px;
+  line-height: 12px;
+}
+
+.world-map-panel.anime-adventure .nearby-target-action .anime-icon {
+  filter: none;
+}
+
+.world-map-panel.anime-adventure.exploration-map.exploration-canvas .map-sheet-heading {
+  min-width: 0;
+  padding-right: 30px;
+}
+
+.world-map-panel.anime-adventure.exploration-map.exploration-canvas .map-sheet-heading > div {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}

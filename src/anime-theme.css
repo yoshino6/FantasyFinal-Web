@@ -1,0 +1,481 @@
+/* Hand-painted surfaces stay separate from live text, controls and game state. */
+:root {
+  color-scheme: light;
+  --ink: #59404a;
+  --muted: #8a756c;
+  --cream: #f7f1de;
+  --paper: #fffbef;
+  --coral: #d56f60;
+  --lavender: #438e99;
+  --mint: #78b9a8;
+  --line: #d7c4a4;
+  --anime-teal: #2e999b;
+  --anime-blue: #57abc5;
+  --anime-gold: #dba95a;
+  --anime-shadow: 0 5px 0 #89674620, 0 12px 24px #62463d12;
+  font-family: 'Microsoft YaHei', 'PingFang SC', system-ui, sans-serif;
+  font-synthesis: none;
+}
+body {
+  background: #eef4e4;
+  color: var(--ink);
+  overflow-x: clip;
+}
+button, input, select, textarea { font: inherit; }
+button { touch-action: manipulation; }
+button:disabled { cursor: not-allowed; filter: saturate(.3); }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 3px solid #238e9e;
+  outline-offset: 3px;
+}
+input, select, textarea {
+  min-width: 0;
+  border: 1px solid #b8a285;
+  border-radius: 5px 8px 4px 7px;
+  color: var(--ink);
+  background: #fffaf0;
+  box-shadow: inset 0 2px 3px #795f3e0a;
+  accent-color: var(--anime-teal);
+}
+input::placeholder, textarea::placeholder { color: #998a7c; }
+.app-shell {
+  min-height: 100dvh;
+  padding-bottom: calc(118px + env(safe-area-inset-bottom));
+  background: linear-gradient(#fff4d329, #eff6e985 400px, #f8f1e7ed 900px), var(--anime-city) center top / cover fixed;
+}
+.app-shell[data-page='login'], .app-shell[data-page='register'] { padding-bottom: 0; background: #d9eadb; }
+.app-shell .card-surface {
+  position: relative;
+  border: 12px solid transparent;
+  border-image: url('/assets/light-anime/paper-frame.svg') 24 fill / 12px stretch;
+  border-radius: 5px;
+  background: #fffbef;
+  background-clip: padding-box;
+  box-shadow: var(--anime-shadow);
+  backdrop-filter: none;
+}
+.app-shell h1, .app-shell h2, .app-shell h3 { color: var(--ink); }
+.app-shell h1 { font-size: clamp(21px, 3vw, 30px); }
+.app-shell h2 { font-size: 20px; }
+.app-shell h3 { font-size: 17px; }
+.app-shell .eyebrow { color: #a08055; font-size: 10px; letter-spacing: .14em; }
+.app-shell :is(.primary-button, .soft-button, .danger-button) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 42px;
+  padding: 4px 13px;
+  border: 9px solid transparent;
+  border-image: url('/assets/light-anime/button-teal.svg') 18 fill / 9px stretch;
+  border-radius: 6px;
+  background: transparent;
+  color: #fffaf0;
+  font-weight: 700;
+  box-shadow: 0 3px 0 #745e4322;
+  text-shadow: 0 1px 0 #286f7266;
+  transition: transform .15s ease, filter .15s ease;
+}
+.app-shell .soft-button {
+  border-image-source: url('/assets/light-anime/button-paper.svg');
+  color: var(--ink);
+  text-shadow: none;
+}
+.app-shell .danger-button {
+  border-image-source: url('/assets/light-anime/button-coral.svg');
+  color: #fffaf0;
+}
+@media (hover: hover) {
+  .app-shell :is(.primary-button, .soft-button, .danger-button):not(:disabled):hover { filter: brightness(1.06); transform: translateY(-1px); }
+}
+.app-shell :is(.primary-button, .soft-button, .danger-button):not(:disabled):active { transform: translateY(2px); }
+.app-shell .ghost-button { color: #76624d; border: 1px solid #c7b392; background: #fff6e3; border-radius: 5px 8px 6px 4px; }
+.app-shell .dialog-close { display: grid; place-items: center; width: 34px; height: 34px; min-width: 34px; padding: 0; border: 1.5px solid #b59a75; background: #fff3da; color: #845d48; border-radius: 8px 6px 9px 5px; font-size: 24px; box-shadow: 0 2px 0 #9b754423; }
+/* Equal side columns keep the hanging title centered independently of the logo/actions. */
+.app-shell .topbar { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); width: min(1260px, calc(100% - 32px)); padding: 0 0 8px; gap: 16px; }
+.page-brand { min-width: 0; width: 100%; justify-self: start; }
+.anime-wordmark { position: relative; isolation: isolate; display: grid; place-items: center; width: min(180px, 100%); min-height: 74px; color: #1f3458; font-family: KaiTi, STKaiti, serif; font-size: 39px; font-weight: 900; letter-spacing: -3px; white-space: nowrap; text-shadow: 2px 2px #fff7dc, -1px -1px #fff7dc, 0 4px #cc984d; transform: rotate(-5deg); }
+.anime-wordmark::before { content: ''; position: absolute; z-index: -1; width: 60px; height: 80px; left: 32px; top: -3px; background: #edb24f; clip-path: polygon(50% 0, 60% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0 50%, 39% 39%); }
+.app-shell .anime-wordmark > span { display: block; color: inherit; font: inherit; letter-spacing: inherit; text-shadow: inherit; }
+.page-context { --title-width: clamp(220px, 40vw, 360px); position: relative; display: grid; place-items: center; align-self: start; justify-self: center; width: var(--title-width); aspect-ratio: 1200 / 406; height: auto; min-width: 0; margin-top: calc(var(--title-width) * -.0625); padding: 0; border: 0; background: url('/assets/light-anime/main-title-wood-v2.webp') center top / contain no-repeat; text-align: center; }
+.page-context > strong { position: absolute; top: 63.4%; left: 50%; transform: translate(-50%, -50%); color: #3c2b24; font-family: KaiTi, STKaiti, serif; font-size: 36px; font-weight: 900; line-height: 1.15; letter-spacing: 3px; white-space: nowrap; text-shadow: 0 1px 0 #ffe7b280; }
+.app-shell .top-actions { justify-self: end; justify-content: flex-end; flex-wrap: wrap; max-width: 100%; gap: 8px; }
+.app-shell :is(.inbox-button, .settings-button) { position: relative; display: grid; place-items: center; width: 40px; height: 40px; padding: 0; color: var(--ink); background: transparent; border: 0; border-radius: 5px; box-shadow: none; }
+.app-shell :is(.inbox-button, .settings-button) > img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.app-shell .inbox-button .inbox-unread-dot { position: absolute; top: 0; right: 0; width: 11px; min-width: 0; height: 11px; padding: 0; border: 2px solid #fff8e9; border-radius: 50%; background: #d95554; box-shadow: 0 1px 2px #6b3e3333; }
+.app-shell .connection-dot { color: #3e795b; background: #faf9e3; padding: 4px 8px; border: 1px solid #bcc49e; border-radius: 12px; font-size: 11px; white-space: nowrap; }
+.app-shell .page-content { width: min(1260px, calc(100% - 32px)); padding-top: 10px; }
+.anime-status-ribbon { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: min(1260px, calc(100% - 32px)); margin: 0 auto 2px; gap: 8px; }
+.anime-status-ribbon .stat-card { display: grid; grid-column: auto; grid-template-columns: 25px auto 1fr; grid-template-rows: auto 8px; gap: 3px 5px; align-items: center; min-height: 56px; padding: 5px 8px; border: 6px solid transparent; border-image: url('/assets/light-anime/paper-frame.svg') 24 fill / 6px stretch; border-radius: 4px; background: #fffbef; background-clip: padding-box; }
+.anime-status-ribbon .stat-card > .anime-icon { grid-row: 1 / 3; width: 25px; height: 25px; }
+.anime-status-ribbon .stat-card > span { font-size: 12px; font-weight: 700; color: var(--ink); }
+.anime-status-ribbon .stat-card > strong { display: block; min-width: 0; text-align: right; font-size: 12px; margin: 0; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.anime-status-ribbon .stat-card > i { grid-column: 2 / 4; height: 7px; border: 1px solid #b5a78d; border-radius: 99px; background: #d5cfb8; overflow: hidden; }
+.anime-status-ribbon .stat-card > i b { display: block; height: 100%; background: linear-gradient(#f4b09c, #df756e); border-radius: inherit; }
+.anime-status-ribbon .stat-card > i.mana b { background: linear-gradient(#a2e5f5, #58a9d0); }
+.anime-status-ribbon .stat-card > i.stamina b { background: linear-gradient(#b6dca7, #73b18a); }
+.app-shell .explore-frame { padding: 0; overflow: visible; border: 0; border-image: none; background: transparent; box-shadow: none; }
+.app-shell :is(.character-tabs, .social-section-tabs, .inventory-tabs, .inventory-subtabs, .inventory-equipment-tabs, .auth-tabs, .auto-battle-mode-tabs, .floating-social-tabs) { display: flex; gap: 4px; padding: 5px; border-radius: 3px; background: #eee1c6; box-shadow: inset 0 1px 0 #fff9eb; }
+.app-shell :is(.character-tabs, .social-section-tabs, .inventory-tabs, .auth-tabs, .auto-battle-mode-tabs) > button { flex: 1 1 0; min-width: 0; min-height: 43px; padding: 6px; border: 6px solid transparent; border-image: url('/assets/light-anime/button-paper.svg') 18 fill / 6px stretch; background: transparent; color: #675144; font-weight: 700; border-radius: 3px; }
+.app-shell :is(.character-tabs, .social-section-tabs, .inventory-tabs, .auth-tabs, .auto-battle-mode-tabs) > button.active { border-image-source: url('/assets/light-anime/button-teal.svg'); color: #fffaf0; text-shadow: 0 1px #477879; }
+.app-shell .character-tabs { border-image-width: 8px; border-width: 8px; margin-bottom: 12px; }
+.character-tab-icon .anime-icon { width: 20px; height: 20px; vertical-align: middle; }
+.app-shell .character-tabs button { display: flex; align-items: center; justify-content: center; gap: 5px; font-size: 12px; white-space: nowrap; }
+.app-shell .character-panel-grid { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+.app-shell .character-profile-card { padding: 16px; gap: 20px; background: linear-gradient(90deg, #f8ecd146, #fff7e7db), var(--anime-forest) 30% center / cover; }
+.app-shell .character-profile-portrait { flex: 0 0 36%; width: 36%; min-width: 140px; height: 430px; align-self: stretch; }
+.app-shell .character-profile-portrait.anime-growth-commerce .character-portrait-stage { width: 100%; height: 100%; aspect-ratio: auto; background: linear-gradient(#fdf1ce20, #e7eed940), var(--anime-forest) center / cover; border: 0; border-radius: 5px; box-shadow: none; }
+.app-shell .character-profile-portrait .character-portrait-empty { display: none; }
+.app-shell .character-profile-portrait .character-portrait-base { width: 100%; height: 100%; object-fit: contain; }
+.app-shell .character-profile-info { flex: 1; padding: 16px; background: #fff9e9eb; border: 1px solid #c9b28a; border-radius: 9px 5px 8px 4px; }
+.app-shell .character-profile-info h1 { font-size: 25px; }
+.app-shell .character-identity { grid-template-columns: minmax(0, 1fr); gap: 0; margin-top: 12px; padding-top: 6px; }
+.app-shell .character-identity > div { display: grid; grid-template-columns: 66px minmax(0, 1fr); gap: 7px; align-items: baseline; padding: 6px 0; border-bottom: 1px solid #dbcbae; }
+.app-shell .character-identity span { font-size: 12px; }
+.app-shell .character-identity strong { font-size: 12px; white-space: normal; overflow-wrap: anywhere; text-overflow: clip; }
+.app-shell .character-resource-list { grid-template-columns: minmax(0, 1fr); gap: 7px; margin-top: 10px; padding-top: 0; border: 0; }
+.app-shell .character-resource-list > div { grid-template-columns: auto 1fr; gap: 5px; padding: 5px 7px; background: #f5ead5; border: 1px solid #d9c6a5; border-radius: 4px; }
+.app-shell .character-resource-list strong { text-align: right; font-size: 11px; }
+.app-shell .character-resource-list i { grid-column: 1 / -1; }
+.app-shell .character-battle-stats { padding: 14px; }
+.app-shell .character-battle-stats h2 { display: flex; align-items: center; gap: 8px; font-size: 20px; padding-bottom: 8px; border-bottom: 1px solid #cab18f; }
+.app-shell .character-battle-grid { gap: 7px; }
+.app-shell .character-battle-item { background: #f7eedc; border: 1px solid #e1d0ac; border-radius: 4px 6px 3px 5px; }
+.app-shell .attribute-help-trigger { color: #8a765f; background: #eaddbf; }
+.app-shell .attribute-help-popover { border: 1px solid #bca27a; background: #fff9e9; color: #5d4d40; z-index: 8; }
+.app-shell .character-subpanel { padding: 12px; }
+.app-shell .subpanel-intro { margin-bottom: 12px; }
+.app-shell .equipment-layout { gap: 12px; }
+.app-shell .equipment-slot { background: #fbf3df; border: 1px solid #bfa682; border-radius: 7px 4px 6px 5px; box-shadow: inset 0 0 0 3px #fff8e9; }
+.app-shell .equipment-slot.filled { background: #fff8e7; border-color: #b69b62; }
+.app-shell .equipment-slot-icon { border-color: #d5bf96; background: #ede4ce; border-radius: 5px; }
+.app-shell .equipment-summary { background: linear-gradient(#d6eeeb40, #f5e6c660), var(--anime-forest) center / cover; border: 1px solid #bda581; border-radius: 8px 6px 9px 5px; }
+.app-shell .character-resource-list > div > span { display: inline-flex; align-items: center; gap: 4px; }
+.app-shell .inventory-frame { padding: 12px; }
+.app-shell .inventory-grid { gap: 8px; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
+.app-shell .inventory-slot { position: relative; min-height: 125px; padding: 9px; background: linear-gradient(140deg, #fffdf0, #ece2c7); border: 1px solid #bda786; border-radius: 6px 9px 5px 7px; box-shadow: inset 0 0 0 3px #fffaf0; }
+.app-shell .inventory-slot::before { content: ''; position: absolute; left: 3px; top: 3px; width: 12px; height: 12px; background: #8abbb0; clip-path: polygon(0 0, 100% 0, 0 100%); }
+.app-shell .inventory-slot strong { color: var(--ink); font-size: 12px; }
+.app-shell .inventory-slot small { position: absolute; right: 6px; bottom: 5px; padding: 1px 5px; background: #594d41; color: #fff8e9; border-radius: 4px; font-size: 10px; }
+.inventory-search { display: flex; align-items: center; gap: 7px; margin: 10px 0 12px; padding: 3px 9px; border: 1px solid #bca78a; border-radius: 6px 8px 4px 7px; background: #fffaf0; }
+.inventory-search input { flex: 1; width: 100%; margin: 0; padding: 8px 0; border: 0; box-shadow: none; background: transparent; }
+.inventory-search button { flex: 0 0 28px; padding: 3px; color: #8a715a; background: transparent; }
+.inventory-result-count { font-size: 11px; color: var(--muted); white-space: nowrap; }
+.app-shell .inventory-item-dialog { padding: 20px; width: min(430px, calc(100vw - 32px)); }
+.app-shell .inventory-dialog-icon { width: 90px; height: 90px; float: left; margin-right: 16px; }
+.app-shell .inventory-dialog-meta { clear: both; padding-top: 12px; }
+.inventory-use-preview { margin: 12px 0; padding: 14px; border: 1px solid #b6ba91; border-radius: 6px 9px 4px 7px; background: #e9f0db; }
+.inventory-use-preview h4 { margin: 0 0 10px; color: #426d62; }
+.inventory-use-preview > div { display: flex; justify-content: space-between; gap: 12px; padding: 5px 0; }
+.inventory-use-preview > p { margin: 8px 0 0; font-size: 11px; color: var(--muted); }
+.app-shell .social-page { display: grid; gap: 12px; }
+.app-shell .social-section-tabs { margin-bottom: 0; }
+.app-shell .social-summary-card { padding: 16px; }
+.app-shell .social-count { min-width: 28px; padding: 3px 9px; border: 1px solid #c2ad88; color: #735d45; background: #eee0bc; border-radius: 8px; }
+.app-shell .social-add-friend { padding: 10px 0 14px; }
+.app-shell .social-friend-list { gap: 10px; }
+.app-shell .social-friend-row { padding: 11px; background: #fff7e4; border: 1px solid #d6c4a1; border-radius: 5px 9px 5px 7px; gap: 11px; }
+.app-shell .avatar-dot { width: 43px; height: 43px; flex-basis: 43px; border: 2px solid #c3ab78; border-radius: 9px 6px 8px 4px; color: #706351; background: linear-gradient(145deg, #d4ebea, #ffedc2); font-size: 18px; font-weight: 700; }
+.app-shell .social-friend-row em { color: #437658; background: #dfecd6; border: 1px solid #b7caa4; border-radius: 10px; }
+.app-shell .social-friend-row em.oath { color: #b86673; background: #f9e1d7; border-color: #dfb6a6; }
+.app-shell .social-request-row { padding: 12px; border: 1px solid #d1bc96; border-radius: 5px; background: #f6ebcf; }
+.app-shell .oath-card { background: #fffaed; }
+.app-shell .oath-status { padding: 15px; border: 1px solid #cdb184; background: linear-gradient(125deg, #dcebed88, #fff6ddb0); border-radius: 6px 9px 4px 8px; }
+.app-shell .oath-emblem { width: 70px; height: 70px; }
+.app-shell .social-party-card { padding: 12px; }
+.app-shell .world-page { padding: 14px; }
+.app-shell .world-entry-grid { min-height: min(660px, 70dvh); align-content: end; grid-template-columns: 1fr 1fr; gap: 14px; padding: 26px; background: linear-gradient(0deg, #9b704938, transparent 60%), var(--anime-city) center / cover; border: 1px solid #b59b74; border-radius: 6px; }
+.app-shell .world-entry { min-height: 120px; padding: 15px; border: 14px solid transparent; border-image: url('/assets/light-anime/wood-sign.svg') 24 fill / 14px stretch; background: transparent; color: #64462e; border-radius: 0; box-shadow: 0 6px 12px #634c3d22; }
+.app-shell .world-entry strong { font-size: 24px; }
+.app-shell .world-entry small { color: #7a5e42; }
+.world-entry-mark .anime-icon { width: 40px; height: 40px; }
+.app-shell .world-side-links { background: #eddfc4; border: 1px solid #bea984; border-radius: 6px; }
+.app-shell .world-side-links button { color: var(--ink); background: #fbf3de; border: 1px solid #d8c7a8; border-radius: 5px; }
+.app-shell .world-side-links button.active { color: #fff8e9; background: #449a96; border-color: #387e7d; }
+.app-shell .world-back { color: #7a5f45; }
+.app-shell .bottom-nav { z-index: 30; bottom: 0; width: min(760px, 100%); min-height: 106px; padding: 0 2px max(2px, env(safe-area-inset-bottom)); gap: 0; background: transparent; border: 0; border-image: none; border-radius: 0; box-shadow: none; backdrop-filter: none; filter: drop-shadow(0 -2px 3px #67492930); }
+.app-shell .bottom-nav button { position: relative; display: grid; grid-template-rows: 58px 22px; justify-items: center; align-content: center; min-height: 104px; margin: 0 -1px; padding: 10px 2px 8px; gap: 0; color: #293042; font-family: KaiTi, STKaiti, serif; font-size: 18px; font-weight: 900; border: 0; border-radius: 0; background: url('/assets/light-anime/nav-parchment-v2.webp') center / 100% 100% no-repeat; }
+.app-shell .bottom-nav button img { width: min(80%, 62px); height: 58px; object-fit: contain; }
+.app-shell .bottom-nav button span { line-height: 22px; text-shadow: 0 1px #fff9df; }
+.app-shell .bottom-nav button.active { color: #fffdf1; background: url('/assets/light-anime/nav-active-v2.webp') center / 100% 100% no-repeat; box-shadow: none; transform: translateY(-4px); }
+.app-shell .bottom-nav button.active span { text-shadow: 0 2px #246f82, 1px 0 #246f82; }
+.app-shell .bottom-nav button.active img { transform: translateY(-1px) scale(1.04); }
+.app-shell .bottom-nav::before { content: ''; position: absolute; z-index: -1; inset: 30px 0 0; background: linear-gradient(#fff4d900, #f8efd9ec 25%, #fff6df); pointer-events: none; }
+.app-shell .bottom-nav .explore-nav { margin-top: 0; }
+.app-shell .bottom-nav .explore-nav img { width: min(84%, 65px); height: 62px; margin-top: -3px; }
+.app-shell .floating-social-layer { z-index: 40; }
+.app-shell .floating-social-dock { background: #fff7e5; border: 1px solid #baa17a; border-radius: 6px; box-shadow: 0 4px 12px #74533020; }
+.app-shell .floating-social-button { border-radius: 4px; background: #f4e9ce; color: var(--ink); border-color: #baa17a; }
+.app-shell .floating-social-panel { padding: 12px; border-radius: 4px; }
+.app-shell .floating-social-panel-heading { padding: 8px 5px; border-bottom: 1px solid #d6bd97; background: transparent; }
+.app-shell .floating-social-tabs button { padding: 8px 10px; border-radius: 4px; color: #725d49; background: #f7ecd4; }
+.app-shell .floating-social-tabs button.active { color: #fff9ea; background: #3b9b99; }
+.app-shell .floating-social-card { padding: 10px 4px 2px; }
+.app-shell .message-row p { text-align: left; color: var(--ink); background: #fff5dc; border: 1px solid #cfba93; border-radius: 3px 10px 7px 8px; }
+.app-shell .message-row.own p { background: #e3f1de; border-color: #aac69e; border-radius: 10px 3px 8px 7px; }
+.app-shell .chat-input { padding-top: 8px; border-top: 1px solid #ddcba8; }
+.app-shell .chat-recruitment-card { background: #e5eddd; border: 1px solid #b4c59d; border-radius: 6px; }
+.desktop-explore-sidebar { display: none; }
+.desktop-chat-paper, .desktop-party-paper { padding: 8px; border: 10px solid transparent; border-image: url('/assets/light-anime/paper-frame.svg') 24 fill / 10px stretch; background: #fff7e3; background-clip: padding-box; }
+.desktop-explore-sidebar header { display: flex; align-items: center; gap: 8px; min-width: 0; padding: 4px 0 9px; border-bottom: 1px solid #d3bc97; }
+.desktop-explore-sidebar header strong { min-width: 0; flex: 1; font-size: 14px; overflow-wrap: anywhere; }
+.desktop-explore-sidebar header button { flex: 0 0 auto; padding: 4px 7px; font-size: 11px; }
+.desktop-message-list { display: flex; flex-direction: column; gap: 8px; max-height: 218px; min-height: 135px; overflow-y: auto; overscroll-behavior: contain; padding: 10px 3px; }
+.desktop-message { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 3px 7px; align-items: baseline; font-size: 12px; }
+.desktop-message > strong { color: #358179; max-width: 7em; overflow-wrap: anywhere; }
+.desktop-message.own > strong { color: #a56c44; }
+.desktop-message > p { margin: 0; overflow-wrap: anywhere; line-height: 1.5; white-space: pre-wrap; }
+.desktop-message > time { grid-column: 2; font-size: 10px; color: #9e8a71; }
+.desktop-chat-input input { min-height: 39px; font-size: 12px; }
+.desktop-chat-input .primary-button { min-height: 39px; padding: 2px 6px; font-size: 12px; }
+.desktop-social-empty { margin: 12px 0; padding: 5px; color: #8b775e; font-size: 12px; line-height: 1.7; }
+.desktop-party-name { display: block; padding: 10px 5px 6px; font-size: 13px; }
+.desktop-party-members { display: flex; flex-wrap: wrap; gap: 6px; }
+.desktop-party-members > span { display: inline-flex; align-items: center; gap: 3px; padding: 4px 6px; border: 1px solid #c4b292; border-radius: 4px; background: #f3e8d1; font-size: 11px; }
+.app-shell .friend-channel-option { background: #f7ebd2; border: 1px solid #d1bd98; border-radius: 5px; color: var(--ink); }
+.app-shell .friend-channel-option.active { background: #d7eeea; border-color: #6aa9a7; }
+.app-shell .settings-drawer { border-radius: 6px; width: min(440px, calc(100vw - 28px)); padding: 15px; }
+.app-shell .settings-header { padding-bottom: 10px; border-bottom: 1px solid #d8c19c; background: transparent; }
+.app-shell .settings-section { padding: 14px 12px; border: 1px solid #d4c2a1; border-radius: 5px 8px 4px 6px; background: #fff7e6; }
+.app-shell .settings-help .settings-section-heading { display: grid; gap: 10px; }
+.app-shell .settings-help .soft-button { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; white-space: nowrap; }
+.app-shell .settings-switch { min-width: 64px; background: #cfccc0; color: #756b5c; border: 1px solid #aba18e; border-radius: 18px; }
+.app-shell .settings-switch.active { color: #fff9ed; background: #389c99; border-color: #327e7a; }
+.app-shell .avatar-choice { color: #816a52; background: #f5e9d2; border: 1px solid #cdb791; border-radius: 6px; }
+.app-shell .avatar-choice.active { background: #dbefdf; border-color: #66a59d; }
+.app-shell .settings-gender button.active { background: #d3ede6; color: #356a66; border-color: #66a59d; }
+.app-shell .account-id-row { padding: 8px; background: #f5ead4; border: 1px solid #d4c19b; border-radius: 5px; }
+.app-shell .auto-battle-dialog { padding: 16px; border-radius: 6px; }
+.app-shell .auto-battle-state { color: #b46455; background: #f5d8cc; border-radius: 12px; }
+.app-shell .auto-battle-state.enabled { color: #447459; background: #e2edce; }
+.app-shell .auto-battle-row, .app-shell .auto-battle-threshold, .app-shell .auto-battle-action-row { border: 1px solid #d4c09a; background: #fcf3df; border-radius: 5px; }
+.app-shell .auto-battle-actions-heading { color: #6d563f; }
+.app-shell .auto-battle-toggle.active { background: #6bb2a3; border-color: #438c80; }
+.app-shell .auto-battle-action-row > b { color: #967349; background: #f0deb3; border: 1px solid #c4a36b; border-radius: 50%; }
+.app-shell :is(.auto-battle-toggle-row, .auto-battle-default, .auto-battle-potion-grid label) { background: #f9efd8; border: 1px solid #d4c09a; border-radius: 5px 9px 4px 6px; }
+.app-shell .auto-battle-potion-grid input[type='range'] { accent-color: var(--anime-teal); }
+.app-shell .toggle-button { color: #8b6f58; background: #ead9bd; border: 1px solid #bba080; }
+.app-shell .toggle-button.active { color: #fff9eb; background: #439e98; border-color: #267e79; }
+.app-shell .interaction-choice { width: min(440px, calc(100vw - 32px)); padding: 18px 12px; }
+.app-shell .interaction-choice-list button { display: grid; grid-template-columns: 30px minmax(0, 1fr) 18px; gap: 10px; text-align: left; }
+.app-shell .interaction-choice-list button > span { display: grid; gap: 4px; min-width: 0; }
+.app-shell .interaction-choice-list strong { font-size: 14px; }
+.app-shell .interaction-choice-list small { white-space: normal; overflow-wrap: anywhere; line-height: 1.5; }
+.app-shell .auto-battle-default-actions button.active { background: #439e9b; color: #fff7e8; }
+.app-shell .feedback-toast { z-index: 110; max-width: calc(100vw - 30px); padding: 13px 20px; color: #37695a; border: 2px solid #8dab82; border-radius: 8px 5px 9px 4px; background: #f5fae8; box-shadow: 0 5px 14px #4d564524; }
+.app-shell .feedback-toast.error { color: #a04f43; border-color: #c88e78; background: #fff0de; }
+.app-shell .empty-state, .app-shell .social-empty { padding: 24px 18px; min-height: 120px; color: #8b775e; background: #f8efd8; border: 1px dashed #c6b28a; border-radius: 8px; line-height: 1.7; }
+.app-shell .error-text { color: #b65747; padding: 8px; background: #fff0de; border: 1px solid #e6c3a7; border-radius: 4px; }
+.app-shell .result-text { background: #f9efd9; color: #7c6953; border: 1px solid #d4c09c; border-radius: 4px; }
+.app-shell :is(.settings-layer, .inventory-item-backdrop, .interaction-choice-backdrop, .auto-battle-backdrop) { z-index: 80; }
+.app-shell .story-settings-layer { z-index: 130; }
+.app-shell :is(.settings-backdrop, .inventory-item-backdrop, .interaction-choice-backdrop, .auto-battle-backdrop) { background-color: #2c374e6b; backdrop-filter: blur(2px); }
+.app-shell .account-onboarding-layer { z-index: 120; background: linear-gradient(#afdadc44, #f6efd37a), var(--anime-auth) center / cover; }
+.app-shell .account-onboarding { width: min(440px, calc(100vw - 32px)); padding: 26px; }
+.app-shell .account-onboarding h2 { font-size: 25px; text-align: center; }
+.app-shell .auth-screen { position: relative; isolation: isolate; min-height: 100dvh; padding: 30px; align-items: center; justify-content: flex-end; background: #cbe4db; }
+.app-shell .auth-art { position: absolute; z-index: -2; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 35% 35%; }
+.app-shell .auth-screen::after { z-index: -1; background: linear-gradient(90deg, #ffedbb00, #fff3d72b 40%, #fff7e8ba); }
+.app-shell .auth-card-column { width: min(420px, 100%); margin-right: max(3vw, calc((100vw - 1260px) / 2)); }
+.app-shell .auth-card { padding: 21px; border-width: 18px; border-image-width: 18px; }
+.app-shell .world-title { margin-bottom: 15px; filter: drop-shadow(0 2px 2px #fffcdf); }
+.app-shell .world-title::before, .app-shell .world-title::after { content: none; }
+.app-shell .auth-card form { display: grid; gap: 10px; }
+.app-shell .auth-card input { margin-top: 0; min-height: 46px; border: 1px solid #bfa67f; background: #fffaf0; border-radius: 7px 4px 8px 5px; }
+.app-shell .auth-tabs { margin-bottom: 18px; }
+.app-shell .auth-tabs button { font-size: 17px; }
+.app-shell .auth-card .primary-button { margin-top: 5px; min-height: 50px; font-size: 19px; }
+.app-shell .auth-tip { color: #8b765d; }
+@media (min-width: 1180px) {
+  .app-shell .explore-frame .world-map-layout.has-footer { grid-template-areas: 'map targets' 'footer targets'; grid-template-rows: auto 1fr; }
+  .desktop-explore-sidebar { display: grid; gap: 8px; margin-top: 8px; }
+  .app-shell .explore-frame .explore-map .world-map-grid-shell { width: min(100%, clamp(320px, calc(100dvh - 340px), 820px)); }
+  .app-shell .explore-frame .explore-map .world-map-footer { width: min(100%, clamp(320px, calc(100dvh - 340px), 820px)); }
+  .app-shell[data-page='explore'] .floating-social-dock { display: none; }
+  .app-shell { padding-left: 110px; }
+  /* The side navigation reserves 110px; compensate so the title centers on the viewport. */
+  .app-shell .topbar { transform: translateX(-55px); }
+  .app-shell .bottom-nav { left: 12px; top: 114px; bottom: auto; width: 96px; min-height: 590px; grid-template-columns: 1fr; transform: none; padding: 0; gap: 0; }
+  .app-shell .bottom-nav button { min-height: 118px; grid-template-rows: 70px 23px; font-size: 21px; }
+  .app-shell .bottom-nav button img { width: 74px; height: 70px; }
+  .app-shell .bottom-nav .explore-nav img { width: 76px; height: 73px; }
+  .app-shell .bottom-nav::before { content: none; }
+  .app-shell .character-panel-grid { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); align-items: start; }
+  .app-shell .character-profile-card { align-self: stretch; }
+  .app-shell .character-battle-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .app-shell .character-tabs { max-width: 820px; margin-left: auto; margin-right: auto; }
+  .app-shell .auth-screen { margin-left: -110px; }
+}
+@media (max-width: 760px) {
+  .app-shell { background-attachment: scroll; }
+  .app-shell .topbar { padding: 0 0 2px; gap: 8px; }
+  .app-shell .topbar, .app-shell .page-content, .anime-status-ribbon { width: calc(100% - 20px); }
+  .page-brand { gap: 6px; }
+  .anime-wordmark { width: min(106px, 100%); min-height: 56px; font-size: 27px; letter-spacing: -3px; }
+  .anime-wordmark::before { width: 35px; height: 56px; left: 15px; top: 0; }
+  .page-context { --title-width: clamp(140px, 42vw, 164px); padding: 0; }
+  .page-context > strong { font-size: 24px; letter-spacing: 2px; }
+  .app-shell .top-actions { gap: 5px; }
+  .app-shell :is(.inbox-button, .settings-button) { width: 31px; height: 32px; padding: 0; }
+  .app-shell .inbox-button .inbox-unread-dot { top: -1px; right: -1px; width: 10px; height: 10px; }
+  .app-shell .connection-dot { display: none; }
+  .anime-status-ribbon { gap: 4px; }
+  .anime-status-ribbon .stat-card { grid-template-columns: 18px 1fr; grid-template-rows: auto auto 6px; gap: 2px 3px; padding: 3px; min-height: 58px; border-width: 4px; border-image-width: 4px; }
+  .anime-status-ribbon .stat-card > .anime-icon { grid-row: 1; width: 18px; height: 18px; }
+  .anime-status-ribbon .stat-card > span { font-size: 10px; }
+  .anime-status-ribbon .stat-card > strong { grid-column: 1 / -1; font-size: 11px; text-align: center; }
+  .anime-status-ribbon .stat-card > i { grid-column: 1 / -1; }
+  .app-shell .page-content { padding-top: 8px; }
+  .app-shell .card-surface { border-width: 9px; border-image-width: 9px; }
+  .app-shell .character-profile-card { gap: 10px; padding: 5px; }
+  .app-shell .character-profile-portrait { flex-basis: 36%; width: 36%; min-width: 0; height: 100%; min-height: 410px; }
+  .app-shell .character-profile-info { padding: 8px; }
+  .app-shell .character-profile-info h1 { font-size: 19px; }
+  .app-shell .character-identity > div { grid-template-columns: 54px minmax(0, 1fr); gap: 4px; padding: 5px 0; }
+  .app-shell .character-identity span, .app-shell .character-identity strong { font-size: 11px; }
+  .app-shell .character-tabs { padding: 3px; gap: 2px; }
+  .app-shell .character-tabs button { flex-direction: column; gap: 3px; font-size: 10px; padding: 3px 0; }
+  .app-shell .character-battle-stats { padding: 8px; }
+  .app-shell .inventory-frame { padding: 5px; }
+  .app-shell .inventory-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+  .app-shell .inventory-slot { min-height: 100px; padding: 6px 3px 20px; }
+  .app-shell .inventory-slot strong { font-size: 10px; line-height: 1.4; }
+  .app-shell .inventory-slot .inventory-item-icon { width: 48px; height: 48px; }
+  .app-shell .social-summary-card { padding: 8px; }
+  .app-shell .social-friend-row { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 8px; }
+  .app-shell .social-friend-row > .social-row-actions { grid-column: 2 / 4; justify-content: flex-end; }
+  .app-shell .social-request-row { gap: 8px; flex-wrap: wrap; }
+  .app-shell .world-page { padding: 3px; }
+  .app-shell .world-entry-grid { min-height: 63dvh; padding: 18px 8px; gap: 9px; }
+  .app-shell .world-entry { min-height: 110px; padding: 8px; border-width: 9px; border-image-width: 9px; }
+  .app-shell .world-entry strong { font-size: 19px; }
+  .app-shell .settings-drawer { padding: 10px; }
+  .app-shell .auth-screen { justify-content: center; align-items: flex-end; padding: 24px 18px max(28px, env(safe-area-inset-bottom)); }
+  .app-shell .auth-screen::after { background: linear-gradient(0deg, #fff7e8b0, #fff3d726 68%, transparent); }
+  .app-shell .auth-art { object-position: 40% 20%; }
+  .app-shell .auth-card-column { width: min(390px, 100%); margin-right: 0; }
+  .app-shell .auth-card { padding: 16px; border-width: 15px; border-image-width: 15px; }
+  .app-shell .world-title img { width: 210px; }
+}
+@media (max-width: 1179px) {
+  .app-shell .world-map-sidebar-extra { display: none; }
+}
+@media (max-width: 360px) {
+  .anime-wordmark { width: min(76px, 100%); font-size: 21px; }
+  .page-context > strong { font-size: 22px; }
+  .app-shell .character-tabs button { font-size: 9px; }
+  .anime-status-ribbon .stat-card { grid-template-columns: 18px 1fr; }
+  .anime-status-ribbon .stat-card > .anime-icon { display: inline-block; }
+  .anime-status-ribbon .stat-card > i { grid-column: 1 / 3; }
+  .app-shell .inventory-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-shell *, .app-shell *::before, .app-shell *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+/* Primary sections share one paper rail directly below the wooden page title. */
+.app-shell[data-visual='light-anime'] .main-section-tabs {
+  --section-tab-count: 3;
+  display: grid;
+  grid-template-columns: repeat(var(--section-tab-count), minmax(0, 1fr));
+  width: min(1260px, calc(100% - 32px));
+  max-width: none;
+  height: 68px;
+  min-height: 68px;
+  margin: 0 auto;
+  padding: 0;
+  gap: 0;
+  border: 6px solid transparent;
+  border-image: url('/assets/light-anime/main-tabs-paper-v1.webp') 40 64 fill / 12px stretch;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: 0 3px 6px #73583c1c;
+  overflow: visible;
+}
+.app-shell[data-visual='light-anime'] .main-section-tabs.character-tabs { --section-tab-count: 5; }
+.app-shell[data-visual='light-anime'] .main-section-tabs.inventory-tabs { --section-tab-count: 4; }
+.app-shell[data-visual='light-anime'] .main-section-tabs > button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  gap: 7px;
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  min-height: 0;
+  margin: 0;
+  padding: 0 3px;
+  border: 4px solid transparent;
+  border-image: none;
+  border-radius: 0;
+  color: #655247;
+  background: transparent;
+  box-shadow: none;
+  font-family: KaiTi, STKaiti, serif;
+  font-size: clamp(16px, 1.8vw, 24px);
+  font-weight: 900;
+  line-height: 1.2;
+  letter-spacing: 0;
+  text-shadow: 0 1px #fffaf0;
+  white-space: nowrap;
+}
+.app-shell[data-visual='light-anime'] .main-section-tabs > button + button::before {
+  content: '';
+  position: absolute;
+  top: 12%;
+  bottom: 12%;
+  left: -5px;
+  width: 1px;
+  background: #cbb18c99;
+}
+.app-shell[data-visual='light-anime'] .main-section-tabs > button.active {
+  z-index: 1;
+  border-image: url('/assets/light-anime/main-tab-active-v1.webp') 40 fill / 6px stretch;
+  color: #fffdf1;
+  background: transparent;
+  box-shadow: none;
+  text-shadow: 0 1px 1px #267a79;
+}
+.app-shell[data-visual='light-anime'] .main-section-tabs > button.active::before,
+.app-shell[data-visual='light-anime'] .main-section-tabs > button.active + button::before { content: none; }
+.app-shell[data-visual='light-anime'] .main-section-tabs > button > :first-child {
+  display: grid;
+  place-items: center;
+  flex: 0 0 27px;
+  width: 27px;
+  min-width: 0;
+  height: 27px;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  color: inherit;
+  background: transparent;
+  box-shadow: none;
+  pointer-events: none;
+}
+.app-shell[data-visual='light-anime'] .main-section-tabs > button > :first-child :is(svg, img) {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  object-fit: contain;
+}
+.app-shell[data-visual='light-anime'] .main-section-tabs > button > svg:first-child { display: block; }
+.app-shell[data-visual='light-anime'] .main-section-tabs > button > span:last-child { min-width: 0; margin: 0; color: inherit; font: inherit; white-space: nowrap; }
+.app-shell[data-visual='light-anime'] .world-selected-layout { grid-template-columns: minmax(0, 1fr); }
+@media (hover: hover) {
+  .app-shell[data-visual='light-anime'] .main-section-tabs > button:not(:disabled):hover { background: transparent; filter: brightness(1.04); }
+}
+@media (max-width: 760px) {
+  .app-shell[data-visual='light-anime'] .main-section-tabs { width: calc(100% - 20px); height: 62px; min-height: 62px; }
+  .app-shell[data-visual='light-anime'] .main-section-tabs > button { gap: 4px; font-size: 13px; }
+  .app-shell[data-visual='light-anime'] .main-section-tabs > button > :first-child { flex-basis: 22px; width: 22px; height: 22px; }
+}
+@media (max-width: 600px) {
+  .app-shell[data-visual='light-anime'] .main-section-tabs > button { flex-direction: column; gap: 2px; padding: 0 1px; font-size: clamp(11px, 3.05vw, 12px); }
+  .app-shell[data-visual='light-anime'] .main-section-tabs > button > :first-child { flex-basis: 20px; width: 20px; height: 20px; }
+}

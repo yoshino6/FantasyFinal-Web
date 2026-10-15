@@ -1,5 +1,11 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
+import AnimeIcon from './AnimeIcon.vue';
+import GameUiFeedbackArt from './GameUiFeedbackArt.vue';
+import SkillIcon from './SkillIcon.vue';
+import InventoryItemIcon from './InventoryItemIcon.vue';
+import { gameAssetUrl } from '../game-assets';
+import './anime-adventure.css';
 import { userFacingErrorMessage } from '../api';
 import { createIdempotencyKey } from '../idempotency-key';
 import * as handbook from '../handbook-api';
@@ -13,6 +19,7 @@ const props = defineProps<{ open: boolean; section: HandbookSection }>();
 const emit = defineEmits<{ close: []; updated: [section: HandbookSection] }>();
 
 const title = computed(() => ({ footprints: '足迹', codex: '图鉴', warrants: '通缉' })[props.section]);
+const kindIcon = (kind: string) => kind === '装备' ? 'sword' : kind === '道具' ? 'scroll' : kind === '材料' ? 'stamina' : kind === '怪物' ? 'paw' : 'mana';
 const loading = ref(false);
 const detailLoading = ref(false);
 const working = ref(false);
@@ -311,11 +318,11 @@ function dateText(value: string | null) {
 <template>
   <Teleport to="body">
     <div v-if="open" class="handbook-backdrop" role="presentation" @click.self="emit('close')">
-      <section class="handbook-dialog" role="dialog" aria-modal="true" :aria-label="`冒险手册${title}`" @keydown.esc="emit('close')">
+      <section class="handbook-dialog anime-adventure" :class="`handbook-${section}`" role="dialog" aria-modal="true" :aria-label="`冒险手册${title}`" @keydown.esc="emit('close')">
         <header class="handbook-header">
-          <div class="heading-mark" aria-hidden="true">✦</div>
+          <div class="heading-mark" aria-hidden="true"><AnimeIcon :name="section === 'footprints' ? 'paw' : section === 'codex' ? 'book' : 'sword'" :size="40" /></div>
           <div class="heading-copy"><small>冒险手册 · ADVENTURE NOTES</small><h2>{{ title }}</h2></div>
-          <button class="icon-button" type="button" :aria-label="`关闭${title}`" @click="emit('close')">×</button>
+          <button class="icon-button" type="button" :aria-label="`关闭${title}`" @click="emit('close')"><AnimeIcon name="close" /></button>
         </header>
 
         <div class="handbook-body">
@@ -326,10 +333,10 @@ function dateText(value: string | null) {
             <template v-if="section === 'footprints'">
               <p class="intro">旅途中留下的足迹，只记录已经达成的成就。</p>
               <section v-if="rewards" class="reward-card" aria-label="足迹奖励">
-                <div class="section-heading"><span>✧</span><h3>成就珍藏</h3></div>
+                <div class="section-heading"><AnimeIcon name="star" :size="26" /><h3>成就珍藏</h3></div>
                 <div v-if="rewards.actions.length" class="box-list">
                   <div v-for="action in rewards.actions" :key="action.boxKey" class="box-row">
-                    <div><strong>{{ action.name }}</strong><small>持有 {{ action.available }} 个 · 每次最多开启 100 个</small></div>
+                    <AnimeIcon class="box-art" name="home" :size="54" /><div><strong>{{ action.name }}</strong><small>持有 {{ action.available }} 个 · 每次最多开启 100 个</small></div>
                     <div class="box-controls"><input v-model.number="boxQuantity[action.boxKey]" type="number" inputmode="numeric" min="1" :max="Math.min(100, action.available)" :aria-label="`${action.name}开启数量`" />
                       <button type="button" :disabled="working || !quantityForBox(action.boxKey, action.available)" @click="openBox(action.boxKey, action.available)">开启</button></div>
                   </div>
@@ -341,19 +348,19 @@ function dateText(value: string | null) {
               <p v-if="!loading && achievementPage" class="count">已完成 {{ achievementPage.total }} 项</p>
               <div v-if="!loading && achievementPage?.entries.length" class="entry-list">
                 <button v-for="entry in achievementPage.entries" :key="entry.id" class="entry-card" type="button" @click="showDetail('achievement', entry.id)">
-                  <span class="entry-icon">✦</span><span class="entry-main"><strong>{{ entry.name }}</strong><small>{{ entry.category }} · {{ entry.rarity }} · {{ entry.completedAt }}</small><span>{{ entry.description }}</span></span><span class="entry-arrow">›</span>
+                  <span class="entry-icon achievement-emblem"><AnimeIcon name="star" :size="42" /></span><span class="entry-main"><strong>{{ entry.name }}</strong><small>{{ entry.category }} · {{ entry.rarity }} · {{ entry.completedAt }}</small><span>{{ entry.description }}</span></span><span class="achievement-stamp">已达成</span><span class="entry-arrow"><AnimeIcon name="arrow" :size="20" /></span>
                 </button>
               </div>
             </template>
 
             <template v-else-if="section === 'codex'">
               <p class="intro">图鉴收录你已发现的事物，继续冒险可解锁更多条目。</p>
-              <div class="chip-row" aria-label="图鉴分类"><button v-for="kind in codexKinds" :key="kind" type="button" :class="{ selected: codexKind === kind }" :disabled="loading" @click="selectCodexKind(kind)">{{ kind }}</button></div>
+              <div class="chip-row" aria-label="图鉴分类"><button v-for="kind in codexKinds" :key="kind" type="button" :class="{ selected: codexKind === kind }" :disabled="loading" @click="selectCodexKind(kind)"><AnimeIcon :name="kindIcon(kind)" :size="22" />{{ kind }}</button></div>
               <div class="chip-row subchips" aria-label="图鉴子分类"><button v-for="category in codexCategories" :key="category.value" type="button" :class="{ selected: codexCategory === category.value }" :disabled="loading" @click="selectCodexCategory(category.value)">{{ category.label }}</button></div>
               <form class="search-row" @submit.prevent="searchCodex"><input v-model="keywordDraft" maxlength="80" type="search" placeholder="搜索已发现条目" aria-label="搜索图鉴" /><button type="submit" :disabled="loading">查找</button></form>
-              <div v-if="!loading && codexPage?.entries.length" class="entry-list">
+              <div v-if="!loading && codexPage?.entries.length" class="entry-list codex-gallery">
                 <button v-for="entry in codexPage.entries" :key="entry.id" class="entry-card" type="button" @click="showDetail('codex', entry.detailId)">
-                  <span class="entry-icon">▤</span><span class="entry-main"><strong>{{ entry.name }}</strong><small>{{ entry.category }}</small></span><span class="entry-arrow">›</span>
+                  <span class="entry-icon"><img v-if="codexKind === '怪物' && entry.name.includes('球兔')" :src="gameAssetUrl('/assets/loading/ball-rabbit.png')" alt="" /><SkillIcon v-else-if="codexKind === '技能'" :code="entry.code" :name="entry.name" :size="48" /><AnimeIcon v-else-if="codexKind === '怪物'" :name="kindIcon(codexKind)" :size="48" /><InventoryItemIcon v-else :name="entry.name" :codex-id="entry.detailId" :item-type="codexKind" /></span><span class="entry-main"><strong>{{ entry.name }}</strong><small>{{ entry.category }}</small></span><span class="entry-arrow"><AnimeIcon name="arrow" :size="20" /></span>
                 </button>
               </div>
             </template>
@@ -365,36 +372,37 @@ function dateText(value: string | null) {
                 <div class="chip-row subchips" aria-label="行踪筛选"><button v-for="filter in warrantFilters" :key="filter" type="button" :class="{ selected: warrantFilter === filter }" :disabled="loading" @click="selectWarrantFilter(filter)">{{ filter }}</button></div>
                 <div v-if="!loading && warrantPage?.entries.length" class="entry-list">
                   <button v-for="entry in warrantPage.entries" :key="entry.id" class="entry-card" type="button" @click="showDetail('warrant', entry.id)">
-                    <span class="entry-icon warrant-icon">⚑</span><span class="entry-main"><strong>{{ entry.name }}</strong><small>{{ entry.regionName }} · {{ traceText(entry.trace) }} · {{ positionText(entry.position) }}</small><span>悬赏 {{ entry.rewardCopper }} 铜币 · {{ entry.rewardItems }} 件物品</span></span><span class="entry-arrow">›</span>
+                    <span class="entry-icon warrant-icon"><AnimeIcon name="party" :size="44" /><b>{{ entry.name.slice(0, 1) }}</b></span><span class="entry-main"><strong>{{ entry.name }}</strong><small>{{ entry.regionName }}</small><span class="warrant-trace" :class="`trace-${entry.trace}`">{{ traceText(entry.trace) }}</span><small>{{ positionText(entry.position) }}</small></span><span class="warrant-reward"><small>悬赏</small><strong><AnimeIcon name="coin" :size="22" />{{ entry.rewardCopper }} 铜币</strong><span>{{ entry.rewardItems }} 件物品</span></span><span class="entry-arrow"><AnimeIcon name="arrow" :size="20" /></span>
                   </button>
                 </div>
               </template>
-              <div v-else-if="warrantTab === 'posts' && !loading && postsPage?.entries.length" class="entry-list">
-                <article v-for="entry in postsPage.entries" :key="entry.id" class="entry-card static-card"><span class="entry-icon">✧</span><span class="entry-main"><strong>{{ entry.wantedName }}</strong><small>{{ entry.regionName }} · {{ entry.warrantStatus }}</small><span>{{ entry.itemName ? `${entry.itemName} ×${entry.quantity}` : `${entry.copper} 铜币` }}</span><small>发布：{{ dateText(entry.postedAt) }} · {{ entry.claimedAt ? `领取：${dateText(entry.claimedAt)}（${entry.claimedBy ?? '未知'}）` : '尚未领取' }}</small></span></article>
+              <div v-else-if="warrantTab === 'posts' && !loading && postsPage?.entries.length" class="entry-list warrant-ledger">
+                <div class="ledger-heading"><span>通缉对象</span><span>我的赏金与状态</span></div>
+                <article v-for="entry in postsPage.entries" :key="entry.id" class="entry-card static-card"><span class="entry-icon"><AnimeIcon name="party" :size="36" /></span><span class="entry-main"><strong>{{ entry.wantedName }}</strong><small>{{ entry.regionName }}</small><small>发布：{{ dateText(entry.postedAt) }}</small></span><span class="ledger-amount"><strong>{{ entry.itemName ? `${entry.itemName} ×${entry.quantity}` : `${entry.copper} 铜币` }}</strong><em>{{ entry.warrantStatus }}</em><small>{{ entry.claimedAt ? `领取：${dateText(entry.claimedAt)}（${entry.claimedBy ?? '未知'}）` : '尚未领取' }}</small></span></article>
               </div>
               <div v-else-if="warrantTab === 'pursuits' && !loading && pursuitsPage?.entries.length" class="entry-list">
-                <article v-for="entry in pursuitsPage.entries" :key="entry.warrantId" class="entry-card static-card"><span class="entry-icon">⚔</span><span class="entry-main"><strong>{{ entry.wantedName }}</strong><small>{{ entry.regionName }} · {{ entry.recordType === 'capture' ? '本人缉获' : '领取悬赏' }}</small><span v-if="entry.capturedAt">缉获：{{ dateText(entry.capturedAt) }}</span><span v-if="entry.rewardClaimedAt">领取：{{ dateText(entry.rewardClaimedAt) }} · {{ entry.rewardCopper }} 铜币 · {{ entry.rewardItems }} 件物品</span></span></article>
+                <article v-for="entry in pursuitsPage.entries" :key="entry.warrantId" class="entry-card static-card pursuit-card"><span class="entry-icon"><AnimeIcon name="sword" :size="44" /></span><span class="entry-main"><strong>{{ entry.wantedName }}</strong><small>{{ entry.regionName }}</small><span v-if="entry.capturedAt">缉获：{{ dateText(entry.capturedAt) }}</span><span v-if="entry.rewardClaimedAt">领取：{{ dateText(entry.rewardClaimedAt) }} · {{ entry.rewardCopper }} 铜币 · {{ entry.rewardItems }} 件物品</span></span><em class="pursuit-stamp">{{ entry.recordType === 'capture' ? '本人缉获' : '领取悬赏' }}</em></article>
               </div>
             </template>
 
-            <p v-if="loading" class="empty" role="status">正在翻阅{{ title }}…</p>
-            <p v-else-if="!error && !currentPage?.entries.length" class="empty">这一页还没有记录。</p>
+            <p v-if="loading" class="empty game-ui-empty-message" role="status"><GameUiFeedbackArt name="loading" :size="36" /><span>正在翻阅{{ title }}…</span></p>
+            <p v-else-if="!error && !currentPage?.entries.length" class="empty game-ui-empty-message"><GameUiFeedbackArt name="empty" :size="36" /><span>这一页还没有记录。</span></p>
             <nav v-if="!loading && !error && currentPage && pageCount > 1" class="pager" aria-label="翻页"><button type="button" :disabled="page <= 1" @click="changePage(page - 1)">上一页</button><span>{{ page }} / {{ pageCount }}</span><button type="button" :disabled="page >= pageCount" @click="changePage(page + 1)">下一页</button></nav>
           </template>
 
           <template v-else>
-            <button class="back-button" type="button" @click="resetDetail">‹ 返回列表</button>
-            <p v-if="detailLoading" class="empty" role="status">正在查看详情…</p>
+            <button class="back-button" type="button" @click="resetDetail"><AnimeIcon name="arrow" :size="18" />返回列表</button>
+            <p v-if="detailLoading" class="empty game-ui-empty-message" role="status"><GameUiFeedbackArt name="loading" :size="36" /><span>正在查看详情…</span></p>
             <p v-if="detailError" class="error" role="alert">{{ detailError }}</p>
             <template v-if="detail && detailType === 'achievement'">
-              <article class="detail-card"><span class="detail-symbol">✦</span><p class="eyebrow">{{ (detail as AchievementEntry).category }} · {{ (detail as AchievementEntry).rarity }}</p><h3>{{ (detail as AchievementEntry).name }}</h3><p>{{ (detail as AchievementEntry).description }}</p><div class="detail-grid"><span>达成时间 <strong>{{ (detail as AchievementEntry).completedAt }}</strong></span><span>奖励 <strong>{{ (detail as AchievementEntry).attribute }}</strong></span><span>达成顺序 <strong>第 {{ (detail as AchievementEntry).rank }} 位</strong></span><span>全服完成率 <strong>{{ (detail as AchievementEntry).percentage }}</strong></span></div></article>
+              <article class="detail-card"><span class="detail-symbol"><AnimeIcon name="star" :size="40" /></span><p class="eyebrow">{{ (detail as AchievementEntry).category }} · {{ (detail as AchievementEntry).rarity }}</p><h3>{{ (detail as AchievementEntry).name }}</h3><p>{{ (detail as AchievementEntry).description }}</p><div class="detail-grid"><span>达成时间 <strong>{{ (detail as AchievementEntry).completedAt }}</strong></span><span>奖励 <strong>{{ (detail as AchievementEntry).attribute }}</strong></span><span>达成顺序 <strong>第 {{ (detail as AchievementEntry).rank }} 位</strong></span><span>全服完成率 <strong>{{ (detail as AchievementEntry).percentage }}</strong></span></div></article>
             </template>
             <template v-if="detail && detailType === 'codex'">
-              <article class="detail-card"><span class="detail-symbol">▤</span><p class="eyebrow">{{ (detail as CodexDetail).kind }} · 已发现</p><h3>{{ (detail as CodexDetail).detail.name }}</h3><dl class="facts"><div v-for="field in detailFields" :key="field.label"><dt>{{ field.label }}</dt><dd>{{ field.value }}</dd></div></dl></article>
+              <article class="detail-card codex-spread"><div class="codex-illustration"><img v-if="(detail as CodexDetail).kind === '怪物' && String((detail as CodexDetail).detail.name).includes('球兔')" :src="gameAssetUrl('/assets/loading/ball-rabbit.png')" alt="球兔" /><SkillIcon v-else-if="(detail as CodexDetail).kind === '技能'" :code="String((detail as CodexDetail).detail.code || '')" :name="String((detail as CodexDetail).detail.name || '')" :size="100" /><AnimeIcon v-else :name="kindIcon((detail as CodexDetail).kind)" :size="100" /><span>冒险见闻 · 已发现</span></div><div><p class="eyebrow">{{ (detail as CodexDetail).kind }} · 已发现</p><h3>{{ (detail as CodexDetail).detail.name }}</h3><dl class="facts"><div v-for="field in detailFields" :key="field.label"><dt>{{ field.label }}</dt><dd>{{ field.value }}</dd></div></dl></div></article>
             </template>
             <template v-if="detail && detailType === 'warrant'">
-              <article class="detail-card"><span class="detail-symbol">⚑</span><p class="eyebrow">{{ (detail as WarrantDetail).regionName }} · {{ traceText((detail as WarrantDetail).trace) }}</p><h3>{{ (detail as WarrantDetail).name }}</h3><div class="detail-grid"><span>危险标记 <strong>{{ (detail as WarrantDetail).stars }} 星 · {{ (detail as WarrantDetail).skulls }} 骷髅</strong></span><span>最后行踪 <strong>{{ positionText((detail as WarrantDetail).position) }}</strong></span><span>铜币悬赏 <strong>{{ (detail as WarrantDetail).rewardCopper }}</strong></span><span>物品悬赏 <strong>{{ (detail as WarrantDetail).rewardItems }} 件</strong></span></div></article>
-              <section v-if="(detail as WarrantDetail).actions.some(action => action.id === 'add_reward')" class="reward-card add-reward"><div class="section-heading"><span>✧</span><h3>追加赏金</h3></div><p class="quiet">只有被此人夺走失物的玩家可追加；提交前会核对背包余额。</p>
+              <article class="detail-card warrant-detail-card"><span class="detail-symbol warrant-person"><AnimeIcon name="party" :size="72" /><strong>{{ (detail as WarrantDetail).name.slice(0, 1) }}</strong></span><p class="eyebrow">{{ (detail as WarrantDetail).regionName }} · {{ traceText((detail as WarrantDetail).trace) }}</p><h3>{{ (detail as WarrantDetail).name }}</h3><div class="detail-grid"><span>危险标记 <strong>{{ (detail as WarrantDetail).stars }} 星 · {{ (detail as WarrantDetail).skulls }} 骷髅</strong></span><span>最后行踪 <strong>{{ positionText((detail as WarrantDetail).position) }}</strong></span><span>铜币悬赏 <strong><AnimeIcon name="coin" :size="20" />{{ (detail as WarrantDetail).rewardCopper }}</strong></span><span>物品悬赏 <strong>{{ (detail as WarrantDetail).rewardItems }} 件</strong></span></div></article>
+              <section v-if="(detail as WarrantDetail).actions.some(action => action.id === 'add_reward')" class="reward-card add-reward"><div class="section-heading"><AnimeIcon name="coin" :size="23" /><h3>追加赏金</h3></div><p class="quiet">只有被此人夺走失物的玩家可追加；提交前会核对背包余额。</p>
                 <div class="chip-row"><button type="button" :class="{ selected: rewardKind === 'copper' }" @click="rewardKind = 'copper'">铜币</button><button type="button" :class="{ selected: rewardKind === 'item' }" @click="rewardKind = 'item'">物品</button></div>
                 <label v-if="rewardKind === 'copper'" class="field">铜币数量<input v-model.number="rewardAmount" type="number" min="1" step="1" inputmode="numeric" /></label>
                 <div v-else class="reward-item-picker">
@@ -409,7 +417,7 @@ function dateText(value: string | null) {
                   <label v-if="selectedRewardItem" class="field">{{ selectedRewardItem.name }} · 上赏数量（可用 {{ selectedRewardItem.available }} 件）<input v-model.number="rewardQuantity" type="number" min="1" :max="selectedRewardItem.available" step="1" inputmode="numeric" /></label>
                 </div>
                 <button class="primary-button" type="button" :disabled="working" @click="previewReward">预览上赏</button>
-                <div v-if="rewardPreview" class="preview" role="status"><strong>{{ rewardPreview.kind === 'copper' ? `${rewardPreview.amount} 铜币` : `${rewardPreview.itemName ?? '该物品'} ×${rewardPreview.quantity}` }}</strong><span>可用：{{ rewardPreview.available }}{{ rewardPreview.kind === 'copper' ? ' 铜币' : ' 件' }}</span><p v-if="rewardPreview.reason">{{ rewardPreview.reason }}</p><button v-if="rewardPreview.canSubmit" class="primary-button" type="button" :disabled="working" @click="submitReward">确认追加赏金</button></div>
+                <div v-if="rewardPreview" class="preview" role="status"><strong>赏金预览</strong><span>{{ rewardPreview.kind === 'copper' ? `${rewardPreview.amount} 铜币` : `${rewardPreview.itemName ?? '该物品'} ×${rewardPreview.quantity}` }}</span><span>可用：{{ rewardPreview.available }}{{ rewardPreview.kind === 'copper' ? ' 铜币' : ' 件' }}</span><p v-if="rewardPreview.reason">{{ rewardPreview.reason }}</p><div class="reward-preview-actions"><button type="button" class="back-button" @click="rewardPreview = null; previewInput = null">返回修改</button><button v-if="rewardPreview.canSubmit" class="primary-button" type="button" :disabled="working" @click="submitReward">确认追加赏金</button></div></div>
               </section>
             </template>
           </template>
@@ -429,7 +437,7 @@ function dateText(value: string | null) {
 .handbook-body { flex: 1; min-height: 0; overflow-y: auto; padding: 17px 20px max(24px, env(safe-area-inset-bottom)); overscroll-behavior: contain; }
 .intro { margin: 1px 0 16px; color: #8c8094; font-size: 12px; line-height: 1.6; }.chip-row { display: flex; gap: 7px; flex-wrap: wrap; margin: 12px 0; }.chip-row button { min-height: 34px; padding: 6px 12px; color: #83768c; background: #f2edf4; border: 1px solid transparent; border-radius: 10px; font-size: 12px; }.chip-row button.selected { color: #674a92; background: #ece3f8; border-color: #d9c9ec; font-weight: 700; }.subchips { margin-top: 5px; }.subchips button { background: #f7f3f3; }.count { margin: 12px 1px 8px; color: #9c8ba2; font-size: 11px; }
 .reward-card, .detail-card { padding: 15px; background: #fff; border: 1px solid #f0e1e7; border-radius: 16px; box-shadow: 0 3px 16px #644a7810; }.reward-card { margin: 0 0 17px; }.section-heading { display: flex; align-items: center; gap: 7px; margin-bottom: 12px; color: #9b70ae; }.section-heading h3 { margin: 0; color: #67536d; font-size: 14px; }.box-list { display: grid; gap: 9px; }.box-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px; background: #fcf9fc; border-radius: 11px; }.box-row strong, .box-row small { display: block; }.box-row strong { font-size: 12px; }.box-row small { margin-top: 3px; color: #9b8a9f; font-size: 11px; }.box-controls { display: flex; gap: 6px; flex: 0 0 auto; }.box-controls input { width: 56px; padding: 6px; text-align: center; }.box-controls button, .search-row button, .primary-button { min-height: 34px; padding: 7px 12px; color: white; background: #9277ba; border-radius: 9px; font-size: 12px; font-weight: 700; }.reward-items { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }.reward-items span { padding: 5px 8px; color: #826484; background: #fbf0f5; border-radius: 8px; font-size: 11px; }
-.entry-list { display: grid; gap: 9px; margin-top: 12px; }.entry-card { display: flex; align-items: center; gap: 11px; width: 100%; padding: 13px; color: inherit; text-align: left; background: #fff; border: 1px solid #f1e5e9; border-radius: 13px; box-shadow: 0 2px 9px #6550750c; }.entry-card:not(.static-card):hover { border-color: #d7c3e5; background: #fefbff; }.entry-icon { display: grid; place-items: center; flex: 0 0 37px; width: 37px; height: 37px; color: #a984b8; background: #f2eafa; border-radius: 11px; font-size: 19px; }.warrant-icon { color: #b88b84; background: #fff0ec; }.entry-main { display: grid; gap: 3px; flex: 1; min-width: 0; overflow-wrap: anywhere; }.entry-main strong { font-size: 13px; }.entry-main small { color: #a095a6; font-size: 11px; }.entry-main > span { color: #736a7a; font-size: 12px; line-height: 1.5; }.entry-arrow { color: #ad96bb; font-size: 23px; }.static-card { cursor: default; }
+.entry-list { display: grid; gap: 9px; margin-top: 12px; }.entry-card { display: flex; align-items: center; gap: 11px; width: 100%; padding: 13px; color: inherit; text-align: left; background: #fff; border: 1px solid #f1e5e9; border-radius: 13px; box-shadow: 0 2px 9px #6550750c; }.entry-icon { display: grid; place-items: center; flex: 0 0 37px; width: 37px; height: 37px; color: #a984b8; background: #f2eafa; border-radius: 11px; font-size: 19px; }.warrant-icon { color: #b88b84; background: #fff0ec; }.entry-main { display: grid; gap: 3px; flex: 1; min-width: 0; overflow-wrap: anywhere; }.entry-main strong { font-size: 13px; }.entry-main small { color: #a095a6; font-size: 11px; }.entry-main > span { color: #736a7a; font-size: 12px; line-height: 1.5; }.entry-arrow { color: #ad96bb; font-size: 23px; }.static-card { cursor: default; }
 .search-row { display: flex; gap: 7px; margin: 12px 0; }.search-row input { flex: 1; min-width: 0; }.search-row input, .box-controls input, .field input { min-height: 35px; color: #594d62; background: white; border: 1px solid #e4d8e6; border-radius: 9px; font: inherit; font-size: 12px; }.search-row input { padding: 7px 10px; }.quiet { margin: 0; color: #9d91a1; font-size: 12px; line-height: 1.6; }.empty { padding: 34px 8px; color: #a496a5; font-size: 13px; text-align: center; }.pager { display: flex; justify-content: center; align-items: center; gap: 14px; margin: 18px 0 2px; font-size: 12px; }.pager button { min-height: 34px; padding: 7px 12px; color: #735d96; background: #eee7f7; border-radius: 9px; }
 .back-button { margin-bottom: 13px; padding: 7px 10px; color: #7e67a6; background: #f0eaf7; border-radius: 9px; font-size: 12px; }.detail-card { padding: 20px; }.detail-symbol { display: grid; place-items: center; width: 46px; height: 46px; color: #a17cba; background: #f4ebfa; border-radius: 14px; font-size: 25px; }.eyebrow { margin: 15px 0 3px; color: #ac8bb8; font-size: 11px; }.detail-card h3 { margin: 0 0 12px; color: #5d4e69; font-size: 20px; }.detail-card > p:not(.eyebrow) { color: #736979; font-size: 13px; line-height: 1.7; }.detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; margin-top: 16px; }.detail-grid span { display: grid; gap: 4px; padding: 10px; color: #97899d; background: #faf5fa; border-radius: 9px; font-size: 11px; overflow-wrap: anywhere; }.detail-grid strong { color: #604f70; font-size: 12px; }.facts { display: grid; gap: 0; margin: 12px 0 0; }.facts div { display: grid; grid-template-columns: 90px minmax(0, 1fr); gap: 10px; padding: 10px 0; border-top: 1px solid #f0e9ee; font-size: 12px; }.facts dt { color: #9a8ba0; }.facts dd { margin: 0; overflow-wrap: anywhere; white-space: pre-wrap; }.add-reward { margin-top: 14px; }.reward-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }.field { display: grid; gap: 5px; margin: 12px 0; color: #71637b; font-size: 12px; }.field input { width: 100%; padding: 7px 9px; }.preview { display: grid; gap: 5px; margin-top: 12px; padding: 12px; background: #f7f0fc; border-radius: 10px; font-size: 12px; }.preview p { margin: 0; color: #a45f6c; }.preview button { justify-self: start; margin-top: 5px; }
 .notice, .error { padding: 11px 12px; border-radius: 10px; font-size: 12px; line-height: 1.5; }.notice { color: #4d7a68; background: #eaf7f0; }.error { color: #aa5265; background: #fff0ee; }

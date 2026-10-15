@@ -3,47 +3,78 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#fff8ee" />
+    <meta name="theme-color" content="#f7f1de" />
     <meta name="description" content="FantasyFinal 奇幻冒险 H5 客户端" />
-    <title>FantasyFinal · 奇幻冒险</title>
-    <link rel="preload" as="image" href="/assets/loading/fantasy-logo.webp" />
+    <title>幻想次元 · 奇幻冒险</title>
+    <link rel="preload" as="image" href="/assets/light-anime/auth-v4/loading-scene-wide-v1.webp" />
+    <link rel="preload" as="image" href="/assets/light-anime/auth-v4/fantasy-logo.webp" />
     <style>
-      #ff-boot { position: fixed; z-index: 9999; inset: 0; overflow: hidden; display: grid; place-items: center; color: #514366; background: #eaf6ee; font-family: "PingFang SC", "Microsoft YaHei", sans-serif; transition: opacity .24s ease; }
-      #ff-boot::before { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(225, 243, 255, .08), rgba(255, 248, 230, .3) 65%, rgba(255, 248, 230, .68)), url('/assets/loading/forest.webp') center / cover no-repeat; }
-      #ff-boot::after { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 50% 68%, rgba(255, 255, 255, .55), transparent 49%); pointer-events: none; }
-      html[data-ff-boot-warm="1"] #ff-boot, #ff-boot.is-hidden { display: none; }
+      #ff-boot { position: fixed; z-index: 9999; inset: 0; isolation: isolate; overflow: hidden; color: #233768; background: #c8e1bc; font-family: "KaiTi", "STKaiti", "Microsoft YaHei", sans-serif; transition: opacity .24s ease; }
+      #ff-boot, #ff-boot * { box-sizing: border-box; }
+      #ff-boot.is-hidden { display: none; }
       #ff-boot.is-exiting { opacity: 0; pointer-events: none; }
-      .ff-boot-inner { position: relative; z-index: 1; width: min(480px, calc(100vw - 36px)); margin-top: min(28vh, 180px); text-align: center; }
-      .ff-boot-logo { display: block; width: min(350px, 82vw); max-height: 190px; margin: 0 auto 132px; object-fit: contain; filter: drop-shadow(0 5px 3px #fff) drop-shadow(0 10px 18px rgba(68, 78, 81, .23)); }
-      .ff-boot-track-wrap { position: relative; }
-      .ff-boot-chase { position: absolute; z-index: 2; bottom: calc(100% + 4px); left: 0; width: 205px; height: 105px; transition: left .23s ease-out; pointer-events: none; }
-      .ff-boot-pear, .ff-boot-rabbit { position: absolute; display: block; object-fit: contain; object-position: center bottom; filter: drop-shadow(0 4px 3px rgba(80, 77, 70, .22)); }
-      .ff-boot-pear { left: 0; bottom: 0; width: 138px; height: 104px; animation: ff-pear-run .55s ease-in-out infinite alternate; }
-      .ff-boot-rabbit { right: 0; bottom: 8px; width: 78px; height: 80px; animation: ff-rabbit-hop .43s ease-in-out infinite alternate; }
-      #ff-boot-track { overflow: hidden; height: 18px; border: 3px solid rgba(255, 255, 255, .95); border-radius: 99px; background: rgba(255, 255, 255, .73); box-shadow: 0 4px 18px rgba(55, 96, 78, .22), inset 0 1px 5px rgba(100, 104, 106, .12); }
-      #ff-boot-fill { width: 0; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #80c8ab, #b6df9e 42%, #f7c279 78%, #f4a9a2); transition: width .18s ease-out; }
-      #ff-boot-status { min-height: 1.6em; margin: 11px 0 0; color: #4e5d5c; font-size: 13px; font-weight: 700; text-shadow: 0 1px 3px #fff; }
-      #ff-boot-retry { margin-top: 12px; padding: 8px 20px; border: 1px solid rgba(112, 101, 126, .22); border-radius: 999px; background: rgba(255, 255, 255, .94); color: #65527b; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+      .ff-boot-inner { position: absolute; z-index: 1; top: 50%; left: 50%; isolation: isolate; container-type: inline-size; width: max(calc(100vw * 940 * 940 / 1672 / 1672), calc(100dvh * 940 / 1672)); aspect-ratio: 940 / 1672; margin: 0; padding: 0; text-align: center; background: transparent; transform: translate(-50%, -50%); }
+      .ff-boot-hero { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; }
+      .ff-boot-logo { position: absolute; z-index: 2; top: 9cqw; left: 50%; display: block; width: 55%; height: auto; max-height: 23cqw; object-fit: contain; transform: translateX(-50%); }
+      .ff-boot-track-wrap { position: absolute; z-index: 2; top: 83.5106%; left: 50%; display: grid; align-content: center; gap: .8cqw; width: min(112.5894%, calc(100vw - 24px)); height: 10.1064%; margin: 0; padding: 1cqw 4.7cqw 1.3cqw; border: 0; background: transparent; transform: translateX(-50%); }
+      .ff-boot-status-row { display: flex; align-items: baseline; justify-content: center; flex-wrap: wrap; gap: 1.3cqw; min-width: 0; }
+      #ff-boot-status { flex: 0 1 auto; margin: 0; min-width: 0; color: #233768; font-size: clamp(11px, 3.4cqw, 32px); font-weight: 700; line-height: 1.2; letter-spacing: .025em; overflow-wrap: anywhere; text-shadow: 0 1px #fffbee; }
+      #ff-boot.has-load-error #ff-boot-status { font-size: clamp(10px, 2.6cqw, 23px); line-height: 1.15; }
+      #ff-boot-count { flex: none; color: #7c7464; font-family: "Microsoft YaHei", sans-serif; font-size: clamp(8px, 1.9cqw, 16px); font-variant-numeric: tabular-nums; line-height: 1.3; white-space: nowrap; }
+      #ff-boot-elapsed { color: #7c7464; font-family: "Microsoft YaHei", sans-serif; font-size: clamp(8px, 1.9cqw, 16px); font-variant-numeric: tabular-nums; white-space: nowrap; }
+      .ff-boot-progress-row { display: grid; grid-template-columns: minmax(16px, 5.2cqw) minmax(0, 1fr) minmax(36px, 8cqw); align-items: center; gap: 1.6cqw; min-width: 0; }
+      .ff-boot-paw { display: block; width: 100%; height: auto; color: #b38268; }
+      #ff-boot-track { width: 100%; height: clamp(10px, 2.8cqw, 26px); overflow: hidden; border: 1px solid #a89b83; border-radius: 99px; background: #cabda7; box-shadow: inset 0 1px 3px #78644b2e, 0 1px #fff9e9; }
+      #ff-boot-fill { width: 0; height: 100%; border-radius: inherit; background: repeating-linear-gradient(130deg, #7edcff 0 9px, #46c6f9 9px 18px); box-shadow: inset 0 0 0 1px #2198ce, inset 0 2px 2px #d4fbff99; transition: width .18s ease-out; }
+      #ff-boot-percent { color: #192b66; font-size: clamp(16px, 4.2cqw, 38px); font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; white-space: nowrap; }
+      #ff-boot-chase[hidden] { display: none; }
+      #ff-boot-retry { position: absolute; z-index: 2; top: min(calc(100% - clamp(44px, 8.7cqw, 82px) - 6px), calc(50% + 50dvh - clamp(44px, 8.7cqw, 82px) - 6px)); left: 50%; display: flex; align-items: center; justify-content: center; gap: 1.5cqw; width: clamp(132px, 30.3cqw, 285px); min-height: clamp(44px, 8.7cqw, 82px); margin: 0; padding: 5px 10px; color: #233768; border: 2px solid #d4bc97; border-radius: 5px; background: linear-gradient(115deg, #fffdf4, #fff5df); box-shadow: inset 0 0 0 2px #fffdf4, inset 0 0 0 3px #e3d3b8, 0 2px 6px #59623d40; transform: translateX(-50%); font: inherit; font-size: clamp(16px, 3.8cqw, 32px); font-weight: 700; line-height: 1.2; cursor: pointer; }
+      #ff-boot-retry svg { flex: 0 0 auto; width: clamp(20px, 5cqw, 43px); height: auto; }
       #ff-boot-retry[hidden] { display: none; }
-      @keyframes ff-pear-run { from { transform: translate(-2px, 1px) rotate(-3deg); } to { transform: translate(3px, -6px) rotate(2deg); } }
-      @keyframes ff-rabbit-hop { from { transform: translate(-3px, 0) rotate(-4deg); } to { transform: translate(4px, -10px) rotate(4deg); } }
-      @media (max-width: 480px) { .ff-boot-inner { margin-top: min(23vh, 140px); } .ff-boot-logo { margin-bottom: 120px; } }
-      @media (prefers-reduced-motion: reduce) { #ff-boot, .ff-boot-chase, #ff-boot-fill { transition: none; } .ff-boot-pear, .ff-boot-rabbit { animation: none; } }
+      #ff-boot-retry:focus-visible { outline: 3px solid #3bb9e9; outline-offset: 3px; }
+      @media (prefers-reduced-motion: reduce) { #ff-boot, #ff-boot-fill { transition: none; } }
     </style>
   </head>
   <body>
-    <script>try { document.documentElement.dataset.ffBootWarm = localStorage.getItem('fantasy-final.boot-assets.v1') === 'v1:__FF_BOOT_ASSET_REVISION__' ? '1' : '0'; } catch { document.documentElement.dataset.ffBootWarm = '0'; }</script>
     <div id="ff-boot" role="status" aria-live="polite" aria-label="正在加载幻想次元">
+      <img class="ff-boot-hero" src="/assets/light-anime/auth-v4/loading-scene-wide-v1.webp" width="1672" height="940" alt="更大的世界就去冒险吧！梨子喵与球兔前往百纳镇，藤蔓纸板与向左右延展的风景连成完整画面" fetchpriority="high" />
       <div class="ff-boot-inner">
-        <img class="ff-boot-logo" src="/assets/loading/fantasy-logo.webp" alt="幻想次元" />
+        <img class="ff-boot-logo" src="/assets/light-anime/auth-v4/fantasy-logo.webp" width="1942" height="809" alt="幻想次元" fetchpriority="high" />
         <div class="ff-boot-track-wrap">
-          <div id="ff-boot-chase" class="ff-boot-chase" aria-hidden="true"><img class="ff-boot-pear" src="/assets/loading/pear.png" alt="" /><img class="ff-boot-rabbit" src="/assets/loading/ball-rabbit.png" alt="" /></div>
-          <div id="ff-boot-track" role="progressbar" aria-label="游戏资源加载进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="ff-boot-fill"></div></div>
+          <span id="ff-boot-chase" aria-hidden="true" hidden></span>
+          <div class="ff-boot-status-row"><p id="ff-boot-status">正在加载游戏界面…</p><span id="ff-boot-count">准备中</span><span id="ff-boot-elapsed" aria-hidden="true">已用 0 秒</span></div>
+          <div class="ff-boot-progress-row">
+            <svg class="ff-boot-paw" viewBox="0 0 48 48" aria-hidden="true"><ellipse cx="10" cy="14" rx="5" ry="7" fill="currentColor" transform="rotate(-24 10 14)" /><ellipse cx="21" cy="9" rx="5" ry="7" fill="currentColor" transform="rotate(-7 21 9)" /><ellipse cx="33" cy="10" rx="5" ry="7" fill="currentColor" transform="rotate(10 33 10)" /><ellipse cx="42" cy="19" rx="4.5" ry="6.5" fill="currentColor" transform="rotate(26 42 19)" /><path d="M13 31c3-3 4-10 11-10s8 7 12 11c7 10-1 14-8 10-4-2-5-2-9 0-9 4-14-4-6-11Z" fill="currentColor" /></svg>
+            <div id="ff-boot-track" role="progressbar" aria-label="游戏资源加载进度" aria-describedby="ff-boot-count" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="ff-boot-fill"></div></div>
+            <span id="ff-boot-percent" aria-hidden="true">0%</span>
+          </div>
         </div>
-        <p id="ff-boot-status">正在准备冒险资源…</p>
-        <button id="ff-boot-retry" type="button" hidden>重新加载</button>
+        <button id="ff-boot-retry" type="button" hidden><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M26 12a11 11 0 1 0-1 12" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" /><path d="m18 11 9 3 2-9" fill="currentColor" /></svg><span>重新加载</span></button>
       </div>
     </div>
+    <script>
+      (() => {
+        const started = performance.now();
+        const timer = window.setInterval(() => {
+          const splash = document.getElementById('ff-boot');
+          if (!splash || splash.classList.contains('is-exiting')) { window.clearInterval(timer); return; }
+          const elapsed = document.getElementById('ff-boot-elapsed');
+          if (elapsed) elapsed.textContent = `已用 ${Math.floor((performance.now() - started) / 1000)} 秒`;
+        }, 1000);
+        // This listener exists before the module graph. A failed entry download
+        // must leave a usable retry action, even when main.ts never executes.
+        window.addEventListener('error', event => {
+          const source = event.target;
+          if (!(source instanceof HTMLScriptElement) || source.type !== 'module') return;
+          const status = document.getElementById('ff-boot-status');
+          const splash = document.getElementById('ff-boot');
+          const retry = document.getElementById('ff-boot-retry');
+          splash?.classList.add('has-load-error');
+          if (status) status.textContent = '界面加载中断，请检查网络后重新加载。';
+          if (retry) { retry.hidden = false; retry.onclick = () => location.reload(); }
+        }, true);
+      })();
+    </script>
     <div id="app"></div>
     <script type="module" src="/src/main.ts"></script>
   </body>

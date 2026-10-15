@@ -1,5 +1,5 @@
 import type { PanelPortrait } from './api';
-import { gameAssetUrl } from './game-assets';
+import { GAME_ASSETS, gameAssetUrl } from './game-assets';
 
 /**
  * 角色立绘资源注册表。
@@ -37,9 +37,36 @@ export const CHARACTER_ADVANCED_ASSETS: Record<string, string> = Object.fromEntr
     [`advanced_${code}_${gender}`, `/assets/character/${REDRAWN_COMPANION_CODES.has(code) ? 'v4' : 'v2'}/advanced-${code}-${gender}.png`]))
 );
 
+export type CharacterPortraitVariant = 'default' | 'profile' | 'equipment';
+type DrawnPortraitVariant = Exclude<CharacterPortraitVariant, 'default'>;
+
+/** 新图按既有语义键注册；未发布的变体不会触发图片请求。 */
+export const CHARACTER_VARIANT_ASSETS = Object.fromEntries(
+  (['profile', 'equipment'] as const).map(variant => [variant, Object.fromEntries(
+    Object.entries({ ...CHARACTER_BASE_ASSETS, ...CHARACTER_ADVANCED_ASSETS }).map(([key, path]) => [
+      key, `/assets/character/light-anime-v1/${path.split('/').pop()!.replace(/\.png$/, '')}-${variant}.webp`
+    ])
+  )])
+) as Record<DrawnPortraitVariant, Record<string, string>>;
+
+/** 林巡三异兽立绘使用独立修订目录；其它职业与默认回退图保持原路径。 */
+for (const gender of ['male', 'female'] as const) {
+  for (const variant of ['profile', 'equipment'] as const) {
+    CHARACTER_VARIANT_ASSETS[variant][`advanced_ranger_warden_${gender}`]
+      = `/assets/character/ranger-three-beasts-v2/advanced-ranger_warden-${gender}-${variant}.webp`;
+  }
+}
+
+const releasedCharacterPaths = new Set(GAME_ASSETS.map(asset => asset.path));
+
 /** 仅使用当前立绘；二转资源不可用时回退到当前一转立绘。 */
-export const portraitAssetCandidates = (portrait?: PanelPortrait): string[] => {
+export const portraitAssetCandidates = (portrait?: PanelPortrait, variant: CharacterPortraitVariant = 'default'): string[] => {
   const key = portrait?.baseKey ?? 'player_male_initial';
+  if (variant !== 'default') {
+    const path = CHARACTER_VARIANT_ASSETS[variant][key];
+    const current = portraitAssetCandidates(portrait);
+    return path && releasedCharacterPaths.has(path) ? [gameAssetUrl(path), ...current] : current;
+  }
   const fallbackKey = portrait?.fallbackKey && CHARACTER_BASE_ASSETS[portrait.fallbackKey]
     ? portrait.fallbackKey : 'player_male_initial';
   if (CHARACTER_BASE_ASSETS[key]) return [gameAssetUrl(CHARACTER_BASE_ASSETS[key])];

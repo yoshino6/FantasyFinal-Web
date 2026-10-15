@@ -1,3 +1,6 @@
+import type { EnvironmentObjectView } from './map-environment';
+import { surfaceSnapshotClock, validSurfaceScene, type MapSurfaceScene } from './map-surface';
+
 export type Panel = {
   pendingStory?: { command?: string; revision?: string | number; messages?: GameActionMessage[] };
   text?: string;
@@ -23,13 +26,13 @@ export type Panel = {
     giftName?: string | null; staminaFullSeconds?: number; activeBuffs?: string[];
     equipment?: PanelEquippedItem[];
     portrait?: PanelPortrait;
-    movementStep?: number; movementMaximum?: number; perception?: number;
-    activity?: string; travel?: { destination: string; remaining: number; activityType?: 'move' | 'hunt' };
+    movementStep?: number; movementMaximum?: number; movement?: { speed?: number; maximum?: number }; perception?: number;
+    activity?: string; travel?: { destination: string; remaining: number; activityType?: 'move' | 'hunt'; visual?: ExploreTravelVisual };
   };
   mapData?: {
     current?: { name: string; x: number; y: number; z: number };
     maps: { code: string; name: string; danger: number; isCurrent: boolean; bounds?: { minX: number; maxX: number; minY: number; maxY: number; minZ: number; maxZ: number } }[];
-    partyMembers?: { id: number; gameId: number; name: string; isLeader: boolean; isSelf: boolean; regionCode: string; regionName: string; x: number; y: number; z: number }[];
+    partyMembers?: { id: number; gameId: number; name: string; isLeader: boolean; isSelf: boolean; regionCode: string; regionName: string; x: number; y: number; z: number; portrait?: PanelPortrait }[];
     landmarks?: { code: string; name: string; type: 'building' | 'landmark'; regionCode: string; regionName: string; x: number; y: number; z: number }[];
   };
   inBattle?: boolean;
@@ -43,15 +46,15 @@ export type Panel = {
     estimatedQuantity: number | null;
     finished: boolean;
   };
-  movement?: { step: number; maximum: number; showLandmarks?: boolean; showPlayers?: boolean };
+  movement?: { step: number; maximum: number; speed?: number; showLandmarks?: boolean; showPlayers?: boolean };
   nearby?: { description?: string; range?: number; actionRange?: number; points?: PanelNearbyPoint[] };
   battle?: PanelBattleSnapshot;
   inventory?: PanelInventory;
   regionMap?: {
     currentRegionCode?: string;
-    regions?: { code: string; name: string; danger?: string | number; isCurrent?: boolean; current?: { x: number; y: number; z?: number } }[];
-    members?: { id: string; name: string; x: number; y: number; z?: number; regionCode?: string; regionName?: string; icon?: string; isCurrent?: boolean }[];
-    landmarks?: { id: string; name: string; x: number; y: number; z?: number; regionCode?: string; regionName?: string; type?: string; icon?: string; description?: string }[];
+    regions?: { code: string; name: string; danger?: string | number; isCurrent?: boolean; bounds?: { minX: number; maxX: number; minY: number; maxY: number; minZ: number; maxZ: number }; current?: { x: number; y: number; z?: number } }[];
+    members?: { id: string; name: string; x: number; y: number; z?: number; regionCode?: string; regionName?: string; icon?: string; isCurrent?: boolean; portrait?: PanelPortrait }[];
+    landmarks?: { id: string; name: string; x: number; y: number; z?: number; regionCode?: string; regionName?: string; type?: string; icon?: string; description?: string; code?: string; templateCode?: string; siteType?: string }[];
   };
 };
 
@@ -62,6 +65,7 @@ export type PanelInventoryStack = {
   name: string;
   itemType?: string;
   itemCategory?: string;
+  rarity?: string;
   weaponType?: string | null;
   quantity: number;
   description?: string;
@@ -74,6 +78,7 @@ export type PanelInventoryInstance = {
   name: string;
   itemType?: string;
   itemCategory?: string;
+  rarity?: string;
   weaponType?: string | null;
   quality?: number;
   durability?: number;
@@ -106,6 +111,17 @@ export type PanelEquippedItem = {
   description?: string;
   appearanceName?: string;
   appearanceCode?: string;
+};
+
+export type EquipmentDetailSection = { key: string; title: string; lines: string[] };
+export type EquipmentDetailSet = {
+  code: string; name: string; count: number; maxPieces: number;
+  thresholds: Array<{ pieces: number; active: boolean; lines: string[] }>;
+};
+export type EquippedEquipmentDetails = { sections: EquipmentDetailSection[]; sets: EquipmentDetailSet[] };
+export type EquippedEquipmentDetailResponse = {
+  ok: true; slot: string; id: number | null; code: string | null; name: string | null;
+  detail: EquippedEquipmentDetails | null;
 };
 
 export type PanelPortrait = {
@@ -147,7 +163,13 @@ export type PanelNearbyPoint = {
   x: number;
   y: number;
   z?: number;
+  regionId?: number;
+  regionCode?: string;
   code?: string;
+  /** 绘图语义键；code 继续保留真实交互实例编号。 */
+  templateCode?: string;
+  level?: number;
+  portrait?: PanelPortrait;
   interaction?: { type: string; id: string };
   observedOnly?: boolean;
   interactable?: boolean;
@@ -286,19 +308,21 @@ export type AutoBattleConfig = {
 export type AutoBattleSkillChoice = { id: number | null; name: string };
 export type AutoBattlePotionChoice = { id: number; name: string };
 
-export type ChatChannel = { id: string; name: string; type: 'world' | 'friend' | 'party'; unreadCount?: number };
-export type ChatMessage = { id: number; senderName: string; senderId?: string; content: string; createdAt: string; own?: boolean; recruitmentId?: number; recruitment?: Recruitment };
-export type SocialFriend = { name: string; gameId: number; status: 'friend' | 'oath' | string; affinity: number; stage: string };
+export type SocialIdentity = { portrait?: PanelPortrait; gender?: string; level?: number; profession?: string };
+export type AffinityProgress = { min: number; nextMin: number | null; toNext: number };
+export type ChatChannel = SocialIdentity & { id: string; name: string; type: 'world' | 'friend' | 'party'; unreadCount?: number; gameId?: number };
+export type ChatMessage = { id: number; senderName: string; senderId?: string; senderPortrait?: PanelPortrait; content: string; createdAt: string; own?: boolean; recruitmentId?: number; recruitment?: Recruitment };
+export type SocialFriend = SocialIdentity & { name: string; gameId: number; status: 'friend' | 'oath' | string; affinity: number; stage: string; affinityProgress?: AffinityProgress };
 export type SocialSummary = {
   friends: SocialFriend[];
-  friendRequests: { id: number; name: string; gameId: number; createdAt: string }[];
-  oath: { id: number; name: string; gameId: number; status: string; affinity: number; stage: string } | null;
-  oathRequests: { id: number; name: string; gameId: number; affinity: number; stage: string; expiresAt: string }[];
-  oathReleaseRequests: { id: number; name: string; gameId: number; expiresAt: string }[];
+  friendRequests: (SocialIdentity & { id: number; name: string; gameId: number; createdAt: string })[];
+  oath: (SocialIdentity & { id: number; name: string; gameId: number; status: string; affinity: number; stage: string; affinityProgress?: AffinityProgress }) | null;
+  oathRequests: (SocialIdentity & { id: number; name: string; gameId: number; affinity: number; stage: string; affinityProgress?: AffinityProgress; expiresAt: string })[];
+  oathReleaseRequests: (SocialIdentity & { id: number; name: string; gameId: number; expiresAt: string })[];
 };
-export type Recruitment = { id: number; partyId: string; partyName: string; title?: string; description?: string; creatorName?: string; leaderGameId?: number; regionCode?: string; regionName?: string; targetCount: number; memberCount: number; openSlots?: number; status?: 'open' | 'closed'; applicationStatus?: 'pending' | 'accepted' | 'rejected' | 'cancelled' | 'expired' | null; createdAt: string; expiresAt?: string; own?: boolean; applied?: boolean };
-export type PartyApplication = { id: number; gameId: number; name: string; message: string; status: string; createdAt: string; respondedAt?: string | null };
-export type WebPartyMember = { id: number; gameId: number; name: string; level: number; isLeader: boolean; isSelf: boolean; regionCode: string; regionName: string; position: { x: number; y: number; z: number } };
+export type Recruitment = { id: number; partyId: string; partyName: string; title?: string; description?: string; creatorName?: string; leaderGameId?: number; leaderPortrait?: PanelPortrait; regionCode?: string; regionName?: string; targetCount: number; memberCount: number; openSlots?: number; status?: 'open' | 'closed'; applicationStatus?: 'pending' | 'accepted' | 'rejected' | 'cancelled' | 'expired' | null; createdAt: string; expiresAt?: string; own?: boolean; applied?: boolean };
+export type PartyApplication = SocialIdentity & { id: number; gameId: number; name: string; message: string; status: string; createdAt: string; respondedAt?: string | null };
+export type WebPartyMember = SocialIdentity & { id: number; gameId: number; name: string; level: number; isLeader: boolean; isSelf: boolean; regionCode: string; regionName: string; position: { x: number; y: number; z: number } };
 export type WebParty = { id: string; name: string; story: boolean; leaderId: number; leaderGameId: number | null; ownId: number; isLeader: boolean; leader: WebPartyMember | null; members: WebPartyMember[]; memberCount: number; maxMembers: number; regionCode: string; regionName: string; position: { x: number; y: number; z: number } | null; canLeave: boolean; canRename: boolean; canRecruit: boolean; canPublishRecruitment: boolean; recruitment: Recruitment | null; pendingApplicationCount: number };
 export type PartySearchPage = { ok: true; recruitments: Recruitment[]; parties: Recruitment[]; hasMore: boolean; nextCursor: number | null };
 
@@ -347,8 +371,10 @@ export type GameActionButton = { label: string; command: string; actionId?: neve
 export type StoryIllustration = { sceneKey: string; path: string; width: number; height: number; alt: string };
 export type GameActionMessage = { text?: string; markdown?: string; format?: { type?: string; value?: unknown; options?: Record<string, unknown> }[]; storyImage?: StoryIllustration; buttons?: GameActionButton[] };
 export type CommandActionResult = GameActionMessage & {
+  movementVisual?: ExploreCommittedMovement;
   ok?: boolean;
   presentation?: 'story' | 'interaction' | 'page';
+  destination?: 'character' | 'inventory' | 'explore' | 'evolution' | 'advancedProfession';
   commerce?: { kind: 'bank' | 'guildShop' | 'bookshop' | 'homeShop'; targetId?: string; mode?: 'buy' | 'sell' };
   text?: string;
   buttons?: GameActionButton[];
@@ -450,6 +476,7 @@ export const setPassword = (newPassword: string, passwordConfirmation: string) =
 export const changePassword = (currentPassword: string, newPassword: string, passwordConfirmation: string) => request<PasswordResult>('/password/change', { method: 'POST', body: JSON.stringify({ currentPassword, newPassword, passwordConfirmation }) });
 export const logout = () => request<{ ok: true }>('/logout', { method: 'POST' });
 export const panel = () => request<Panel>('/panel');
+export const equippedEquipmentDetail = (slot: string, signal?: AbortSignal) => request<EquippedEquipmentDetailResponse>(`/equipment/${encodeURIComponent(slot)}/detail`, { signal });
 export const autoBattleConfig = (mode: AutoBattleMode = 'pve') => request<AutoBattleConfig>(`/auto-battle/config?mode=${mode}`);
 export const autoBattleSkills = (page = 1, keyword = '') => request<{ choices: AutoBattleSkillChoice[]; page: number; total: number }>(`/auto-battle/skills?page=${page}&keyword=${encodeURIComponent(keyword)}`);
 export const autoBattlePotions = (page = 1, keyword = '') => request<{ items: AutoBattlePotionChoice[]; page: number; total: number }>(`/auto-battle/potions?page=${page}&keyword=${encodeURIComponent(keyword)}`);
@@ -458,10 +485,39 @@ export const saveAutoBattleAction = (payload: { sequence: number; skillId: numbe
 export const deleteAutoBattleAction = (sequence: number, mode: AutoBattleMode = 'pve') => request<AutoBattleConfig>(`/auto-battle/actions/${sequence}?mode=${mode}`, { method: 'DELETE' });
 export const command = (value: string) => request<CommandActionResult>('/command', { method: 'POST', body: JSON.stringify({ command: value }) });
 export const exploreMove = (position: { x: number; y: number; z: number }) => request<CommandActionResult & { kind: string; text: string; position: { x: number; y: number; z: number }; interactionTargets?: { type: string; id: string; name: string; description?: string }[] }>('/explore/move', { method: 'POST', body: JSON.stringify(position) });
+export type ExploreRoutePosition = { x: number; y: number; z: number; regionId: number };
+export type ExploreTravelVisualPoint = ExploreRoutePosition & { regionCode: string; regionName: string };
+export type ExploreCommittedMovement = { id: string; origin: ExploreTravelVisualPoint; target: ExploreTravelVisualPoint; totalDistance: number; movementSpeed?: number; waypoints: (ExploreTravelVisualPoint & { distance: number })[] };
+export type ExploreTravelVisual = {
+  id: string; serverNow: number; startAt: number; arrivalAt: number;
+  start: ExploreTravelVisualPoint; target: ExploreTravelVisualPoint; totalDistance: number;
+  segments: { kind: 'walk' | 'portal' | 'guild'; instant: boolean; from: ExploreTravelVisualPoint; to: ExploreTravelVisualPoint; distance: number; startAt: number; arrivalAt: number; waypoints: (ExploreTravelVisualPoint & { distance: number; at: number })[] }[];
+};
+export type ExploreGroundWindow = { cells: { x: number; y: number; z: number; regionId: number; regionCode: string }[]; terrainFields: MapSurfaceScene['terrainFields']; padding?: number; scopeToken?: 'world:0' };
+export type ExploreLocalMap = { ok: true; origin: ExploreRoutePosition; range: number; actionRange: number; movement: { step: number; maximum: number; speed?: number }; cells: { x: number; y: number; z: number; regionId?: number; regionCode?: string; passable: boolean; reachable?: boolean }[]; environment?: EnvironmentObjectView[]; environmentJob?: EnvironmentJobView | null; surfaceScene?: MapSurfaceScene; groundWindow?: ExploreGroundWindow; travelView?: { id: string; serverNow: number; position: ExploreTravelVisualPoint; committedOrigin: ExploreRoutePosition }; nearby?: { points: PanelNearbyPoint[]; range: number; actionRange: number } };
+export type EnvironmentJobView = { id: string; objectId: string; objectName: string; finishesAt: string; remainingSeconds: number; ready: boolean };
+export type EnvironmentActionResult = { kind: 'clearing' | 'cancelled' | 'idle' | 'settled'; message: string; text?: string; job?: EnvironmentJobView | null; objectId?: string; alreadySettled?: boolean; rewards?: { code: string; name: string; quantity: number }[]; panel?: Panel };
+export type ExploreRoutePreview = { ok: true; origin: ExploreRoutePosition; sightRange: number; actionRange: number; moveRange: number; path: ExploreRoutePosition[]; stepMilliseconds: number };
+export type ExploreStepState = { position: ExploreRoutePosition; region: string; hp: number; mp: number; stamina: number; movement: ExploreLocalMap['movement']; nearby: { points: PanelNearbyPoint[]; range: number; actionRange: number } };
+export type ExploreRouteStep = CommandActionResult & { kind: string; text: string; position: ExploreRoutePosition; moved: boolean; localMap?: Omit<ExploreLocalMap, 'ok'>; stepState?: ExploreStepState };
+export const exploreLocalMap = (signal?: AbortSignal, view?: 'travel') => request<ExploreLocalMap>(`/explore/local-map${view === 'travel' ? '?view=travel' : ''}`, { signal }).then(result => {
+  if (validSurfaceScene(result.surfaceScene)) surfaceSnapshotClock(result.surfaceScene, performance.now());
+  return result;
+});
+export const clearEnvironment = (id: string) => request<EnvironmentActionResult>('/explore/environment/clear', { method: 'POST', body: JSON.stringify({ id }) });
+export const cancelEnvironment = () => request<EnvironmentActionResult>('/explore/environment/cancel', { method: 'POST' });
+export const settleEnvironment = (objectId: string) => request<EnvironmentActionResult>('/explore/environment/settle', { method: 'POST', body: JSON.stringify({ objectId }) });
+export const exploreRoutePreview = (position: { x: number; y: number; z: number }, signal?: AbortSignal) => request<ExploreRoutePreview>('/explore/route/preview', { method: 'POST', body: JSON.stringify(position), signal });
+export const exploreRouteStep = (position: { x: number; y: number; z: number }, expectedFrom: ExploreRoutePosition, signal?: AbortSignal) => request<ExploreRouteStep>('/explore/route/step', { method: 'POST', body: JSON.stringify({ ...position, expectedFrom, compact: true }), signal }).then(result => {
+  // A committed step may wait in the animation queue. Its traces start ageing
+  // on receipt, rather than becoming new again when that leg is displayed.
+  if (validSurfaceScene(result.localMap?.surfaceScene)) surfaceSnapshotClock(result.localMap!.surfaceScene!, performance.now());
+  return result;
+});
 export const mineResource = (resourceId: number) => request<{ kind: string; text: string; resourceId: number; panel?: Panel }>('/explore/mine', { method: 'POST', body: JSON.stringify({ resourceId }) });
-export const exploreTravel = (position: { x: number; y: number; z: number }) => request<{ kind: string; text: string; position: { x: number; y: number; z: number }; remaining?: number; panel?: Panel }>('/explore/travel', { method: 'POST', body: JSON.stringify(position) });
-export const cancelExploreTravel = () => request<{ kind: 'cancelled'; text: string; panel?: Panel }>('/explore/travel/cancel', { method: 'POST' });
-export const settleExploreTravel = () => request<{ kind: string; text: string; remaining: number; panel?: Panel }>('/explore/travel/settle', { method: 'POST' });
+export const exploreTravel = (position: { x: number; y: number; z: number }) => request<{ kind: string; text: string; position: { x: number; y: number; z: number }; remaining?: number; movementVisual?: ExploreCommittedMovement; travel?: { remaining: number; destination?: string; activityType?: 'move' | 'hunt'; visual?: ExploreTravelVisual }; panel?: Panel }>('/explore/travel', { method: 'POST', body: JSON.stringify(position) });
+export const cancelExploreTravel = () => request<{ kind: 'cancelled'; text: string; position?: ExploreRoutePosition; panel?: Panel }>('/explore/travel/cancel', { method: 'POST' });
+export const settleExploreTravel = () => request<{ kind: string; text: string; remaining: number; position?: ExploreRoutePosition; travel?: { remaining: number; destination?: string; activityType?: 'move' | 'hunt'; visual?: ExploreTravelVisual }; panel?: Panel }>('/explore/travel/settle', { method: 'POST' });
 export type NegotiationCommandPayload = {
   type: 'view' | 'talk' | 'gift' | 'leave' | 'fight';
   sessionId?: string;

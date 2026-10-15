@@ -10,29 +10,44 @@ export type SkillActionInput = {
 };
 export type LearnedSkill = {
   id: number; code: string; name: string; category: string; tier: string;
+  description?: string;
   level: number; quickSlot: number | null; passiveLinked: boolean;
 };
 export type AvailableSkill = {
-  id: number; name: string; category: string; tier: string;
+  id: number; code: string; name: string; category: string; tier: string;
+  description?: string;
   learnCost: number; canLearn: boolean; remainingSkillPoints?: number; reason?: string;
 };
 export type SkillPage<T extends LearnedSkill | AvailableSkill> = {
   ok: true; view: SkillView; page: number; totalPages: number; total: number;
   keyword: string; skillPoints: number; passiveLinkLimit: number;
-  quickSlots: { slot: number; skillId: number; name: string }[];
-  linkedPassives: { skillId: number; name: string }[];
+  quickSlots: { slot: number; skillId: number; code: string; name: string }[];
+  linkedPassives: { skillId: number; code: string; name: string }[];
   items: T[]; serverTime: string;
 };
 export type SkillEffect = {
   code: string; name: string; effect_type: string; value: number; duration: number;
   target_scope: 'enemy' | 'ally' | 'self'; trigger_timing: 'on_hit' | 'on_cast';
 };
+export type SkillCombatEffect = {
+  text: string;
+  descriptions?: { name: string; text: string }[];
+};
+export type SkillSpecializationDetail = {
+  key: string; name: string; level: number; maxLevel: number | null;
+  currentEffect: string; nextEffect: string | null; cost: number | null;
+  action: 'specialization' | 'appraisal';
+  specialization?: SkillSpecialization; direction?: AppraisalDirection;
+};
 export type SkillInfo = {
   id: number; code: string; name: string; category: string; tier: string; description: string;
+  summary?: string; combatEffects?: SkillCombatEffect[];
   learned: boolean; level: number; maxLevel: number; skillPoints: number;
   learnCost: number; nextUpgradeCost: number | null; skillKind: string; element: string;
   rangeType: string; targetScope: string; requiredWeaponType: string | null;
   actualPower: number; actualManaCost: number; actualCooldown: number; actualChant: number;
+  basePower?: number; baseManaCost?: number; baseCooldown?: number; baseChant?: number;
+  passiveEffect?: Record<string, unknown>; weaponMastery?: boolean; characterLevel?: number;
   quickSlot: number | null; passiveLinked: boolean;
   specializations: Partial<Record<SkillSpecialization, number>>;
   specializationChoices: SkillSpecialization[];
@@ -40,6 +55,7 @@ export type SkillInfo = {
   specializationMaxLevel: number; masteryProficiencyCost: number | null;
   masteryFocusCost: number | null; passiveSpecializable: boolean;
   appraisal: { rangeLevel: number; informationLevel: number } | null;
+  specializationDetails?: SkillSpecializationDetail[];
   effectDetails: SkillEffect[];
 };
 export type SkillQuoteResult = {

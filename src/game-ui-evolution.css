@@ -1,0 +1,307 @@
+/* Original painted research tools, one emblem per cell of a 4 x 2 PNG atlas. */
+.evolution-research-emblem {
+  display: block;
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  background: url('/assets/light-anime/game-ui-v1/evolution-emblems.webp') 0 0 / 400% 200% no-repeat;
+}
+.evolution-research-emblem[data-emblem='character-level'] { background-position: 33.333333% 0; }
+.evolution-research-emblem[data-emblem='injections'] { background-position: 66.666667% 0; }
+.evolution-research-emblem[data-emblem='scale'] { background-position: 100% 0; }
+.evolution-research-emblem[data-emblem='pressure'] { background-position: 0 100%; }
+.evolution-research-emblem[data-emblem='stability'] { background-position: 33.333333% 100%; }
+.evolution-research-emblem[data-emblem='symbiosis'] { background-position: 66.666667% 100%; }
+.evolution-research-emblem[data-emblem='journal'] { background-position: 100% 100%; }
+
+/* Keep the existing research-room composition and viewport pagination. Only
+   the controls and small records receive paper; no opaque full-page sheet. */
+.app-shell[data-visual='light-anime'] .character-page .evolution-viewport-panel.evolution-journal {
+  gap: 6px;
+  color: var(--game-ui-ink, #535366);
+  border-image: none;
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+
+.app-shell[data-visual='light-anime'] .character-page .evolution-journal > .evolution-heading {
+  min-height: 34px;
+  padding: 0 3px 0 0;
+  border: 5px solid transparent;
+  border-image: var(--game-ui-paper) 144 fill / 5px stretch;
+  background: transparent;
+}
+
+.app-shell[data-visual='light-anime'] .character-page .evolution-journal > .evolution-heading h2 {
+  gap: 6px;
+  color: var(--game-ui-ink, #535366);
+  font: 700 17px/1.15 'KaiTi', 'STKaiti', serif;
+  text-shadow: none;
+}
+
+.app-shell[data-visual='light-anime'] .character-page .evolution-journal .evolution-heading .evolution-research-emblem {
+  flex-basis: 27px;
+  width: 27px;
+  height: 27px;
+}
+
+.app-shell[data-visual='light-anime'] .character-page .evolution-journal > .evolution-tabs {
+  display: grid;
+  gap: 3px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.app-shell[data-visual='light-anime'] .character-page .evolution-journal > .evolution-tabs > button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-width: 0;
+  min-height: 32px;
+  padding: 1px 2px;
+  border: 5px solid transparent;
+  border-image: var(--game-ui-paper) 144 fill / 5px stretch;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--game-ui-ink, #535366);
+  font: 700 11px/1.15 'KaiTi', 'STKaiti', serif;
+  white-space: nowrap;
+}
+
+.app-shell[data-visual='light-anime'] .character-page .evolution-journal > .evolution-tabs > button.active {
+  border-image-source: var(--game-ui-teal);
+  color: var(--game-ui-primary-ink, #245664);
+  text-shadow: none;
+}
+
+.app-shell[data-visual='light-anime'] .character-page .evolution-journal .evolution-tabs .evolution-research-emblem {
+  flex-basis: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+.app-shell[data-visual='light-anime'] .character-page .evolution-journal :is(.evolution-heading, .evolution-viewport-gate, .evolution-viewport-toolbar) button {
+  box-sizing: border-box;
+  min-height: 28px;
+  padding: 1px 5px;
+  border: 5px solid transparent;
+  border-image: var(--game-ui-paper) 144 fill / 5px stretch;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--game-ui-ink, #535366);
+  font: 700 11px/1.2 'KaiTi', 'STKaiti', serif;
+}
+
+.app-shell[data-visual='light-anime'] .character-page .evolution-journal .evolution-viewport-toolbar > span {
+  padding: 3px 7px;
+  color: var(--game-ui-ink, #535366);
+  background: var(--game-ui-paper) center / 100% 100% no-repeat;
+  font-size: 11px;
+  text-shadow: none;
+}
+
+.app-shell[data-visual='light-anime'] .character-page .evolution-journal .evolution-viewport-toolbar > button {
+  border-image-source: var(--game-ui-paper);
+  color: var(--game-ui-gold-ink, #735632);
+}
+
+.app-shell[data-visual='light-anime'] .character-page .evolution-viewport-panel.evolution-journal .evolution-viewport-list > .evolution-viewport-entry {
+  gap: 6px;
+  height: 64px;
+  padding: 4px 6px;
+  overflow: hidden;
+  border: 6px solid transparent;
+  border-image: var(--game-ui-panel) 144 fill / 6px stretch;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--game-ui-ink, #535366);
+}
+
+.app-shell[data-visual='light-anime'] .character-page .evolution-journal .evolution-viewport-entry > .evolution-research-emblem {
+  flex-basis: 36px;
+  width: 36px;
+  height: 36px;
+  filter: drop-shadow(0 1px 1px #7a5a3430);
+}
+
+.app-shell[data-visual='light-anime'] .character-page .evolution-viewport-panel.evolution-journal .evolution-viewport-entry > .evolution-entry-copy {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.app-shell[data-visual='light-anime'] .character-page .evolution-viewport-panel.evolution-journal .evolution-entry-copy > strong {
+  color: var(--game-ui-muted, #736c78);
+  font: 700 12px/1.15 'KaiTi', 'STKaiti', serif;
+}
+
+.app-shell[data-visual='light-anime'] .character-page .evolution-viewport-panel.evolution-journal .evolution-entry-copy > small {
+  color: var(--game-ui-primary-ink, #245664);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.app-shell[data-visual='light-anime'] .character-page .evolution-viewport-panel.evolution-journal .is-metrics .evolution-entry-copy > small {
+  color: var(--game-ui-primary-ink, #245664);
+  font: 700 16px/1.1 'KaiTi', 'STKaiti', serif;
+  font-variant-numeric: tabular-nums;
+}
+
+.evolution-journal .evolution-research-gauge {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 8px;
+  padding-inline: 3px;
+  border: 2px solid #c7c5b3;
+  border-radius: 2px;
+  background: #e9ede1;
+  box-shadow: inset 0 1px 2px #718b7a26;
+}
+
+.evolution-journal .evolution-research-gauge::before,
+.evolution-journal .evolution-research-gauge::after {
+  content: '';
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  width: 5px;
+  background: var(--game-ui-gold) center / 100% 100% no-repeat;
+}
+.evolution-journal .evolution-research-gauge::before { left: -3px; }
+.evolution-journal .evolution-research-gauge::after { right: -3px; }
+
+.evolution-journal .evolution-research-gauge > meter {
+  display: block;
+  width: 100%;
+  height: 4px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.evolution-journal .evolution-research-gauge > meter::-webkit-meter-bar {
+  height: 4px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.evolution-journal .evolution-research-gauge > meter::-webkit-meter-optimum-value {
+  background: var(--game-ui-teal) center / 100% 100% no-repeat;
+  box-shadow: inset 0 1px 2px #718b7a26;
+}
+.evolution-journal .evolution-research-gauge[data-gauge='pressure'] > meter::-webkit-meter-optimum-value {
+  background-image: var(--game-ui-coral);
+}
+.evolution-journal .evolution-research-gauge > meter::-moz-meter-bar { background: #55a99b; }
+.evolution-journal .evolution-research-gauge[data-gauge='pressure'] > meter::-moz-meter-bar { background: #d58067; }
+
+.evolution-viewport-backdrop.evolution-journal-overlay.anime-growth-commerce > :is(.evolution-viewport-dialog, .evolution-viewport-detail) {
+  padding: 12px;
+  border: 10px solid transparent;
+  border-image: var(--game-ui-panel) 144 fill / 10px stretch;
+  border-radius: 0;
+  background: #fffcf4;
+  background-clip: padding-box;
+  color: var(--game-ui-ink, #535366);
+}
+
+.evolution-journal-overlay.anime-growth-commerce :is(.evolution-viewport-dialog > header button, .evolution-detail-close, .evolution-actions button, .evolution-quote button, .growth-controls button) {
+  border: 6px solid transparent;
+  border-image: var(--game-ui-paper) 144 fill / 6px stretch;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--game-ui-ink, #535366);
+}
+
+.evolution-journal-overlay.anime-growth-commerce .growth-controls > section {
+  border: 7px solid transparent;
+  border-image: var(--game-ui-panel) 144 fill / 7px stretch;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.evolution-journal-overlay.anime-growth-commerce :is(.evolution-actions, .evolution-quote, .growth-fields) > button:first-child,
+.evolution-journal-overlay.anime-growth-commerce .evolution-research-controls :is(.growth-breakthrough, .growth-observation) > button {
+  border-image-source: var(--game-ui-teal);
+  color: var(--game-ui-primary-ink, #245664);
+}
+
+.evolution-journal-overlay.anime-growth-commerce .growth-controls :is(h3, strong) { color: var(--game-ui-ink, #535366); }
+.evolution-journal-overlay.anime-growth-commerce .growth-controls p { color: var(--game-ui-muted, #736c78); }
+.evolution-journal-overlay.anime-growth-commerce .evolution-research-controls.growth-controls {
+  margin: 8px 0 0;
+  padding: 0;
+  border: 0;
+  border-image: none;
+  background: transparent;
+  box-shadow: none;
+}
+.evolution-journal-overlay.anime-growth-commerce .evolution-viewport-detail > h3 {
+  color: var(--game-ui-ink, #535366);
+  font-family: 'KaiTi', 'STKaiti', serif;
+}
+.evolution-journal-overlay.anime-growth-commerce .evolution-viewport-detail > :is(p, small) { color: var(--game-ui-muted, #736c78); }
+.evolution-research-controls.growth-controls h3 {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: 'KaiTi', 'STKaiti', serif;
+}
+.evolution-research-controls h3 > .evolution-research-emblem { flex-basis: 28px; width: 28px; height: 28px; }
+.evolution-research-controls .growth-traits > button { display: flex; align-items: center; gap: 6px; }
+.evolution-research-controls .growth-traits .evolution-research-emblem { flex-basis: 25px; width: 25px; height: 25px; }
+.evolution-research-controls.growth-controls progress {
+  display: block;
+  width: 100%;
+  height: 10px;
+  border: 1px solid #c7c5b3;
+  border-radius: 1px;
+  background: #edf1e8;
+}
+.evolution-research-controls.growth-controls progress::-webkit-progress-bar {
+  background: var(--game-ui-paper) center / 100% 100% no-repeat;
+  border-radius: 0;
+}
+.evolution-research-controls.growth-controls progress::-webkit-progress-value {
+  background: var(--game-ui-teal) center / 100% 100% no-repeat;
+  border-radius: 0;
+}
+.evolution-research-controls.growth-controls progress::-moz-progress-bar { background: #4d9d91; }
+
+.app-shell[data-visual='light-anime'] .character-page .evolution-journal button:disabled,
+.evolution-journal-overlay.anime-growth-commerce button:disabled {
+  opacity: .7;
+  filter: saturate(.4);
+  cursor: not-allowed;
+}
+
+@media (max-width: 380px) {
+  .app-shell[data-visual='light-anime'] .character-page .evolution-journal .evolution-tabs .evolution-research-emblem { flex-basis: 15px; width: 15px; height: 15px; }
+  .app-shell[data-visual='light-anime'] .character-page .evolution-journal > .evolution-tabs > button { gap: 2px; border-width: 4px; border-image-width: 4px; }
+  .app-shell[data-visual='light-anime'] .character-page .evolution-journal .evolution-viewport-entry > .evolution-research-emblem { flex-basis: 29px; width: 29px; height: 29px; }
+  .app-shell[data-visual='light-anime'] .character-page .evolution-viewport-panel.evolution-journal .evolution-viewport-entry { gap: 4px; padding-inline: 4px; }
+  .app-shell[data-visual='light-anime'] .character-page .evolution-viewport-panel.evolution-journal .evolution-entry-copy > strong { font-size: 11px; }
+  .app-shell[data-visual='light-anime'] .character-page .evolution-viewport-panel.evolution-journal .is-metrics .evolution-entry-copy > small { font-size: 15px; }
+}
+
+@media (max-height: 480px) {
+  .app-shell[data-visual='light-anime'] .character-page .evolution-viewport-panel.evolution-journal { gap: 3px; }
+  .app-shell[data-visual='light-anime'] .character-page .evolution-journal > .evolution-heading { min-height: 27px; border-width: 3px; border-image-width: 3px; }
+  .app-shell[data-visual='light-anime'] .character-page .evolution-journal .evolution-heading .evolution-research-emblem { flex-basis: 21px; width: 21px; height: 21px; }
+  .app-shell[data-visual='light-anime'] .character-page .evolution-journal > .evolution-tabs > button { min-height: 27px; border-width: 3px; border-image-width: 3px; }
+  .app-shell[data-visual='light-anime'] .character-page .evolution-journal :is(.evolution-heading, .evolution-viewport-gate, .evolution-viewport-toolbar) button { min-height: 24px; border-width: 3px; border-image-width: 3px; }
+}

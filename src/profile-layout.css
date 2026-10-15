@@ -1,0 +1,62 @@
+/* Profile alone keeps the portrait beside identity, with every attribute visible below. */
+.app-shell[data-visual='light-anime'] .profile-viewport-panel {
+  grid-template-rows: var(--profile-hero-height) minmax(0,1fr);
+}
+.app-shell[data-visual='light-anime'] .profile-viewport-panel .profile-viewport-hero {
+  grid-template-columns:minmax(0,47fr) minmax(0,53fr); gap:5px;
+}
+.app-shell[data-visual='light-anime'] .profile-viewport-panel .profile-viewport-portrait.character-profile-portrait {
+  position:relative; inset:auto; grid-column:1; width:100%; height:100%;
+}
+.app-shell[data-visual='light-anime'] .profile-viewport-panel .profile-viewport-identity {
+  grid-column:2; height:100%; max-height:none; padding:3px 9px; gap:2px;
+}
+.app-shell[data-visual='light-anime'] .profile-viewport-panel .profile-viewport-identity-heading {
+  display:flex; align-items:baseline; gap:4px;
+}
+.app-shell[data-visual='light-anime'] .profile-viewport-panel .profile-viewport-identity-heading h1 {
+  flex:1; min-width:0; margin:0; font-size:clamp(14px,1.5vw,19px); line-height:1.15;
+}
+.app-shell[data-visual='light-anime'] .profile-viewport-panel .profile-viewport-identity-heading p {
+  flex:none; max-width:48%; margin:0; font-size:var(--profile-identity-font); line-height:1.15;
+}
+.app-shell[data-visual='light-anime'] .profile-viewport-panel .profile-viewport-identity-fields {
+  grid-template-columns:repeat(var(--profile-identity-columns),minmax(0,1fr));
+  grid-template-rows:repeat(var(--profile-identity-rows),minmax(0,1fr)); grid-auto-rows:minmax(0,1fr); column-gap:8px;
+}
+.app-shell[data-visual='light-anime'] .profile-viewport-panel .profile-viewport-identity-fields>button { padding:0; }
+.app-shell[data-visual='light-anime'] .profile-viewport-panel .profile-viewport-identity-fields>button>span,
+.app-shell[data-visual='light-anime'] .profile-viewport-panel .profile-viewport-identity-fields>button>strong {
+  font-size:var(--profile-identity-font); line-height:1.15;
+}
+.app-shell[data-visual='light-anime'] .profile-viewport-panel .profile-viewport-paper {
+  grid-template-rows:var(--profile-tab-height) minmax(0,1fr); gap:0;
+  padding:var(--profile-paper-padding-y) 9px; border-width:0;
+}
+.app-shell[data-visual='light-anime'] .profile-viewport-panel .profile-viewport-tabs {
+  grid-template-columns:repeat(3,minmax(0,1fr));
+}
+.app-shell[data-visual='light-anime'] .profile-viewport-panel .profile-viewport-tabs>button {
+  min-height:0; height:var(--profile-tab-height); padding:0 3px; font-size:var(--profile-entry-font); line-height:1;
+}
+.app-shell[data-visual='light-anime'] .profile-viewport-panel .profile-viewport-list {
+  grid-template-columns:repeat(2,minmax(0,1fr)); grid-auto-rows:var(--profile-row-height); gap:0 10px; align-content:start;
+}
+.app-shell[data-visual='light-anime'] .profile-viewport-panel .profile-viewport-entry {
+  min-height:0; height:100%; gap:4px; padding:0 2px; border:0; border-radius:0; background:transparent;
+  box-shadow:inset 0 -1px #c7b69b60; overflow:hidden;
+}
+.app-shell[data-visual='light-anime'] .profile-viewport-panel .profile-viewport-entry>span,
+.app-shell[data-visual='light-anime'] .profile-viewport-panel .profile-viewport-entry>strong {
+  font-size:var(--profile-entry-font); line-height:var(--profile-entry-line); white-space:nowrap;
+}
+.app-shell[data-visual='light-anime'] .profile-viewport-panel .profile-viewport-entry>span {
+  overflow:hidden; text-overflow:ellipsis;
+}
+@media(max-height:450px) {
+  .app-shell[data-visual='light-anime'][data-viewport-layout][data-character-scene='profile'] .topbar { height:32px; }
+  .app-shell[data-visual='light-anime'][data-viewport-layout][data-character-scene='profile'] .page-brand .original-game-logo>img { width:90px; height:28px; }
+  .app-shell[data-visual='light-anime'][data-viewport-layout][data-character-scene='profile'] :is(.inbox-button,.settings-button) { width:26px; height:26px; }
+  .app-shell[data-visual='light-anime'][data-viewport-layout][data-character-scene='profile'] .main-section-tabs { height:28px; }
+  .app-shell[data-visual='light-anime'][data-viewport-layout][data-character-scene='profile'] .bottom-nav { height:35px; }
+}

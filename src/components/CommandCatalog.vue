@@ -1,4 +1,9 @@
 <script setup lang="ts">
+import '../anime-growth-commerce.css';
+import '../game-ui-catalog.css';
+import AnimeIcon from './AnimeIcon.vue';
+import ViewportPagination from './ViewportPagination.vue';
+import { useViewportPagination } from '../useViewportPagination';
 import { computed, nextTick, ref, watch } from 'vue';
 import { commandAction, userFacingErrorMessage } from '../api';
 import type {
@@ -41,6 +46,8 @@ const emit = defineEmits<{
 }>();
 
 const query = ref('');
+const workbenchOpen = ref(false);
+const commandViewport = ref<HTMLElement | null>(null);
 const category = ref('全部');
 const selectedId = ref('');
 const args = ref<Record<string, FormValue>>({});
@@ -69,6 +76,8 @@ const filteredCommands = computed(() => {
   });
 });
 const selected = computed(() => props.commands.find(item => item.id === selectedId.value) ?? filteredCommands.value[0] ?? null);
+const commandPaging = useViewportPagination(() => filteredCommands.value, {container:commandViewport,rowHeight:64,gap:6});
+watch([query,category], commandPaging.reset);
 const selectedFields = computed<CommandFieldSchema[]>(() => {
   const schema = selected.value?.schema;
   if (Array.isArray(schema)) return schema;
@@ -114,6 +123,7 @@ function normalizedOptions(field: CommandFieldSchema): CommandFieldOption[] {
 
 function setSelection(id: string) {
   selectedId.value = id;
+  workbenchOpen.value = true;
 }
 
 function initializeForm(command: CommandCatalogItem | null) {
@@ -241,6 +251,7 @@ function followUpCommand(raw: string): { command: CatalogCommand; rest: string }
 }
 
 async function openFollowUp(command: string) {
+  workbenchOpen.value = true;
   const target = followUpCommand(command);
   if (!target) {
     notice.value = '此操作尚未接入网页命令目录。';
@@ -281,6 +292,7 @@ function activateMessageButton(button: MessageButton) {
 
 // The parent calls these after handling an issued action so its full response uses the same renderer.
 function showInteractionResult(result: CommandActionResult) {
+  workbenchOpen.value = true;
   resultFromInteraction.value = true;
   previewResult.value = null;
   lastResult.value = result;
@@ -352,26 +364,29 @@ watch([query, category], selectFirstAvailable);
 </script>
 
 <template>
-  <section class="command-catalog" :class="{ compact }">
+  <section class="command-catalog anime-growth-commerce catalog-painted" :class="{ compact }">
     <aside class="command-catalog-list card-surface">
       <div class="command-catalog-heading">
-        <div><p class="eyebrow">COMMANDS</p><h3>冒险操作</h3></div>
+        <div><h3><AnimeIcon name="book" :size="26" />冒险操作</h3></div>
         <span class="muted">{{ filteredCommands.length }} 项</span>
       </div>
-      <input v-model="query" class="command-search" type="search" aria-label="搜索命令" placeholder="搜索操作或指令" />
-      <div class="command-categories" role="tablist" aria-label="命令分类">
-        <button v-for="item in categories" :key="item" type="button" :class="{ active: category === item }" @click="category = item">{{ item }}</button>
-      </div>
+      <div class="catalog-search-wrap"><AnimeIcon name="search" :size="20" class="catalog-search-art" /><input v-model="query" class="command-search" type="search" aria-label="搜索命令" placeholder="搜索操作或指令" /></div>
+      <label class="command-category-select">分类 <select v-model="category" aria-label="命令分类"><option v-for="item in categories" :key="item" :value="item">{{ categoryLabel(item) }}</option></select></label>
+      <div ref="commandViewport" class="command-viewport">
       <div class="command-items">
-        <button v-for="item in filteredCommands" :key="item.id" type="button" class="command-item" :class="{ active: selected?.id === item.id, disabled: item.enabled === false }" @click="setSelection(item.id)">
-          <span><strong>{{ item.title }}</strong><small>{{ categoryLabel(item.category) }}<template v-if="item.readOnly"> · 查看</template></small></span>
-          <span v-if="item.enabled === false" class="command-readonly">未解锁</span><span v-else-if="item.readOnly" class="command-readonly">只读</span>
+        <button v-for="item in commandPaging.visibleItems.value" :key="item.id" :data-command-id="item.id" type="button" class="command-item" :class="{ active: selected?.id === item.id, disabled: item.enabled === false }" @click="setSelection(item.id)">
+          <AnimeIcon :name="item.category === 'battle' ? 'sword' : item.category === 'social' ? 'party' : item.category === 'home' ? 'home' : item.category === 'shop' ? 'coin' : 'scroll'" :size="32" /><span><strong :title="item.title">{{ item.title }}</strong><small>{{ categoryLabel(item.category) }}<template v-if="item.readOnly"> · 查看</template></small></span>
+          <span v-if="item.enabled === false" class="command-readonly locked">未解锁</span><span v-else-if="item.readOnly" class="command-readonly">只读</span>
         </button>
         <p v-if="!filteredCommands.length" class="empty-state">没有找到匹配的操作。</p>
       </div>
+      </div>
+      <ViewportPagination :page="commandPaging.page.value" :total-pages="commandPaging.totalPages.value" :total="filteredCommands.length" label="操作目录翻页" :disabled="isBusy" @update:page="commandPaging.setPage" />
     </aside>
 
-    <section v-if="selected" class="command-workbench card-surface">
+    <div v-if="selected && (compact || workbenchOpen)" class="command-workbench-backdrop" @click.self="!isBusy && (workbenchOpen = false)">
+    <section class="command-workbench card-surface" role="dialog" aria-modal="true" :aria-label="selected.title">
+      <button v-if="!compact" type="button" class="dialog-close command-workbench-close" aria-label="关闭操作详情" :disabled="isBusy" @click="workbenchOpen = false"><AnimeIcon name="close" :size="22" /></button>
       <div class="command-workbench-heading">
         <div><p class="eyebrow">{{ categoryLabel(selected.category) }}</p><h2>{{ selected.title }}</h2></div>
         <span class="command-risk" :class="selected.readOnly ? 'safe' : selected.risk === 'danger' ? 'danger' : 'write'">{{ selected.readOnly ? '只读' : selected.risk === 'danger' ? '确认操作' : '可操作' }}</span>
@@ -401,11 +416,11 @@ watch([query, category], selectFirstAvailable);
 
       <div v-if="notice" class="command-notice" role="status">{{ notice }}</div>
       <div v-if="previewResult" class="command-preview">
-        <div class="section-heading"><h3>操作预览</h3><span class="muted">确认后才会产生变更</span></div>
+        <div class="section-heading"><h3><AnimeIcon name="scroll" :size="24" />操作预览</h3><span class="muted">确认后才会产生变更</span></div>
         <pre>{{ previewText }}</pre>
       </div>
       <div v-else-if="renderedMessages.some(message => message.text || message.images.length || message.buttons.length)" class="command-result">
-        <div class="section-heading"><h3>返回结果</h3><span v-if="refreshRegions.length" class="muted">将刷新：{{ refreshRegions.join('、') }}</span></div>
+        <div class="section-heading"><h3><AnimeIcon name="check" :size="24" />返回结果</h3><span v-if="refreshRegions.length" class="muted">将刷新：{{ refreshRegions.join('、') }}</span></div>
         <div v-for="(message, index) in renderedMessages" :key="index" class="command-result-message">
           <pre v-if="message.text">{{ message.text }}</pre>
           <img v-for="(src, imageIndex) in message.images" :key="imageIndex" class="command-result-image" :src="src" alt="命令返回的图片" loading="lazy" />
@@ -415,7 +430,8 @@ watch([query, category], selectFirstAvailable);
         </div>
       </div>
     </section>
-    <section v-else class="command-workbench card-surface empty-state">暂无可用命令。</section>
+    </div>
+    <section v-else-if="!selected" class="command-workbench card-surface empty-state">暂无可用命令。</section>
   </section>
 </template>
 
@@ -431,7 +447,7 @@ watch([query, category], selectFirstAvailable);
 .command-categories button.active { color: #665197; background: #eee9ff; }
 .command-items { display: grid; gap: 7px; max-height: 590px; overflow-y: auto; padding-right: 2px; }
 .command-item { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; padding: 11px 12px; text-align: left; color: var(--ink); background: #faf3ee; border: 1px solid transparent; border-radius: 13px; }
-.command-item:hover, .command-item.active { background: #f1ecff; border-color: rgba(143, 125, 215, .22); }
+.command-item.active { background: #f1ecff; border-color: rgba(143, 125, 215, .22); }
 .command-item strong, .command-item small { display: block; }
 .command-item strong { font-size: 13px; }
 .command-item small { margin-top: 4px; color: var(--muted); font-size: 10px; }

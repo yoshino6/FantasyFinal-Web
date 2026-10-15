@@ -1,0 +1,398 @@
+/* 008–015, 023–039, 049, 057–059, 070: component-owned illustrated surfaces. */
+.anime-growth-commerce.anime-growth-commerce {
+  --gc-ink: var(--ink, #27374a);
+  --gc-muted: #8b7468;
+  --gc-paper: #fff4dd;
+  --gc-line: #c7aa83;
+  --gc-teal: #168d96;
+  --gc-coral: #d56f61;
+  --gc-blue: #e6f5f7;
+  color: var(--gc-ink);
+}
+.anime-growth-commerce.anime-growth-commerce:is(.skill-panel, .skill-dialog, .evolution-panel, .growth-controls, .advanced-dialog, .advanced-inline-panel, .market-panel, .home-purchase-panel, .bank-dialog, .guild-shop-panel, .bookshop-panel) {
+  border: 12px solid transparent;
+  border-image: url('/assets/light-anime/paper-frame.svg') 24 fill / 12px / 0 stretch;
+  border-radius: 5px 12px 7px 10px;
+  background: var(--gc-paper);
+  background-clip: padding-box;
+  box-shadow: 0 5px 0 #936c4933, 0 14px 35px #64484724;
+}
+.anime-growth-commerce.anime-growth-commerce :is(h2, h3, h4) {
+  color: var(--gc-ink);
+  letter-spacing: .035em;
+}
+.anime-growth-commerce.anime-growth-commerce :is(h2, h3, h4):has(> .anime-icon) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.anime-growth-commerce.anime-growth-commerce :is(small, dt, .hint, .quiet, .intro, .muted) { color: var(--gc-muted); }
+.anime-growth-commerce.anime-growth-commerce strong { color: var(--gc-ink); }
+.anime-growth-commerce.anime-growth-commerce :is(button, input, select, textarea) { font: inherit; }
+.anime-growth-commerce.anime-growth-commerce button {
+  min-height: 42px;
+  border: 2px solid var(--gc-line);
+  border-radius: 8px 11px 7px 10px;
+  background: #fff3dc;
+  background-clip: padding-box;
+  color: var(--gc-ink);
+  box-shadow: inset 0 0 0 2px #fffaf0, 0 2px 0 #a3815b22;
+  transition: filter .15s, transform .15s;
+}
+.anime-growth-commerce.anime-growth-commerce button:hover:not(:disabled) { filter: brightness(1.035); transform: translateY(-1px); }
+.anime-growth-commerce.anime-growth-commerce button:active:not(:disabled) { transform: translateY(1px); }
+.anime-growth-commerce.anime-growth-commerce button:disabled { opacity: .48; cursor: not-allowed; filter: saturate(.45); }
+.anime-growth-commerce.anime-growth-commerce :is(button, input, select, textarea):focus-visible { outline: 3px solid #36a9b2; outline-offset: 3px; }
+.anime-growth-commerce.anime-growth-commerce :is(input, select, textarea) {
+  min-height: 42px;
+  padding: 8px 12px;
+  color: var(--gc-ink);
+  background: #fffaf0;
+  border: 2px solid #b8a493;
+  border-radius: 8px 11px 7px 10px;
+  box-shadow: inset 0 2px 5px #7d675110;
+}
+.anime-growth-commerce.anime-growth-commerce input[type='search'] {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' fill='none' stroke='%23755b4c' stroke-width='3'%3E%3Ccircle cx='13' cy='13' r='9'/%3E%3Cpath d='m20 20 9 9'/%3E%3C/svg%3E");
+  background-size: 20px;
+  background-position: 11px center;
+  background-repeat: no-repeat;
+  padding-left: 38px;
+}
+.anime-growth-commerce.anime-growth-commerce :is(.skill-tabs, .evolution-tabs, .advanced-filters, .market-tabs, .subtabs, .home-floor-tabs, .home-storage-scope, .home-storage-categories, .home-purchase-tabs, .home-purchase-filters, .bank-tabs, .segment, .guild-shop-tabs, .bookshop-tabs, .command-categories) {
+  gap: 5px;
+  padding: 4px 0;
+  background: transparent;
+  border: 0;
+}
+.anime-growth-commerce.anime-growth-commerce :is(.skill-tabs, .evolution-tabs, .advanced-filters, .market-tabs, .subtabs, .home-floor-tabs, .home-storage-scope, .home-storage-categories, .home-purchase-tabs, .home-purchase-filters, .bank-tabs, .segment, .guild-shop-tabs, .bookshop-tabs, .command-categories) > button {
+  padding: 9px 10px;
+  border: 9px solid transparent;
+  border-image: url('/assets/light-anime/tab-frame.svg') 16 fill / 9px / 0 stretch;
+  border-radius: 0;
+  background: #fff4dd;
+  background-clip: padding-box;
+  box-shadow: none;
+  color: var(--gc-ink);
+  font-weight: 750;
+}
+.anime-growth-commerce.anime-growth-commerce :is(button.active, button.selected, .primary-button, .advanced-actions button, .evolution-actions button, .growth-controls > button, .home-refresh, .home-storage-transfer button, .home-storage-confirm, .home-purchase-primary, .guild-shop-primary, .bookshop-primary, .search-row > button, .search > button, .bookshop-search > button, .guild-shop-search > button) {
+  border: 9px solid transparent;
+  border-image: url('/assets/light-anime/button-teal.svg') 18 fill / 9px / 0 stretch;
+  background: var(--gc-teal);
+  background-clip: padding-box;
+  color: #fff9e8;
+  font-weight: 800;
+  box-shadow: 0 3px 0 #4c68642b;
+}
+.anime-growth-commerce.anime-growth-commerce :is(.danger-button, .subtle-button, .advanced-confirm, .quote .primary-button, .home-purchase-quote .home-purchase-primary, .guild-shop-quote .guild-shop-primary, .bookshop-quote .bookshop-primary, .quote-card .primary-button) {
+  border: 9px solid transparent;
+  border-image: url('/assets/light-anime/button-coral.svg') 18 fill / 9px / 0 stretch;
+  background: var(--gc-coral);
+  background-clip: padding-box;
+  color: #fff9e8;
+}
+.anime-growth-commerce.anime-growth-commerce :is(.skill-top, .dialog-header, .evolution-heading, .advanced-header, .market-header, .home-purchase-header, .bank-header, .guild-shop-header, .bookshop-header) {
+  min-height: 58px;
+  padding: 10px 12px;
+  background: transparent;
+  border-bottom: 1px solid #ceb68e;
+}
+.anime-growth-commerce.anime-growth-commerce :is(.market-emblem, .home-purchase-mark, .bank-mark, .guild-shop-emblem, .bookshop-mark, .advanced-mark) {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  color: var(--gc-teal);
+  background: transparent;
+  box-shadow: none;
+}
+.anime-growth-commerce.anime-growth-commerce :is(.dialog-header > button, .close-button, .home-purchase-close, .bank-header > button, .guild-shop-close, .bookshop-close, .advanced-close) {
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  flex: none;
+  color: #795b49;
+  font-size: 25px;
+}
+.anime-growth-commerce.anime-growth-commerce :is(.skill-card, .config-summary > div, .evolution-card, .evolution-detail, .advanced-catalog, .advanced-detail, .advanced-feature, .advanced-timeline, .item-card, .detail-card, .confirm-card, .home-card, .home-summary, .home-unowned, .home-storage-selection, .home-storage-quote, .home-purchase-card, .home-purchase-detail, .home-purchase-quote, .home-purchase-result, .transfer-card, .shortcuts, .deposit-detail, .quote-card, .guild-shop-item, .guild-shop-detail, .guild-shop-quote, .bookshop-item, .bookshop-detail, .bookshop-quote, .command-catalog-list, .command-workbench) {
+  border: 10px solid transparent;
+  border-image: url('/assets/light-anime/paper-frame.svg') 24 fill / 10px / 0 stretch;
+  background: var(--gc-paper);
+  background-clip: padding-box;
+  border-radius: 4px 9px 6px 10px;
+  box-shadow: 0 3px 0 #a8845c19;
+  color: var(--gc-ink);
+}
+.anime-growth-commerce.anime-growth-commerce :is(.item-card.chosen, .bookshop-item.selected, .guild-shop-item.selected, .home-storage-item.selected, .advanced-candidate.selected, .evolution-mutation.selected) {
+  border-image: none;
+  border-color: #66bfc1;
+  background: #e7f5ed;
+  box-shadow: inset 0 0 0 2px #c3eee4, 0 0 0 2px #3dabad44;
+}
+.anime-growth-commerce.anime-growth-commerce :is(.confirm-box, .evolution-quote, .growth-quote, .advanced-quote, .quote, .home-storage-quote, .home-purchase-quote, .quote-card, .guild-shop-quote, .bookshop-quote) {
+  padding: 15px;
+  border: 2px solid #79b7b6;
+  border-radius: 9px 13px 8px 12px;
+  background: linear-gradient(135deg, #f4fcf7, #e3f4f1);
+  box-shadow: inset 0 0 0 3px #fff9e6;
+  scroll-margin-top: 12px;
+}
+.anime-growth-commerce.anime-growth-commerce :is(.confirm-box, .evolution-quote, .growth-quote, .advanced-quote, .quote, .home-storage-quote, .home-purchase-quote, .quote-card, .guild-shop-quote, .bookshop-quote) :is(p, small, strong, h3, h4, span) { color: var(--gc-ink); }
+.anime-growth-commerce.anime-growth-commerce :is(.wallet, .points, .bookshop-wallet, .guild-shop-balance) {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 10px;
+  color: #745a3b;
+  background: #fff0ca;
+  border: 1px solid #d2ad70;
+  border-radius: 7px 11px 6px 10px;
+}
+.anime-growth-commerce.anime-growth-commerce :is(.wallet, .points, .bookshop-wallet, .guild-shop-balance) strong { color: #176d7b; }
+
+/* Skill journal: tall illustrated rows and separate configuration work surfaces. */
+.skill-panel.anime-growth-commerce.anime-growth-commerce { padding: 10px 12px 18px; }
+.skill-panel.anime-growth-commerce .skill-top h2 { font-size: 20px; }
+.anime-growth-commerce.anime-growth-commerce .skill-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.anime-growth-commerce.anime-growth-commerce .skill-card { min-height: 105px; padding: 12px; gap: 13px; }
+.anime-growth-commerce.anime-growth-commerce .skill-art { width: 64px; height: 64px; flex-basis: 64px; border: 2px solid #a8bac2; border-radius: 10px 15px 9px 13px; background: linear-gradient(145deg, #e1f2f8, #bddce9); box-shadow: inset 0 0 0 3px #fff7e6, 0 3px 0 #58657121; }
+.anime-growth-commerce.anime-growth-commerce [data-category='magic'] .skill-art { background: linear-gradient(145deg, #ffe0c1, #efa184); border-color: #bf8171; }
+.anime-growth-commerce.anime-growth-commerce [data-category='utility'] .skill-art { background: linear-gradient(145deg, #e7efd0, #a8d39a); border-color: #91ad7a; }
+.anime-growth-commerce.anime-growth-commerce [data-category='passive'] .skill-art { background: linear-gradient(145deg, #fff0b5, #e1c38c); border-color: #b49661; }
+.anime-growth-commerce.anime-growth-commerce .skill-copy { gap: 6px; }
+.anime-growth-commerce.anime-growth-commerce .skill-copy strong { color: var(--gc-ink); font-size: 15px; }
+.anime-growth-commerce.anime-growth-commerce .skill-copy small { font-size: 12px; }
+.anime-growth-commerce.anime-growth-commerce .skill-badge { background: #d5edf2; color: #267b90; border: 1px solid #93bec7; font-size: 11px; }
+.anime-growth-commerce.anime-growth-commerce .config-summary { grid-template-columns: 1.2fr 1fr; gap: 12px; }
+.anime-growth-commerce.anime-growth-commerce .config-summary h3 { font-size: 16px; }
+.anime-growth-commerce.anime-growth-commerce .slot-row { gap: 7px; }
+.anime-growth-commerce.anime-growth-commerce .slot-row > span { min-height: 76px; padding: 9px; white-space: normal; color: var(--gc-ink); background: #f5e8cb; border: 1px solid #cbb795; font-size: 12px; }
+.skill-dialog.anime-growth-commerce.anime-growth-commerce { width: min(740px, 100%); max-height: 88dvh; }
+.anime-growth-commerce.anime-growth-commerce .dialog-header .skill-art { width: 74px; height: 74px; flex-basis: 74px; }
+.anime-growth-commerce.anime-growth-commerce .dialog-body { padding: 16px 18px max(22px, env(safe-area-inset-bottom)); }
+.anime-growth-commerce.anime-growth-commerce .stat-grid { gap: 9px; }
+.anime-growth-commerce.anime-growth-commerce .stat-grid > span { padding: 11px; color: var(--gc-muted); background: #f6eacf; border: 1px solid #d3bd95; font-size: 12px; }
+.anime-growth-commerce.anime-growth-commerce .stat-grid strong { color: var(--gc-ink); font-size: 13px; }
+.anime-growth-commerce.anime-growth-commerce .detail-section h3 { font-size: 16px; padding-bottom: 7px; border-bottom: 1px solid #d1ba91; }
+.anime-growth-commerce.anime-growth-commerce .specialization-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.anime-growth-commerce.anime-growth-commerce .specialization-list > span { padding: 12px; background: #f5ead2; border: 1px solid #cbb995; color: var(--gc-ink); }
+.anime-growth-commerce.anime-growth-commerce .action-row { padding: 13px; background: #fff8e7; border: 1px solid #c8b08a; }
+.anime-growth-commerce.anime-growth-commerce .action-row strong { color: var(--gc-ink); font-size: 13px; }
+.anime-growth-commerce.anime-growth-commerce .action-row small { font-size: 12px; }
+
+/* Evolution: material display, state details, timeline and observation cards. */
+.evolution-panel.anime-growth-commerce.anime-growth-commerce { padding: 12px; }
+.anime-growth-commerce.anime-growth-commerce .evolution-gate { min-height: 64px; background: #e8f3f0; border: 1px solid #aac2aa; border-radius: 9px; }
+.anime-growth-commerce.anime-growth-commerce .evolution-stage { min-height: 135px; padding: 20px; background: linear-gradient(110deg, #f5e7be, #fff6df); border: 1px solid #c4ac7e; border-radius: 9px 15px 8px 12px; }
+.anime-growth-commerce.anime-growth-commerce .evolution-stage strong { color: #284e59; font-size: 38px; }
+.anime-growth-commerce.anime-growth-commerce .evolution-metrics { gap: 9px; }
+.anime-growth-commerce.anime-growth-commerce .evolution-metrics > div { padding: 15px 12px; border: 1px solid #cbb38d; background: #f8edd3; border-radius: 8px; }
+.anime-growth-commerce.anime-growth-commerce .evolution-metrics strong { color: #1b8490; }
+.anime-growth-commerce.anime-growth-commerce .evolution-resources { grid-template-columns: 1fr; gap: 13px; }
+.anime-growth-commerce.anime-growth-commerce .evolution-section-head { display: flex; align-items: center; gap: 8px; }
+.anime-growth-commerce.anime-growth-commerce .evolution-resource-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; }
+.anime-growth-commerce.anime-growth-commerce .evolution-resource-list > div { display: flex; flex-direction: column; justify-content: center; gap: 6px; min-height: 140px; padding: 12px 7px; border: 1px solid #c6b28d; border-radius: 8px 12px 7px 9px; background: #f8ebce; text-align: center; }
+.anime-growth-commerce.anime-growth-commerce .evolution-resource-list .inventory-art-wrap { width: 64px; height: 64px; flex-basis: 64px; margin: 0; }
+.anime-growth-commerce.anime-growth-commerce .evolution-resource-list .inventory-item-image { width: 60px; height: 60px; }
+.anime-growth-commerce.anime-growth-commerce .evolution-resource-list strong { color: var(--gc-ink); font-size: 15px; }
+.anime-growth-commerce.anime-growth-commerce .evolution-mutation-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 13px; }
+.anime-growth-commerce.anime-growth-commerce .evolution-mutation { min-height: 85px; gap: 12px; padding: 12px; border: 1px solid #c4ad88; background: #fff7e2; }
+.anime-growth-commerce.anime-growth-commerce .evolution-mutation-mark { width: 48px; height: 48px; flex-basis: 48px; background: #e8ebc8; }
+.anime-growth-commerce.anime-growth-commerce .evolution-history { position: relative; padding-left: 17px; }
+.anime-growth-commerce.anime-growth-commerce .evolution-history article { position: relative; margin-left: 8px; padding: 14px 12px 14px 32px; border-left: 3px solid #6aada6; border-bottom: 1px solid #d8bd93; background: #fff5df; }
+.anime-growth-commerce.anime-growth-commerce .evolution-history-dot { position: absolute; left: -17px; top: 17px; display: grid; place-items: center; width: 32px; height: 32px; border: 1px solid #6aada6; border-radius: 50%; background: #f9f5d8; }
+.growth-controls.anime-growth-commerce.anime-growth-commerce { padding: 14px 18px; margin-top: 14px; line-height: 1.7; }
+.anime-growth-commerce.anime-growth-commerce .growth-controls > h3 { font-size: 20px; }
+.growth-controls.anime-growth-commerce > section { margin-top: 17px; padding: 15px 0; border-top: 1px solid #c9b28c; }
+.anime-growth-commerce.anime-growth-commerce .growth-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.anime-growth-commerce.anime-growth-commerce .growth-fields label { width: 100%; }
+.anime-growth-commerce.anime-growth-commerce .growth-fields select { width: 100%; }
+.anime-growth-commerce.anime-growth-commerce .growth-traits > button { min-height: 76px; text-align: left; }
+.anime-growth-commerce.anime-growth-commerce .growth-traits > button { display: flex; gap: 10px; align-items: center; }
+.anime-growth-commerce.anime-growth-commerce .growth-traits > button.selected { color: #fff9e8; }
+.anime-growth-commerce.anime-growth-commerce .growth-active-observation { display: flex; align-items: center; gap: 15px; padding: 14px; margin-top: 10px; background: #f5ecd1; border: 1px solid #c2ad83; border-radius: 8px; }
+.anime-growth-commerce.anime-growth-commerce .growth-active-observation > div { flex: 1; min-width: 0; }
+.anime-growth-commerce.anime-growth-commerce progress { display: block; appearance: none; width: 100%; height: 12px; border: 1px solid #b7a486; border-radius: 7px; overflow: hidden; background: #e4d4b5; }
+.anime-growth-commerce.anime-growth-commerce progress::-webkit-progress-bar { background: #e4d4b5; }
+.anime-growth-commerce.anime-growth-commerce progress::-webkit-progress-value { background: linear-gradient(90deg, #52b6c3, #9ed8c1); border-radius: 6px; }
+.anime-growth-commerce.anime-growth-commerce progress::-moz-progress-bar { background: #52b6c3; }
+.anime-growth-commerce.anime-growth-commerce .growth-observation { position: relative; margin: 9px 0; padding: 13px; border: 1px solid #c7b18c; border-radius: 8px; background: #fff8e5; }
+.anime-growth-commerce.anime-growth-commerce .growth-quote { border-width: 2px; border-top: 2px solid #78b2b4; padding: 16px; }
+.anime-growth-commerce.anime-growth-commerce .growth-quote p { padding: 9px 0; border-bottom: 1px dashed #adc8bb; }
+.anime-growth-commerce.anime-growth-commerce .growth-quote .growth-fields > button:first-child { border-image: url('/assets/light-anime/button-teal.svg') 18 fill / 9px / 0 stretch; color: #fff7e2; background: #168d96; }
+
+/* Public profession trial: route rail and numbered progress spine. */
+.anime-growth-commerce.anime-growth-commerce .advanced-summary { background: #f7ebd1; border: 1px solid #c5af89; }
+.anime-growth-commerce.anime-growth-commerce .advanced-layout { grid-template-columns: minmax(190px, .65fr) minmax(0, 1.65fr); gap: 15px; }
+.anime-growth-commerce.anime-growth-commerce .advanced-catalog { padding: 12px; }
+.anime-growth-commerce.anime-growth-commerce .advanced-candidate { min-height: 86px; padding: 10px; background: #fff5dc; border: 1px solid #ceb58d; }
+.anime-growth-commerce.anime-growth-commerce .advanced-candidate-mark { width: 46px; height: 46px; flex-basis: 46px; background: #e3ebd0; }
+.anime-growth-commerce.anime-growth-commerce .advanced-title h3 { color: #244a58; font-size: 26px; }
+.anime-growth-commerce.anime-growth-commerce .advanced-story-image { display: block; max-height: 170px; max-width: 100%; width: 100%; object-fit: cover; border: 2px solid #c6ac82; border-radius: 8px; margin: 12px 0; }
+.anime-growth-commerce.anime-growth-commerce .advanced-info-grid > section { background: #f6e9cd; border: 1px solid #cbb48c; }
+.anime-growth-commerce.anime-growth-commerce .advanced-step { position: relative; padding: 14px 0; border: 0; }
+.anime-growth-commerce.anime-growth-commerce .advanced-step::before { content: ''; position: absolute; top: 30px; bottom: -15px; left: 15px; width: 2px; background: #b4b997; }
+.anime-growth-commerce.anime-growth-commerce .advanced-step:last-child::before { display: none; }
+.anime-growth-commerce.anime-growth-commerce .advanced-step > b { position: relative; width: 32px; height: 32px; flex-basis: 32px; border-radius: 50%; border: 2px solid #a38661; background: #f4e7c5; color: #72573d; }
+.anime-growth-commerce.anime-growth-commerce .advanced-step.reached > b { background: #1d9397; color: #fff9e8; border-color: #73beba; }
+.anime-growth-commerce.anime-growth-commerce .advanced-step > div { flex: 1; padding: 10px; border: 1px solid #c9b089; background: #fff8e8; border-radius: 8px; }
+
+/* Commerce ledgers: inventory rows, selected details and real quote receipts. */
+.anime-growth-commerce.anime-growth-commerce :is(.market-body, .home-purchase-body, .bank-body, .guild-shop-body, .bookshop-body, .advanced-body) { padding: 16px 18px max(24px, env(safe-area-inset-bottom)); }
+.anime-growth-commerce.anime-growth-commerce :is(.content-grid, .guild-shop-content) { grid-template-columns: minmax(0, 1.4fr) minmax(280px, 1fr); gap: 15px; }
+.anime-growth-commerce.anime-growth-commerce :is(.item-card, .guild-shop-item) { min-height: 103px; padding: 12px; gap: 12px; }
+.anime-growth-commerce.anime-growth-commerce :is(.item-card, .guild-shop-item) .inventory-art-wrap { width: 64px; height: 64px; flex-basis: 64px; margin: 0; background: #f1e2c5; border-radius: 8px; }
+.anime-growth-commerce.anime-growth-commerce :is(.item-card, .guild-shop-item) .inventory-item-image { width: 60px; height: 60px; }
+.anime-growth-commerce.anime-growth-commerce :is(.item-copy strong, .guild-shop-item strong) { color: var(--gc-ink); font-size: 15px; }
+.anime-growth-commerce.anime-growth-commerce :is(.item-copy small, .guild-shop-item small) { font-size: 12px; }
+.anime-growth-commerce.anime-growth-commerce :is(.item-copy > span, .item-copy b) { color: #397274; font-size: 12px; }
+.anime-growth-commerce.anime-growth-commerce .detail-card > .inventory-art-wrap { width: 84px; height: 84px; }
+.anime-growth-commerce.anime-growth-commerce .detail-card > .inventory-art-wrap .inventory-item-image { width: 80px; height: 80px; }
+.anime-growth-commerce.anime-growth-commerce :is(.detail-card dl > div, .guild-shop-facts > div, .bookshop-facts > div, .home-purchase-facts > div) { padding: 10px 0; border-color: #d2bb95; font-size: 13px; }
+.anime-growth-commerce.anime-growth-commerce :is(.detail-card dd, .guild-shop-facts dd, .bookshop-facts dd, .home-purchase-facts dd) { color: #296a76; }
+.anime-growth-commerce.anime-growth-commerce :is(.composer, .guild-shop-detail, .bookshop-detail, .home-purchase-detail) { padding: 16px; }
+.anime-growth-commerce.anime-growth-commerce .order-card { position: relative; gap: 10px; }
+.anime-growth-commerce.anime-growth-commerce .order-card .subtle-button { min-width: 110px; border: 9px solid transparent; border-image: url('/assets/light-anime/button-coral.svg') 18 fill / 9px / 0 stretch; }
+.anime-growth-commerce.anime-growth-commerce .confirm-cover { padding: 18px; background: #223440b5; backdrop-filter: blur(3px); }
+.anime-growth-commerce.anime-growth-commerce .confirm-card { padding: 20px; max-height: calc(100% - 24px); overflow-y: auto; }
+.anime-growth-commerce.anime-growth-commerce .cancel-item { display: flex; align-items: center; gap: 15px; padding: 12px 0; border-block: 1px solid #d1b894; }
+.anime-growth-commerce.anime-growth-commerce .cancel-item .inventory-art-wrap { width: 65px; height: 65px; }
+.anime-growth-commerce.anime-growth-commerce .quote > span { padding: 8px 0; border-bottom: 1px dashed #b3c8bb; }
+.anime-growth-commerce.anime-growth-commerce :is(.quote .primary-button, .home-purchase-quote .home-purchase-primary, .guild-shop-quote .guild-shop-primary, .bookshop-quote .bookshop-primary) { min-height: 48px; }
+
+/* Home: static wooden floor plan; existing server furniture coordinates remain authoritative. */
+.home-panel.anime-growth-commerce.anime-growth-commerce { padding: 10px 6px 24px; }
+.anime-growth-commerce.anime-growth-commerce .home-heading h2 { display: flex; gap: 8px; align-items: center; font-size: 22px; }
+.anime-growth-commerce.anime-growth-commerce .home-heading h2 small { font-size: 12px; font-weight: 400; margin-left: 4px; }
+.anime-growth-commerce.anime-growth-commerce .home-summary { padding: 14px 18px; }
+.anime-growth-commerce.anime-growth-commerce .home-summary h3 { color: #244753; }
+.anime-growth-commerce.anime-growth-commerce .home-content-grid { grid-template-columns: minmax(0, 1.25fr) minmax(320px, 1fr); }
+.anime-growth-commerce.anime-growth-commerce .home-card { padding: 14px; }
+.anime-growth-commerce.anime-growth-commerce .home-grid-scroll { padding: 9px; background: #b79368; border: 3px solid #826042; border-radius: 7px; }
+.anime-growth-commerce.anime-growth-commerce .home-room-grid { border: 5px solid #745943; background: repeating-linear-gradient(0deg, #e1bc87 0, #e1bc87 21px, #cfab78 22px, #cfab78 24px); box-shadow: inset 0 12px 18px #6b4d2c30; }
+.anime-growth-commerce.anime-growth-commerce .home-room-cell { border-right: 1px dashed #fff4dba6; border-bottom: 1px dashed #fff4dba6; }
+.anime-growth-commerce.anime-growth-commerce .home-room-furniture { display: flex; flex-direction: column; background: #f6e7cbb3; border: 1px solid #92724e; border-radius: 4px 8px 3px 6px; color: #493e35; gap: 1px; }
+.anime-growth-commerce.anime-growth-commerce .home-room-furniture .inventory-art-wrap { min-height: 0; width: min(65%, 60px); height: auto; aspect-ratio: 1; flex: 1; max-height: 75%; margin: 0; padding: 0; border: 0; background: transparent; }
+.anime-growth-commerce.anime-growth-commerce .home-room-furniture .inventory-art { width: 100%; height: 100%; }
+.anime-growth-commerce.anime-growth-commerce .home-furniture-list ul { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.anime-growth-commerce.anime-growth-commerce .home-furniture-list li { flex-wrap: wrap; gap: 7px; padding: 10px; border: 1px solid #c8b18b; background: #fcf1d8; }
+.anime-growth-commerce.anime-growth-commerce .home-furniture-list .inventory-art-wrap { width: 45px; height: 45px; margin: 0; }
+.anime-growth-commerce.anime-growth-commerce .home-furniture-list small { flex-basis: 100%; margin-left: 52px; color: var(--gc-muted); }
+.anime-growth-commerce.anime-growth-commerce :is(.home-badges span, .home-state-row span) { color: #537363; background: #e5ecd0; border: 1px solid #b5be98; }
+.anime-growth-commerce.anime-growth-commerce .home-storage-track { height: 13px; border: 1px solid #bba582; background: #e6d5b8; }
+.anime-growth-commerce.anime-growth-commerce .home-storage-track > span { background: linear-gradient(90deg, #3ba4aa, #77c5b6); }
+.anime-growth-commerce.anime-growth-commerce .home-storage-amount { margin-top: 16px; }
+.anime-growth-commerce.anime-growth-commerce .home-storage-amount strong { color: #244d58; }
+.anime-growth-commerce.anime-growth-commerce .home-storage-stats > div { background: #f6e7c6; border: 1px solid #d2bb92; }
+.anime-growth-commerce.anime-growth-commerce .home-storage-items { grid-template-columns: 1fr; gap: 9px; }
+.anime-growth-commerce.anime-growth-commerce .home-storage-item { grid-template-columns: 54px minmax(0, 1fr) auto; min-height: 80px; padding: 9px; background: #fff5df; border: 1px solid #c7b08b; }
+.anime-growth-commerce.anime-growth-commerce .home-storage-item .inventory-art-wrap { width: 50px; height: 50px; }
+.anime-growth-commerce.anime-growth-commerce .home-storage-item-weight { grid-column: 3; grid-row: 1; white-space: nowrap; color: #537d79; }
+.anime-growth-commerce.anime-growth-commerce .home-storage-picked { display: flex; align-items: center; gap: 13px; margin-bottom: 9px; }
+.anime-growth-commerce.anime-growth-commerce .home-storage-picked .inventory-art-wrap { width: 68px; height: 68px; margin: 0; }
+.anime-growth-commerce.anime-growth-commerce .home-storage-transfer { justify-content: space-between; align-items: end; }
+.anime-growth-commerce.anime-growth-commerce .home-purchase-illustration { display: flex; align-items: end; gap: 20px; padding: 12px 0; }
+.anime-growth-commerce.anime-growth-commerce .home-purchase-card { min-height: 240px; padding: 18px; }
+.anime-growth-commerce.anime-growth-commerce .home-purchase-site { background: #ecf0d6; border: 1px solid #b6bc92; }
+.anime-growth-commerce.anime-growth-commerce .home-purchase-shop-grid { grid-template-columns: minmax(0, 1.2fr) minmax(270px, 1fr); }
+.anime-growth-commerce.anime-growth-commerce .home-purchase-offers { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-content: start; }
+.anime-growth-commerce.anime-growth-commerce .home-purchase-offer { flex-direction: column; align-items: center; min-height: 180px; padding: 13px; background: #fcf1d6; border: 1px solid #bfa981; text-align: center; }
+.anime-growth-commerce.anime-growth-commerce .home-purchase-offer > span { flex: none; }
+.anime-growth-commerce.anime-growth-commerce .home-purchase-offer .inventory-art-wrap { width: 70px; height: 70px; flex-basis: 70px; }
+.anime-growth-commerce.anime-growth-commerce .home-purchase-offer b { display: none; }
+
+/* Bank: currency tiles, deposit certificates, three product cards. */
+.anime-growth-commerce.anime-growth-commerce .balances { gap: 12px; }
+.anime-growth-commerce.anime-growth-commerce .balances > div { display: grid; grid-template-columns: 40px 1fr; align-items: center; gap: 5px 8px; padding: 13px; background: #fff0cc; border: 1px solid #c5a97a; border-radius: 8px 12px 7px 10px; }
+.anime-growth-commerce.anime-growth-commerce .balances > div > .anime-icon { grid-row: span 2; }
+.anime-growth-commerce.anime-growth-commerce .balances strong { color: #684a32; font-size: 22px; }
+.anime-growth-commerce.anime-growth-commerce .product-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.anime-growth-commerce.anime-growth-commerce .product-list > button { display: flex; flex-direction: column; min-height: 180px; padding: 15px 10px; background: #fff3da; border: 1px solid #bda57f; }
+.anime-growth-commerce.anime-growth-commerce .product-list > button.selected { border-image: none; border-color: #60b6ba; background: #e5f4eb; color: var(--gc-ink); }
+.anime-growth-commerce.anime-growth-commerce .product-list > button > span:nth-child(2) { display: grid; gap: 7px; text-align: center; }
+.anime-growth-commerce.anime-growth-commerce .product-icon { width: 65px; height: 65px; background: #f5e0a9; border-radius: 50%; }
+.anime-growth-commerce.anime-growth-commerce .deposit-list > button { min-height: 96px; padding: 13px; border: 1px solid #c5ad84; background: #fff4dd; }
+.anime-growth-commerce.anime-growth-commerce .deposit-symbol { width: 55px; height: 55px; flex-basis: 55px; background: #f0dfaf; border-radius: 9px; }
+.anime-growth-commerce.anime-growth-commerce .deposit-detail .facts { gap: 9px; }
+.anime-growth-commerce.anime-growth-commerce .deposit-detail .facts > span { padding: 10px; background: #f5e7c9; border: 1px solid #d2bb91; }
+
+/* Bookshop buying uses covers on a shelf; selling keeps a compact ledger. */
+.anime-growth-commerce.anime-growth-commerce .bookshop-content { grid-template-columns: minmax(0, 1.25fr) minmax(290px, 1fr); }
+.bookshop-panel[data-side='buy'].anime-growth-commerce .bookshop-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.bookshop-panel[data-side='buy'].anime-growth-commerce .bookshop-item { flex-direction: column; min-height: 205px; padding: 14px 8px; text-align: center; }
+.bookshop-panel[data-side='buy'].anime-growth-commerce .bookshop-item > span { flex: none; }
+.bookshop-panel[data-side='buy'].anime-growth-commerce .bookshop-item b { display: none; }
+.bookshop-panel[data-side='buy'].anime-growth-commerce .bookshop-item .inventory-art-wrap { width: 85px; height: 95px; flex-basis: 95px; }
+.anime-growth-commerce.anime-growth-commerce .bookshop-item .inventory-item-image { width: 76px; height: 86px; }
+.bookshop-panel[data-side='sell'].anime-growth-commerce .bookshop-item { min-height: 91px; padding: 11px; gap: 12px; }
+.bookshop-panel[data-side='sell'].anime-growth-commerce .bookshop-item .inventory-art-wrap { width: 58px; height: 62px; flex-basis: 58px; }
+.anime-growth-commerce.anime-growth-commerce .bookshop-picked .inventory-art-wrap { width: 88px; height: 96px; flex-basis: 88px; }
+.anime-growth-commerce.anime-growth-commerce .bookshop-picked .inventory-item-image { width: 82px; height: 90px; }
+
+/* Command workbench: catalog rail, clear parameter form and preserved returned messages. */
+.command-catalog.anime-growth-commerce.anime-growth-commerce { grid-template-columns: minmax(240px, .75fr) minmax(0, 1.5fr); gap: 16px; }
+.anime-growth-commerce.anime-growth-commerce .command-item { min-height: 76px; padding: 12px; gap: 11px; background: #fff2d6; border: 1px solid #c8ad85; }
+.anime-growth-commerce.anime-growth-commerce .command-item > span:first-of-type { flex: 1; min-width: 0; }
+.anime-growth-commerce.anime-growth-commerce .command-item.active { border-image: none; background: #edf2d6; color: var(--gc-ink); border-color: #bca466; }
+.anime-growth-commerce.anime-growth-commerce .command-preview { padding: 14px; background: #e7f3ed; border: 1px solid #9dbca7; border-radius: 9px; }
+.anime-growth-commerce.anime-growth-commerce .command-preview pre { background: #fff8e8; border: 1px solid #c4b291; }
+.anime-growth-commerce.anime-growth-commerce .command-result { padding: 14px; background: #eff3d9; border: 1px solid #b0c69b; border-radius: 9px; }
+.anime-growth-commerce.anime-growth-commerce .command-result pre { background: #f9f6de; }
+.anime-growth-commerce.anime-growth-commerce .command-notice { color: #32747c; background: #e0f0e9; border: 1px solid #b2cbb7; }
+.anime-growth-commerce.anime-growth-commerce .command-usage { color: #527874; background: #f5ebd1; border: 1px dashed #bead89; }
+
+/* Shared portrait and item frames retain the existing asset selection and error fallback. */
+.anime-growth-commerce.anime-growth-commerce .character-portrait-stage { max-height: 470px; width: min(100%, 290px); background: radial-gradient(ellipse at 50% 90%, #b4cbae55, transparent 40%), linear-gradient(150deg, #fff3d1, #dcece2); border: 3px solid #aa936f; border-radius: 12px 20px 10px 17px; box-shadow: inset 0 0 0 4px #fff9e6, 0 6px 0 #a78a6225; }
+.anime-growth-commerce.anime-growth-commerce .character-portrait-chip { grid-template-columns: 24px minmax(0, 1fr); align-items: center; padding: 9px; background: #fff2d5; border: 1px solid #c6b087; border-radius: 7px 10px 6px 9px; }
+.anime-growth-commerce.anime-growth-commerce .character-portrait-chip > .anime-icon { grid-row: span 2; }
+.anime-growth-commerce.anime-growth-commerce .character-portrait-chip strong { color: var(--gc-ink); white-space: normal; }
+.inventory-art-wrap.anime-growth-commerce.anime-growth-commerce { display: inline-grid; place-items: center; flex: none; background: linear-gradient(135deg, #fff3d5, #ead6b3); border: 1px solid #c3aa85; border-radius: 8px 13px 7px 11px; padding: 3px; box-shadow: inset 0 0 0 2px #fff8e6; }
+.inventory-art-wrap.anime-growth-commerce.anime-growth-commerce :is(.inventory-item-image, .inventory-art) { display: block; width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 2px 1px #73584325); }
+.inventory-art-wrap.anime-growth-commerce.anime-growth-commerce .inventory-art { stroke: #76564c; stroke-width: 1; stroke-linejoin: round; }
+
+@media (max-width: 760px) {
+  .anime-growth-commerce.anime-growth-commerce:is(.market-panel, .home-purchase-panel, .bank-dialog, .guild-shop-panel, .bookshop-panel, .advanced-dialog) { border-width: 8px; border-image-width: 8px; }
+  .anime-growth-commerce.anime-growth-commerce :is(.market-body, .home-purchase-body, .bank-body, .guild-shop-body, .bookshop-body, .advanced-body) { padding: 12px 8px max(24px, env(safe-area-inset-bottom)); }
+  .anime-growth-commerce.anime-growth-commerce :is(.content-grid, .guild-shop-content, .bookshop-content, .home-purchase-shop-grid, .evolution-mutation-grid, .advanced-layout, .home-content-grid, .config-summary) { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .anime-growth-commerce.anime-growth-commerce :is(.bookshop-detail, .guild-shop-detail, .home-purchase-detail) { order: initial; }
+  .anime-growth-commerce.anime-growth-commerce .content-grid .detail-card:not(.composer) { order: initial; }
+  .anime-growth-commerce.anime-growth-commerce .skill-list { grid-template-columns: 1fr; }
+  .anime-growth-commerce.anime-growth-commerce .skill-card { min-height: 103px; padding: 10px; }
+  .anime-growth-commerce.anime-growth-commerce .advanced-candidates { gap: 9px; }
+  .anime-growth-commerce.anime-growth-commerce .advanced-candidate { flex-basis: 210px; }
+  .anime-growth-commerce.anime-growth-commerce .home-furniture-list ul { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .anime-growth-commerce.anime-growth-commerce .bookshop-list { gap: 7px; }
+  .bookshop-panel[data-side='buy'].anime-growth-commerce .bookshop-item { min-height: 175px; padding: 8px 4px; }
+  .bookshop-panel[data-side='buy'].anime-growth-commerce .bookshop-item .inventory-art-wrap { width: 63px; height: 74px; flex-basis: 74px; }
+  .anime-growth-commerce.anime-growth-commerce .bookshop-item .inventory-item-image { width: 100%; height: 100%; }
+  .anime-growth-commerce.anime-growth-commerce .product-list > button { min-height: 160px; padding: 12px 5px; }
+  .anime-growth-commerce.anime-growth-commerce .product-list small { font-size: 10px; white-space: normal; }
+  .command-catalog.anime-growth-commerce.anime-growth-commerce { grid-template-columns: 1fr; }
+  .anime-growth-commerce.anime-growth-commerce :is(.command-catalog-list, .command-workbench) { padding: 13px; }
+  .anime-growth-commerce.anime-growth-commerce .command-items { max-height: 310px; }
+}
+@media (max-width: 420px) {
+  .anime-growth-commerce.anime-growth-commerce .growth-active-observation { flex-wrap: wrap; }
+  .anime-growth-commerce.anime-growth-commerce :is(.wallet, .points) { gap: 4px; font-size: 11px; padding: 6px; }
+  .anime-growth-commerce.anime-growth-commerce .skill-top { padding-inline: 2px; gap: 6px; }
+  .skill-panel.anime-growth-commerce .skill-top h2 { font-size: 17px; }
+  .anime-growth-commerce.anime-growth-commerce .skill-art { width: 54px; height: 54px; flex-basis: 54px; }
+  .anime-growth-commerce.anime-growth-commerce .skill-badge { max-width: 50px; white-space: normal; }
+  .anime-growth-commerce.anime-growth-commerce .dialog-body { padding: 11px 8px; }
+  .anime-growth-commerce.anime-growth-commerce .evolution-resource-list { gap: 6px; }
+  .anime-growth-commerce.anime-growth-commerce .evolution-resource-list > div { min-height: 120px; font-size: 11px; }
+  .anime-growth-commerce.anime-growth-commerce .evolution-resource-list .inventory-art-wrap { width: 51px; height: 51px; flex-basis: 51px; }
+  .anime-growth-commerce.anime-growth-commerce .growth-fields { grid-template-columns: 1fr; }
+  .anime-growth-commerce.anime-growth-commerce .growth-traits { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .anime-growth-commerce.anime-growth-commerce .balances { gap: 5px; }
+  .anime-growth-commerce.anime-growth-commerce .balances > div { grid-template-columns: 1fr; text-align: center; padding: 8px 5px; }
+  .anime-growth-commerce.anime-growth-commerce .balances > div > .anime-icon { grid-row: auto; margin: auto; }
+  .anime-growth-commerce.anime-growth-commerce .balances strong { font-size: 17px; }
+  .anime-growth-commerce.anime-growth-commerce .order-card .subtle-button { margin-left: auto; }
+  .anime-growth-commerce.anime-growth-commerce .home-furniture-list ul { grid-template-columns: 1fr; }
+  .anime-growth-commerce.anime-growth-commerce :is(.confirm-actions, .home-storage-quote-actions) { flex-wrap: wrap; }
+  .anime-growth-commerce.anime-growth-commerce :is(.confirm-actions, .home-storage-quote-actions) > button { flex: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .anime-growth-commerce.anime-growth-commerce button { transition: none; }
+}

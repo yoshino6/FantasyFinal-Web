@@ -1,5 +1,14 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
+import AnimeIcon from './AnimeIcon.vue';
+import TabArtIcon from './TabArtIcon.vue';
+import SkillIcon from './SkillIcon.vue';
+import { ANIME_SCENES } from '../anime-assets';
+import { mapTargetArt } from '../exploration-assets';
+import './anime-adventure.css';
+import '../battle-viewport.css';
+import ViewportPagination from './ViewportPagination.vue';
+import { useViewportPagination } from '../useViewportPagination';
 
 export type BattleMember = {
   id: string;
@@ -19,6 +28,7 @@ export type BattleMember = {
 export type BattleAction = {
   id: string;
   label: string;
+  skillCode?: string;
   category?: 'normal' | 'skill' | 'item' | 'special';
   description?: string;
   icon?: string;
@@ -52,9 +62,14 @@ const props = defineProps<{ battle: BattleState; disabled?: boolean }>();
 const emit = defineEmits<{
   (event: 'action', payload: { action: BattleAction; targetId?: string; targetKind?: 'member' | 'target' }): void;
   (event: 'member-selected', payload: { member: BattleMember; side: 'ally' | 'enemy' }): void;
+  (event: 'open-auto-battle'): void;
 }>();
 
 const pendingAction = ref<BattleAction | null>(null);
+const battleStage = ref<HTMLElement | null>(null);
+const battleViewportList = ref<HTMLElement | null>(null);
+const battleViewportInfo = ref<{ title: string; text?: string; view?: 'status' | 'log' } | null>(null);
+let actionTrigger: HTMLElement | null = null;
 const selectedCategory = ref<NonNullable<BattleAction['category']>>('normal');
 const actionCategories = [
   { id: 'normal', label: '普通' },
@@ -71,25 +86,75 @@ watch(() => props.battle.actions, () => {
   if (!availableCategories.value.some(category => category.id === selectedCategory.value)) selectedCategory.value = 'normal';
   if (pendingAction.value) pendingAction.value = props.battle.actions.find(action => action.id === pendingAction.value?.id && !action.disabled) ?? null;
 });
-watch(() => [props.battle.revision, props.battle.phase], () => { pendingAction.value = null; });
+watch([() => props.battle.revision, () => props.battle.round, () => props.battle.phase], () => { pendingAction.value = null; });
 const canAct = computed(() => !props.disabled && (props.battle.phase === undefined || props.battle.phase === 'player'));
+watch(canAct, ready => { if (!ready) pendingAction.value = null; });
 const phaseLabel = computed(() => {
+  if (props.disabled) return '正在处理行动…';
   if (props.battle.turnLabel) return props.battle.turnLabel;
   return ({ player: '轮到你行动', enemy: '敌方行动中', waiting: '等待队伍行动', victory: '战斗胜利', defeat: '战斗失败' }[props.battle.phase ?? 'player'] ?? '准备战斗');
 });
-const phaseTone = computed(() => props.battle.phase === 'victory' ? 'victory' : props.battle.phase === 'defeat' ? 'defeat' : props.battle.phase === 'enemy' ? 'enemy' : 'player');
+const phaseTone = computed(() => props.battle.phase ?? 'player');
+const categoryIcon = (category: BattleAction['category']) => category === 'normal' ? 'sword' : category === 'skill' ? 'mana' : category === 'item' ? 'scroll' : 'star';
+const actionIcon = (action: BattleAction) => action.id === 'defend' ? 'shield' : action.id === 'escape' ? 'arrow' : categoryIcon(actionCategory(action));
+const memberPortrait = (member: BattleMember, side: 'ally' | 'enemy') => member.portrait
+  || mapTargetArt({ type: side === 'ally' ? 'member' : '怪物', name: member.name }).src;
 
 const percent = (value: number, max: number) => Math.min(100, Math.max(0, value / Math.max(1, max) * 100));
 const memberCanTarget = (member: BattleMember, side: 'ally' | 'enemy') => {
-  if (!canAct.value || !pendingAction.value || member.defeated) return false;
+  if (!canAct.value || !pendingAction.value || pendingAction.value.disabled || member.defeated) return false;
   if (pendingAction.value.targeting !== side && pendingAction.value.targeting !== 'any') return false;
   const allowed = pendingAction.value.allowedTargets?.[side];
   return !allowed || allowed.includes(member.id);
 };
-const selectAction = (action: BattleAction) => {
+const battleViewportPagination = useViewportPagination(() => visibleActions.value, {
+  container: battleViewportList, rowHeight: 64,
+  columns: () => battleViewportList.value ? getComputedStyle(battleViewportList.value).gridTemplateColumns.split(' ').length : 2
+});
+watch(selectedCategory, () => battleViewportPagination.reset());
+const formations = computed(() => ([
+  { side: 'ally' as const, label: '我方阵容', members: props.battle.allies },
+  { side: 'enemy' as const, label: '敌方阵容', members: props.battle.enemies }
+]).map(team => {
+  const unknownHp = team.members.some(member => member.unknownHp);
+  const hp = team.members.reduce((sum, member) => ({ current: sum.current + member.hp.current, max: sum.max + member.hp.max }), { current: 0, max: 0 });
+  return { ...team, hp, unknownHp, alive: team.members.filter(member => !member.defeated).length,
+    statusCount: team.members.reduce((count, member) => count + (member.status?.length ?? 0), 0) };
+}));
+const targetLabel = computed(() => pendingAction.value?.targeting === 'ally' ? '队友' : pendingAction.value?.targeting === 'any' ? '单位' : '敌方目标');
+const targetCount = computed(() => formations.value.reduce((count, team) => count + team.members.filter(member => memberCanTarget(member, team.side)).length, 0));
+const commandHint = computed(() => pendingAction.value
+  ? targetCount.value ? `点击高亮${targetLabel.value}施放 · Esc 取消` : '当前没有可选目标，请更换行动'
+  : canAct.value ? '选择下方行动，再点击场上目标' : '可查看状态与记录');
+const memberMark = (member: BattleMember, side: 'ally' | 'enemy') => member.defeated ? '已倒下'
+  : memberCanTarget(member, side) ? '可选目标' : member.active ? side === 'ally' ? '当前行动' : '当前目标' : '';
+const memberLabel = (member: BattleMember, side: 'ally' | 'enemy') => pendingAction.value
+  ? `选择${side === 'ally' ? '队友' : '敌方目标'} ${member.name}` : `查看${member.name}状态`;
+function battleViewportMemberInfo(member: BattleMember, side: 'ally' | 'enemy') {
+  battleViewportInfo.value = { title: member.name, text: [side === 'ally' ? '我方队伍' : '敌方队伍',
+    member.role || (side === 'ally' ? '冒险者' : '敌人'), member.level ? `Lv.${member.level}` : '',
+    `HP ${member.unknownHp ? '???' : `${member.hp.current} / ${member.hp.max}`}`,
+    member.mp && !member.unknownHp ? `MP ${member.mp.current} / ${member.mp.max}` : '',
+    member.defeated ? '已被击败' : '', member.active ? side === 'ally' ? '当前行动单位' : '当前目标' : '',
+    member.status?.length ? `状态：${member.status.join('、')}` : '暂无附加状态'].filter(Boolean).join('\n') };
+}
+function battleViewportActionInfo(action: BattleAction) {
+  battleViewportInfo.value = { title: action.label, text: [action.description,
+    action.cost, action.cooldown ? `冷却 ${action.cooldown} 回合` : '',
+    action.targeting === 'none' ? '立即执行' : action.targeting === 'ally' ? '选择队友' : action.targeting === 'any' ? '选择单位' : '选择敌方目标',
+    action.disabled ? '当前不可使用' : ''].filter(Boolean).join('\n') };
+}
+const selectAction = (action: BattleAction, event: MouseEvent) => {
   if (!canAct.value || action.disabled) return;
+  actionTrigger = event.currentTarget as HTMLElement;
+  pendingAction.value = null;
   if (action.targeting && action.targeting !== 'none') {
     pendingAction.value = action;
+    void nextTick(() => {
+      const target = battleStage.value?.querySelector<HTMLButtonElement>('.targetable');
+      target?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+      target?.focus({ preventScroll: true });
+    });
     return;
   }
   emit('action', { action });
@@ -105,139 +170,114 @@ const selectMember = (member: BattleMember, side: 'ally' | 'enemy') => {
   pendingAction.value = null;
   if (action) emit('action', { action, targetId: member.id, targetKind: side === 'ally' ? 'member' : 'target' });
 };
-const cancelTargeting = () => { pendingAction.value = null; };
+const cancelTargeting = () => {
+  if (!pendingAction.value) return;
+  pendingAction.value = null;
+  void nextTick(() => { if (actionTrigger?.isConnected) actionTrigger.focus({ preventScroll: true }); });
+};
 </script>
 
 <template>
-  <section class="turn-battle-panel card-surface" aria-label="回合制战斗">
-    <header class="battle-header">
-      <div>
-        <p class="eyebrow">TURN BATTLE</p>
-        <h3>{{ battle.title || '遭遇战' }}</h3>
-      </div>
-      <div class="battle-round"><span>ROUND</span><strong>{{ battle.round ?? 1 }}</strong></div>
+  <section class="turn-battle-panel battle-viewport-panel battle-command-layout card-surface anime-adventure"
+    :class="'battle-phase-' + phaseTone" :data-battle-pending-action="pendingAction?.id" :data-battle-category="selectedCategory"
+    :style="{ '--adventure-scene': 'url(' + ANIME_SCENES.forest + ')' }" :inert="Boolean(battleViewportInfo)"
+    aria-label="回合制战斗" @keydown.esc.stop.prevent="cancelTargeting">
+    <header class="battle-command-header">
+      <div class="battle-heading"><h3><AnimeIcon name="sword" :size="23" />{{ battle.title || '遭遇战' }}</h3><small>回合制战斗</small></div>
+      <div class="battle-round-badge" aria-label="当前回合"><small>回合</small><strong>{{ battle.round ?? 1 }}</strong></div>
+      <button type="button" class="battle-tool" aria-label="查看完整战斗状态"
+        @click="battleViewportInfo = { title: '战斗状态', text: [phaseLabel, battle.statusText].filter(Boolean).join('\n') }">战况 ⓘ</button>
     </header>
 
-    <div class="battle-status" :class="`phase-${phaseTone}`">
-      <span class="battle-status-dot" />
-      <strong>{{ phaseLabel }}</strong>
-      <small v-if="battle.statusText">{{ battle.statusText }}</small>
-      <button v-if="pendingAction" type="button" class="cancel-targeting" @click="cancelTargeting">取消选取</button>
-    </div>
+    <section class="battle-overview" role="group" aria-label="双方状态与回合信息">
+      <template v-for="(team, index) in formations" :key="team.side">
+        <div class="battle-team-summary" :class="team.side">
+          <span><strong>{{ team.label }}</strong><small>{{ team.alive }} / {{ team.members.length }} 在场</small></span>
+          <span class="battle-bar hp"><i :style="{ width: team.unknownHp ? '100%' : percent(team.hp.current, team.hp.max) + '%' }" /></span>
+          <small>HP {{ team.unknownHp ? '???' : team.hp.current + ' / ' + team.hp.max }}<template v-if="team.statusCount"> · {{ team.statusCount }} 状态</template></small>
+        </div>
+        <div v-if="index === 0" class="battle-turn-state" :class="'phase-' + phaseTone" role="status" aria-live="polite">
+          <strong>{{ phaseLabel }}</strong><small>{{ pendingAction ? '正在选择目标' : '第 ' + (battle.round ?? 1) + ' 回合' }}</small>
+        </div>
+      </template>
+    </section>
 
-    <div class="battle-field">
-      <div class="battle-side ally-side">
-        <div class="side-heading"><span>我方队伍</span><small>{{ battle.allies.length }} 人</small></div>
-        <button v-for="member in battle.allies" :key="member.id" type="button" class="battle-member" :class="{ active: member.active, defeated: member.defeated, targetable: memberCanTarget(member, 'ally') }" :disabled="!memberCanTarget(member, 'ally')" @click="selectMember(member, 'ally')">
-          <span class="member-portrait"><img v-if="member.portrait" :src="member.portrait" :alt="member.name" /><span v-else>{{ member.icon || '✦' }}</span></span>
-          <span class="member-main"><span class="member-title"><strong>{{ member.name }}</strong><small v-if="member.level">Lv.{{ member.level }}</small></span><small class="member-role">{{ member.role || '冒险者' }}</small><span class="battle-bar hp"><i :style="{ width: `${percent(member.hp.current, member.hp.max)}%` }" /></span><span class="member-numbers">HP {{ member.hp.current }} / {{ member.hp.max }}</span><template v-if="member.mp"><span class="battle-bar mp"><i :style="{ width: `${percent(member.mp.current, member.mp.max)}%` }" /></span><span class="member-numbers">MP {{ member.mp.current }} / {{ member.mp.max }}</span></template><span v-if="member.status?.length" class="member-status-tags"><em v-for="status in member.status" :key="status">{{ status }}</em></span></span>
-          <span v-if="member.active" class="active-mark">行动</span>
-        </button>
-        <div v-if="!battle.allies.length" class="battle-empty">没有可行动队员</div>
+    <section ref="battleStage" class="battle-stage" aria-label="双方阵容">
+      <span class="battle-stage-versus" aria-hidden="true">VS</span>
+      <section v-for="team in formations" :key="team.side" class="battle-formation" :class="'is-' + team.side" :aria-label="team.label">
+        <header><strong>{{ team.label }}</strong><small>{{ pendingAction ? '高亮目标可点选' : '点击立绘查看状态' }}</small></header>
+        <div class="battle-formation-units" :style="{ '--formation-columns': Math.min(3, Math.max(1, team.members.length)), '--formation-rows': Math.ceil(team.members.length / 3) }">
+          <button v-for="member in team.members" :key="member.id" type="button" class="battle-stage-unit"
+            :class="{ targetable: memberCanTarget(member, team.side), untargetable: pendingAction && !memberCanTarget(member, team.side), defeated: member.defeated, active: member.active }"
+            :data-battle-member-id="member.id" :data-battle-member-side="team.side" :aria-label="memberLabel(member, team.side)"
+            :disabled="Boolean(pendingAction) && !memberCanTarget(member, team.side)"
+            @click="pendingAction ? selectMember(member, team.side) : battleViewportMemberInfo(member, team.side)">
+            <span class="battle-unit-mark">{{ memberMark(member, team.side) }}</span>
+            <span class="battle-unit-art"><img :src="memberPortrait(member, team.side)" :alt="member.name" /></span>
+            <strong :title="member.name">{{ member.name }}</strong>
+            <span class="battle-bar hp"><i :style="{ width: member.unknownHp ? '100%' : percent(member.hp.current, member.hp.max) + '%' }" /></span>
+            <small class="battle-unit-hp">HP {{ member.unknownHp ? '???' : member.hp.current + ' / ' + member.hp.max }}</small>
+            <span v-if="member.status?.length" class="battle-unit-tags" :title="member.status.join('、')"><em>{{ member.status[0] }}</em><em v-if="member.status.length > 1">+{{ member.status.length - 1 }}</em></span>
+          </button>
+          <p v-if="!team.members.length" class="battle-viewport-empty">暂无单位</p>
+        </div>
+      </section>
+    </section>
+
+    <footer class="battle-command-deck">
+      <div class="battle-command-toolbar">
+        <div class="battle-command-prompt" role="status" aria-live="polite"><strong>{{ pendingAction ? pendingAction.label + ' · 选择' + targetLabel : canAct ? '下达指令' : phaseLabel }}</strong><small>{{ commandHint }}</small></div>
+        <button v-if="pendingAction" type="button" class="cancel-targeting" @click="cancelTargeting">取消选取</button>
+        <button type="button" class="battle-tool" aria-label="查看双方状态" @click="battleViewportInfo = { title: '双方状态', view: 'status' }">状态</button>
+        <button type="button" class="battle-tool" aria-label="查看战斗记录" @click="battleViewportInfo = { title: '战斗记录', view: 'log' }">记录</button>
+        <button type="button" class="battle-tool" aria-label="自动战斗设置" :disabled="disabled" @click="emit('open-auto-battle')">自动</button>
       </div>
-
-      <div class="battle-divider" aria-hidden="true"><span>VS</span></div>
-
-      <div class="battle-side enemy-side">
-        <div class="side-heading"><span>敌方队伍</span><small>{{ battle.enemies.length }} 个目标</small></div>
-        <button v-for="member in battle.enemies" :key="member.id" type="button" class="battle-member" :class="{ active: member.active, defeated: member.defeated, targetable: memberCanTarget(member, 'enemy') }" :disabled="!memberCanTarget(member, 'enemy')" @click="selectMember(member, 'enemy')">
-          <span class="member-portrait enemy-portrait"><img v-if="member.portrait" :src="member.portrait" :alt="member.name" /><span v-else>{{ member.icon || '◆' }}</span></span>
-          <span class="member-main"><span class="member-title"><strong>{{ member.name }}</strong><small v-if="member.level">Lv.{{ member.level }}</small></span><small class="member-role">{{ member.role || '敌人' }}</small><span class="battle-bar hp enemy-hp"><i :style="{ width: member.unknownHp ? '100%' : `${percent(member.hp.current, member.hp.max)}%` }" /></span><span class="member-numbers">HP {{ member.unknownHp ? '???' : `${member.hp.current} / ${member.hp.max}` }}</span><template v-if="member.mp && !member.unknownHp"><span class="battle-bar mp"><i :style="{ width: `${percent(member.mp.current, member.mp.max)}%` }" /></span><span class="member-numbers">MP {{ member.mp.current }} / {{ member.mp.max }}</span></template><span v-if="member.status?.length" class="member-status-tags"><em v-for="status in member.status" :key="status">{{ status }}</em></span></span>
-          <span v-if="member.active" class="active-mark enemy-active">行动</span>
+      <div class="battle-action-tabs" role="group" aria-label="战斗行动分类">
+        <button v-for="category in availableCategories" :key="category.id" type="button" :aria-pressed="selectedCategory === category.id"
+          :class="{ active: selectedCategory === category.id }" @click="selectCategory(category.id)">
+          <TabArtIcon :name="category.id === 'normal' ? 'equipment' : category.id === 'skill' ? 'skills' : category.id === 'item' ? 'consumables' : 'oath'" :size="22" />{{ category.label }}
         </button>
-        <div v-if="!battle.enemies.length" class="battle-empty">没有敌方目标</div>
       </div>
-    </div>
-
-    <div v-if="battle.log?.length" class="battle-log" aria-label="战斗记录">
-      <p v-for="(entry, index) in battle.log.slice(-4)" :key="entry.id ?? index" :class="`log-${entry.tone || 'normal'}`">{{ entry.text }}</p>
-    </div>
-
-    <footer class="battle-actions">
-      <div class="action-heading"><span>{{ pendingAction ? `请选择${pendingAction.targeting === 'ally' ? '队友' : pendingAction.targeting === 'any' ? '单位' : '敌方目标'}` : '行动' }}</span><small>需要指定目标时，点选上方队伍卡片</small></div>
-      <div class="battle-action-tabs" role="tablist" aria-label="战斗行动分类"><button v-for="category in availableCategories" :key="category.id" type="button" role="tab" :aria-selected="selectedCategory === category.id" :class="{ active: selectedCategory === category.id }" @click="selectCategory(category.id)">{{ category.label }}</button></div>
-      <div class="battle-action-grid">
-        <button v-for="action in visibleActions" :key="action.id" type="button" class="battle-action" :class="{ selected: pendingAction?.id === action.id }" :disabled="!canAct || action.disabled" @click="selectAction(action)">
-          <span class="battle-action-icon">{{ action.icon || '✦' }}</span>
-          <span class="battle-action-copy"><strong>{{ action.label }}</strong><small>{{ action.cooldown ? `冷却 ${action.cooldown} 回合` : action.cost || action.description || (action.targeting === 'none' ? '立即执行' : '选择目标') }}</small></span>
-        </button>
-        <p v-if="!visibleActions.length" class="battle-action-empty">当前没有可用的{{ actionCategories.find(category => category.id === selectedCategory)?.label }}行动。</p>
+      <div ref="battleViewportList" class="battle-viewport-list actions" role="group" aria-label="战斗行动列表">
+        <div v-for="action in battleViewportPagination.visibleItems.value" :key="action.id" class="battle-viewport-action-row" :data-battle-action-id="action.id">
+          <button type="button" class="battle-action" :class="{ selected: pendingAction?.id === action.id }" :aria-pressed="pendingAction?.id === action.id"
+            :aria-label="action.label" :disabled="!canAct || action.disabled" @click="selectAction(action, $event)">
+            <span class="battle-action-icon"><SkillIcon v-if="action.skillCode || action.id === 'attack'" :code="action.skillCode || 'basic_slash'" :name="action.label" :size="32" /><AnimeIcon v-else :name="actionIcon(action)" :size="27" /></span>
+            <span class="battle-action-copy"><strong>{{ action.label }}</strong><small>{{ action.cooldown ? '冷却 ' + action.cooldown + ' 回合' : action.cost || action.description || (action.targeting === 'none' ? '立即执行' : '选择目标') }}</small></span>
+          </button>
+          <button type="button" class="battle-viewport-action-info" :aria-label="'查看' + action.label + '详情'" @click="battleViewportActionInfo(action)">ⓘ</button>
+        </div>
+        <p v-if="!visibleActions.length" class="battle-viewport-empty">当前没有可用行动。</p>
       </div>
+      <ViewportPagination v-if="battleViewportPagination.totalPages.value > 1" :page="battleViewportPagination.page.value" :total-pages="battleViewportPagination.totalPages.value" :total="visibleActions.length" label="战斗列表翻页" @update:page="battleViewportPagination.setPage" />
     </footer>
+
+    <Teleport to="body">
+      <div v-if="battleViewportInfo" class="battle-viewport-backdrop" @click.self="battleViewportInfo = null">
+        <section class="battle-viewport-dialog" role="dialog" aria-modal="true" :aria-label="battleViewportInfo.title" @keydown.esc.stop.prevent="battleViewportInfo = null">
+          <header><h3>{{ battleViewportInfo.title }}</h3><button type="button" aria-label="关闭战斗详情" @click="battleViewportInfo = null">关闭 ×</button></header>
+          <div>
+            <template v-if="battleViewportInfo.view === 'status'">
+              <section v-for="team in formations" :key="team.side" class="battle-roster-list">
+                <h4>{{ team.label }}</h4>
+                <button v-for="member in team.members" :key="member.id" type="button" class="battle-viewport-member"
+                  :class="{ defeated: member.defeated, active: member.active }" :aria-label="'查看' + member.name + '状态'" @click="battleViewportMemberInfo(member, team.side)">
+                  <span class="battle-viewport-member-portrait"><img :src="memberPortrait(member, team.side)" :alt="member.name" /></span>
+                  <span class="battle-viewport-member-copy"><strong>{{ member.name }}</strong><small>HP {{ member.unknownHp ? '???' : member.hp.current + ' / ' + member.hp.max }}<template v-if="member.mp && !member.unknownHp"> · MP {{ member.mp.current }} / {{ member.mp.max }}</template></small><small>{{ member.status?.join('、') || '暂无附加状态' }}</small></span>
+                </button>
+              </section>
+            </template>
+            <div v-else-if="battleViewportInfo.view === 'log'" class="battle-record-list">
+              <button v-for="(entry, index) in battle.log ?? []" :key="entry.id ?? index" type="button" class="battle-viewport-log-entry"
+                :class="'log-' + (entry.tone || 'normal')" :data-battle-log-id="entry.id ?? index" @click="battleViewportInfo = { title: '战斗记录', text: entry.text }">
+                <AnimeIcon name="scroll" :size="23" /><span>{{ entry.text }}</span><b aria-hidden="true">›</b>
+              </button>
+              <p v-if="!battle.log?.length" class="battle-viewport-empty">暂无战斗记录。</p>
+            </div>
+            <p v-else>{{ battleViewportInfo.text }}</p>
+          </div>
+        </section>
+      </div>
+    </Teleport>
   </section>
 </template>
-
-<style scoped>
-.turn-battle-panel { position: relative; padding: 22px; overflow: hidden; }
-.battle-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 13px; }
-.battle-header h3 { margin: 0; }
-.battle-round { display: grid; place-items: center; min-width: 56px; padding: 8px 12px; color: #66596f; background: #faf2eb; border-radius: 13px; }
-.battle-round span { color: var(--muted, #827487); font-size: 9px; letter-spacing: .12em; }
-.battle-round strong { margin-top: 2px; color: var(--coral, #ed806f); font-size: 20px; line-height: 1; }
-.battle-status { display: flex; align-items: center; gap: 7px; min-height: 36px; margin-bottom: 14px; padding: 8px 11px; color: #66596f; background: #faf5f0; border-radius: 12px; font-size: 12px; }
-.battle-status small { overflow: hidden; margin-left: 3px; color: var(--muted, #827487); text-overflow: ellipsis; white-space: nowrap; }
-.battle-status.phase-player { background: #eef8f0; }
-.battle-status.phase-enemy { background: #fff2e6; }
-.battle-status.phase-victory { color: #4a866c; background: #e9f7ef; }
-.battle-status.phase-defeat { color: #a14c56; background: #ffeded; }
-.battle-status-dot { width: 7px; height: 7px; flex: 0 0 auto; background: var(--coral, #ed806f); border-radius: 99px; box-shadow: 0 0 0 3px rgba(237,128,111,.15); }
-.phase-enemy .battle-status-dot { background: #efaa61; box-shadow: 0 0 0 3px rgba(239,170,97,.15); }
-.phase-victory .battle-status-dot { background: #4ba77b; box-shadow: 0 0 0 3px rgba(75,167,123,.15); }
-.phase-defeat .battle-status-dot { background: #c45d66; box-shadow: 0 0 0 3px rgba(196,93,102,.15); }
-.cancel-targeting { margin-left: auto; padding: 4px 8px; color: #806c9b; background: rgba(143,125,215,.1); border-radius: 8px; font-size: 10px; }
-.battle-field { display: grid; grid-template-columns: minmax(0, 1fr) 40px minmax(0, 1fr); gap: 10px; align-items: stretch; }
-.battle-side { display: grid; align-content: start; gap: 8px; min-width: 0; }
-.side-heading { display: flex; align-items: center; justify-content: space-between; padding: 0 3px 3px; color: #66596f; font-size: 12px; }
-.side-heading small { color: var(--muted, #827487); font-size: 10px; }
-.battle-member { position: relative; display: flex; align-items: center; gap: 9px; min-width: 0; padding: 10px; color: var(--ink, #4d4354); background: #fcf5ef; border: 1px solid transparent; border-radius: 14px; text-align: left; transition: border-color .15s ease, transform .15s ease, opacity .15s ease; }
-.battle-member.active { border-color: rgba(237,128,111,.55); box-shadow: 0 5px 12px rgba(237,128,111,.1); }
-.battle-member.targetable { border-color: #a995dc; background: #f1edff; cursor: pointer; box-shadow: 0 0 0 2px rgba(169,149,220,.16); }
-.battle-member.targetable:hover { transform: translateY(-1px); }
-.battle-member:disabled { cursor: default; }
-.battle-member.defeated { opacity: .46; filter: grayscale(.6); }
-.member-portrait { display: grid; place-items: center; flex: 0 0 39px; width: 39px; height: 39px; overflow: hidden; color: #9b7b61; background: #fff0d7; border-radius: 13px; font-size: 19px; }
-.member-portrait img { width: 100%; height: 100%; object-fit: cover; }
-.enemy-portrait { color: #a65c62; background: #ffe6e3; }
-.member-main { display: grid; min-width: 0; flex: 1; gap: 3px; }
-.member-title { display: flex; align-items: baseline; gap: 5px; min-width: 0; }
-.member-title strong { overflow: hidden; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
-.member-title small { color: var(--muted, #827487); font-size: 9px; }
-.member-role { overflow: hidden; color: var(--muted, #827487); font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
-.battle-bar { display: block; height: 5px; overflow: hidden; background: #f0ded9; border-radius: 99px; }
-.battle-bar i { display: block; height: 100%; background: linear-gradient(90deg, #e7776d, #f2a070); border-radius: inherit; transition: width .28s ease; }
-.battle-bar.mp { background: #e0e4f4; }
-.battle-bar.mp i { background: linear-gradient(90deg, #628acb, #8eb8e7); }
-.enemy-hp i { background: linear-gradient(90deg, #cf6a72, #e59788); }
-.member-numbers { color: var(--muted, #827487); font-size: 9px; }
-.member-status-tags { display: flex; flex-wrap: wrap; gap: 3px; }
-.member-status-tags em { padding: 2px 4px; color: #806c9b; background: #eee9ff; border-radius: 5px; font-size: 8px; font-style: normal; }
-.active-mark { position: absolute; right: 7px; top: 6px; padding: 2px 4px; color: #bd665a; background: #ffe2d9; border-radius: 5px; font-size: 8px; }
-.enemy-active { color: #a96066; background: #ffe0e0; }
-.battle-divider { display: flex; align-items: center; justify-content: center; color: #d2b9a7; font-size: 12px; font-weight: 800; }
-.battle-divider::before, .battle-divider::after { content: ''; position: absolute; height: 1px; background: #eadbd1; }
-.battle-divider span { position: relative; z-index: 1; padding: 8px 5px; color: #d58b76; background: var(--paper, #fffaf4); border-radius: 50%; }
-.battle-empty { padding: 18px 5px; color: var(--muted, #827487); font-size: 11px; text-align: center; }
-.battle-log { display: grid; gap: 4px; max-height: 106px; overflow-y: auto; margin-top: 13px; padding: 10px 12px; color: var(--muted, #827487); background: #faf5f0; border-radius: 12px; font-size: 11px; line-height: 1.45; }
-.battle-log p { margin: 0; }
-.battle-log .log-good { color: #4a866c; }
-.battle-log .log-danger { color: #b45d64; }
-.battle-log .log-muted { color: #ad9baa; }
-.battle-actions { margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--line, #eadfd8); }
-.action-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 10px; color: #66596f; font-size: 13px; }
-.action-heading small { color: var(--muted, #827487); font-size: 10px; }
-.battle-action-tabs { display: flex; gap: 5px; overflow-x: auto; margin-bottom: 9px; padding: 3px; background: #f5eef1; border-radius: 10px; scrollbar-width: thin; }
-.battle-action-tabs button { flex: 1 0 62px; padding: 7px 10px; color: #7d7185; background: transparent; border-radius: 8px; font-size: 11px; white-space: nowrap; }
-.battle-action-tabs button.active { color: #67558f; background: #fff; box-shadow: 0 2px 7px rgba(61, 45, 78, .08); font-weight: 700; }
-.battle-action-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; }
-.battle-action-empty { grid-column: 1 / -1; margin: 0; padding: 10px; color: var(--muted, #827487); font-size: 11px; }
-.battle-action { display: flex; align-items: center; gap: 8px; min-width: 0; padding: 10px; color: #594d6b; background: #f1ecff; border: 1px solid transparent; border-radius: 12px; text-align: left; transition: border-color .15s ease, transform .15s ease; }
-.battle-action:hover:not(:disabled), .battle-action.selected { border-color: #aa98da; transform: translateY(-1px); }
-.battle-action:disabled { opacity: .44; cursor: not-allowed; }
-.battle-action-icon { display: grid; place-items: center; flex: 0 0 29px; width: 29px; height: 29px; color: #9077bd; background: #fff; border-radius: 10px; font-size: 15px; }
-.battle-action-copy { display: grid; min-width: 0; gap: 3px; }
-.battle-action-copy strong { overflow: hidden; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
-.battle-action-copy small { overflow: hidden; color: #8c7f9b; font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
-@media (max-width: 680px) { .battle-action-copy strong, .battle-action-copy small { overflow: visible; text-overflow: clip; white-space: normal; overflow-wrap: anywhere; } }
-@media (max-width: 680px) { .turn-battle-panel { padding: 14px 11px; } .battle-field { grid-template-columns: minmax(0, 1fr) 20px minmax(0, 1fr); gap: 4px; } .battle-side { max-height: 34dvh; overflow-y: auto; } .battle-divider::before, .battle-divider::after { display: none; } .battle-divider span { padding: 3px 1px; font-size: 10px; } .battle-member { align-items: flex-start; gap: 5px; padding: 6px 4px; } .member-portrait { flex-basis: 26px; width: 26px; height: 26px; border-radius: 8px; font-size: 14px; } .member-title strong { font-size: 10px; } .side-heading { font-size: 10px; } .side-heading small { font-size: 9px; } .battle-action-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 420px) { .battle-action-grid { grid-template-columns: 1fr; } }
-</style>

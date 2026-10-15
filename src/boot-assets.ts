@@ -4,6 +4,13 @@ export const BOOT_READY_KEY = 'fantasy-final.boot-assets.v1';
 const RESOURCE_CACHE = 'ff-game-assets-v2';
 const DOWNLOAD_WORKERS = 4;
 const retryAssets = new Set<string>();
+const bootPaths = new Set([
+  '/assets/light-anime/auth-v4/fantasy-logo.webp',
+  '/assets/light-anime/auth-v4/login-scene-wide-v1.webp',
+  '/assets/light-anime/auth-v4/login-button.png',
+  '/assets/light-anime/auth-v4/paper-panel-v1.webp'
+]);
+const BOOT_ASSETS = GAME_ASSETS.filter(asset => bootPaths.has(asset.path));
 
 export type BootProgress = {
   fraction: number;
@@ -23,14 +30,17 @@ async function openResourceCache(): Promise<Cache | null> {
 
 function mimeType(path: string): string {
   const extension = path.split('.').pop()?.toLowerCase();
-  return ({ png: 'image/png', webp: 'image/webp', jpg: 'image/jpeg', jpeg: 'image/jpeg',
+  return ({ png: 'image/png', svg: 'image/svg+xml', webp: 'image/webp', jpg: 'image/jpeg', jpeg: 'image/jpeg',
     gif: 'image/gif', avif: 'image/avif', mp3: 'audio/mpeg', ogg: 'audio/ogg',
     wav: 'audio/wav', woff: 'font/woff', woff2: 'font/woff2' } as Record<string, string>)[extension ?? '']
     ?? 'application/octet-stream';
 }
 
 /**
- * All current UI, portraits, inventory art and music must finish before mount.
+ * Only necessary login artwork must finish before mount. The loading scene is
+ * already requested by HTML, and registration artwork loads on its own screen.
+ * Other resources load
+ * when their screen is rendered or their music is played.
  * Each file has a content hash URL, so new releases reuse unchanged resources.
  * Public HTTP IPs fall back to normal browser HTTP caching without a SW/Cache API.
  */
@@ -38,9 +48,9 @@ export async function prepareBootAssets(onProgress: (progress: BootProgress) => 
   signal: AbortSignal, _revision: string, _refresh: boolean): Promise<void> {
   const cache = await openResourceCache();
   let canWriteCache = Boolean(cache);
-  const loaded = GAME_ASSETS.map(() => 0);
-  const finished = GAME_ASSETS.map(() => false);
-  const totalBytes = GAME_ASSETS.reduce((sum, asset) => sum + asset.bytes, 0);
+  const loaded = BOOT_ASSETS.map(() => 0);
+  const finished = BOOT_ASSETS.map(() => false);
+  const totalBytes = BOOT_ASSETS.reduce((sum, asset) => sum + asset.bytes, 0);
   const controller = new AbortController();
   const cancel = () => controller.abort(signal.reason);
   signal.addEventListener('abort', cancel, { once: true });
@@ -53,13 +63,13 @@ export async function prepareBootAssets(onProgress: (progress: BootProgress) => 
     lastReport = now;
     const loadedBytes = loaded.reduce((sum, bytes) => sum + bytes, 0);
     onProgress({ fraction: totalBytes ? loadedBytes / totalBytes : 1,
-      completed: finished.filter(Boolean).length, total: GAME_ASSETS.length, loadedBytes, totalBytes });
+      completed: finished.filter(Boolean).length, total: BOOT_ASSETS.length, loadedBytes, totalBytes });
   };
   report(true);
 
   async function loadAsset(index: number): Promise<void> {
     controller.signal.throwIfAborted();
-    const asset = GAME_ASSETS[index];
+    const asset = BOOT_ASSETS[index];
     const url = gameAssetUrl(asset.path);
     let cached: Response | undefined;
     try { cached = await cache?.match(url); } catch { /* Private-mode storage may be disabled. */ }
@@ -127,11 +137,11 @@ export async function prepareBootAssets(onProgress: (progress: BootProgress) => 
   let failure: unknown;
   const worker = async () => {
     try {
-      while (next < GAME_ASSETS.length) {
+      while (next < BOOT_ASSETS.length) {
         const index = next++;
         try { await loadAsset(index); }
         catch (error) {
-          retryAssets.add(GAME_ASSETS[index].path);
+          retryAssets.add(BOOT_ASSETS[index].path);
           throw error;
         }
       }
@@ -141,7 +151,7 @@ export async function prepareBootAssets(onProgress: (progress: BootProgress) => 
     }
   };
   try {
-    await Promise.all(Array.from({ length: Math.min(DOWNLOAD_WORKERS, GAME_ASSETS.length) }, worker));
+    await Promise.all(Array.from({ length: Math.min(DOWNLOAD_WORKERS, BOOT_ASSETS.length) }, worker));
     if (failure) throw failure;
     controller.signal.throwIfAborted();
     report(true);

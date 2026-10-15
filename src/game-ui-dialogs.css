@@ -1,0 +1,185 @@
+/* Settings owns its positioning: the generic .card-surface must not turn it
+   back into a relative element whose full contents extend below the viewport. */
+.app-shell .settings-layer > .settings-drawer {
+  position: absolute;
+  inset: 0 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: min(440px, calc(100vw - 28px));
+  max-width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  max-height: 100vh;
+  max-height: 100dvh;
+  min-height: 0;
+  padding: 12px;
+  overflow: hidden;
+  border: 12px solid transparent;
+  border-image: var(--game-ui-panel) 144 fill / 12px stretch;
+  border-radius: 0;
+  background: #fffaf0;
+  background-clip: padding-box;
+  pointer-events: auto;
+}
+
+.app-shell .settings-drawer > .settings-header {
+  position: relative;
+  z-index: 1;
+  flex: 0 0 auto;
+  align-items: center;
+  min-width: 0;
+  padding: max(5px, env(safe-area-inset-top)) 4px 12px;
+}
+
+.app-shell .settings-header > div { min-width: 0; }
+
+.app-shell .settings-header > .dialog-close {
+  position: static;
+  display: grid;
+  place-items: center;
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  margin: 0;
+  padding: 0;
+  color: var(--game-ui-ink);
+  border: 7px solid transparent;
+  border-image: var(--game-ui-paper) 144 fill / 7px stretch;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  font-size: 26px;
+  line-height: 1;
+}
+
+.app-shell .settings-drawer > .settings-content {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 0;
+  padding: 12px 4px max(20px, env(safe-area-inset-bottom));
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  scroll-padding-block: 12px;
+}
+
+.app-shell .settings-content .settings-section {
+  min-width: 0;
+  margin-bottom: 10px;
+  padding: 12px;
+  border: 5px solid transparent;
+  border-image: var(--game-ui-panel) 144 fill / 5px stretch;
+  border-radius: 0;
+  background: transparent;
+}
+
+.app-shell .settings-content :is(.settings-switch, .settings-gender button) {
+  min-height: 34px;
+  padding: 2px 8px;
+  border: 5px solid transparent;
+  border-image: var(--game-ui-paper) 144 fill / 5px 8px stretch;
+  border-radius: 0;
+  color: var(--game-ui-ink);
+  background: transparent;
+  box-shadow: none;
+  font-weight: 700;
+}
+
+.app-shell .settings-content :is(.settings-switch.active, .settings-gender button.active) {
+  border-image-source: var(--game-ui-teal);
+  color: var(--game-ui-primary-ink);
+  background: transparent;
+  text-shadow: none;
+  box-shadow: none;
+}
+
+.app-shell .settings-content .avatar-choice {
+  border: 5px solid transparent;
+  border-image: var(--game-ui-panel) 144 fill / 5px stretch;
+  border-radius: 0;
+  background: transparent;
+  color: var(--game-ui-ink);
+}
+
+.app-shell .settings-content .avatar-choice.active {
+  border-image-source: var(--game-ui-teal);
+  color: var(--game-ui-primary-ink);
+}
+
+/* The old span rule belonged to text glyphs. It must not tint or round the
+   transparent painted sprites now used for avatar previews. */
+.app-shell .settings-content .avatar-choice .anime-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 0;
+  background: transparent;
+}
+
+.app-shell .settings-content .avatar-choice .anime-icon-sprite {
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+  background-color: transparent;
+}
+
+.app-shell .settings-content .account-id-row {
+  border: 4px solid transparent;
+  border-image: var(--game-ui-panel) 144 fill / 4px stretch;
+  border-radius: 0;
+  background: transparent;
+}
+
+.app-shell .settings-content :is(.settings-section-heading, .settings-form, .settings-password-form, .password-field) {
+  min-width: 0;
+}
+
+.app-shell .settings-content :is(input:not([type='range']), select) {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.app-shell .settings-content :is(.primary-button, .soft-button, .danger-button) {
+  border: 8px solid transparent;
+  border-image: var(--game-ui-paper) 144 fill / 8px stretch;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--game-ui-ink);
+  text-shadow: none;
+}
+
+.app-shell .settings-content .primary-button {
+  border-image-source: var(--game-ui-teal);
+  color: var(--game-ui-primary-ink);
+}
+
+.app-shell .settings-content .danger-button {
+  border-image-source: var(--game-ui-coral);
+  color: var(--game-ui-danger-ink);
+}
+
+.app-shell .settings-drawer :is(button, input, select):focus-visible {
+  outline: 3px solid #2c9692;
+  outline-offset: 2px;
+}
+
+@media (max-width: 480px) {
+  .app-shell .settings-layer > .settings-drawer {
+    width: calc(100vw - 16px);
+    padding: 8px;
+    border-width: 9px;
+    border-image-width: 9px;
+  }
+
+  .app-shell .settings-content .settings-section { padding: 10px 8px; }
+}
+
+@media (max-height: 480px) {
+  .app-shell .settings-drawer > .settings-header { padding-block: 2px 6px; }
+  .app-shell .settings-header .eyebrow { display: none; }
+  .app-shell .settings-drawer > .settings-content { padding-top: 6px; }
+}

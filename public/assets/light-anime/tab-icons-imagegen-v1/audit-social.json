@@ -1,0 +1,290 @@
+[
+  {
+    "key": "friends",
+    "label": "好友：两位友善冒险者半身",
+    "tool": "functions.exec tools.image_gen__imagegen (built-in)",
+    "transparent_background": true,
+    "generatedSource": "C:\\Users\\afshu\\.codex\\generated_images\\01a12765-b012-7c53-b055-9fb96662851a\\exec-75f6b36b-05d1-4f8f-8f36-5d0e9a2937b4.png",
+    "sourcePath": "E:\\猫拉瑞亚\\FantasyFinal\\web\\public\\assets\\light-anime\\tab-icons-imagegen-v1\\sources\\friends.png",
+    "runtimePath": "E:\\猫拉瑞亚\\FantasyFinal\\web\\public\\assets\\light-anime\\tab-icons-imagegen-v1\\friends.png",
+    "sourceSha256": "ba23ade55eced070683854278f7596b484538eeb94ad4efd5764baff5312394b",
+    "runtimeSha256": "ddc7a6b7175017cd0bc4e36f4b0b8ddeb542dc61003ec41fe23ff6f9fa376b00",
+    "source": {
+      "width": 1254,
+      "height": 1254,
+      "channels": 4,
+      "transparentPixels": 793069,
+      "partialAlphaPixels": 778895,
+      "opaquePixels": 552,
+      "transparentRatio": 0.5043312754846374,
+      "alphaBounds": {
+        "left": 0,
+        "top": 48,
+        "width": 1204,
+        "height": 1206
+      },
+      "subjectBounds": {
+        "left": 95,
+        "top": 150,
+        "width": 1107,
+        "height": 956
+      },
+      "corners": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "runtime": {
+      "width": 128,
+      "height": 128,
+      "channels": 4,
+      "transparentPixels": 11140,
+      "partialAlphaPixels": 4995,
+      "opaquePixels": 249,
+      "transparentRatio": 0.679931640625,
+      "alphaBounds": {
+        "left": 20,
+        "top": 26,
+        "width": 88,
+        "height": 76
+      },
+      "subjectBounds": {
+        "left": 20,
+        "top": 26,
+        "width": 88,
+        "height": 76
+      },
+      "corners": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "extraction": {
+      "left": 93,
+      "top": 148,
+      "width": 1111,
+      "height": 960
+    },
+    "prompt": "Use case: stylized-concept\nAsset type: FantasyFinal Chinese fantasy RPG social-category tab icon, single raster PNG asset.\nStyle/medium: Japanese light anime, cute chibi hand-painted fantasy game icon. Soft rounded proportions, polished painterly highlights and shading, warm brown hand-drawn contour lines; cozy storybook game artwork, consistent with a sunny anime RPG village. A compact, readable silhouette that remains recognizable at 20–28 pixels. This is a richly illustrated raster game asset, not a flat vector symbol.\nColor palette: warm cream, honey gold, restrained turquoise teal, gentle brown contours. Friendly warm illumination.\nComposition/framing: A single centered compact subject group, square canvas. Complete subject occupies about 70 percent of canvas width and height, leaving at least 15 percent clean empty transparent margin on every edge. Keep few strong shapes rather than many tiny details.\nScene/backdrop: Truly transparent alpha background; isolated cutout.\nConstraints: Exactly one social tab icon per image. No text, letters, numbers, watermark, decorative UI frame, card, tile, medallion or disc behind the subject, border, background scene, ground plane, cast shadow outside the object, checkerboard, white backdrop, SVG, or vector appearance. Background pixels must genuinely have transparent alpha.\nPrimary request: Two friendly cute chibi fantasy adventurers shown together from the waist or upper chest upward, the clear icon for friends. Two distinct smiling faces with big round heads, soft brown hair, cream and teal travelling clothes, a small warm-gold clasp. The two companions face the viewer, close shoulder-to-shoulder in a balanced compact group. Keep both faces clearly separated, simple, warm and welcoming."
+  },
+  {
+    "key": "oath",
+    "label": "星誓：双星环绕金色誓约结",
+    "tool": "functions.exec tools.image_gen__imagegen (built-in)",
+    "transparent_background": true,
+    "generatedSource": "C:\\Users\\afshu\\.codex\\generated_images\\01a12765-b012-7c53-b055-9fb96662851a\\exec-03936232-968b-45a2-8ca2-9038125cb912.png",
+    "sourcePath": "E:\\猫拉瑞亚\\FantasyFinal\\web\\public\\assets\\light-anime\\tab-icons-imagegen-v1\\sources\\oath.png",
+    "runtimePath": "E:\\猫拉瑞亚\\FantasyFinal\\web\\public\\assets\\light-anime\\tab-icons-imagegen-v1\\oath.png",
+    "sourceSha256": "89d1ace7993393e7b8d6dfcd4288ee50be2a15603b20c096c5d153ff740d2580",
+    "runtimeSha256": "6bd04c9ef9f4ff2e4ad04819cd38b435334565b8a8c3ecdf2d133daba38d5bf1",
+    "source": {
+      "width": 1254,
+      "height": 1254,
+      "channels": 4,
+      "transparentPixels": 1006260,
+      "partialAlphaPixels": 565819,
+      "opaquePixels": 437,
+      "transparentRatio": 0.6399044588417543,
+      "alphaBounds": {
+        "left": 0,
+        "top": 19,
+        "width": 1236,
+        "height": 1235
+      },
+      "subjectBounds": {
+        "left": 100,
+        "top": 138,
+        "width": 1035,
+        "height": 889
+      },
+      "corners": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "runtime": {
+      "width": 128,
+      "height": 128,
+      "channels": 4,
+      "transparentPixels": 11981,
+      "partialAlphaPixels": 3983,
+      "opaquePixels": 420,
+      "transparentRatio": 0.73126220703125,
+      "alphaBounds": {
+        "left": 20,
+        "top": 26,
+        "width": 88,
+        "height": 76
+      },
+      "subjectBounds": {
+        "left": 20,
+        "top": 26,
+        "width": 88,
+        "height": 76
+      },
+      "corners": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "extraction": {
+      "left": 98,
+      "top": 136,
+      "width": 1039,
+      "height": 893
+    },
+    "prompt": "Use case: stylized-concept\nAsset type: FantasyFinal Chinese fantasy RPG social-category tab icon, single raster PNG asset.\nStyle/medium: Japanese light anime, cute chibi hand-painted fantasy game icon. Soft rounded proportions, polished painterly highlights and shading, warm brown hand-drawn contour lines; cozy storybook game artwork, consistent with a sunny anime RPG village. A compact, readable silhouette that remains recognizable at 20–28 pixels. This is a richly illustrated raster game asset, not a flat vector symbol.\nColor palette: warm cream, honey gold, restrained turquoise teal, gentle brown contours. Friendly warm illumination.\nComposition/framing: A single centered compact subject group, square canvas. Complete subject occupies about 70 percent of canvas width and height, leaving at least 15 percent clean empty transparent margin on every edge. Keep few strong shapes rather than many tiny details.\nScene/backdrop: Truly transparent alpha background; isolated cutout.\nConstraints: Exactly one social tab icon per image. No text, letters, numbers, watermark, decorative UI frame, card, tile, medallion or disc behind the subject, border, background scene, ground plane, cast shadow outside the object, checkerboard, white backdrop, SVG, or vector appearance. Background pixels must genuinely have transparent alpha.\nPrimary request: A beautiful golden oath knot with two radiant five-pointed stars orbiting it, the clear icon for a star oath or friendship bond. Make the central intertwined golden cord knot broad, rounded and easy to recognize, with a soft cream highlight. Exactly two small plump gold stars and two graceful turquoise orbital arcs around the knot, arranged into one balanced compact symbol. Hand-painted dimensional texture, no outer badge or enclosing frame."
+  },
+  {
+    "key": "party",
+    "label": "队伍：三人冒险小队",
+    "tool": "functions.exec tools.image_gen__imagegen (built-in)",
+    "transparent_background": true,
+    "generatedSource": "C:\\Users\\afshu\\.codex\\generated_images\\01a12765-b012-7c53-b055-9fb96662851a\\exec-c42ddb9c-eab2-4ff8-9b5b-44690925c1b7.png",
+    "sourcePath": "E:\\猫拉瑞亚\\FantasyFinal\\web\\public\\assets\\light-anime\\tab-icons-imagegen-v1\\sources\\party.png",
+    "runtimePath": "E:\\猫拉瑞亚\\FantasyFinal\\web\\public\\assets\\light-anime\\tab-icons-imagegen-v1\\party.png",
+    "sourceSha256": "d51c9261fc76073ab202b6ded17e58dc39f7c7bacb5b8b18d2765ff27c0d3947",
+    "runtimeSha256": "65412600313541ec4c0a1c3c19ed502f77adbfe6385145918f1059c225164494",
+    "source": {
+      "width": 1254,
+      "height": 1254,
+      "channels": 4,
+      "transparentPixels": 773849,
+      "partialAlphaPixels": 798549,
+      "opaquePixels": 118,
+      "transparentRatio": 0.4921088243299273,
+      "alphaBounds": {
+        "left": 0,
+        "top": 20,
+        "width": 1243,
+        "height": 1234
+      },
+      "subjectBounds": {
+        "left": 23,
+        "top": 209,
+        "width": 1218,
+        "height": 855
+      },
+      "corners": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "runtime": {
+      "width": 128,
+      "height": 128,
+      "channels": 4,
+      "transparentPixels": 11937,
+      "partialAlphaPixels": 4252,
+      "opaquePixels": 195,
+      "transparentRatio": 0.72857666015625,
+      "alphaBounds": {
+        "left": 20,
+        "top": 33,
+        "width": 88,
+        "height": 62
+      },
+      "subjectBounds": {
+        "left": 20,
+        "top": 33,
+        "width": 88,
+        "height": 62
+      },
+      "corners": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "extraction": {
+      "left": 21,
+      "top": 207,
+      "width": 1222,
+      "height": 859
+    },
+    "prompt": "Use case: stylized-concept\nAsset type: FantasyFinal Chinese fantasy RPG social-category tab icon, single raster PNG asset.\nStyle/medium: Japanese light anime, cute chibi hand-painted fantasy game icon. Soft rounded proportions, polished painterly highlights and shading, warm brown hand-drawn contour lines; cozy storybook game artwork, consistent with a sunny anime RPG village. A compact, readable silhouette that remains recognizable at 20–28 pixels. This is a richly illustrated raster game asset, not a flat vector symbol.\nColor palette: warm cream, honey gold, restrained turquoise teal, gentle brown contours. Friendly warm illumination.\nComposition/framing: A single centered compact subject group, square canvas. Complete subject occupies about 70 percent of canvas width and height, leaving at least 15 percent clean empty transparent margin on every edge. Keep few strong shapes rather than many tiny details.\nScene/backdrop: Truly transparent alpha background; isolated cutout.\nConstraints: Exactly one social tab icon per image. No text, letters, numbers, watermark, decorative UI frame, card, tile, medallion or disc behind the subject, border, background scene, ground plane, cast shadow outside the object, checkerboard, white backdrop, SVG, or vector appearance. Background pixels must genuinely have transparent alpha.\nPrimary request: A three-member friendly cute chibi fantasy adventuring party, the clear icon for a team. Exactly three distinct smiling adventurers shown as compact upper-body busts: one centered slightly forward and two flanking companions, all three faces fully visible and clearly separated. Soft brown hair, cream and turquoise travelling clothes, warm gold clasps. Large round heads and few clear silhouettes, a cozy heroic small squad."
+  },
+  {
+    "key": "paw",
+    "label": "伙伴：柔圆猫爪印",
+    "tool": "functions.exec tools.image_gen__imagegen (built-in)",
+    "transparent_background": true,
+    "generatedSource": "C:\\Users\\afshu\\.codex\\generated_images\\01a12765-b012-7c53-b055-9fb96662851a\\exec-3b7aad54-02ba-48ec-b221-8541cef42ebe.png",
+    "sourcePath": "E:\\猫拉瑞亚\\FantasyFinal\\web\\public\\assets\\light-anime\\tab-icons-imagegen-v1\\sources\\paw.png",
+    "runtimePath": "E:\\猫拉瑞亚\\FantasyFinal\\web\\public\\assets\\light-anime\\tab-icons-imagegen-v1\\paw.png",
+    "sourceSha256": "c3337f0001ec4d28fa6fb18ad989ee5d764e5a724b53a0dabbbf505762b1bb64",
+    "runtimeSha256": "1e9064ee0d245dbf886b488f0ca87b161b2f0bd3312c5e6066ec816787d5ed64",
+    "source": {
+      "width": 1254,
+      "height": 1254,
+      "channels": 4,
+      "transparentPixels": 984786,
+      "partialAlphaPixels": 586822,
+      "opaquePixels": 908,
+      "transparentRatio": 0.6262486359439268,
+      "alphaBounds": {
+        "left": 0,
+        "top": 39,
+        "width": 1240,
+        "height": 1215
+      },
+      "subjectBounds": {
+        "left": 111,
+        "top": 208,
+        "width": 1031,
+        "height": 852
+      },
+      "corners": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "runtime": {
+      "width": 128,
+      "height": 128,
+      "channels": 4,
+      "transparentPixels": 11761,
+      "partialAlphaPixels": 4306,
+      "opaquePixels": 317,
+      "transparentRatio": 0.71783447265625,
+      "alphaBounds": {
+        "left": 20,
+        "top": 27,
+        "width": 88,
+        "height": 73
+      },
+      "subjectBounds": {
+        "left": 20,
+        "top": 27,
+        "width": 88,
+        "height": 73
+      },
+      "corners": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "extraction": {
+      "left": 109,
+      "top": 206,
+      "width": 1035,
+      "height": 856
+    },
+    "prompt": "Use case: stylized-concept\nAsset type: FantasyFinal Chinese fantasy RPG social-category tab icon, single raster PNG asset.\nStyle/medium: Japanese light anime, cute chibi hand-painted fantasy game icon. Soft rounded proportions, polished painterly highlights and shading, warm brown hand-drawn contour lines; cozy storybook game artwork, consistent with a sunny anime RPG village. A compact, readable silhouette that remains recognizable at 20–28 pixels. This is a richly illustrated raster game asset, not a flat vector symbol.\nColor palette: warm cream, honey gold, restrained turquoise teal, gentle brown contours. Friendly warm illumination.\nComposition/framing: A single centered compact subject group, square canvas. Complete subject occupies about 70 percent of canvas width and height, leaving at least 15 percent clean empty transparent margin on every edge. Keep few strong shapes rather than many tiny details.\nScene/backdrop: Truly transparent alpha background; isolated cutout.\nConstraints: Exactly one social tab icon per image. No text, letters, numbers, watermark, decorative UI frame, card, tile, medallion or disc behind the subject, border, background scene, ground plane, cast shadow outside the object, checkerboard, white backdrop, SVG, or vector appearance. Background pixels must genuinely have transparent alpha.\nPrimary request: A single adorable soft round cat paw print, the clear icon for a pet or companion tab. Exactly four small rounded toe pads above one large rounded heartlike central pad, forming a compact readable paw-print silhouette. Creamy honey-gold pads with subtle turquoise teal shaded edges and warm brown hand-painted contours. Soft dimensional highlights, chibi storybook game style, no surrounding badge, ribbon, extra paws or lettering."
+  }
+]

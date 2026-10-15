@@ -1,0 +1,280 @@
+/* Painted operation handbook. Pagination and command behavior stay in the component. */
+.command-catalog.catalog-painted.catalog-painted.anime-growth-commerce {
+  --gc-ink: var(--game-ui-ink, #535366);
+  --gc-muted: var(--game-ui-muted, #736c78);
+  color: var(--gc-ink);
+}
+
+.command-catalog.catalog-painted.catalog-painted.anime-growth-commerce :is(.command-catalog-list, .command-workbench) {
+  border-image: var(--game-ui-journal) var(--game-ui-journal-slice) fill / 8px stretch;
+  border-radius: 0;
+  background: #fffcf4;
+  background-clip: padding-box;
+  box-shadow: none;
+}
+
+.command-catalog.catalog-painted.catalog-painted.anime-growth-commerce :is(.command-catalog-heading h3, .command-workbench-heading h2, .section-heading h3) {
+  color: var(--game-ui-ink, #535366);
+  font-family: KaiTi, STKaiti, 'Noto Serif SC', serif;
+}
+
+.command-catalog.catalog-painted.catalog-painted.anime-growth-commerce .command-catalog-heading h3 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.command-catalog.catalog-painted.catalog-painted.anime-growth-commerce .command-catalog-heading > .muted {
+  padding: 2px 7px;
+  background: var(--game-ui-gold) center / 100% 100% no-repeat;
+  color: var(--game-ui-gold-ink, #735632);
+  font-variant-numeric: tabular-nums;
+}
+
+.command-catalog.catalog-painted.catalog-painted.anime-growth-commerce .catalog-search-wrap {
+  position: relative;
+  flex: none;
+  min-width: 0;
+  height: 32px;
+}
+
+.command-catalog.catalog-painted.catalog-painted.anime-growth-commerce .catalog-search-art {
+  position: absolute;
+  z-index: 1;
+  left: 7px;
+  top: 50%;
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.command-catalog.catalog-painted.catalog-painted.anime-growth-commerce :is(.command-search, .command-category-select select, .command-field input, .command-field select, .command-field textarea) {
+  box-sizing: border-box;
+  min-width: 0;
+  border: 3px solid transparent;
+  border-image: var(--game-ui-panel) 144 fill / 3px 5px stretch;
+  border-radius: 0;
+  background: #fffcf4;
+  background-clip: padding-box;
+  color: var(--game-ui-ink, #535366);
+  box-shadow: none;
+}
+
+.app-shell[data-visual='light-anime'][data-viewport-layout] .catalog-painted .catalog-search-wrap .command-search {
+  width: 100%;
+  height: 32px;
+  padding-left: 32px;
+  margin: 0;
+}
+
+.command-catalog.catalog-painted.catalog-painted.anime-growth-commerce .command-category-select {
+  color: var(--game-ui-ink, #535366);
+  font-weight: 700;
+}
+
+.command-catalog.catalog-painted.catalog-painted.anime-growth-commerce .command-category-select select {
+  padding: 3px 7px;
+  font-weight: 500;
+}
+
+/* Keep the real 64px row, its border width and hit target. */
+.command-catalog.catalog-painted.catalog-painted.anime-growth-commerce .command-item {
+  border-image: var(--game-ui-paper) 144 fill / 4px 7px stretch;
+  border-radius: 0;
+  background: transparent;
+  color: var(--game-ui-ink, #535366);
+  box-shadow: none;
+}
+
+.command-catalog.catalog-painted.catalog-painted.anime-growth-commerce .command-item.active {
+  border-image-source: var(--game-ui-teal);
+  color: var(--game-ui-primary-ink, #245664);
+  background: transparent;
+}
+
+.command-catalog.catalog-painted.catalog-painted.anime-growth-commerce .command-item:hover {
+  background: transparent;
+  filter: brightness(1.035);
+}
+
+.command-catalog.catalog-painted.catalog-painted.anime-growth-commerce .command-item > .anime-icon {
+  flex: none;
+}
+
+.command-catalog.catalog-painted.catalog-painted.anime-growth-commerce .command-item > span:not(.command-readonly):not(.anime-icon) {
+  flex: 1;
+  min-width: 0;
+}
+
+.command-catalog.catalog-painted.catalog-painted.anime-growth-commerce .command-item strong {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  color: inherit;
+  font-size: 13px;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.command-catalog.catalog-painted.catalog-painted.anime-growth-commerce .command-item small {
+  margin-top: 3px;
+  color: var(--game-ui-muted, #736c78);
+  line-height: 1.2;
+}
+
+.command-catalog.catalog-painted.catalog-painted.anime-growth-commerce .command-readonly {
+  padding: 4px 7px;
+  background: var(--game-ui-teal) center / 100% 100% no-repeat;
+  color: var(--game-ui-primary-ink, #245664);
+  font-size: 10px;
+  line-height: 1.2;
+  text-shadow: none;
+}
+
+.command-catalog.catalog-painted.catalog-painted.anime-growth-commerce .command-item.disabled {
+  border-image-source: var(--game-ui-paper);
+  background: transparent;
+  filter: saturate(.45);
+}
+
+.command-catalog.catalog-painted.catalog-painted.anime-growth-commerce .command-readonly.locked {
+  background-image: var(--game-ui-paper);
+  color: var(--game-ui-muted, #736c78);
+  text-shadow: none;
+}
+
+.command-catalog.catalog-painted.catalog-painted.anime-growth-commerce .command-workbench-heading > div {
+  min-width: 0;
+}
+
+.command-catalog.catalog-painted.catalog-painted.anime-growth-commerce .command-workbench-heading h2 {
+  overflow-wrap: anywhere;
+  line-height: 1.35;
+}
+
+.command-catalog.catalog-painted.catalog-painted.anime-growth-commerce .command-workbench-heading .eyebrow {
+  color: var(--game-ui-muted, #736c78);
+}
+
+.command-catalog.catalog-painted.catalog-painted.anime-growth-commerce .command-risk {
+  border: 0;
+  border-radius: 0;
+  background: var(--game-ui-gold) center / 100% 100% no-repeat;
+  color: var(--game-ui-gold-ink, #735632);
+  white-space: nowrap;
+  font-weight: 700;
+}
+
+.command-catalog.catalog-painted.catalog-painted.anime-growth-commerce .command-risk.safe {
+  background-image: var(--game-ui-teal);
+  color: var(--game-ui-primary-ink, #245664);
+  text-shadow: none;
+}
+
+.command-catalog.catalog-painted.catalog-painted.anime-growth-commerce .command-risk.danger {
+  background-image: var(--game-ui-coral);
+  color: var(--game-ui-danger-ink, #793f4a);
+  text-shadow: none;
+}
+
+.command-catalog.catalog-painted.catalog-painted.anime-growth-commerce :is(.command-description, .command-field small) {
+  color: var(--game-ui-muted, #736c78);
+  overflow-wrap: anywhere;
+}
+
+.command-catalog.catalog-painted.catalog-painted.anime-growth-commerce .command-usage {
+  border: 0;
+  border-image: none;
+  border-radius: 0;
+  background: var(--game-ui-paper) center / 100% 100% no-repeat;
+  color: var(--game-ui-ink, #535366);
+  overflow-wrap: anywhere;
+}
+
+.command-catalog.catalog-painted.catalog-painted.anime-growth-commerce :is(.command-workbench-close, .command-actions > button, .command-result-buttons > button) {
+  box-sizing: border-box;
+  border: 4px solid transparent;
+  border-image: var(--game-ui-paper) 144 fill / 4px 7px stretch;
+  border-radius: 0;
+  background: transparent;
+  color: var(--game-ui-ink, #535366);
+  font-weight: 700;
+  text-shadow: none;
+  box-shadow: none;
+}
+
+.command-catalog.catalog-painted.catalog-painted.anime-growth-commerce .command-workbench-close {
+  display: grid;
+  place-items: center;
+  padding: 0;
+}
+
+.command-catalog.catalog-painted.catalog-painted.anime-growth-commerce .command-actions > .primary-button {
+  border-image-source: var(--game-ui-teal);
+  color: var(--game-ui-primary-ink, #245664);
+  text-shadow: none;
+}
+
+.command-catalog.catalog-painted.catalog-painted.anime-growth-commerce .command-actions > .soft-button {
+  border-image-source: var(--game-ui-coral);
+  color: var(--game-ui-danger-ink, #793f4a);
+  text-shadow: none;
+}
+
+.command-catalog.catalog-painted.catalog-painted.anime-growth-commerce :is(.command-actions, .command-result-buttons) > button:disabled {
+  opacity: .7;
+  filter: saturate(.25);
+}
+
+.command-catalog.catalog-painted.catalog-painted.anime-growth-commerce .command-notice {
+  border: 0;
+  border-image: none;
+  border-radius: 0;
+  background: var(--game-ui-paper) center / 100% 100% no-repeat;
+  color: var(--game-ui-ink, #535366);
+  overflow-wrap: anywhere;
+}
+
+.command-catalog.catalog-painted.catalog-painted.anime-growth-commerce :is(.command-preview, .command-result) {
+  border: 0;
+  border-image: none;
+  border-radius: 0;
+  background: transparent;
+  color: var(--game-ui-ink, #535366);
+}
+
+.command-catalog.catalog-painted.catalog-painted.anime-growth-commerce :is(.command-preview pre, .command-result pre) {
+  border: 0;
+  border-image: none;
+  border-radius: 0;
+  background: var(--game-ui-paper) center / 100% 100% no-repeat;
+  color: var(--game-ui-ink, #535366);
+  overflow-wrap: anywhere;
+}
+
+.command-catalog.catalog-painted.catalog-painted.anime-growth-commerce :is(.command-field em, .command-validation) {
+  color: var(--game-ui-danger-ink, #793f4a);
+}
+
+.command-catalog.catalog-painted.catalog-painted.anime-growth-commerce :is(button, input, select, textarea):focus-visible {
+  outline: 2px solid #31847c;
+  outline-offset: 2px;
+}
+
+.command-catalog.catalog-painted.catalog-painted.anime-growth-commerce .viewport-pagination {
+  border-image: none;
+  background: transparent;
+}
+
+.command-catalog.catalog-painted.catalog-painted.anime-growth-commerce .viewport-pagination :is(button, select) {
+  border-image: var(--game-ui-paper) 144 fill / 4px 6px stretch;
+  border-radius: 0;
+  background: transparent;
+  color: var(--game-ui-ink, #535366);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .command-catalog.catalog-painted.catalog-painted.anime-growth-commerce .command-item {
+    transition: none;
+  }
+}

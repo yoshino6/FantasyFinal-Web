@@ -1,0 +1,224 @@
+/* A living research board: the painted frame belongs to this panel alone.
+   Preserve the measured 64px records and 6px gaps used by viewport pagination. */
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal {
+  --evolution-board: url('/assets/light-anime/evolution-panel-v1/research-panel.png');
+  --gc-ink: #554b3c;
+  --gc-muted: #93836a;
+  --gc-teal: #629b84;
+  --gc-line: #b7b393;
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 7px 8px 5px;
+  overflow: hidden;
+  border: 14px solid transparent;
+  border-image: var(--evolution-board) 240 fill / 22px stretch;
+  border-radius: 0;
+  background: #fdf8e9;
+  background-clip: padding-box;
+  box-shadow: none;
+  color: var(--gc-ink);
+}
+
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal button {
+  min-width: 0;
+  min-height: 26px;
+  border: 1px solid #c1b391;
+  border-image: none;
+  border-radius: 5px 8px 5px 7px;
+  background: #fffaed;
+  box-shadow: inset 0 1px #fffef5, 0 2px 0 #aa92631c;
+  color: #72654f;
+  font: 600 11px/1.25 'KaiTi', 'STKaiti', serif;
+  text-shadow: none;
+  transition: background .15s, border-color .15s;
+}
+
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal button:hover:not(:disabled) { border-color: #85aa8e; background-color: #f2f5e4; transform: none; filter: none; }
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal button:active:not(:disabled) { transform: none; }
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal button:focus-visible { outline: 2px solid #539785; outline-offset: 2px; }
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal button:disabled { opacity: .55; filter: saturate(.55); }
+
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal > .evolution-heading {
+  flex: none;
+  min-height: 51px;
+  margin: 0;
+  padding: 1px 0 7px;
+  gap: 8px;
+  border: 0;
+  border-image: none;
+  border-bottom: 1px dashed #b9b594;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .evolution-research-title { display: flex; align-items: center; gap: 9px; min-width: 0; }
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .evolution-research-title > div { min-width: 0; }
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .evolution-heading h2 { margin: 0; color: #497b68; font: 800 19px/1.25 'KaiTi', 'STKaiti', serif; letter-spacing: 1px; white-space: nowrap; }
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .evolution-heading .evolution-research-emblem { flex: 0 0 35px; width: 35px; height: 35px; filter: drop-shadow(0 2px 0 #c5bd9929); }
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .evolution-heading .evolution-research-caption { display: flex; flex-wrap: wrap; gap: 4px 9px; margin: 4px 0 0; color: #978569; font: 500 10px/1.2 'KaiTi', 'STKaiti', serif; letter-spacing: 0; }
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .evolution-research-caption span + span { padding-left: 8px; border-left: 1px solid #c8bea0; color: #7b8c66; white-space: nowrap; }
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .evolution-heading > button { flex: none; min-height: 27px; padding: 4px 9px; }
+
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal > .evolution-viewport-gate {
+  min-height: 28px;
+  padding: 2px 6px;
+  gap: 5px;
+  border: 1px solid #dfc9a3;
+  border-radius: 5px 8px 5px 7px;
+  background: #fbf0d5c9;
+}
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal > .evolution-viewport-gate.is-onsite { border-color: #bdd0ac; background: #edf3df; }
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .evolution-viewport-gate > button:first-child { flex: 1; min-height: 21px; padding: 2px 0; overflow: hidden; border: 0; background: transparent; box-shadow: none; color: #9b794c; text-align: left; text-overflow: ellipsis; white-space: nowrap; }
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .evolution-viewport-gate.is-onsite > button:first-child { color: #6c8b57; }
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .evolution-viewport-gate > button:last-child:not(:first-child) { flex: none; min-height: 22px; padding: 2px 5px; border-color: #ceb48a; background: #fff8e5; font-size: 10px; }
+
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal > .evolution-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: end;
+  flex: none;
+  gap: 5px;
+  min-height: 35px;
+  margin: 0;
+  padding: 0 0 2px;
+  border: 0;
+  border-bottom: 1px solid #bdc2a0;
+  border-image: none;
+  border-radius: 0;
+  background: transparent;
+}
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal > .evolution-tabs > button { position: relative; display: flex; align-items: center; justify-content: center; gap: 4px; height: 30px; min-height: 30px; padding: 3px 4px; border: 1px solid #c2bea0; border-bottom: 0; border-image: none; border-radius: 7px 7px 0 0; background: #f2eddb; box-shadow: inset 0 1px #fffdf0; color: #96876b; font: 700 12px/1.1 'KaiTi', 'STKaiti', serif; }
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal > .evolution-tabs > button.active { height: 33px; min-height: 33px; border-color: #8caf91; border-image: none; background: #e3eed6; box-shadow: inset 0 2px #c6ddae; color: #4c7d60; text-shadow: none; }
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .evolution-tabs .evolution-research-emblem { flex: 0 0 20px; width: 20px; height: 20px; }
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .evolution-research-tab-count { display: inline-flex; align-items: center; justify-content: center; min-width: 14px; padding: 1px 3px; border-radius: 6px; background: #dcd7bd80; color: #92866b; font: 500 9px/1.1 sans-serif; font-variant-numeric: tabular-nums; }
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .active .evolution-research-tab-count { background: #c3d5ae80; color: #678254; }
+
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal > .evolution-viewport-toolbar { min-height: 27px; gap: 7px; padding: 0 1px; }
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .evolution-viewport-toolbar > span { min-width: 0; padding: 0; overflow: hidden; background: transparent; color: #9a896c; font: 500 11px/1.3 'KaiTi', 'STKaiti', serif; text-overflow: ellipsis; white-space: nowrap; }
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .evolution-viewport-toolbar > button { flex: none; min-height: 26px; padding: 3px 9px; border-color: #8eaa87; background: #e9f1db; color: #557c5f; }
+
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal > .evolution-viewport-list.evolution-stage {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-auto-rows: 64px;
+  align-content: start;
+  align-items: stretch;
+  justify-content: normal;
+  flex: 1;
+  gap: 6px;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-image: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal > .evolution-viewport-list.is-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .evolution-viewport-list > .evolution-viewport-entry { box-sizing: border-box; display: flex; align-items: center; gap: 8px; width: 100%; height: 64px; min-height: 0; margin: 0; padding: 7px 9px; overflow: hidden; border: 1px solid #d0c4a1; border-left: 3px solid #c1c7a4; border-image: none; border-radius: 5px 9px 5px 8px; background: linear-gradient(115deg,#fffdf4e6,#fcf7e7ed); box-shadow: 0 2px 0 #b8a27c15; color: #74644c; text-align: left; }
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .evolution-viewport-entry > .evolution-research-emblem { flex: 0 0 35px; width: 35px; height: 35px; filter: drop-shadow(0 1px 0 #e2d3a6); }
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .evolution-viewport-entry > .evolution-entry-copy { display: grid; flex: 1; gap: 4px; min-width: 0; padding: 0; border: 0; border-image: none; background: transparent; }
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .evolution-entry-copy > strong { color: #807052; font: 700 12px/1.15 'KaiTi', 'STKaiti', serif; }
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .evolution-entry-copy > small { color: #73916a; font: 500 11px/1.2 'KaiTi', 'STKaiti', serif; }
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .is-metrics .evolution-entry-copy > small { color: #557e65; font: 800 17px/1.05 'KaiTi', 'STKaiti', serif; font-variant-numeric: tabular-nums; }
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .evolution-viewport-entry[data-evolution-entry='level'] { border-color: #a9bea1; border-left-color: #81a587; background: linear-gradient(120deg,#f2f7e7,#e6efd8); }
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .evolution-viewport-entry[data-evolution-entry='pressure'] { border-left-color: #cead77; }
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .evolution-viewport-entry[data-evolution-entry='pressure'] .evolution-entry-copy > small { color: #aa8956; }
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .evolution-viewport-entry b { flex: none; color: #a5b48f; font-size: 21px; font-weight: 400; }
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal[data-evolution-tab='resources'] .evolution-viewport-entry { border-left-color: #d1b988; }
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal[data-evolution-tab='mutations'] .evolution-viewport-entry { border-left-color: #91b4a2; background: linear-gradient(110deg,#f6f9ef,#fff9ed); }
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal[data-evolution-tab='history'] .evolution-viewport-entry { border-left-color: #bab48b; background: repeating-linear-gradient(0deg,transparent 0 20px,#cec7aa23 20px 21px),#fffbeddd; }
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .evolution-research-gauge { height: 6px; padding: 0; border: 1px solid #c4c6a5; border-radius: 4px; background: #e8e8d1; box-shadow: inset 0 1px 1px #aaa78026; }
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .evolution-research-gauge::before,
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .evolution-research-gauge::after { content: none; }
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .evolution-research-gauge meter { height: 4px; }
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .evolution-research-gauge meter::-webkit-meter-optimum-value { border-radius: 3px; background: linear-gradient(90deg,#b2c890,#71a687); box-shadow: none; }
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .evolution-research-gauge[data-gauge='pressure'] meter::-webkit-meter-optimum-value { background: linear-gradient(90deg,#e0c282,#c3935d); }
+
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal > .viewport-pagination { flex: none; min-height: 31px; gap: 6px; padding: 3px 0 0; border-top: 1px dashed #c7bda0; color: #8a7c62; }
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .viewport-pagination :is(button,select) { min-height: 26px; padding: 2px 7px; border: 1px solid #c4b99b; border-image: none; border-radius: 5px; background: #fffaf0; box-shadow: none; color: #82745b; font: 600 10px/1.2 'KaiTi', 'STKaiti', serif; }
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .viewport-pagination small { color: #a3957d; font-size: 10px; }
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal > .evolution-locked { flex: 1; min-height: 0; margin: 0; padding: 22px 8px; border: 1px dashed #c6c6a3; border-image: none; border-radius: 7px; background: #fbf8e8a8; box-shadow: none; }
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .evolution-locked h3 { color: #7d8b65; font-size: 15px; }
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .evolution-empty { grid-column: 1 / -1; margin: 0; padding: 14px 6px; color: #a19275; }
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .evolution-locked .game-ui-empty-message > span { color: #a19275; font-size: 12px; }
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal > .evolution-viewport-message { min-height: 25px; padding: 4px 7px; border-color: #b9c8a4; background: #edf3df; color: #6c8d60; }
+.app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal > .evolution-viewport-message.error { border-color: #d4bc95; background: #f9edda; color: #a48151; }
+
+/* Teleported details receive their own scope; other growth panels keep their art. */
+.evolution-research-overlay.evolution-journal-overlay.evolution-viewport-backdrop.anime-growth-commerce { --gc-ink:#5f553f; --gc-muted:#93836a; --gc-line:#bdb393; --gc-teal:#699f83; padding:12px; background:#3b433e88; backdrop-filter:blur(2px); }
+.evolution-research-overlay.evolution-journal-overlay.evolution-viewport-backdrop.anime-growth-commerce > :is(.evolution-viewport-dialog,.evolution-viewport-detail) { width:min(760px,100%); max-height:calc(var(--app-viewport-height,100dvh) - 24px); padding:10px 12px; border:12px solid transparent; border-image:url('/assets/light-anime/evolution-panel-v1/research-panel.png') 240 fill / 22px stretch; border-radius:0; background:#fffaec; background-clip:padding-box; box-shadow:0 12px 40px #2e3a3040; color:#665740; }
+.evolution-research-overlay.evolution-journal-overlay.evolution-viewport-backdrop.anime-growth-commerce .evolution-viewport-dialog > header { min-height:34px; padding-bottom:7px; border-bottom:1px dashed #bfc3a2; }
+.evolution-research-overlay.evolution-journal-overlay.evolution-viewport-backdrop.anime-growth-commerce :is(.evolution-viewport-dialog h3,.evolution-viewport-detail h3,.growth-controls h3) { color:#527b62; font-family:'KaiTi','STKaiti',serif; font-size:16px; }
+.evolution-research-overlay.evolution-journal-overlay.evolution-viewport-backdrop.anime-growth-commerce :is(.evolution-viewport-dialog-body,.evolution-viewport-detail) { scrollbar-width:thin; scrollbar-color:#b9c29e #f5edd9; }
+.evolution-research-overlay.evolution-journal-overlay.evolution-viewport-backdrop.anime-growth-commerce button { min-height:30px; padding:5px 9px; border:1px solid #c2b492; border-image:none; border-radius:5px 8px 5px 7px; background:#fff8e8; box-shadow:inset 0 1px #fffdf4,0 2px 0 #a2936c19; color:#7d6b4e; font-size:12px; line-height:1.3; }
+.evolution-research-overlay.evolution-journal-overlay.evolution-viewport-backdrop.anime-growth-commerce button:hover:not(:disabled) { transform:none; filter:none; background-color:#eef3df; }
+.evolution-research-overlay.evolution-journal-overlay.evolution-viewport-backdrop.anime-growth-commerce .growth-controls > section { margin-block:10px; padding:11px; border:1px solid #c8c9a6; border-image:none; border-radius:6px 10px 6px 9px; background:linear-gradient(125deg,#f9f9e8,#fff9e9); box-shadow:none; }
+.evolution-research-overlay.evolution-journal-overlay.evolution-viewport-backdrop.anime-growth-commerce .growth-controls > section.growth-quote { border-color:#a1b998; background:#eaf1dc; }
+.evolution-research-overlay.evolution-journal-overlay.evolution-viewport-backdrop.anime-growth-commerce :is(.evolution-actions,.evolution-quote,.growth-fields) > button:first-child,
+.evolution-research-overlay.evolution-journal-overlay.evolution-viewport-backdrop.anime-growth-commerce .evolution-research-controls :is(.growth-breakthrough,.growth-observation) > button { border-color:#8eac88; border-image:none; background:#dfeccd; color:#527951; }
+.evolution-research-overlay.evolution-journal-overlay.evolution-viewport-backdrop.anime-growth-commerce .growth-controls select { width:100%; min-width:0; min-height:32px; padding:5px 7px; border:1px solid #c2b493; border-image:none; border-radius:5px; background:#fffdf1; color:#756449; font-size:12px; }
+.evolution-research-overlay.evolution-journal-overlay.evolution-viewport-backdrop.anime-growth-commerce .growth-controls p { color:#938168; line-height:1.65; }
+.evolution-research-overlay.evolution-journal-overlay.evolution-viewport-backdrop.anime-growth-commerce .growth-controls strong { color:#6f815a; }
+.evolution-research-overlay.evolution-journal-overlay.evolution-viewport-backdrop.anime-growth-commerce .evolution-effects span { border:1px solid #ccd4ae; border-radius:6px; background:#f0f4df; color:#6c865f; }
+.evolution-research-overlay.evolution-journal-overlay.evolution-viewport-backdrop.anime-growth-commerce .evolution-quote { padding:10px; border:1px solid #bdcda6; border-image:none; border-radius:7px; background:#eff4df; color:#7f795c; }
+.evolution-research-overlay.evolution-journal-overlay.evolution-viewport-backdrop.anime-growth-commerce .evolution-viewport-full-text { color:#827358; }
+
+@media (max-width:480px) {
+  .app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal { padding:5px 4px 3px; border-width:10px; border-image-width:18px; }
+  .app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal > .evolution-heading { min-height:48px; gap:5px; }
+  .app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .evolution-research-title { gap:5px; }
+  .app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .evolution-heading h2 { font-size:16px; letter-spacing:.5px; }
+  .app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .evolution-heading .evolution-research-emblem { flex-basis:27px; width:27px; height:27px; }
+  .app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .evolution-heading .evolution-research-caption { gap:3px 5px; font-size:9px; }
+  .app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .evolution-research-caption span + span { padding-left:5px; }
+  .app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .evolution-heading > button { padding:3px 6px; font-size:10px; }
+  .app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal > .evolution-tabs { gap:4px; }
+  .app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal > .evolution-tabs > button { gap:2px; padding-inline:2px; font-size:11px; }
+  .app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .evolution-tabs .evolution-research-emblem { flex-basis:17px; width:17px; height:17px; }
+  .app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .evolution-research-tab-count { min-width:12px; padding-inline:2px; font-size:8px; }
+  .app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .evolution-viewport-list > .evolution-viewport-entry { gap:5px; padding:6px; }
+  .app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .evolution-viewport-entry > .evolution-research-emblem { flex-basis:29px; width:29px; height:29px; }
+  .app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .evolution-entry-copy > strong { font-size:11px; }
+  .app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .is-metrics .evolution-entry-copy > small { font-size:15px; }
+  .evolution-research-overlay.evolution-journal-overlay.evolution-viewport-backdrop.anime-growth-commerce { padding:9px; }
+  .evolution-research-overlay.evolution-journal-overlay.evolution-viewport-backdrop.anime-growth-commerce > :is(.evolution-viewport-dialog,.evolution-viewport-detail) { max-height:calc(var(--app-viewport-height,100dvh) - 18px); padding:7px; border-width:9px; border-image-width:16px; }
+  .evolution-research-overlay.evolution-journal-overlay.evolution-viewport-backdrop.anime-growth-commerce .growth-controls > section { padding:8px; }
+}
+@media (max-width:360px) {
+  .app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .evolution-heading h2 { font-size:14px; }
+  .app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .evolution-research-caption > span:first-child { display:none; }
+  .app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .evolution-research-caption > span:nth-child(2) { padding-left:0; border-left:0; }
+}
+@media (max-height:480px) {
+  .app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal { gap:3px; padding:3px 5px 2px; border-width:7px; border-image-width:12px; }
+  .app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal > .evolution-heading { min-height:35px; padding-bottom:3px; }
+  .app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .evolution-heading h2 { font-size:14px; }
+  .app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .evolution-heading .evolution-research-emblem { flex-basis:26px; width:26px; height:26px; }
+  .app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .evolution-heading .evolution-research-caption { margin-top:2px; font-size:8px; }
+  .app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .evolution-heading > button { min-height:23px; padding:2px 7px; }
+  .app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal > .evolution-viewport-gate { min-height:23px; padding:0 5px; }
+  .app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal > .evolution-tabs { min-height:28px; }
+  .app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal > .evolution-tabs > button { height:25px; min-height:25px; padding-block:2px; }
+  .app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal > .evolution-tabs > button.active { height:27px; min-height:27px; }
+  .app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .evolution-tabs .evolution-research-emblem { flex-basis:17px; width:17px; height:17px; }
+  .app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal > .evolution-viewport-toolbar { min-height:23px; }
+  .app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .evolution-viewport-toolbar > button { min-height:22px; padding:2px 7px; }
+  .app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal > .viewport-pagination { min-height:27px; padding-top:1px; }
+  .app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal .viewport-pagination :is(button,select) { min-height:24px; }
+  .evolution-research-overlay.evolution-journal-overlay.evolution-viewport-backdrop.anime-growth-commerce > :is(.evolution-viewport-dialog,.evolution-viewport-detail) { padding:6px 8px; border-width:7px; border-image-width:14px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .app-shell[data-visual='light-anime'] .character-page .evolution-research-panel.evolution-viewport-panel.evolution-journal button { transition:none; }
+}

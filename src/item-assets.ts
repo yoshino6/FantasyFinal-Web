@@ -323,6 +323,9 @@ export const itemAssetFor = (input: ItemAssetInput): string => {
     return asset(equipmentAsset);
   }
 
+  // Market rows can omit the stable code and item type. The character “药”
+  // in a herb name describes a plant, so resolve it before generic bottles.
+  if (type !== 'consumable' && /草药|药草/.test(text) && !/药剂|药水|药丸|药瓶|合剂/.test(text)) return asset('material-herb');
   const potionAsset = potionAssetFor(code, text, type);
   if (potionAsset) return potionAsset;
 

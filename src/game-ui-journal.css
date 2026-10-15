@@ -1,0 +1,191 @@
+/* Readable, live journal pages; story pictures and server-provided copy stay intact. */
+.app-shell[data-visual='light-anime'][data-viewport-layout]:has(> .story-topbar) {
+  position: absolute;
+  isolation: auto;
+}
+
+.app-shell[data-visual='light-anime'][data-viewport-layout] > .topbar.story-topbar {
+  position: sticky;
+  z-index: 120;
+}
+
+.app-shell[data-visual='light-anime'][data-viewport-layout] > .story-settings-layer {
+  z-index: 140;
+}
+
+.manual-backdrop .manual-dialog.anime-adventure,
+.manual-backdrop.anime-location-refinement .manual-dialog.location-paper-dialog,
+.story-backdrop .story-dialog.anime-adventure,
+.handbook-backdrop .handbook-dialog.anime-adventure {
+  border: 12px solid transparent;
+  border-image: var(--game-ui-journal) var(--game-ui-journal-slice) fill / 12px stretch;
+  border-radius: 0;
+  background: #fffcf4;
+  background-clip: padding-box;
+  color: var(--game-ui-ink, #535366);
+}
+
+.manual-backdrop .manual-dialog.anime-adventure .manual-message,
+.handbook-backdrop .handbook-dialog.anime-adventure :is(.entry-card, .detail-card, .reward-card) {
+  border: 6px solid transparent;
+  border-image: var(--game-ui-panel) 144 fill / 6px stretch;
+  border-radius: 0;
+  background: transparent;
+}
+
+.manual-backdrop .manual-dialog.anime-adventure .manual-message::after {
+  content: none;
+}
+
+.manual-backdrop .manual-dialog.anime-adventure .manual-categories > button,
+.handbook-backdrop .handbook-dialog.anime-adventure .chip-row > button {
+  min-width: 0;
+  border: 5px solid transparent;
+  border-image: var(--game-ui-paper) 144 fill / 5px 8px stretch;
+  border-radius: 0;
+  background: transparent;
+  color: var(--game-ui-ink, #535366);
+  padding: 4px 6px;
+  font-weight: 700;
+}
+
+.manual-backdrop .manual-dialog.anime-adventure .manual-categories > button.active,
+.handbook-backdrop .handbook-dialog.anime-adventure .chip-row > button.selected {
+  border-image-source: var(--game-ui-teal);
+  color: var(--game-ui-primary-ink, #245664);
+  text-shadow: none;
+}
+
+.manual-backdrop .manual-dialog.anime-adventure .manual-actions > button,
+.story-backdrop .story-dialog.anime-adventure :is(.primary-button, .soft-button),
+.handbook-backdrop .handbook-dialog.anime-adventure :is(.primary-button, .soft-button, .ghost-button, .box-controls > button, .search-row > button, .back-button, .pager > button) {
+  border: 7px solid transparent;
+  border-image: var(--game-ui-paper) 144 fill / 7px 10px stretch;
+  border-radius: 0;
+  background: transparent;
+  color: var(--game-ui-ink, #535366);
+  padding: 4px 10px;
+  font-weight: 700;
+}
+
+.manual-backdrop .manual-dialog.anime-adventure .manual-actions > button,
+.story-backdrop .story-dialog.anime-adventure .primary-button,
+.handbook-backdrop .handbook-dialog.anime-adventure :is(.primary-button, .box-controls > button, .search-row > button) {
+  border-image-source: var(--game-ui-teal);
+  color: var(--game-ui-primary-ink, #245664);
+  text-shadow: none;
+}
+
+.manual-backdrop .manual-dialog.anime-adventure .manual-close,
+.handbook-backdrop .handbook-dialog.anime-adventure .handbook-header > .icon-button {
+  border: 6px solid transparent;
+  border-image: var(--game-ui-paper) 144 fill / 6px stretch;
+  border-radius: 0;
+  background: transparent;
+  color: var(--game-ui-ink, #535366);
+  padding: 0;
+  box-shadow: none;
+}
+
+.manual-backdrop.anime-location-refinement .location-paper-dialog .manual-header {
+  margin: 0;
+  min-height: 64px;
+  padding: 6px 9px;
+  border: 6px solid transparent;
+  border-image: var(--game-ui-paper) 144 fill / 6px 10px stretch;
+  background: transparent;
+}
+
+.manual-backdrop .manual-dialog.anime-adventure.interaction-dialog .manual-heading-group {
+  border-image: var(--game-ui-paper) 144 fill / 6px stretch;
+  color: var(--game-ui-ink, #535366);
+}
+
+.handbook-backdrop .handbook-dialog.anime-adventure :is(.section-heading, .detail-grid > span, .reward-item-choice, .preview) {
+  border: 4px solid transparent;
+  border-image: var(--game-ui-panel) 144 fill / 4px stretch;
+  border-radius: 0;
+  background: transparent;
+}
+
+.handbook-backdrop .handbook-dialog.anime-adventure .reward-item-choice.selected {
+  border-image-source: var(--game-ui-teal);
+  color: var(--game-ui-primary-ink, #245664);
+}
+
+.handbook-backdrop .handbook-dialog.anime-adventure :is(.entry-icon, .detail-symbol) {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.handbook-backdrop .handbook-dialog.anime-adventure :is(.search-row, .box-controls, .field) input {
+  border: 4px solid transparent;
+  border-image: var(--game-ui-paper) 144 fill / 4px stretch;
+  border-radius: 0;
+  background: transparent;
+  color: var(--game-ui-ink, #535366);
+}
+
+.handbook-backdrop .handbook-dialog.anime-adventure .back-button > .anime-icon {
+  transform: rotate(180deg);
+}
+
+/* The illustration follows its own content rather than the length of the facts. */
+.handbook-backdrop .handbook-dialog.anime-adventure .codex-spread {
+  grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr);
+}
+
+.handbook-backdrop .handbook-dialog.anime-adventure .codex-illustration {
+  align-self: start;
+  min-width: 0;
+  min-height: 0;
+  border: 5px solid transparent;
+  border-image: var(--game-ui-panel) 144 fill / 5px stretch;
+  border-radius: 0;
+  background: transparent;
+}
+
+@media (max-width: 600px) {
+  .handbook-backdrop .handbook-dialog.anime-adventure .codex-spread {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    background: none;
+  }
+
+  .handbook-backdrop .handbook-dialog.anime-adventure .codex-illustration {
+    grid-template-columns: minmax(0, 96px) minmax(0, 1fr);
+    align-items: center;
+    gap: 12px;
+    padding: 8px;
+    text-align: center;
+  }
+
+  .handbook-backdrop .handbook-dialog.anime-adventure .codex-illustration img {
+    width: 100%;
+    height: 96px;
+    max-height: 96px;
+  }
+}
+
+.handbook-backdrop .handbook-dialog.anime-adventure :is(.back-button, .search-row > button) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.manual-backdrop .manual-dialog.anime-adventure .manual-actions button:disabled,
+.story-backdrop .story-dialog.anime-adventure button:disabled,
+.handbook-backdrop .handbook-dialog.anime-adventure button:disabled {
+  opacity: .7;
+  filter: saturate(.25);
+}
+
+@media (max-width: 360px) {
+  .manual-backdrop .manual-dialog.anime-adventure .manual-categories > button {
+    padding-inline: 2px;
+    font-size: 12px;
+  }
+}

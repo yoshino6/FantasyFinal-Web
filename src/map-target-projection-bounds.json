@@ -1,0 +1,47 @@
+{
+  "building_guild": {
+    "assetPath": "/assets/light-anime/map-surface-v3/target-building_guild-ortho-v1.png",
+    "width": 1254,
+    "height": 1254,
+    "left": 46,
+    "top": 25,
+    "right": 1208,
+    "bottom": 1218
+  },
+  "building_church": {
+    "assetPath": "/assets/light-anime/map-surface-v3/target-building_church-ortho-v1.png",
+    "width": 1254,
+    "height": 1254,
+    "left": 230,
+    "top": 30,
+    "right": 1023,
+    "bottom": 1192
+  },
+  "building_forge": {
+    "assetPath": "/assets/light-anime/map-surface-v3/target-building_forge-ortho-v1.png",
+    "width": 1254,
+    "height": 1254,
+    "left": 125,
+    "top": 29,
+    "right": 1081,
+    "bottom": 1171
+  },
+  "building_library": {
+    "assetPath": "/assets/light-anime/map-surface-v3/target-building_library-ortho-v1.png",
+    "width": 1254,
+    "height": 1254,
+    "left": 135,
+    "top": 38,
+    "right": 1227,
+    "bottom": 1210
+  },
+  "landmark_bridge": {
+    "assetPath": "/assets/light-anime/map-surface-v3/target-landmark_bridge-ortho-v1.png",
+    "width": 1774,
+    "height": 887,
+    "left": 62,
+    "top": 148,
+    "right": 1712,
+    "bottom": 794
+  }
+}

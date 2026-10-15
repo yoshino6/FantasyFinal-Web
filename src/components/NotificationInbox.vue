@@ -39,6 +39,10 @@ export type NotificationInboxMailDetail = NotificationInboxMailItem & {
 </script>
 
 <script setup lang="ts">
+import AnimeIcon from './AnimeIcon.vue';
+import GameUiFeedbackArt from './GameUiFeedbackArt.vue';
+import './anime-adventure.css';
+import '../game-ui-inbox.css';
 import { computed, nextTick, ref, watch } from 'vue';
 import InventoryItemIcon from './InventoryItemIcon.vue';
 
@@ -270,14 +274,14 @@ watch(selected, (item, _previous, onCleanup) => {
 <template>
   <Teleport to="body">
     <div v-if="open" class="inbox-backdrop" role="presentation" @click.self="emit('close')">
-      <section class="inbox-dialog" role="dialog" aria-modal="true" aria-labelledby="inbox-heading">
+      <section class="inbox-dialog anime-adventure inbox-painted" role="dialog" aria-modal="true" aria-labelledby="inbox-heading">
         <header class="inbox-header">
           <div class="inbox-heading-group">
-            <span class="inbox-envelope" aria-hidden="true">✉</span>
+            <span class="inbox-envelope" aria-hidden="true"><img src="/assets/light-anime/game-ui-v1/inbox-ornament.webp" width="1536" height="1024" alt="" /></span>
             <h2 id="inbox-heading">消息信箱</h2>
             <span v-if="totalUnreadCount > 0" class="inbox-unread" :aria-label="`${totalUnreadCount} 条未读`">{{ unreadLabel }}</span>
           </div>
-          <button ref="closeButton" type="button" class="inbox-close" aria-label="关闭消息信箱" @click="emit('close')">×</button>
+          <button ref="closeButton" type="button" class="inbox-close" aria-label="关闭消息信箱" @click="emit('close')"><AnimeIcon name="close" /></button>
         </header>
 
         <div class="inbox-tabs" role="tablist" aria-label="消息类别">
@@ -289,14 +293,14 @@ watch(selected, (item, _previous, onCleanup) => {
         <div v-if="activeTab === 'notice'" class="inbox-body">
           <div class="inbox-list" role="tabpanel" aria-label="通知列表">
             <p v-if="error" class="inbox-error" role="alert">{{ error }} <button type="button" @click="emit('refresh')">重试</button></p>
-            <p v-if="loading && !items.length" class="inbox-state" role="status">正在读取消息…</p>
+            <p v-if="loading && !items.length" class="inbox-state game-ui-empty-message" role="status"><GameUiFeedbackArt name="loading" :size="36" /><span>正在读取消息…</span></p>
             <template v-else>
               <button v-for="item in visibleItems" :key="item.id" type="button" class="inbox-row" :class="{ unread: !item.isRead, selected: selectedId === item.id }" @click="openItem(item)">
-                <span class="inbox-row-icon" :class="`category-${item.category}`" aria-hidden="true">{{ item.category === 'mail' ? '✉' : item.category === 'battle' ? '⚔' : item.category === 'quest' ? '✦' : '•' }}</span>
+                <span class="inbox-row-icon" :class="`category-${item.category}`" aria-hidden="true"><AnimeIcon :name="item.category === 'mail' ? 'mail' : item.category === 'battle' ? 'sword' : item.category === 'quest' ? 'scroll' : 'settings'" :size="36" /></span>
                 <span class="inbox-row-main"><span class="inbox-row-title">{{ item.title || categoryNames[item.category] }}</span><span class="inbox-row-preview">{{ item.messages?.[0]?.text || item.messages?.[0]?.markdown || '点击查看详情' }}</span></span>
                 <span class="inbox-row-meta"><time :datetime="item.createdAt">{{ formatDate(item.createdAt) }}</time><i v-if="!item.isRead" class="inbox-unread-dot" aria-label="未读" /></span>
               </button>
-              <p v-if="!visibleItems.length && !loading && !error" class="inbox-state">还没有通知</p>
+              <p v-if="!visibleItems.length && !loading && !error" class="inbox-state game-ui-empty-message"><GameUiFeedbackArt name="empty" :size="36" /><span>还没有通知</span></p>
               <button v-if="hasMore" type="button" class="inbox-load-more" :disabled="loadingMore || loading" @click="emit('load-more')">{{ loadingMore ? '正在加载…' : '查看更早的消息' }}</button>
             </template>
           </div>
@@ -311,11 +315,11 @@ watch(selected, (item, _previous, onCleanup) => {
                 <img v-for="(src, imageIndex) in message.images" :key="imageIndex" class="inbox-message-image" :src="src" alt="消息图片" loading="lazy" />
                 <div v-if="message.buttons.length" class="inbox-message-actions"><button v-for="button in message.buttons" :key="`${button.command}:${button.label}`" type="button" @click="emit('open-command', button.command)">{{ button.label }}</button></div>
               </div>
-              <p v-if="!renderedMessages.length" class="inbox-state">这条消息没有正文。</p>
+              <p v-if="!renderedMessages.length" class="inbox-state game-ui-empty-message"><GameUiFeedbackArt name="message" :size="36" /><span>这条消息没有正文。</span></p>
             </div>
             <button v-if="!selected.isRead" type="button" class="inbox-mark-read" :disabled="markingReadId === selected.id" @click="emit('mark-read', selected.id)">{{ markingReadId === selected.id ? '标记中…' : '标为已读' }}</button>
           </article>
-          <div v-else class="inbox-detail-placeholder" aria-hidden="true"><span>✉</span><p>选择一条消息查看完整内容</p></div>
+          <div v-else class="inbox-detail-placeholder" aria-hidden="true"><img class="inbox-placeholder-art" src="/assets/light-anime/game-ui-v1/inbox-ornament.webp" width="1536" height="1024" alt="" /><p>选择一条消息查看完整内容</p></div>
         </div>
 
         <div v-else class="inbox-body" role="tabpanel" aria-label="游戏邮件">
@@ -325,14 +329,14 @@ watch(selected, (item, _previous, onCleanup) => {
             </div>
             <div class="inbox-mail-scroll">
               <p v-if="mailError" class="inbox-error" role="alert">{{ mailError }} <button type="button" @click="emit('mail-refresh')">重试</button></p>
-              <p v-if="mailLoading && !mailItems.length" class="inbox-state" role="status">正在读取邮件…</p>
+              <p v-if="mailLoading && !mailItems.length" class="inbox-state game-ui-empty-message" role="status"><GameUiFeedbackArt name="loading" :size="36" /><span>正在读取邮件…</span></p>
               <template v-else>
                 <button v-for="mail in mailItems" :key="mail.id" type="button" class="inbox-row" :class="{ unread: !mail.isRead, selected: selectedMailId === mail.id }" @click="openMail(mail)">
-                  <span class="inbox-row-icon category-mail" aria-hidden="true">✉</span>
+                  <span class="inbox-row-icon category-mail" aria-hidden="true"><AnimeIcon name="mail" :size="36" /></span>
                   <span class="inbox-row-main"><span class="inbox-row-title">{{ mail.title }}</span><span class="inbox-row-preview">{{ mail.preview || mail.senderName }}</span><span v-if="mail.hasAttachments" class="inbox-mail-attachment-label">{{ mail.claimedAt ? '附件已领取' : '有附件' }}</span></span>
                   <span class="inbox-row-meta"><time :datetime="mail.createdAt">{{ formatDate(mail.createdAt) }}</time><i v-if="!mail.isRead" class="inbox-unread-dot" aria-label="未读" /></span>
                 </button>
-                <p v-if="!mailItems.length && !mailLoading && !mailError" class="inbox-state">{{ mailFilter === 'unread' ? '没有未读邮件' : mailFilter === 'attachments' ? '没有带附件的邮件' : '邮箱空空如也' }}</p>
+                <p v-if="!mailItems.length && !mailLoading && !mailError" class="inbox-state game-ui-empty-message"><GameUiFeedbackArt name="empty" :size="36" /><span>{{ mailFilter === 'unread' ? '没有未读邮件' : mailFilter === 'attachments' ? '没有带附件的邮件' : '邮箱空空如也' }}</span></p>
                 <button v-if="mailHasMore" type="button" class="inbox-load-more" :disabled="mailLoadingMore || mailLoading" @click="emit('mail-load-more')">{{ mailLoadingMore ? '正在加载…' : '查看更早的邮件' }}</button>
               </template>
             </div>
@@ -341,7 +345,7 @@ watch(selected, (item, _previous, onCleanup) => {
 
           <article v-if="selectedMailId !== null" class="inbox-detail" :aria-label="selectedMail?.title || '邮件详情'">
             <div class="inbox-detail-top"><button type="button" class="inbox-back" @click="closeDetail">‹ 返回</button><span>游戏邮件</span></div>
-            <p v-if="mailDetailLoading || (!selectedMail && !mailError)" class="inbox-state" role="status">正在读取邮件…</p>
+            <p v-if="mailDetailLoading || (!selectedMail && !mailError)" class="inbox-state game-ui-empty-message" role="status"><GameUiFeedbackArt name="loading" :size="36" /><span>正在读取邮件…</span></p>
             <p v-else-if="!selectedMail && mailError" class="inbox-error" role="alert">{{ mailError }} <button type="button" @click="emit('open-mail', selectedMailId)">重试</button></p>
             <template v-else-if="selectedMail">
               <h3>{{ selectedMail.title }}</h3>
@@ -359,9 +363,10 @@ watch(selected, (item, _previous, onCleanup) => {
                 <button v-if="selectedMail.hasAttachments && !selectedMail.claimedAt" type="button" class="inbox-mail-claim" :disabled="mailActionBusy" @click="emit('claim-mail', selectedMail.id)">{{ mailActionBusy ? '处理中…' : '领取附件' }}</button>
                 <button type="button" class="inbox-mail-delete" :disabled="mailActionBusy || (selectedMail.hasAttachments && !selectedMail.claimedAt)" :title="selectedMail.hasAttachments && !selectedMail.claimedAt ? '请先领取附件' : '删除邮件'" @click="requestDeleteMail(selectedMail.id)">{{ deleteConfirmMailId === selectedMail.id ? '确认删除' : '删除邮件' }}</button>
               </div>
+              <p v-if="selectedMail.hasAttachments && !selectedMail.claimedAt" class="inbox-delete-hint">请先领取附件</p>
             </template>
           </article>
-          <div v-else class="inbox-detail-placeholder" aria-hidden="true"><span>✉</span><p>选择一封邮件查看正文与附件</p></div>
+          <div v-else class="inbox-detail-placeholder" aria-hidden="true"><img class="inbox-placeholder-art" src="/assets/light-anime/game-ui-v1/inbox-ornament.webp" width="1536" height="1024" alt="" /><p>选择一封邮件查看正文与附件</p></div>
         </div>
       </section>
     </div>
@@ -393,9 +398,9 @@ watch(selected, (item, _previous, onCleanup) => {
 .inbox-mail-footer { padding: 9px 10px; border-top: 1px solid #eee3df; background: #fffaf6; }
 .inbox-mail-footer button { width: 100%; padding: 9px; color: #fff; background: #9679b7; border-radius: 9px; font-size: 11px; }
 .inbox-row { display: flex; align-items: center; gap: 9px; width: 100%; min-height: 67px; padding: 10px 12px; color: inherit; background: transparent; border-bottom: 1px solid #f1e8e4; border-radius: 0; text-align: left; }
-.inbox-row:hover, .inbox-row.selected { background: #f5edf9; }
+.inbox-row.selected { background: #f5edf9; }
 .inbox-row.unread { background: #fff4ef; }
-.inbox-row.unread:hover, .inbox-row.unread.selected { background: #f9e8ee; }
+.inbox-row.unread.selected { background: #f9e8ee; }
 .inbox-row-icon { display: grid; place-items: center; flex: 0 0 31px; width: 31px; height: 31px; color: #9675aa; background: #f0e9fa; border-radius: 10px; font-size: 15px; }
 .inbox-row-icon.category-mail { color: #bb805b; background: #fff0dd; }
 .inbox-row-icon.category-battle { color: #b96372; background: #ffeced; }

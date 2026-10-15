@@ -2,6 +2,8 @@
 import { nextTick, ref, watch } from 'vue';
 import type { GameActionMessage } from '../api';
 import StoryGuideContent from './StoryGuideContent.vue';
+import AnimeIcon from './AnimeIcon.vue';
+import './anime-adventure.css';
 
 const props = defineProps<{
   open: boolean;
@@ -47,13 +49,13 @@ watch(() => [props.open, props.messages] as const, async ([open]) => {
 <template>
   <Teleport to="body">
     <div v-if="open" class="story-backdrop">
-      <section ref="dialog" class="story-dialog" role="dialog" aria-labelledby="story-dialog-heading" tabindex="-1">
-        <header class="story-dialog-header"><span aria-hidden="true">✦</span><h2 id="story-dialog-heading">冒险剧情</h2></header>
+      <section ref="dialog" class="story-dialog anime-adventure" role="dialog" aria-labelledby="story-dialog-heading" tabindex="-1">
+        <header class="story-dialog-header"><AnimeIcon name="book" :size="30" /><h2 id="story-dialog-heading">冒险剧情</h2></header>
         <div ref="body" class="story-dialog-body">
           <StoryGuideContent :messages="messages" :busy="busy" @action="action => emit('action', action)" @command="command => emit('command', command)" />
           <p v-if="busy" class="story-dialog-status" role="status">正在继续剧情…</p>
           <div v-if="error" class="story-dialog-error" role="alert"><p>{{ error }}</p><button type="button" class="soft-button" :disabled="busy" @click="emit('refresh')">重新读取当前剧情</button></div>
-          <button v-if="inBattle || canFinish" class="primary-button story-finish" type="button" :disabled="busy" @click="emit('finish')">{{ inBattle ? '进入战斗' : '开始探索' }}</button>
+          <button v-if="inBattle || canFinish" class="primary-button story-finish" :class="{ 'is-battle': inBattle }" type="button" :disabled="busy" @click="emit('finish')"><AnimeIcon :name="inBattle ? 'sword' : 'map'" :size="26" />{{ inBattle ? '进入战斗' : '返回地图' }}</button>
         </div>
       </section>
     </div>

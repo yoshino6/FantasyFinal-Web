@@ -1,0 +1,160 @@
+/* The existing world rail keeps its border box, icon sizes and text geometry. */
+.app-shell[data-visual='light-anime'][data-viewport-layout][data-page='world'] nav.world-section-tabs {
+  border-image: var(--game-ui-panel) 144 fill / 12px stretch;
+  background: transparent;
+  box-shadow: 0 3px 6px #6f8d9c1a;
+}
+
+.app-shell[data-visual='light-anime'][data-viewport-layout][data-page='world'] nav.world-section-tabs > button {
+  border-image: var(--game-ui-paper) 144 fill / 4px 6px stretch;
+  background: transparent;
+  color: var(--game-ui-ink, #535366);
+  text-shadow: none;
+  box-shadow: none;
+}
+
+.app-shell[data-visual='light-anime'][data-viewport-layout][data-page='world'] nav.world-section-tabs > button.active {
+  border-image-source: var(--game-ui-teal);
+  color: var(--game-ui-primary-ink, #245664);
+}
+
+.app-shell[data-visual='light-anime'][data-viewport-layout][data-page='world'] nav.world-section-tabs > button > span:last-child {
+  color: inherit;
+  text-shadow: none;
+  -webkit-text-stroke: 0;
+  paint-order: normal;
+}
+
+.app-shell[data-visual='light-anime'][data-viewport-layout][data-page='world'] nav.world-section-tabs > button + button::before {
+  content: none;
+}
+
+.app-shell[data-visual='light-anime'][data-viewport-layout][data-page='world'] nav.world-section-tabs > button:focus-visible {
+  outline: 2px solid var(--game-ui-focus, #337c94);
+  outline-offset: 2px;
+}
+
+.app-shell[data-visual='light-anime'][data-viewport-layout][data-page='world'] nav.world-section-tabs > button:disabled {
+  opacity: .7;
+  filter: saturate(.4);
+  cursor: not-allowed;
+}
+
+/* Painted entry cards retain live labels and the world's full-viewport scene. */
+.app-shell[data-visual='light-anime'][data-viewport-layout][data-page='world'] .world-entry-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 580px);
+  align-content: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  padding: clamp(8px, 2vw, 24px);
+  gap: clamp(14px, 3vh, 28px);
+  border: 0;
+  border-image: none;
+  background: transparent;
+  overflow: auto;
+}
+
+.app-shell[data-visual='light-anime'][data-page='world'] .world-entry-painted {
+  position: relative;
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  aspect-ratio: 3 / 1;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-image: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--game-ui-ink, #535366);
+  text-align: left;
+  isolation: isolate;
+  filter: drop-shadow(0 5px 5px #6f8d9c26);
+  transition: transform 150ms ease, filter 150ms ease;
+}
+
+.app-shell[data-visual='light-anime'][data-page='world'] .world-entry-painted .world-entry-art {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+}
+
+.app-shell[data-visual='light-anime'][data-page='world'] .world-entry-painted .world-entry-copy {
+  position: absolute;
+  inset: 18% auto 19% 8%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  width: 35%;
+  min-width: 0;
+  gap: clamp(3px, .8vw, 9px);
+  pointer-events: none;
+}
+
+.app-shell[data-visual='light-anime'][data-page='world'] .world-entry-painted strong {
+  font-family: KaiTi, STKaiti, 'Noto Serif SC', serif;
+  font-size: clamp(20px, 5.2vw, 32px);
+  font-weight: 900;
+  line-height: 1.2;
+  letter-spacing: .04em;
+  white-space: nowrap;
+  color: var(--game-ui-ink, #535366);
+  text-shadow: none;
+}
+
+.app-shell[data-visual='light-anime'][data-page='world'] .world-entry-painted small {
+  font-size: clamp(11px, 2.8vw, 15px);
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+  color: var(--game-ui-muted, #736c78);
+}
+
+.app-shell[data-visual='light-anime'][data-page='world'] .world-entry-painted:not(:disabled):hover {
+  background: transparent;
+  transform: translateY(-2px);
+  filter: drop-shadow(0 7px 6px #6f8d9c33) brightness(1.04);
+}
+
+.app-shell[data-visual='light-anime'][data-page='world'] .world-entry-painted:focus-visible {
+  background: transparent;
+  outline: 3px solid #47a99b;
+  outline-offset: 4px;
+}
+
+.app-shell[data-visual='light-anime'][data-page='world'] .world-entry-painted:not(:disabled):active {
+  transform: translateY(1px);
+}
+
+.app-shell[data-visual='light-anime'][data-page='world'] .world-entry-painted:disabled {
+  filter: drop-shadow(0 3px 4px #6f8d9c20) saturate(.5);
+}
+
+@media (min-width: 760px) {
+  .app-shell[data-visual='light-anime'][data-viewport-layout][data-page='world'] .world-entry-grid {
+    grid-template-columns: repeat(2, minmax(0, 520px));
+    gap: 22px;
+  }
+
+  .app-shell[data-visual='light-anime'][data-page='world'] .world-entry-painted strong {
+    font-size: clamp(23px, 2.4vw, 32px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-shell[data-visual='light-anime'][data-page='world'] .world-entry-painted {
+    transition: none;
+  }
+}

@@ -1,0 +1,122 @@
+/* One full-viewport environment; portraits, information paper and controls stay in front. */
+.app-shell[data-visual='light-anime']:is([data-page='character'], [data-page='inventory'], [data-page='social'], [data-page='world']) {
+  position: relative;
+  isolation: isolate;
+  background: transparent;
+}
+
+.app-shell[data-visual='light-anime']:is([data-page='character'], [data-page='inventory'], [data-page='social'], [data-page='world'])::before {
+  content: '';
+  position: fixed;
+  z-index: -1;
+  inset: 0;
+  background: var(--anime-main-scene) center / cover no-repeat;
+  opacity: 1;
+  filter: none;
+  pointer-events: none;
+}
+
+/* Remove scene-sized shells, retaining the smaller paper cards and equipment slots. */
+.app-shell[data-visual='light-anime'][data-page='character'] .character-page :is(.character-profile-card, .character-profile-portrait, .character-equipment-panel, .equipment-layout, .equipment-summary, .evolution-panel, .evolution-stage),
+.app-shell[data-visual='light-anime'][data-page='character'] .character-page .character-profile-card .character-profile-portrait .character-portrait-stage,
+.app-shell[data-visual='light-anime'][data-page='character'] .character-page .equipment-portrait .character-portrait-stage,
+.app-shell[data-visual='light-anime'][data-page='inventory'] .inventory-page .inventory-frame,
+.app-shell[data-visual='light-anime'][data-page='social'] .social-page,
+.app-shell[data-visual='light-anime'][data-page='world'] :is(.world-page, .world-entry-grid) {
+  padding: 0;
+  border: 0;
+  border-image: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+/* The navigation retains its own painted buttons without a cream floor over the scene. */
+.app-shell[data-visual='light-anime']:is([data-page='character'], [data-page='inventory'], [data-page='social'], [data-page='world']) .bottom-nav::before {
+  content: none;
+}
+
+/* Expanded scenes retain the old regional crop, rather than recropping to the viewport. */
+.app-shell[data-visual='light-anime'][data-page='character'][data-scene-framed]::before {
+  background-image: var(--anime-framed-scene);
+  background-position: var(--anime-framed-position);
+  background-size: var(--anime-framed-size);
+}
+
+/* The same illustration fills only uncovered outer edges, below the unchanged core. */
+.app-shell[data-visual='light-anime'][data-page='character'][data-scene-framed]::after {
+  content: '';
+  position: fixed;
+  z-index: -2;
+  inset: 0;
+  background-image: var(--anime-framed-scene);
+  background-position: var(--anime-framed-outer-position);
+  background-size: var(--anime-framed-outer-size);
+  background-repeat: no-repeat;
+  opacity: var(--anime-framed-outer-opacity);
+  pointer-events: none;
+}
+
+/* Complete panoramas cover the viewport with one image, including the courtyard foreground. */
+.app-shell[data-visual='light-anime'][data-page='character']:is([data-character-scene='profile'],[data-character-scene='equipment'])[data-scene-framed]::after {
+  content: none;
+}
+
+.app-shell[data-visual='light-anime'][data-page='character'] .character-page :is(.character-profile-portrait, .equipment-portrait) .character-portrait-stage .scene-framed-portrait {
+  inset: auto;
+  left: var(--scene-portrait-left);
+  top: var(--scene-portrait-top);
+  width: var(--scene-portrait-width);
+  height: var(--scene-portrait-height);
+  min-width: 0;
+  max-width: none;
+  max-height: none;
+  object-fit: fill;
+  transform: none;
+  pointer-events: none;
+}
+
+/* A thin paper backing keeps the existing intro text readable without moving it. */
+.app-shell[data-visual='light-anime'][data-page='character'] .character-page .evolution-heading,
+.app-shell[data-visual='light-anime'][data-page='character'] .character-page .character-equipment-panel > .subpanel-intro {
+  background: #fff7e9ed;
+  box-shadow: inset 0 0 0 1px #d8c29e;
+}
+
+.app-shell[data-visual='light-anime'][data-page='character'] .character-page .evolution-heading :is(h2, p, small),
+.app-shell[data-visual='light-anime'][data-page='character'] .character-page .character-equipment-panel > .subpanel-intro :is(.eyebrow, h2, .muted) {
+  color: #51402f;
+}
+
+/* Short landscape screens keep the painted navigation below the character's face. */
+@media (orientation: landscape) and (max-height: 500px) and (max-width: 1179px) {
+  .app-shell[data-visual='light-anime'] .bottom-nav {
+    height: auto;
+    min-height: 56px;
+    padding: 0 2px max(2px, env(safe-area-inset-bottom));
+  }
+
+  .app-shell[data-visual='light-anime'] .bottom-nav button {
+    grid-template-rows: 32px 18px;
+    height: 54px;
+    min-height: 54px;
+    padding: 2px;
+    font-size: 16px;
+  }
+
+  .app-shell[data-visual='light-anime'] .bottom-nav button img,
+  .app-shell[data-visual='light-anime'] .bottom-nav .explore-nav img {
+    width: min(80%, 36px);
+    height: 32px;
+    margin-top: 0;
+  }
+
+  .app-shell[data-visual='light-anime'] .bottom-nav button span {
+    line-height: 18px;
+  }
+
+  .app-shell[data-visual='light-anime'] .bottom-nav button.active {
+    transform: translateY(-2px);
+  }
+}

@@ -1,12 +1,21 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
-import type { PartyApplication, Recruitment } from '../api';
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
+import type { PanelPortrait, PartyApplication, Recruitment } from '../api';
+import SocialGlyph from './SocialGlyph.vue';
+import GameUiFeedbackArt from './GameUiFeedbackArt.vue';
+import SocialAvatar from './SocialAvatar.vue';
+import ViewportPagination from './ViewportPagination.vue';
+import { useViewportPagination } from '../useViewportPagination';
+import './anime-party-refinement.css';
+import './party-viewport.css';
+import '../game-ui-party.css';
 
 type PartyMember = {
   id: number;
   gameId: number;
   name: string;
   level?: number;
+  portrait?: PanelPortrait | string;
   isLeader: boolean;
   regionCode?: string;
   regionName?: string;
@@ -63,7 +72,13 @@ const emit = defineEmits<{
   reject: [applicationId: number];
 }>();
 
-const activeTab = ref<'create' | 'search'>('create');
+const activeTab = ref<'members' | 'recruitments' | 'applications'>('recruitments');
+const modal = ref<'create' | 'publish' | 'rename' | 'leave' | 'recruitment' | 'member' | 'application' | null>(null);
+const listViewport = ref<HTMLElement | null>(null);
+const dialogRoot = ref<HTMLElement | null>(null);
+let dialogTrigger: HTMLElement | null = null;
+const selectedMember = ref<PartyMember | null>(null);
+const selectedApplicationId = ref<number | null>(null);
 const createName = ref('');
 const createDescription = ref('');
 const createPreview = ref(false);
@@ -71,9 +86,7 @@ const keyword = ref('');
 const region = ref('');
 const searchTargetCount = ref<number | ''>('');
 const selectedRecruitmentId = ref<number | null>(null);
-const renameOpen = ref(false);
 const renameName = ref('');
-const leaveConfirm = ref(false);
 const publishDescription = ref('');
 const publishTargetCount = ref(4);
 const publishPreview = ref(false);
@@ -84,13 +97,23 @@ const leader = computed(() => props.party?.leader ?? props.party?.members.find(m
 const memberCount = computed(() => props.party?.memberCount ?? props.party?.members.length ?? 0);
 const maxMembers = computed(() => props.party?.maxMembers ?? 4);
 const canSubmitPublish = computed(() => Boolean(props.party?.canRecruit && publishTargetCount.value > memberCount.value && publishTargetCount.value <= maxMembers.value && !props.busy && !props.loading));
+const selectedRecruitment = computed(() => props.recruitments.find(item => item.id === selectedRecruitmentId.value) ?? null);
+const selectedApplication = computed(() => props.applications.find(item => item.id === selectedApplicationId.value) ?? null);
+const members = computed(() => props.party?.members ?? []);
+const listRowHeight = () => typeof window !== 'undefined' && window.innerHeight < 450 ? 76 : 108;
+const memberPaging = useViewportPagination(() => members.value, { container: listViewport, rowHeight: listRowHeight, gap: 6 });
+const recruitmentPaging = useViewportPagination(() => props.recruitments, { container: listViewport, rowHeight: listRowHeight, gap: 6 });
+const applicationPaging = useViewportPagination(() => props.applications, { container: listViewport, rowHeight: listRowHeight, gap: 6 });
+const activePaging = computed(() => activeTab.value === 'members' ? memberPaging : activeTab.value === 'applications' ? applicationPaging : recruitmentPaging);
+const activeTotal = computed(() => activeTab.value === 'members' ? members.value.length : activeTab.value === 'applications' ? props.applications.length : props.recruitments.length);
+const pagerLabel = computed(() => activeTab.value === 'members' ? '队伍成员翻页' : activeTab.value === 'applications' ? '入队申请翻页' : '队伍招募翻页');
 
 onMounted(() => { clock = setInterval(() => { now.value = Date.now(); }, 30_000); });
 onUnmounted(() => { if (clock) clearInterval(clock); });
 
 watch(() => props.party?.id, () => {
-  renameOpen.value = false;
-  leaveConfirm.value = false;
+  activeTab.value = props.party ? 'members' : 'recruitments';
+  modal.value = null;
   publishPreview.value = false;
   renameName.value = props.party?.name ?? '';
   publishDescription.value = props.party?.recruitment?.description ?? '';
@@ -106,6 +129,25 @@ watch(() => props.party?.recruitment?.id, () => {
 watch(() => props.recruitments, list => {
   if (selectedRecruitmentId.value && !list.some(item => item.id === selectedRecruitmentId.value)) selectedRecruitmentId.value = null;
 });
+watch(() => props.party?.isLeader, isLeader => {
+  if (isLeader) return;
+  if (activeTab.value === 'applications') activeTab.value = props.party ? 'members' : 'recruitments';
+  if (modal.value === 'application') modal.value = null;
+});
+watch(modal, async (value, previous) => {
+  if (value && !previous) dialogTrigger = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  await nextTick();
+  if (value) dialogRoot.value?.querySelector<HTMLElement>('input,textarea,select,[aria-label="关闭队伍详情"]')?.focus({ preventScroll: true });
+  else if (dialogTrigger?.isConnected) dialogTrigger.focus({ preventScroll: true });
+});
+function trapDialogFocus(event: KeyboardEvent) {
+  if (event.key !== 'Tab') return;
+  const controls = [...(dialogRoot.value?.querySelectorAll<HTMLElement>('button:not(:disabled),input:not(:disabled),textarea:not(:disabled),select:not(:disabled)') ?? [])];
+  const first = controls[0], last = controls[controls.length - 1];
+  if (!first || !last) return;
+  if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+  else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+}
 
 function previewCreate() {
   if (!createName.value.trim()) return;
@@ -116,6 +158,7 @@ function submitCreate() {
   if (!createName.value.trim() || props.busy || props.loading) return;
   emit('create', { name: createName.value.trim(), description: createDescription.value.trim() });
   createPreview.value = false;
+  modal.value = null;
 }
 
 function submitSearch() {
@@ -123,13 +166,14 @@ function submitSearch() {
   const filters: { keyword: string; region: string; targetCount?: number } = { keyword: keyword.value.trim(), region: region.value.trim() };
   if (typeof searchTargetCount.value === 'number') filters.targetCount = searchTargetCount.value;
   emit('search', filters);
+  recruitmentPaging.reset();
 }
 
 function submitRename() {
   const name = renameName.value.trim();
   if (!name || !props.party?.canRename || props.busy || props.loading) return;
   emit('rename', name);
-  renameOpen.value = false;
+  modal.value = null;
 }
 
 function previewPublish() {
@@ -141,12 +185,13 @@ function submitPublish() {
   if (!canSubmitPublish.value) return;
   emit('publish', { description: publishDescription.value.trim(), targetCount: publishTargetCount.value });
   publishPreview.value = false;
+  modal.value = null;
 }
 
 function submitLeave() {
   if (!props.party?.canLeave || props.busy || props.loading) return;
   emit('leave');
-  leaveConfirm.value = false;
+  modal.value = null;
 }
 
 function remainingTime(item: Recruitment): string {
@@ -173,7 +218,7 @@ function recruitmentStatus(item: Recruitment): string {
 }
 
 function canApply(item: Recruitment): boolean {
-  return !item.own && item.status !== 'closed' && (item.openSlots ?? item.targetCount - item.memberCount) > 0
+  return !props.party && !item.own && item.status !== 'closed' && (item.openSlots ?? item.targetCount - item.memberCount) > 0
     && (!item.expiresAt || new Date(item.expiresAt).getTime() > now.value)
     && !['pending', 'accepted'].includes(item.applicationStatus ?? '') && !props.busy && !props.loading;
 }
@@ -195,197 +240,87 @@ function memberLocation(member: PartyMember): string {
   if (!position || ![position.x, position.y, position.z].every(Number.isFinite)) return regionName;
   return `${regionName} · (${position.x}, ${position.y}, ${position.z})`;
 }
+
+function applicationCreatedAt(value: string): string {
+  const date = new Date(value);
+  return Number.isFinite(date.getTime())
+    ? date.toLocaleString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false })
+    : value;
+}
+
+function closeModal() { modal.value = null; }
+function showRecruitment(id: number) { selectedRecruitmentId.value = id; modal.value = 'recruitment'; }
+function showMember(member: PartyMember) { selectedMember.value = member; modal.value = 'member'; }
+function showApplication(application: PartyApplication) { selectedApplicationId.value = application.id; modal.value = 'application'; }
+function respondApplication(id: number, accept: boolean) {
+  if (!props.party?.isLeader || props.busy || props.loading || props.applications.find(item => item.id === id)?.status !== 'pending') return;
+  if (accept) emit('accept', id);
+  else emit('reject', id);
+}
 </script>
 
 <template>
-  <div class="party-popup">
-    <div class="party-toolbar">
-      <span>{{ party ? '当前队伍' : '寻找同行者' }}</span>
-      <button type="button" class="party-text-button" :disabled="busy || loading" @click="emit('refresh')">刷新</button>
-    </div>
-    <p v-if="loading" class="party-state" role="status">正在读取队伍信息…</p>
-    <p v-if="error" class="party-error" role="alert">{{ error }}</p>
-
-    <template v-if="!party">
-      <div class="party-tabs" role="tablist" aria-label="队伍操作">
-        <button type="button" role="tab" :aria-selected="activeTab === 'create'" :class="{ active: activeTab === 'create' }" @click="activeTab = 'create'">创建队伍</button>
-        <button type="button" role="tab" :aria-selected="activeTab === 'search'" :class="{ active: activeTab === 'search' }" @click="activeTab = 'search'">搜索队伍</button>
+  <div class="party-popup anime-party-refinement party-viewport-panel" :data-party-view="activeTab">
+    <header class="party-toolbar">
+      <span><SocialGlyph name="party" :size="18" /><strong>{{ party?.name || '寻找同行者' }}</strong><small v-if="party">{{ memberCount }}/{{ maxMembers }} 人</small></span>
+      <div class="party-toolbar-actions"><button v-if="!party" type="button" class="party-primary" :disabled="busy || loading" @click="modal = 'create'; createPreview = false">创建队伍</button><button type="button" class="party-text-button" :disabled="busy || loading" @click="emit('refresh')">刷新</button></div>
+    </header>
+    <p v-if="loading" class="party-state game-ui-empty-message" role="status"><GameUiFeedbackArt name="loading" :size="36" /><span>正在读取队伍信息…</span></p><p v-if="error" class="party-error" role="alert">{{ error }}</p>
+    <nav class="party-viewport-tabs" role="tablist" aria-label="队伍分类">
+      <button type="button" role="tab" :aria-selected="activeTab === 'members'" :disabled="!party" @click="activeTab = 'members'">成员<span v-if="party"> ({{ members.length }})</span></button>
+      <button type="button" role="tab" :aria-selected="activeTab === 'recruitments'" @click="activeTab = 'recruitments'">招募</button>
+      <button type="button" role="tab" :aria-selected="activeTab === 'applications'" :disabled="!party?.isLeader" @click="activeTab = 'applications'">申请<span v-if="applications.length"> ({{ applications.length }})</span></button>
+    </nav>
+    <form v-if="activeTab === 'recruitments'" class="party-search-form" @submit.prevent="submitSearch">
+      <label><span>关键词</span><input v-model="keyword" maxlength="80" aria-label="队伍关键词" placeholder="队伍名、队长或说明" /></label>
+      <label><span>地区</span><input v-model="region" maxlength="64" aria-label="队伍地区" placeholder="不限" /></label>
+      <label><span>人数</span><select v-model.number="searchTargetCount" aria-label="队伍目标人数"><option value="">不限</option><option :value="2">2 人</option><option :value="3">3 人</option><option :value="4">4 人</option></select></label>
+      <button class="party-primary" type="submit" :disabled="busy || loading">搜索</button>
+    </form>
+    <div ref="listViewport" class="party-list-viewport" role="tabpanel" :aria-label="activeTab === 'members' ? '队伍成员' : activeTab === 'applications' ? '入队申请' : '公开招募'">
+      <div v-if="activeTab === 'members'" class="party-viewport-list">
+        <article v-for="member in memberPaging.visibleItems.value" :key="member.id" class="party-viewport-row party-member" :data-member-id="member.id">
+          <SocialAvatar :name="member.name" :id="member.gameId" :portrait="member.portrait" :size="58" />
+          <button type="button" class="party-row-copy" @click="showMember(member)"><strong>{{ member.name }}<small v-if="member.isLeader"> · 队长</small><small v-if="member.id === party?.ownId"> · 我</small></strong><span>Lv.{{ member.level ?? '—' }} · {{ member.gameId }}</span><small>{{ memberLocation(member) }}</small></button>
+        </article><p v-if="!members.length" class="party-empty game-ui-empty-message"><GameUiFeedbackArt name="message" :size="36" /><span>尚未加入队伍。</span></p>
       </div>
-
-      <section v-if="activeTab === 'create'" class="party-section" aria-label="创建队伍">
-        <form class="party-form" @submit.prevent="previewCreate">
-          <label>队伍名<input v-model="createName" maxlength="32" required placeholder="给队伍取个名字" @input="createPreview = false" /></label>
-          <div class="party-fixed-count"><span>人数上限</span><strong>4 人</strong></div>
-          <label>招募说明<textarea v-model="createDescription" maxlength="300" rows="2" placeholder="说说你想一起探索什么" @input="createPreview = false" /></label>
-          <button class="party-primary" type="submit" :disabled="busy || loading || !createName.trim()">预览创建</button>
-        </form>
-        <div v-if="createPreview" class="party-preview">
-          <strong>确认创建队伍</strong>
-          <p>{{ createName.trim() }} · 最多 4 人</p>
-          <p v-if="createDescription.trim()">招募说明：{{ createDescription.trim() }}</p>
-          <small v-if="createDescription.trim()">创建成功后，这段说明会立即发布到组队频道。</small>
-          <div class="party-actions">
-            <button type="button" class="party-primary" :disabled="busy || loading" @click="submitCreate">确认创建</button>
-            <button type="button" class="party-quiet" @click="createPreview = false">返回修改</button>
-          </div>
-        </div>
-      </section>
-
-      <section v-else class="party-section" aria-label="搜索队伍">
-        <form class="party-search-form" @submit.prevent="submitSearch">
-          <label>关键词<input v-model="keyword" maxlength="80" placeholder="队伍名、队长或说明" /></label>
-          <label>地区<input v-model="region" maxlength="64" placeholder="不限地区" /></label>
-          <label>目标人数<select v-model.number="searchTargetCount"><option value="">不限</option><option :value="2">2 人</option><option :value="3">3 人</option><option :value="4">4 人</option></select></label>
-          <button class="party-primary" type="submit" :disabled="busy || loading">搜索</button>
-        </form>
-        <p class="party-section-caption">仅显示仍有空位的公开招募。</p>
-        <div v-if="recruitments.length" class="party-recruitment-list">
-          <article v-for="item in recruitments" :key="item.id" class="party-recruitment-card">
-            <button type="button" class="party-recruitment-summary" :aria-expanded="selectedRecruitmentId === item.id" @click="selectedRecruitmentId = selectedRecruitmentId === item.id ? null : item.id">
-              <span class="party-avatar" aria-hidden="true">{{ (item.creatorName || item.partyName || '队').slice(0, 1) }}</span>
-              <span class="party-recruitment-heading"><strong>{{ item.partyName }}</strong><small>{{ item.creatorName || '队长' }} · {{ item.regionName || '未知地区' }}</small></span>
-              <span class="party-recruitment-count"><strong>{{ item.memberCount }}/{{ item.targetCount }}</strong><small v-if="recruitmentStatus(item)">{{ recruitmentStatus(item) }}</small></span>
-            </button>
-            <div v-if="selectedRecruitmentId === item.id" class="party-recruitment-detail">
-              <p v-if="item.description">{{ item.description }}</p>
-              <p v-else class="party-muted">队长暂未填写招募说明。</p>
-              <div class="party-recruitment-foot">
-                <span>{{ remainingTime(item) }}</span>
-                <span v-if="recruitmentStatus(item)" class="party-status">{{ recruitmentStatus(item) }}</span>
-                <button v-if="canApply(item)" type="button" class="party-primary" :disabled="busy || loading" @click="emit('apply', item.id)">{{ item.applicationStatus === 'rejected' ? '再次申请' : '申请加入' }}</button>
-              </div>
-            </div>
-          </article>
-        </div>
-        <p v-else-if="!loading" class="party-empty">暂无符合条件的公开招募。</p>
-        <button v-if="hasMore" type="button" class="party-load-more" :disabled="busy || loading || loadingMore" @click="emit('load-more')">{{ loadingMore ? '正在加载…' : '加载更多队伍' }}</button>
-      </section>
-    </template>
-
-    <template v-else>
-      <section class="party-section" aria-label="当前队伍">
-        <div class="party-current-heading">
-          <div><strong>{{ party.name }}</strong><small>{{ party.regionName || leader?.regionName || '未知地区' }}</small></div>
-          <span>{{ memberCount }}/{{ maxMembers }} 人</span>
-        </div>
-        <div class="party-member-list">
-          <div v-for="member in party.members" :key="member.id" class="party-member">
-            <span class="party-avatar" aria-hidden="true">{{ member.name.slice(0, 1) }}</span>
-            <div><strong>{{ member.name }}<em v-if="member.isLeader">队长</em><em v-if="member.id === party.ownId">我</em></strong><small>Game ID {{ member.gameId }} · {{ memberLocation(member) }}</small></div>
-          </div>
-        </div>
-        <p v-if="!party.members.length" class="party-empty">正在读取队伍成员…</p>
-        <div class="party-actions party-member-actions">
-          <button v-if="party.canRename" type="button" class="party-quiet" :disabled="busy || loading" @click="renameOpen = !renameOpen; leaveConfirm = false">修改队伍名</button>
-          <button v-if="party.canLeave" type="button" class="party-quiet" :disabled="busy || loading" @click="leaveConfirm = !leaveConfirm; renameOpen = false">退出队伍</button>
-        </div>
-        <form v-if="renameOpen && party.canRename" class="party-inline-form" @submit.prevent="submitRename">
-          <label>新队伍名<input v-model="renameName" maxlength="32" required /></label>
-          <button class="party-primary" type="submit" :disabled="busy || loading || !renameName.trim()">确认修改</button>
-        </form>
-        <div v-if="leaveConfirm && party.canLeave" class="party-preview">
-          <p>确认退出 {{ party.name }}？</p>
-          <div class="party-actions"><button type="button" class="party-danger" :disabled="busy || loading" @click="submitLeave">确认退出</button><button type="button" class="party-quiet" @click="leaveConfirm = false">取消</button></div>
-        </div>
-        <p v-if="party.story" class="party-section-caption">剧情队伍由主线流程管理，暂不能退出、改名或发布招募。</p>
-      </section>
-
-      <section v-if="party.isLeader" class="party-section" aria-label="队伍招募">
-        <div class="party-section-heading"><strong>组队频道招募</strong><span v-if="party.recruitment" class="party-status">已发布</span></div>
-        <div v-if="party.recruitment" class="party-current-recruitment">
-          <p>{{ party.recruitment.description || '暂无招募说明' }}</p>
-          <small>{{ party.recruitment.memberCount }}/{{ party.recruitment.targetCount }} 人 · {{ remainingTime(party.recruitment) }}</small>
-        </div>
-        <form v-if="party.canRecruit" class="party-form" @submit.prevent="previewPublish">
-          <label>招募说明<textarea v-model="publishDescription" maxlength="300" rows="2" placeholder="向组队频道介绍你的队伍" @input="publishPreview = false" /></label>
-          <label>招募目标人数<select v-model.number="publishTargetCount" @change="publishPreview = false"><option v-for="count in [2, 3, 4]" :key="count" :value="count" :disabled="count <= memberCount || count > maxMembers">{{ count }} 人</option></select></label>
-          <button class="party-primary" type="submit" :disabled="!canSubmitPublish">{{ party.recruitment ? '预览更新' : '预览发布' }}</button>
-        </form>
-        <p v-else class="party-section-caption">{{ party.story ? '剧情队伍不能发布招募。' : memberCount >= maxMembers ? '队伍已满，不能发布招募。' : '当前无法发布招募，请刷新后查看队伍状态。' }}</p>
-        <div v-if="publishPreview && party.canRecruit" class="party-preview">
-          <strong>将发送到组队频道</strong>
-          <p>{{ party.name }} · {{ party.regionName || leader?.regionName || '未知地区' }} · 空位 {{ Math.max(0, publishTargetCount - memberCount) }} · {{ memberCount }}/{{ publishTargetCount }} 人</p>
-          <p>{{ publishDescription.trim() || '暂无招募说明' }}</p>
-          <small>频道卡片将提供申请加入入口。</small>
-          <div class="party-actions"><button type="button" class="party-primary" :disabled="!canSubmitPublish" @click="submitPublish">{{ party.recruitment ? '确认更新' : '发送到组队频道' }}</button><button type="button" class="party-quiet" @click="publishPreview = false">返回修改</button></div>
-        </div>
-      </section>
-
-      <section v-if="party.isLeader" class="party-section" aria-label="入队申请">
-        <div class="party-section-heading"><strong>入队申请</strong><span v-if="party.pendingApplicationCount" class="party-status">待处理 {{ party.pendingApplicationCount }}</span></div>
-        <div v-if="applications.length" class="party-application-list">
-          <article v-for="application in applications" :key="application.id" class="party-application">
-            <div><strong>{{ application.name }}</strong><small>Game ID {{ application.gameId }} · {{ applicationStatus(application.status) }}</small><p v-if="application.message">{{ application.message }}</p></div>
-            <div v-if="application.status === 'pending'" class="party-actions"><button type="button" class="party-primary" :disabled="busy || loading" @click="emit('accept', application.id)">同意</button><button type="button" class="party-quiet" :disabled="busy || loading" @click="emit('reject', application.id)">拒绝</button></div>
-          </article>
-        </div>
-        <p v-else class="party-empty">{{ party.recruitment ? '暂无入队申请。' : '发布招募后，申请会显示在这里。' }}</p>
-      </section>
-    </template>
+      <div v-else-if="activeTab === 'recruitments'" class="party-viewport-list">
+        <article v-for="item in recruitmentPaging.visibleItems.value" :key="item.id" class="party-viewport-row party-recruitment-card" :data-recruitment-id="item.id">
+          <SocialAvatar :name="item.creatorName || '队长'" :id="item.leaderGameId" :portrait="item.leaderPortrait" :size="58" />
+          <button type="button" class="party-row-copy" @click="showRecruitment(item.id)"><strong>{{ item.partyName }}</strong><span>{{ item.regionName || item.regionCode || '未知地区' }} · {{ item.memberCount }}/{{ item.targetCount }} 人 · {{ recruitmentStatus(item) || remainingTime(item) }}</span><small>{{ item.description || '队长暂未填写招募说明。' }}</small></button>
+        </article><p v-if="!recruitments.length && !loading" class="party-empty game-ui-empty-message"><GameUiFeedbackArt name="empty" :size="36" /><span>暂无符合条件的公开招募。</span></p>
+      </div>
+      <div v-else class="party-viewport-list">
+        <article v-for="application in applicationPaging.visibleItems.value" :key="application.id" class="party-viewport-row party-application" :data-application-id="application.id">
+          <SocialAvatar :name="application.name" :id="application.gameId" :portrait="application.portrait" :size="58" />
+          <button type="button" class="party-row-copy" @click="showApplication(application)"><strong>{{ application.name }}</strong><span>Lv.{{ application.level ?? '—' }} · {{ application.gameId }} · {{ applicationStatus(application.status) }}</span><small>{{ application.message || '点击查看申请详情' }}</small></button>
+        </article><p v-if="!applications.length" class="party-empty game-ui-empty-message"><GameUiFeedbackArt :name="party?.recruitment ? 'empty' : 'message'" :size="36" /><span>{{ party?.recruitment ? '暂无入队申请。' : '发布招募后，申请会显示在这里。' }}</span></p>
+      </div>
+    </div>
+    <ViewportPagination :page="activePaging.page.value" :total-pages="activePaging.totalPages.value" :total="activeTotal" :label="pagerLabel" @update:page="activePaging.setPage" />
+    <footer class="party-viewport-actions">
+      <button v-if="activeTab === 'recruitments' && hasMore" type="button" class="party-load-more" :disabled="busy || loading || loadingMore" @click="emit('load-more')">{{ loadingMore ? '正在加载…' : '加载更多队伍' }}</button>
+      <template v-if="party && activeTab !== 'recruitments'"><button v-if="party.canRename" type="button" class="party-primary" :disabled="busy || loading" @click="modal = 'rename'">修改队伍名</button><button v-if="party.canLeave" type="button" class="party-danger" :disabled="busy || loading" @click="modal = 'leave'">退出队伍</button><button v-if="party.canRecruit" type="button" class="party-gold" :disabled="busy || loading" @click="modal = 'publish'; publishPreview = false">发布招募</button><small v-if="party.story">剧情队伍由主线流程管理。</small></template>
+    </footer>
   </div>
+  <Teleport to="body">
+    <div v-if="modal" class="party-dialog-backdrop anime-party-refinement" @click.self="closeModal" @keydown.esc="closeModal">
+      <section ref="dialogRoot" class="party-viewport-dialog" role="dialog" aria-modal="true" :aria-label="modal === 'create' ? '创建队伍' : modal === 'publish' ? '发布招募' : modal === 'rename' ? '修改队伍名' : modal === 'leave' ? '退出队伍确认' : modal === 'recruitment' ? '队伍招募详情' : modal === 'member' ? '队伍成员详情' : '入队申请详情'" @keydown="trapDialogFocus">
+        <header><h3>{{ modal === 'create' ? '创建队伍' : modal === 'publish' ? '发布招募' : modal === 'rename' ? '修改队伍名' : modal === 'leave' ? '退出队伍确认' : modal === 'recruitment' ? '队伍招募详情' : modal === 'member' ? '队伍成员详情' : '入队申请详情' }}</h3><button type="button" class="party-quiet" aria-label="关闭队伍详情" @click="closeModal">关闭</button></header>
+        <form v-if="modal === 'create'" class="party-dialog-form" @submit.prevent="createPreview ? submitCreate() : previewCreate()">
+          <div class="party-dialog-body"><template v-if="!createPreview"><label>队伍名<input v-model="createName" maxlength="32" required placeholder="最多32字" /></label><p>人数上限：4 人</p><label>招募说明 <small>{{ createDescription.length }}/300</small><textarea v-model="createDescription" maxlength="300" rows="4" placeholder="说说你想一起探索什么" /></label></template><template v-else><h4>{{ createName.trim() }} · 最多 4 人</h4><p>{{ createDescription.trim() || '暂无招募说明' }}</p><small v-if="createDescription.trim()">创建成功后，这段说明会立即发布到组队频道。</small></template></div>
+          <footer><button v-if="createPreview" type="button" class="party-quiet" @click="createPreview = false">返回修改</button><button class="party-primary" type="submit" :disabled="busy || loading || !createName.trim()">{{ createPreview ? '确认创建' : '预览创建' }}</button></footer>
+        </form>
+        <form v-else-if="modal === 'publish' && party" class="party-dialog-form" @submit.prevent="publishPreview ? submitPublish() : previewPublish()">
+          <div class="party-dialog-body"><template v-if="!publishPreview"><label>招募说明 <small>{{ publishDescription.length }}/300</small><textarea v-model="publishDescription" maxlength="300" rows="4" placeholder="向组队频道介绍你的队伍" /></label><label>招募目标人数<select v-model.number="publishTargetCount"><option v-for="count in [2, 3, 4]" :key="count" :value="count" :disabled="count <= memberCount || count > maxMembers">{{ count }} 人</option></select></label><p v-if="party.recruitment">当前招募：{{ party.recruitment.description || '暂无招募说明' }} · {{ remainingTime(party.recruitment) }}</p></template><template v-else><h4>将发送到组队频道：{{ party.name }}</h4><p>{{ party.regionName || leader?.regionName || '未知地区' }} · 空位 {{ Math.max(0, publishTargetCount - memberCount) }} · {{ memberCount }}/{{ publishTargetCount }} 人</p><p>{{ publishDescription.trim() || '暂无招募说明' }}</p></template></div>
+          <footer><button v-if="publishPreview" type="button" class="party-quiet" @click="publishPreview = false">返回修改</button><button class="party-primary" type="submit" :disabled="!canSubmitPublish">{{ publishPreview ? party.recruitment ? '确认更新' : '发送到组队频道' : party.recruitment ? '预览更新' : '预览发布' }}</button></footer>
+        </form>
+        <form v-else-if="modal === 'rename'" class="party-dialog-form" @submit.prevent="submitRename"><div class="party-dialog-body"><label>新队伍名<input v-model="renameName" maxlength="32" required /></label></div><footer><button class="party-primary" type="submit" :disabled="busy || loading || !renameName.trim()">确认修改</button></footer></form>
+        <template v-else-if="modal === 'leave'"><div class="party-dialog-body"><p>确认退出 {{ party?.name }}？</p></div><footer><button type="button" class="party-quiet" @click="closeModal">取消</button><button type="button" class="party-danger" :disabled="busy || loading" @click="submitLeave">确认退出</button></footer></template>
+        <template v-else-if="modal === 'recruitment' && selectedRecruitment"><div class="party-dialog-body"><h4>{{ selectedRecruitment.partyName }}</h4><p>队长：{{ selectedRecruitment.creatorName || '队长未提供姓名' }} · {{ selectedRecruitment.leaderGameId }}</p><p>{{ selectedRecruitment.regionName || selectedRecruitment.regionCode || '未知地区' }} · 当前人数 {{ selectedRecruitment.memberCount }}/{{ selectedRecruitment.targetCount }} · 空位 {{ Math.max(0, selectedRecruitment.openSlots ?? selectedRecruitment.targetCount - selectedRecruitment.memberCount) }}</p><p>{{ selectedRecruitment.description || '队长暂未填写招募说明。' }}</p><small>{{ recruitmentStatus(selectedRecruitment) || remainingTime(selectedRecruitment) }}</small></div><footer><button v-if="canApply(selectedRecruitment)" type="button" class="party-primary" :disabled="busy || loading" @click="emit('apply', selectedRecruitment.id)">{{ selectedRecruitment.applicationStatus === 'rejected' ? '再次申请' : '申请加入' }}</button></footer></template>
+        <template v-else-if="modal === 'member' && selectedMember"><div class="party-dialog-body"><h4>{{ selectedMember.name }}{{ selectedMember.isLeader ? ' · 队长' : '' }}{{ selectedMember.id === party?.ownId ? ' · 我' : '' }}</h4><p>Lv.{{ selectedMember.level ?? '—' }} · Game ID {{ selectedMember.gameId }}</p><p>{{ memberLocation(selectedMember) }}</p></div></template>
+        <template v-else-if="modal === 'application' && selectedApplication"><div class="party-dialog-body"><h4>{{ selectedApplication.name }}</h4><p>Lv.{{ selectedApplication.level ?? '—' }} · Game ID {{ selectedApplication.gameId }} · {{ applicationStatus(selectedApplication.status) }}</p><p>{{ selectedApplication.message || '未填写申请说明。' }}</p><time v-if="selectedApplication.createdAt" :datetime="selectedApplication.createdAt">申请时间：{{ applicationCreatedAt(selectedApplication.createdAt) }}</time></div><footer v-if="party?.isLeader && selectedApplication.status === 'pending'"><button type="button" class="party-primary" :disabled="busy || loading" @click="respondApplication(selectedApplication.id, true)">同意</button><button type="button" class="party-danger" :disabled="busy || loading" @click="respondApplication(selectedApplication.id, false)">拒绝</button></footer></template>
+      </section>
+    </div>
+  </Teleport>
 </template>
-
-<style scoped>
-.party-popup { display: grid; gap: 10px; max-height: min(620px, calc(78vh - 56px)); overflow-y: auto; overscroll-behavior: contain; padding: 2px 4px 6px; color: #594d62; font-size: 12px; }
-.party-toolbar, .party-current-heading, .party-section-heading, .party-recruitment-foot, .party-fixed-count { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.party-toolbar { padding: 3px 4px 0; color: #9a7181; font-size: 11px; font-weight: 700; }
-.party-text-button { padding: 4px 6px; color: #7763a8; background: transparent; font-size: 11px; }
-.party-tabs { display: flex; gap: 4px; padding: 3px; background: #f6eeed; border-radius: 10px; }
-.party-tabs button { flex: 1; padding: 8px; color: #8b7f8e; background: transparent; border-radius: 8px; font-size: 12px; }
-.party-tabs button.active { color: #665197; background: #fff; box-shadow: 0 2px 8px rgba(77, 54, 87, .08); font-weight: 700; }
-.party-section { display: grid; gap: 9px; padding: 12px; background: rgba(255, 255, 255, .74); border: 1px solid #f1e7e5; border-radius: 12px; }
-.party-section-heading strong { font-size: 13px; }
-.party-form, .party-search-form { display: grid; gap: 8px; }
-.party-form label, .party-search-form label, .party-inline-form label { margin: 0; color: #756c7a; font-size: 11px; }
-.party-form input, .party-form textarea, .party-form select, .party-search-form input, .party-search-form select, .party-inline-form input { width: 100%; min-height: 34px; margin-top: 4px; padding: 7px 9px; color: #594d62; background: #fff; border: 1px solid #e8dedd; border-radius: 8px; font: inherit; font-size: 12px; }
-.party-form textarea { min-height: 60px; resize: vertical; }
-.party-search-form { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 84px auto; align-items: end; }
-.party-search-form button { min-height: 34px; }
-.party-fixed-count { padding: 8px 10px; color: #756c7a; background: #f8f0ec; border-radius: 8px; font-size: 11px; }
-.party-fixed-count strong { color: #665197; }
-.party-primary, .party-quiet, .party-danger { min-height: 30px; padding: 6px 10px; border-radius: 8px; font-size: 11px; white-space: nowrap; }
-.party-primary { color: #fff; background: #9477b9; }
-.party-quiet { color: #735d88; background: #f0eaf6; }
-.party-danger { color: #ae505c; background: #ffe8e9; }
-.party-primary:disabled, .party-quiet:disabled, .party-danger:disabled, .party-text-button:disabled { cursor: default; opacity: .55; }
-.party-preview { display: grid; gap: 6px; padding: 10px; background: #f6f0ff; border: 1px solid #e7def4; border-radius: 9px; }
-.party-preview p, .party-current-recruitment p { margin: 0; overflow-wrap: anywhere; line-height: 1.5; }
-.party-preview small, .party-current-recruitment small, .party-muted { color: #8f8296; }
-.party-actions { display: flex; flex-wrap: wrap; gap: 5px; }
-.party-section-caption { margin: 0; color: #948895; font-size: 11px; line-height: 1.5; }
-.party-recruitment-list, .party-member-list, .party-application-list { display: grid; gap: 6px; }
-.party-recruitment-card, .party-member, .party-application { min-width: 0; background: #fcf7f2; border-radius: 9px; }
-.party-recruitment-summary { display: flex; align-items: center; gap: 7px; width: 100%; padding: 8px; color: inherit; background: transparent; text-align: left; }
-.party-avatar { display: grid; place-items: center; flex: 0 0 27px; width: 27px; height: 27px; color: #fff; background: #a391bd; border-radius: 8px; font-size: 11px; }
-.party-recruitment-heading, .party-member > div { display: grid; min-width: 0; gap: 2px; }
-.party-recruitment-heading { flex: 1; }
-.party-recruitment-heading strong, .party-member strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.party-recruitment-heading small, .party-member small, .party-application small { overflow: hidden; color: #918493; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
-.party-recruitment-count { display: grid; justify-items: end; flex: 0 0 auto; gap: 2px; color: #786998; font-size: 11px; }
-.party-recruitment-count small { color: #a57485; font-size: 9px; }
-.party-recruitment-detail { display: grid; gap: 7px; padding: 0 9px 9px 44px; }
-.party-recruitment-detail p { margin: 0; line-height: 1.5; overflow-wrap: anywhere; }
-.party-recruitment-foot { justify-content: flex-start; flex-wrap: wrap; color: #938496; font-size: 10px; }
-.party-recruitment-foot button { margin-left: auto; }
-.party-status { padding: 3px 6px; color: #785e91; background: #eee8f5; border-radius: 6px; font-size: 10px; white-space: nowrap; }
-.party-current-heading { padding: 8px 10px; background: #f7f0ec; border-radius: 9px; }
-.party-current-heading > div { display: grid; gap: 2px; min-width: 0; }
-.party-current-heading strong { font-size: 13px; }
-.party-current-heading small, .party-current-heading > span { color: #8c7d8a; font-size: 10px; }
-.party-member { display: flex; align-items: center; gap: 7px; padding: 7px 8px; }
-.party-member > div { flex: 1; }
-.party-member em { margin-left: 5px; color: #b67285; font-size: 10px; font-style: normal; }
-.party-member-actions { margin-top: 2px; }
-.party-inline-form { display: flex; align-items: end; gap: 6px; }
-.party-inline-form label { flex: 1; }
-.party-current-recruitment { display: grid; gap: 4px; padding: 8px 10px; background: #f7f0ec; border-radius: 9px; }
-.party-application { display: flex; align-items: center; justify-content: space-between; gap: 7px; padding: 8px; }
-.party-application > div:first-child { display: grid; min-width: 0; gap: 2px; }
-.party-application p { margin: 2px 0 0; color: #756b7a; font-size: 11px; line-height: 1.4; overflow-wrap: anywhere; }
-.party-empty, .party-state { margin: 0; padding: 14px 8px; color: #978b99; font-size: 11px; text-align: center; }
-.party-load-more { justify-self: center; padding: 6px 12px; color: #735d88; background: #f0eaf6; border-radius: 8px; font-size: 11px; }
-.party-load-more:disabled { opacity: .55; }
-.party-error { margin: 0; padding: 8px 10px; color: #ad4e5b; background: #fff0ed; border-radius: 8px; font-size: 11px; }
-.party-popup button:focus-visible, .party-popup input:focus-visible, .party-popup textarea:focus-visible, .party-popup select:focus-visible { outline: 2px solid #765dc2; outline-offset: 2px; }
-@media (max-width: 460px) { .party-search-form { grid-template-columns: repeat(2, minmax(0, 1fr)); } .party-search-form button { grid-column: 1 / -1; } .party-application { align-items: flex-start; flex-direction: column; } }
-</style>

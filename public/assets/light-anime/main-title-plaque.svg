@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="104" viewBox="0 0 400 104" fill="none">
+  <defs>
+    <linearGradient id="wood" x1="200" y1="5" x2="200" y2="99" gradientUnits="userSpaceOnUse"><stop stop-color="#AC8257"/><stop offset=".45" stop-color="#866341"/><stop offset="1" stop-color="#654933"/></linearGradient>
+    <linearGradient id="paper" x1="180" y1="11" x2="218" y2="94" gradientUnits="userSpaceOnUse"><stop stop-color="#FFF8E6"/><stop offset=".5" stop-color="#FCF0D5"/><stop offset="1" stop-color="#EFDBB7"/></linearGradient>
+    <linearGradient id="rim" x1="200" y1="8" x2="200" y2="96" gradientUnits="userSpaceOnUse"><stop stop-color="#F8DFAD"/><stop offset=".5" stop-color="#C89D67"/><stop offset="1" stop-color="#F3D5A0"/></linearGradient>
+    <pattern id="grain" width="27" height="23" patternUnits="userSpaceOnUse"><path d="M2 5l4-1m11 9l3 1M8 20h2" stroke="#B49464" stroke-width=".6" opacity=".16"/><path d="M19 3l2-1M3 15l2 2" stroke="#FFFDF1" stroke-width="1.2" opacity=".65"/></pattern>
+  </defs>
+  <!-- The flat, beveled archive plaque is shared by all main pages. -->
+  <path d="M30 8L368 8Q378 8 379 20L382 30L396 52L382 77L379 88Q378 99 367 99L31 99Q22 99 21 89L18 78L4 54L18 31L21 20Q22 8 30 8Z" fill="#45372B" opacity=".24" transform="translate(0 3)"/>
+  <path d="M30 5L368 5Q378 5 379 17L382 28L396 51L382 76L379 87Q378 98 367 98L31 98Q22 98 21 88L18 77L4 52L18 28L21 17Q22 5 30 5Z" fill="url(#wood)" stroke="#59432F" stroke-width="2.2" stroke-linejoin="round"/>
+  <path d="M32 10L366 10Q373 10 374 20L377 31L390 52L377 74L374 85Q373 93 366 93L33 93Q27 93 26 85L23 74L10 52L23 31L26 20Q27 10 32 10Z" fill="url(#rim)" stroke="#EED2A1" stroke-width="1.4"/>
+  <path d="M34 15H364Q369 15 369 23L373 33L384 52L373 71L369 81Q369 88 364 88H35Q31 88 31 81L27 71L16 52L27 33L31 23Q31 15 34 15Z" fill="url(#paper)" stroke="#9C7751" stroke-width="1.6"/>
+  <path d="M35 18H363Q367 18 366 25L370 35L380 52L370 69L366 79Q368 85 362 85H36Q32 85 34 79L30 69L20 52L30 35L34 25Q32 18 35 18Z" stroke="#FFFDF0" stroke-width="1.5"/>
+  <path d="M34 15H364Q369 15 369 23L373 33L384 52L373 71L369 81Q369 88 364 88H35Q31 88 31 81L27 71L16 52L27 33L31 23Q31 15 34 15Z" fill="url(#grain)"/>
+  <path d="M37 22L45 20L51 22M349 22L356 20L363 23M36 80L45 83L52 81M348 82L357 83L363 79" stroke="#D7B98A" stroke-width="1.1" stroke-linecap="round"/>
+  <!-- Small archive ornaments leave the central lettering unobstructed. -->
+  <path d="M52 43L57 48L62 48L65 52L62 56H57L52 61L47 56H42L39 52L42 48H47Z" fill="#937353"/>
+  <path d="M348 43L353 48H358L361 52L358 56H353L348 61L343 56H338L335 52L338 48H343Z" fill="#937353"/>
+  <circle cx="52" cy="52" r="2" fill="#B9966C"/><circle cx="348" cy="52" r="2" fill="#B9966C"/>
+  <g stroke="#665438" stroke-width="1.3" stroke-linejoin="round">
+    <path d="M17 30C13 20 15 11 27 9C27 20 24 27 17 30Z" fill="#9CAC59"/>
+    <path d="M19 22C20 12 29 6 39 9C35 18 29 22 19 22Z" fill="#778F49"/>
+    <path d="M17 30L31 12" stroke="#526C3E"/>
+    <path d="M368 91L372 82L381 79L378 89L369 95Z" fill="#B89968"/>
+    <path d="M370 91L376 84" stroke="#F5DDA8"/>
+  </g>
+  <g fill="#ECD2A0" stroke="#66503A" stroke-width="1.1"><circle cx="32" cy="11" r="2.5"/><circle cx="369" cy="11" r="2.5"/><circle cx="29" cy="91" r="2.5"/></g>
+</svg>
