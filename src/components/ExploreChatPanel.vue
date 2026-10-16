@@ -7,7 +7,7 @@ import SocialGlyph from './SocialGlyph.vue';
 import GameUiFeedbackArt from './GameUiFeedbackArt.vue';
 
 export type ExploreChatTab = 'world' | 'recruitment' | 'team' | 'friend' | 'system';
-export type InspectPlayerTarget = { gameId?: number; senderId?: string | number; name: string; portrait?: PanelPortrait; avatarUrl?: string; own?: boolean };
+export type InspectPlayerTarget = { gameId?: number | string; messageId?: number; channelId?: string; senderId?: string | number; name: string; portrait?: PanelPortrait; avatarUrl?: string; own?: boolean };
 
 const props = defineProps<{
   open: boolean;
@@ -87,6 +87,8 @@ const updateDraft = (event: Event) => emit('update:draft', (event.target as HTML
 const send = () => { if (canSubmit.value) emit('send'); };
 const inspectMessage = (message: ChatMessage) => emit('inspect-player', {
   gameId: message.recruitment?.leaderGameId ?? message.senderGameId,
+  messageId: message.id,
+  channelId: props.activeChannelId,
   senderId: message.senderId,
   name: message.recruitment?.creatorName || message.senderName,
   portrait: message.recruitment?.leaderPortrait ?? props.messagePortrait(message),
