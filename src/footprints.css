@@ -1,0 +1,264 @@
+/* The frame stays shared with exploration; only the achievement interior changes. */
+.handbook-backdrop .handbook-dialog.anime-adventure.exploration-window.handbook-footprints .footprints-categories {
+  flex: none;
+  gap: 6px;
+  margin: 0;
+  padding: 9px 8px 7px;
+  border-bottom: 1px solid #d4c7a7;
+  scrollbar-gutter: auto;
+}
+.handbook-backdrop .handbook-dialog.anime-adventure.exploration-window.handbook-footprints .footprints-categories > button {
+  min-height: 34px;
+  padding: 5px 12px;
+  border: 1px solid #c8bea4;
+  border-image: none;
+  border-radius: 7px;
+  color: #6c6654;
+  background: #fffdf6;
+  font-size: 12px;
+  font-weight: 600;
+}
+.handbook-backdrop .handbook-dialog.anime-adventure.exploration-window.handbook-footprints .footprints-categories > button.selected {
+  border-color: #478776;
+  color: #286455;
+  background: #e1eee5;
+  box-shadow: inset 0 -2px #47877633;
+}
+.footprints-summary {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px 5px;
+  color: #81735b;
+  font-size: 11px;
+  line-height: 1.4;
+}
+.footprints-summary > span:first-child { color: #526b59; font-weight: 700; }
+.handbook-backdrop .handbook-dialog.anime-adventure.exploration-window.handbook-footprints .handbook-body.footprints-scroll {
+  flex: 1 1 0;
+  min-height: 0;
+  padding: 5px 8px 9px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+.footprints-list { display: grid; gap: 8px; }
+.footprints-achievement {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) 108px;
+  align-items: center;
+  gap: 13px;
+  width: 100%;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #d8ccb0;
+  border-radius: 9px;
+  color: #514c40;
+  text-align: left;
+  background: linear-gradient(100deg, #fffdf6, #f6f2e5);
+  box-shadow: 0 2px 5px #766a4410;
+  transition: border-color .15s, background-color .15s;
+}
+.footprints-achievement:hover { border-color: #8eac92; background: #fcfff7; }
+.footprints-achievement:focus-visible { outline: 2px solid #398577; outline-offset: -3px; }
+.footprints-emblem {
+  display: grid;
+  place-items: center;
+  flex: none;
+  box-sizing: border-box;
+  width: 64px;
+  height: 64px;
+  padding: 4px;
+  border: 1px solid #c5af79;
+  border-radius: 8px;
+  background: linear-gradient(145deg, #fffdf4, #f1e6c8);
+  box-shadow: inset 0 0 0 2px #fffcf1;
+  overflow: hidden;
+}
+.footprints-emblem > * { display: block; width: 100%; height: 100%; object-fit: contain; }
+.footprints-entry-copy { display: grid; min-width: 0; gap: 5px; }
+.footprints-entry-title { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; min-width: 0; }
+.footprints-entry-title > strong { font-size: 15px; line-height: 1.35; overflow-wrap: anywhere; }
+.footprints-entry-title > small { padding: 1px 5px; border: 1px solid #d7cdb5; border-radius: 4px; color: #8c7c60; font-size: 9px; white-space: nowrap; }
+.footprints-description { color: #6c6656; font-size: 11px; line-height: 1.6; overflow-wrap: anywhere; }
+.footprints-completed-at { color: #91816a; font-size: 10px; line-height: 1.4; overflow-wrap: anywhere; }
+.footprints-completion { display: grid; align-content: center; justify-items: end; gap: 5px; padding-left: 11px; border-left: 1px solid #d9ceb5; text-align: right; }
+.footprints-completion > strong { color: #497a5e; font-size: 12px; }
+.footprints-completion > span { color: #776a51; font-size: 11px; }
+.footprints-completion > small { color: #9b8a6d; font-size: 9px; }
+.handbook-backdrop .handbook-dialog.anime-adventure.exploration-window.handbook-footprints .footprints-footer {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  min-height: 43px;
+  padding: 7px 8px 0;
+  border-top: 1px solid #d4c7a7;
+}
+.handbook-backdrop .handbook-dialog.anime-adventure.exploration-window.handbook-footprints .pager.footprints-pager {
+  flex: 1;
+  gap: 8px;
+  margin: 0;
+  min-width: 0;
+}
+.handbook-backdrop .handbook-dialog.anime-adventure.exploration-window.handbook-footprints .footprints-pager > button {
+  min-height: 34px;
+  padding: 5px 9px;
+  border: 1px solid #cfc2a4;
+  border-image: none;
+  border-radius: 6px;
+  color: #6d6757;
+  background: #fffcf4;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.handbook-backdrop .handbook-dialog.anime-adventure.exploration-window.handbook-footprints .footprints-pager > span { color: #7b7059; font-size: 11px; white-space: nowrap; }
+.handbook-footprints button.footprints-storage-button {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 36px;
+  margin-left: auto;
+  padding: 4px 10px 4px 7px;
+  border: 1px solid #9c946a;
+  border-radius: 7px;
+  color: #546d55;
+  background: linear-gradient(#fcfff4, #e8efdd);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.footprints-storage-button > img { width: 23px; height: 23px; object-fit: contain; }
+.handbook-backdrop .handbook-dialog.anime-adventure.exploration-window.handbook-footprints .footprints-state {
+  display: flex;
+  min-height: 90px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 0;
+  padding: 15px 8px;
+  color: #857963;
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.footprints-state p { margin: 0; overflow-wrap: anywhere; }
+.handbook-footprints .footprints-state button { min-height: 34px; padding: 5px 12px; border: 1px solid #b8c8ad; border-radius: 6px; color: #3f6a54; background: #e9f2e6; font-size: 12px; }
+.handbook-backdrop .handbook-dialog.anime-adventure.exploration-window.handbook-footprints .footprints-detail {
+  padding: 14px;
+  border: 1px solid #d6c8a5;
+  border-image: none;
+  border-radius: 9px;
+  background: #fffdf5;
+}
+.footprints-detail-heading { display: flex; align-items: center; gap: 12px; }
+.footprints-detail-heading > div { min-width: 0; }
+.handbook-backdrop .handbook-dialog.anime-adventure.exploration-window.handbook-footprints .footprints-detail-heading .eyebrow { margin: 0 0 5px; color: #89785b; font-size: 10px; }
+.handbook-backdrop .handbook-dialog.anime-adventure.exploration-window.handbook-footprints .footprints-detail-heading h3 { margin: 0; font-size: 20px; }
+.handbook-footprints [data-rarity='common'], .footprints-storage-dialog [data-rarity='common'] { --achievement-name-color: #646864; }
+.handbook-footprints [data-rarity='excellent'], .footprints-storage-dialog [data-rarity='excellent'] { --achievement-name-color: #347c43; }
+.handbook-footprints [data-rarity='fine'], .footprints-storage-dialog [data-rarity='fine'] { --achievement-name-color: #2d72b2; }
+.handbook-footprints [data-rarity='rare'], .footprints-storage-dialog [data-rarity='rare'] { --achievement-name-color: #7648a4; }
+.handbook-footprints [data-rarity='legendary'], .footprints-storage-dialog [data-rarity='legendary'] { --achievement-name-color: #af5b17; }
+.handbook-footprints [data-rarity='epic'], .footprints-storage-dialog [data-rarity='epic'] { --achievement-name-color: #967010; }
+.handbook-footprints [data-rarity='artifact'], .footprints-storage-dialog [data-rarity='artifact'] { --achievement-name-color: #9a539d; }
+.handbook-footprints [data-rarity] .footprints-emblem { border-color: var(--achievement-name-color, #c5af79); }
+.handbook-backdrop .handbook-dialog.anime-adventure.exploration-window.handbook-footprints .achievement-name,
+.footprints-storage-dialog .achievement-name { color: var(--achievement-name-color, #646864); }
+
+.handbook-backdrop.footprints-storage-backdrop { z-index: 96; background: #263b4677; backdrop-filter: blur(4px); }
+.footprints-storage-dialog {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: min(600px, 90vw);
+  max-width: calc(100vw - 24px);
+  height: min(560px, 76dvh);
+  min-height: 0;
+  border: 2px solid #ad9b70;
+  border-radius: 14px;
+  color: #5c5545;
+  background: linear-gradient(135deg, #fffdf5, #f8f1df);
+  box-shadow: 0 22px 65px #1e35495c, inset 0 0 0 4px #e7edda;
+  overflow: hidden;
+}
+.footprints-storage-heading { display: flex; flex: none; align-items: center; gap: 10px; padding: 12px 14px; border-bottom: 1px solid #d1c19b; background: #eef2e4; }
+.footprints-storage-heading > img { width: 38px; height: 38px; object-fit: contain; }
+.footprints-storage-heading > div { min-width: 0; }
+.footprints-storage-heading small { color: #8b8066; font-size: 10px; }
+.footprints-storage-heading h3 { margin: 2px 0 0; color: #536953; font-size: 18px; }
+.footprints-storage-dialog button.footprints-storage-close { display: grid; place-items: center; flex: none; width: 34px; height: 34px; margin-left: auto; border: 1px solid #c7b38b; border-radius: 7px; color: #8a7354; background: #fffaf0; font-size: 26px; line-height: 1; }
+.footprints-storage-content { flex: 1 1 0; min-height: 0; padding: 14px; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+.footprints-storage-content > :is(.notice, .error) { margin: 0 0 12px; }
+.footprints-storage-dialog h4 { margin: 0 0 10px; color: #746547; font-size: 13px; }
+.footprints-storage-state { margin: 0; padding: 14px 3px; color: #928269; font-size: 11px; line-height: 1.6; }
+.footprints-box-list { display: grid; gap: 9px; }
+.footprints-box { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; align-items: center; gap: 9px; padding: 11px; border: 1px solid #dacbab; border-radius: 8px; background: #fffdf5; }
+.footprints-box-art { width: 48px; height: 48px; object-fit: contain; }
+.footprints-box-copy { display: grid; min-width: 0; gap: 4px; overflow-wrap: anywhere; }
+.footprints-box-copy strong { color: #75613b; font-size: 12px; }
+.footprints-box-copy small { color: #746f5b; font-size: 11px; }
+.footprints-box-copy > span { color: #a08e70; font-size: 9px; }
+.footprints-box-controls { display: grid; grid-template-columns: 52px auto; align-items: center; gap: 6px; }
+.footprints-box-controls > input { box-sizing: border-box; width: 52px; min-width: 0; height: 34px; padding: 5px; border: 1px solid #cdbf9e; border-radius: 6px; color: #6d6653; background: #fff; font-size: 12px; text-align: center; }
+.footprints-box-controls > input[aria-invalid='true'] { border-color: #b66d5e; }
+.footprints-storage-dialog .footprints-box-controls > button, .footprints-storage-dialog .footprints-storage-footer > button, .footprints-storage-dialog .footprints-storage-error > button { min-height: 34px; padding: 5px 10px; border: 1px solid #91ad8f; border-radius: 6px; color: #376449; background: #e9f2e4; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.footprints-quantity-error { grid-column: 1 / -1; color: #a35f54; font-size: 9px; }
+.footprints-storage-items { margin-top: 20px; padding-top: 15px; border-top: 1px solid #d8caaa; }
+.footprints-storage-tip { margin: -3px 0 12px; color: #97856b; font-size: 10px; line-height: 1.6; }
+.footprints-collected-items { display: grid; gap: 8px; }
+.footprints-collected-items > article { padding: 9px 10px; border: 1px solid #ded3b9; border-radius: 7px; background: #fffdf6; }
+.footprints-collected-items strong { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 12px; }
+.footprints-collected-items strong > span { flex: none; color: #8b795a; font-size: 11px; }
+.footprints-collected-items p { margin: 5px 0 0; color: #8a7a62; font-size: 10px; line-height: 1.6; overflow-wrap: anywhere; }
+.footprints-storage-error { display: grid; gap: 6px; margin-bottom: 12px; padding: 10px; border: 1px solid #dfb6a0; border-radius: 7px; color: #a55e4d; background: #fff1e8; }
+.footprints-storage-error p { margin: 0; font-size: 12px; }
+.footprints-storage-error small { font-size: 10px; overflow-wrap: anywhere; }
+.footprints-storage-error > button { justify-self: start; }
+.footprints-storage-footer { display: flex; flex: none; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 14px; border-top: 1px solid #d4c5a2; color: #948469; font-size: 10px; }
+.footprints-storage-dialog :is(button, input):focus-visible { outline: 2px solid #398577; outline-offset: 2px; }
+
+@media (max-width: 600px) {
+  .handbook-backdrop .handbook-dialog.anime-adventure.exploration-window.handbook-footprints .footprints-categories { gap: 5px; padding: 7px 4px 5px; }
+  .handbook-backdrop .handbook-dialog.anime-adventure.exploration-window.handbook-footprints .footprints-categories > button { min-height: 32px; padding: 4px 9px; font-size: 11px; }
+  .footprints-summary { padding: 6px 5px 3px; font-size: 10px; }
+  .handbook-backdrop .handbook-dialog.anime-adventure.exploration-window.handbook-footprints .handbook-body.footprints-scroll { padding: 5px 3px 7px; }
+  .footprints-list { gap: 7px; }
+  .footprints-achievement { grid-template-columns: 48px minmax(0, 1fr); gap: 7px 10px; padding: 9px; }
+  .footprints-emblem { width: 48px; height: 48px; padding: 3px; border-radius: 6px; }
+  .footprints-entry-copy { gap: 4px; }
+  .footprints-entry-title { gap: 4px 6px; }
+  .footprints-entry-title > strong { font-size: 13px; }
+  .footprints-entry-title > small { font-size: 8px; }
+  .footprints-description { font-size: 10px; }
+  .footprints-completed-at { font-size: 9px; }
+  .footprints-completion { grid-column: 2; display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-start; gap: 4px 9px; padding: 6px 0 0; border: 0; border-top: 1px solid #e4dbc6; text-align: left; }
+  .footprints-completion > strong, .footprints-completion > span { font-size: 10px; }
+  .footprints-completion > small { font-size: 8px; }
+  .handbook-backdrop .handbook-dialog.anime-adventure.exploration-window.handbook-footprints .footprints-footer { gap: 6px; padding: 6px 3px 0; }
+  .handbook-backdrop .handbook-dialog.anime-adventure.exploration-window.handbook-footprints .pager.footprints-pager { justify-content: flex-start; gap: 5px; }
+  .handbook-backdrop .handbook-dialog.anime-adventure.exploration-window.handbook-footprints .footprints-pager > button { min-height: 32px; padding: 4px 7px; font-size: 10px; }
+  .handbook-backdrop .handbook-dialog.anime-adventure.exploration-window.handbook-footprints .footprints-pager > span { font-size: 10px; }
+  .handbook-footprints button.footprints-storage-button { min-height: 34px; padding: 4px 8px 4px 5px; font-size: 11px; }
+  .footprints-storage-button > img { width: 20px; height: 20px; }
+  .handbook-backdrop .handbook-dialog.anime-adventure.exploration-window.handbook-footprints .footprints-detail { padding: 10px; }
+  .handbook-backdrop .handbook-dialog.anime-adventure.exploration-window.handbook-footprints .footprints-detail-heading h3 { font-size: 16px; }
+  .footprints-storage-dialog { height: min(560px, 80dvh); }
+  .footprints-storage-heading { padding: 10px; }
+  .footprints-storage-content { padding: 10px; }
+  .footprints-box { grid-template-columns: 40px minmax(0, 1fr); gap: 8px; padding: 9px; }
+  .footprints-box-art { width: 40px; height: 40px; }
+  .footprints-box-controls { grid-column: 2; justify-content: start; }
+  .footprints-storage-footer { padding: 8px 10px; }
+}
+@media (max-width: 360px) {
+  .handbook-backdrop .handbook-dialog.anime-adventure.exploration-window.handbook-footprints .footprints-pager > button { padding-inline: 5px; }
+  .handbook-backdrop .handbook-dialog.anime-adventure.exploration-window.handbook-footprints .pager.footprints-pager { gap: 4px; }
+  .handbook-footprints button.footprints-storage-button { gap: 2px; padding-inline: 5px; }
+  .footprints-storage-button > img { width: 17px; height: 17px; }
+}

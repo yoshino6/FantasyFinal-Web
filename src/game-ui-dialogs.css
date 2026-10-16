@@ -1,26 +1,31 @@
-/* Settings owns its positioning: the generic .card-surface must not turn it
-   back into a relative element whose full contents extend below the viewport. */
+/* Settings uses simple surfaces and keeps its contents scrollable at every size. */
 .app-shell .settings-layer > .settings-drawer {
+  --settings-ink: #354e49;
+  --settings-muted: #687e76;
+  --settings-line: #cbdcd4;
   position: absolute;
   inset: 0 0 0 auto;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
-  width: min(440px, calc(100vw - 28px));
+  width: min(440px, calc(100vw - 20px));
   max-width: 100%;
   height: 100vh;
   height: 100dvh;
   max-height: 100vh;
   max-height: 100dvh;
   min-height: 0;
-  padding: 12px;
+  padding: 14px;
   overflow: hidden;
-  border: 12px solid transparent;
-  border-image: var(--game-ui-panel) 144 fill / 12px stretch;
-  border-radius: 0;
-  background: #fffaf0;
-  background-clip: padding-box;
+  border: 1px solid var(--settings-line);
+  border-image: none;
+  border-radius: 18px 0 0 18px;
+  color: var(--settings-ink);
+  background: #f4f8f5;
+  box-shadow: -12px 0 36px #273e3526;
   pointer-events: auto;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 .app-shell .settings-drawer > .settings-header {
@@ -29,108 +34,107 @@
   flex: 0 0 auto;
   align-items: center;
   min-width: 0;
-  padding: max(5px, env(safe-area-inset-top)) 4px 12px;
+  gap: 12px;
+  padding: max(2px, env(safe-area-inset-top)) 2px 12px;
+  border-bottom: 1px solid var(--settings-line);
 }
 
 .app-shell .settings-header > div { min-width: 0; }
+.app-shell .settings-header h2 { color: var(--settings-ink); font-size: 22px; line-height: 1.3; }
 
-.app-shell .settings-header > .dialog-close {
-  position: static;
-  display: grid;
-  place-items: center;
-  flex: 0 0 40px;
-  width: 40px;
-  height: 40px;
-  min-width: 40px;
-  min-height: 40px;
-  margin: 0;
-  padding: 0;
-  color: var(--game-ui-ink);
-  border: 7px solid transparent;
-  border-image: var(--game-ui-paper) 144 fill / 7px stretch;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-  font-size: 26px;
-  line-height: 1;
-}
-
-.app-shell .settings-drawer > .settings-content {
+.app-shell .settings-layer .settings-drawer > .settings-content {
+  /* Keep absolute accessible labels inside the same scrolling coordinate space. */
+  position: relative;
   flex: 1 1 0;
   min-width: 0;
   min-height: 0;
-  padding: 12px 4px max(20px, env(safe-area-inset-bottom));
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  gap: 12px;
+  padding: 14px 2px max(12px, env(safe-area-inset-bottom));
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-gutter: stable;
-  scroll-padding-block: 12px;
+  scrollbar-width: thin;
+  scrollbar-color: #a7c1b7 transparent;
 }
 
 .app-shell .settings-content .settings-section {
+  display: grid;
+  flex: none;
   min-width: 0;
-  margin-bottom: 10px;
-  padding: 12px;
-  border: 5px solid transparent;
-  border-image: var(--game-ui-panel) 144 fill / 5px stretch;
-  border-radius: 0;
-  background: transparent;
+  gap: 12px;
+  margin: 0;
+  padding: 14px;
+  border: 1px solid var(--settings-line);
+  border-image: none;
+  border-radius: 12px;
+  background: #fffefa;
 }
 
-.app-shell .settings-content :is(.settings-switch, .settings-gender button) {
-  min-height: 34px;
-  padding: 2px 8px;
-  border: 5px solid transparent;
-  border-image: var(--game-ui-paper) 144 fill / 5px 8px stretch;
-  border-radius: 0;
-  color: var(--game-ui-ink);
-  background: transparent;
-  box-shadow: none;
-  font-weight: 700;
-}
-
-.app-shell .settings-content :is(.settings-switch.active, .settings-gender button.active) {
-  border-image-source: var(--game-ui-teal);
-  color: var(--game-ui-primary-ink);
-  background: transparent;
+/* This selector also overrides the general painted button skin. */
+.app-shell[data-visual='light-anime'] .settings-layer > .settings-drawer.settings-drawer button {
+  box-sizing: border-box;
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid #bdcfc6;
+  border-image: none;
+  border-radius: 9px;
+  background: #edf4ef;
+  color: #466056;
   text-shadow: none;
   box-shadow: none;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.35;
 }
 
-.app-shell .settings-content .avatar-choice {
-  border: 5px solid transparent;
-  border-image: var(--game-ui-panel) 144 fill / 5px stretch;
-  border-radius: 0;
-  background: transparent;
-  color: var(--game-ui-ink);
+.app-shell[data-visual='light-anime'] .settings-layer > .settings-drawer.settings-drawer button:is(.active, .primary-button) {
+  border-color: #83b7a7;
+  background: #ddf0e7;
+  color: #255f50;
 }
 
-.app-shell .settings-content .avatar-choice.active {
-  border-image-source: var(--game-ui-teal);
-  color: var(--game-ui-primary-ink);
+.app-shell[data-visual='light-anime'] .settings-layer > .settings-drawer.settings-drawer button.primary-button {
+  border-color: #347b68;
+  background: #3c856f;
+  color: #fff;
 }
 
-/* The old span rule belonged to text glyphs. It must not tint or round the
-   transparent painted sprites now used for avatar previews. */
-.app-shell .settings-content .avatar-choice .anime-icon {
-  width: 34px;
-  height: 34px;
-  border-radius: 0;
-  background: transparent;
+.app-shell[data-visual='light-anime'] .settings-layer > .settings-drawer.settings-drawer button.danger-button {
+  border-color: #dfb3ae;
+  background: #fff0ed;
+  color: #a34f4b;
 }
 
-.app-shell .settings-content .avatar-choice .anime-icon-sprite {
-  width: 100%;
-  height: 100%;
-  border-radius: 0;
-  background-color: transparent;
+.app-shell[data-visual='light-anime'] .settings-layer > .settings-drawer.settings-drawer button:not(:disabled):hover {
+  filter: brightness(.97);
 }
 
-.app-shell .settings-content .account-id-row {
-  border: 4px solid transparent;
-  border-image: var(--game-ui-panel) 144 fill / 4px stretch;
-  border-radius: 0;
-  background: transparent;
+.app-shell[data-visual='light-anime'] .settings-layer > .settings-drawer.settings-drawer .settings-header > .dialog-close {
+  position: static;
+  display: grid;
+  place-items: center;
+  flex: 0 0 38px;
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  min-height: 38px;
+  margin: 0;
+  padding: 0;
+  border-color: #ca5660;
+  background: #d95f68;
+  color: #fff;
+  font-family: Arial, sans-serif;
+  font-size: 28px;
+  line-height: 1;
+}
+
+.app-shell .settings-layer :is(.settings-drawer, .settings-section, button)::before,
+.app-shell .settings-layer :is(.settings-drawer, .settings-section, button)::after {
+  content: none;
 }
 
 .app-shell .settings-content :is(.settings-section-heading, .settings-form, .settings-password-form, .password-field) {
@@ -138,48 +142,156 @@
 }
 
 .app-shell .settings-content :is(input:not([type='range']), select) {
+  box-sizing: border-box;
+  width: 100%;
   min-width: 0;
   max-width: 100%;
-}
-
-.app-shell .settings-content :is(.primary-button, .soft-button, .danger-button) {
-  border: 8px solid transparent;
-  border-image: var(--game-ui-paper) 144 fill / 8px stretch;
-  border-radius: 0;
-  background: transparent;
+  height: 40px;
+  margin: 0;
+  padding: 8px 10px;
+  border: 1px solid #b9cdc1;
+  border-image: none;
+  border-radius: 9px;
+  background: #fff;
+  color: var(--settings-ink);
   box-shadow: none;
-  color: var(--game-ui-ink);
-  text-shadow: none;
+  font-size: 14px;
+  line-height: 1.4;
 }
 
-.app-shell .settings-content .primary-button {
-  border-image-source: var(--game-ui-teal);
-  color: var(--game-ui-primary-ink);
+.app-shell .settings-content input::placeholder { color: #82958a; }
+.app-shell .settings-drawer :is(button, input, select):focus-visible { outline: 3px solid #388b74; outline-offset: 2px; }
+.app-shell .settings-content .settings-section-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.app-shell .settings-content :is(.settings-section-heading h3, .settings-account h3, .settings-avatar-actions h3, .settings-redeem h3) { margin: 0; color: var(--settings-ink); font-size: 15px; line-height: 1.4; }
+.app-shell .settings-content :is(.settings-section-heading small, .settings-avatar-actions small) { color: var(--settings-muted); font-size: 12px; line-height: 1.5; }
+.app-shell .settings-content .settings-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; }
+.app-shell .settings-content .settings-form label { min-width: 0; margin: 0; }
+.app-shell .settings-content .settings-form button { white-space: nowrap; }
+.app-shell .settings-content .settings-gender { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: var(--settings-muted); font-size: 14px; }
+.app-shell .settings-content .settings-gender > div { display: flex; gap: 8px; }
+.app-shell[data-visual='light-anime'] .settings-layer > .settings-drawer.settings-drawer .settings-gender button { min-width: 58px; min-height: 36px; padding: 6px 12px; }
+.app-shell[data-visual='light-anime'] .settings-layer > .settings-drawer.settings-drawer button.settings-switch {
+  display: grid;
+  justify-items: center;
+  flex: none;
+  align-items: center;
+  gap: 0;
+  width: 68px;
+  min-width: 68px;
+  min-height: 40px;
+  padding: 2px;
+  border-color: transparent;
+  background: transparent;
+  color: #a2464c;
+}
+.app-shell[data-visual='light-anime'] .settings-layer > .settings-drawer.settings-drawer button.settings-switch.active { border-color: transparent; background: transparent; color: #267548; }
+.app-shell .settings-switch-track { position: relative; display: block; box-sizing: border-box; width: 62px; height: 28px; border: 1px solid #b64d54; border-radius: 9px; background: #ca6066; transition: background-color .18s ease, border-color .18s ease; }
+.app-shell .settings-switch-text { position: absolute; inset: 0 auto 0 4px; display: grid; place-items: center; width: 26px; color: #fff; font-size: 14px; line-height: 1; }
+.app-shell .settings-switch-knob { position: absolute; top: 2px; left: 3px; display: block; width: 22px; height: 22px; border-radius: 6px; background: #fff; box-shadow: 0 1px 3px #263a3133; transform: translateX(32px); transition: transform .18s ease; }
+.app-shell .settings-switch.active .settings-switch-track { border-color: #31845b; background: #469c6c; }
+.app-shell .settings-switch.active .settings-switch-text { left: auto; right: 4px; }
+.app-shell .settings-switch.active .settings-switch-knob { transform: translateX(0); }
+
+.app-shell .settings-arranged .settings-avatar-section { grid-template-columns: 76px minmax(0, 1fr); align-items: center; gap: 14px; }
+.app-shell .settings-avatar-preview { display: block; width: 76px; height: 76px; overflow: hidden; border: 1px solid #bfd3c6; border-radius: 12px; background: #e8f1e9; }
+.app-shell .settings-avatar-image { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center 15%; }
+.app-shell .settings-avatar-image.uploaded { object-position: center; }
+.app-shell .settings-avatar-actions { display: grid; justify-items: start; gap: 6px; min-width: 0; }
+.app-shell .settings-content .settings-avatar-file { display: none; }
+
+.app-shell .settings-arranged .settings-accordion { gap: 0; padding: 5px; }
+.app-shell[data-visual='light-anime'] .settings-layer > .settings-drawer.settings-drawer .settings-accordion-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px;
+  border-color: transparent;
+  background: transparent;
+  color: var(--settings-ink);
+  font-size: 15px;
+  text-align: left;
+}
+.app-shell[data-visual='light-anime'] .settings-layer > .settings-drawer.settings-drawer .settings-accordion-toggle.active { background: #e6f2e9; color: #2a6755; }
+.app-shell .settings-chevron { display: grid; place-items: center; flex: 0 0 20px; width: 20px; height: 20px; font-family: Arial, 'Segoe UI Symbol', sans-serif; font-size: 20px; font-weight: 700; line-height: 1; }
+.app-shell .settings-accordion-content { display: grid; gap: 14px; min-width: 0; padding: 14px 8px 8px; }
+.app-shell .settings-game-options .settings-section-heading { font-size: 14px; }
+.app-shell .settings-content .settings-range { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 12px; margin: 0; color: var(--settings-muted); font-size: 14px; }
+.app-shell .settings-arranged .settings-account-options { gap: 10px; }
+
+.app-shell .settings-content .account-id-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 3px 10px;
+  padding: 10px;
+  border: 1px solid #d5e1d7;
+  border-image: none;
+  border-radius: 9px;
+  background: #f4f8f2;
+}
+.app-shell .settings-content .account-id-row > span { grid-column: 1; grid-row: 1; color: var(--settings-muted); font-size: 12px; line-height: 1.4; }
+.app-shell .settings-content .account-id-row > strong { grid-column: 1; grid-row: 2; color: var(--settings-ink); font-size: 14px; line-height: 1.5; overflow-wrap: anywhere; }
+.app-shell .settings-content .account-id-row .soft-button { grid-column: 2; grid-row: 1 / 3; align-self: center; min-height: 36px; margin: 0; padding: 6px 10px; }
+.app-shell .settings-content .settings-account p { margin: 0; font-size: 13px; line-height: 1.5; }
+.app-shell .settings-content .settings-password-entry { display: flex; align-items: center; justify-content: space-between; }
+.app-shell .settings-content .settings-password-form { display: grid; gap: 14px; padding: 2px 0; }
+.app-shell .settings-content .password-field input { padding-right: 62px; }
+.app-shell[data-visual='light-anime'] .settings-layer > .settings-drawer.settings-drawer .password-toggle { right: 5px; height: 30px; min-height: 30px; padding: 3px 8px; font-size: 13px; }
+.app-shell .settings-content .settings-password-back { justify-self: start; }
+.app-shell .settings-inline-feedback { grid-column: 1 / -1; margin: 0; color: #346c54; font-size: 13px; line-height: 1.5; overflow-wrap: anywhere; }
+.app-shell .settings-inline-feedback.error-text { color: #a34f4b; }
+.app-shell .settings-arranged .settings-logout { width: 100%; }
+.app-shell .settings-compact-tabs { display: none; }
+
+/* Override the shared illustrated slider without affecting battle settings. */
+.app-shell[data-visual='light-anime'] .settings-layer .settings-range input[type='range'] { appearance: none; box-sizing: border-box; width: 100%; min-width: 0; height: 30px; margin: 0; padding: 0; border: 0; border-image: none; background: transparent; cursor: pointer; }
+.app-shell[data-visual='light-anime'] .settings-layer .settings-range input[type='range']::-webkit-slider-runnable-track { height: 6px; border: 1px solid #bdcfc2; border-image: none; border-radius: 6px; background: #dfebe1; box-shadow: none; }
+.app-shell[data-visual='light-anime'] .settings-layer .settings-range input[type='range']::-moz-range-track { height: 6px; border: 1px solid #bdcfc2; border-image: none; border-radius: 6px; background: #dfebe1; box-shadow: none; }
+.app-shell[data-visual='light-anime'] .settings-layer .settings-range input[type='range']::-webkit-slider-thumb { appearance: none; width: 18px; height: 22px; margin-top: -9px; border: 1px solid #347b68; border-radius: 6px; background: #4b927b; box-shadow: none; }
+.app-shell[data-visual='light-anime'] .settings-layer .settings-range input[type='range']::-moz-range-thumb { width: 18px; height: 22px; border: 1px solid #347b68; border-radius: 6px; background: #4b927b; box-shadow: none; }
+
+@media (max-width: 600px) {
+  .app-shell .settings-layer > .settings-drawer { padding: 12px; }
+  .app-shell .settings-content .settings-section { padding: 12px; }
+  .app-shell .settings-arranged .settings-accordion { padding: 4px; }
 }
 
-.app-shell .settings-content .danger-button {
-  border-image-source: var(--game-ui-coral);
-  color: var(--game-ui-danger-ink);
+@media (max-height: 540px) {
+  .app-shell .settings-drawer > .settings-header { padding-bottom: 10px; }
+  .app-shell .settings-layer .settings-drawer > .settings-content { padding-top: 10px; }
 }
 
-.app-shell .settings-drawer :is(button, input, select):focus-visible {
-  outline: 3px solid #2c9692;
-  outline-offset: 2px;
+@media (prefers-reduced-motion: reduce) {
+  .app-shell :is(.settings-switch-track, .settings-switch-knob) { transition: none; }
 }
 
-@media (max-width: 480px) {
-  .app-shell .settings-layer > .settings-drawer {
-    width: calc(100vw - 16px);
-    padding: 8px;
-    border-width: 9px;
-    border-image-width: 9px;
-  }
+.app-shell .settings-identity-cover { position: fixed; z-index: 145; inset: 0; display: grid; place-items: center; padding: 16px; background: #253a3966; pointer-events: auto; }
+.app-shell .settings-identity-dialog { box-sizing: border-box; width: min(380px, 100%); max-height: calc(100dvh - 32px); padding: 20px; overflow-y: auto; border: 1px solid #bdcec4; border-image: none; border-radius: 16px; background: #fffefa; color: #354e49; box-shadow: 0 16px 48px #213b3933; font-size: 14px; line-height: 1.6; }
+.app-shell .settings-identity-dialog h3 { margin: 0 0 16px; color: #354e49; font-size: 19px; line-height: 1.4; }
+.app-shell .settings-identity-values { display: grid; gap: 10px; margin: 0 0 14px; }
+.app-shell .settings-identity-values > div { display: grid; grid-template-columns: 68px minmax(0, 1fr); align-items: start; gap: 10px; }
+.app-shell .settings-identity-values dt { color: #687e76; }
+.app-shell .settings-identity-values dd { margin: 0; font-weight: 700; overflow-wrap: anywhere; }
+.app-shell .settings-identity-cost { padding: 12px; border: 1px solid #ccded2; border-radius: 10px; background: #edf5ef; }
+.app-shell .settings-identity-dialog p { margin: 0; overflow-wrap: anywhere; }
+.app-shell .settings-identity-dialog p + p { margin-top: 6px; }
+.app-shell .settings-identity-dialog .settings-identity-error { margin-top: 12px; color: #a34f4b; }
+.app-shell .settings-identity-actions { display: flex; gap: 10px; margin-top: 18px; }
+.app-shell[data-visual='light-anime'] .settings-identity-dialog button { flex: 1; min-height: 42px; padding: 8px 12px; border: 1px solid #b9cec1; border-image: none; border-radius: 9px; background: #edf4ef; color: #466056; font-size: 14px; font-weight: 700; line-height: 1.4; box-shadow: none; text-shadow: none; }
+.app-shell[data-visual='light-anime'] .settings-identity-dialog .settings-identity-confirm { border-color: #347b68; background: #3c856f; color: #fff; }
+.app-shell .settings-identity-dialog button:disabled { opacity: .5; cursor: not-allowed; }
+.app-shell .settings-identity-dialog button:focus-visible { outline: 3px solid #6aaa92; outline-offset: 2px; }
+.app-shell .settings-identity-cost .error-text { padding: 0; border: 0; border-radius: 0; background: transparent; color: #a34f4b; }
 
-  .app-shell .settings-content .settings-section { padding: 10px 8px; }
-}
-
-@media (max-height: 480px) {
-  .app-shell .settings-drawer > .settings-header { padding-block: 2px 6px; }
-  .app-shell .settings-header .eyebrow { display: none; }
-  .app-shell .settings-drawer > .settings-content { padding-top: 6px; }
+@media (max-height: 450px) {
+  .app-shell .settings-identity-cover { padding: 12px; }
+  .app-shell .settings-identity-dialog { max-height: calc(100dvh - 24px); padding: 14px 16px; }
+  .app-shell .settings-identity-dialog h3 { margin-bottom: 10px; font-size: 18px; }
+  .app-shell .settings-identity-values { gap: 6px; margin-bottom: 10px; }
+  .app-shell .settings-identity-cost { padding: 8px 10px; }
+  .app-shell .settings-identity-dialog p + p { margin-top: 4px; }
+  .app-shell .settings-identity-actions { margin-top: 12px; }
+  .app-shell[data-visual='light-anime'] .settings-identity-dialog button { min-height: 38px; padding-block: 6px; }
 }

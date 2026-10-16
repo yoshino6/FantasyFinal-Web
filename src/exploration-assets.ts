@@ -63,11 +63,33 @@ export function mapAvatarAtlas(portrait?:PanelPortrait):{src:string;key:string;c
  return {key,src:key?gameAssetUrl(root+'/avatars/'+key+'.webp'):'',columns:4,rows:2,frames:8,idleFrame:0,runFrames:[1,2,3,4,5,6],nativeLeftFrames:EXPLORATION_AVATAR_NATIVE_LEFT_FRAMES[key]??[]};
 }
 
+function targetSpriteBounds(point:MapArtPoint) {
+ const key=mapTargetArt(point).key;
+ return (targetProjectionBounds as Record<string,{width:number;height:number;left:number;top:number;right:number;bottom:number}>)[key]??(resourceSpriteBounds as Record<string,{width:number;height:number;left:number;top:number;right:number;bottom:number}>)[key]??EXPLORATION_TARGET_BOUNDS[key];
+}
+/** Painted dimensions share the rendering scale, excluding transparent export margins. */
+export function mapTargetPaintedSize(point:MapArtPoint,size:number):{width:number;height:number} {
+ const bounds=targetSpriteBounds(point);
+ if(!bounds)return {width:size,height:size*1.25};
+ const width=bounds.right-bounds.left+1,height=bounds.bottom-bounds.top+1,scale=Math.min(1/width,1.25/height)*size;
+ return {width:width*scale,height:height*scale};
+}
+export function mapAvatarPaintedSize(portrait:PanelPortrait|undefined,size:number):{width:number;height:number} {
+ const bounds=EXPLORATION_AVATAR_IDLE_BOUNDS[mapAvatarAtlas(portrait).key];
+ return bounds?{width:(bounds.right-bounds.left+1)/bounds.width*size,height:(bounds.bottom-bounds.top+1)/bounds.height*size*1.25}:mapTargetPaintedSize({type:'玩家'},size);
+}
+/** Full transparent raster frame relative to the same painted foot as the CSS. */
+export function mapTargetSpriteFrame(point:MapArtPoint,size:number,groundBase=false) {
+ const bounds=targetSpriteBounds(point);
+ if(!bounds)return {left:-size/2,top:-size*1.25,width:size,height:size*1.25};
+ const scale=Math.min(1/(bounds.right-bounds.left+1),1.25/(bounds.bottom-bounds.top+1))*size;
+ const anchorX=(bounds.left+bounds.right+1)/2,anchorY=groundBase?bounds.bottom+1-(bounds.bottom-bounds.top+1)*.125:bounds.bottom+1;
+ return {left:-anchorX*scale,top:-anchorY*scale,width:bounds.width*scale,height:bounds.height*scale};
+}
 /** Ore's bottom 25% is its ground base: anchor its centre, 12.5% from the
     painted bottom. Transparent export margins do not shift the ground point. */
 export function mapTargetSpriteStyle(point:MapArtPoint,groundBase=false):{width:string;height:string;left:string;bottom:string} {
- const key=mapTargetArt(point).key;
-  const bounds=(targetProjectionBounds as Record<string,{width:number;height:number;left:number;top:number;right:number;bottom:number}>)[key]??(resourceSpriteBounds as Record<string,{width:number;height:number;left:number;top:number;right:number;bottom:number}>)[key]??EXPLORATION_TARGET_BOUNDS[key];
+ const bounds=targetSpriteBounds(point);
  if(!bounds)return {width:'100%',height:'100%',left:'0',bottom:'0'};
  const scale=Math.min(1/(bounds.right-bounds.left+1),1.25/(bounds.bottom-bounds.top+1));
  const anchorX=(bounds.left+bounds.right+1)/2;

@@ -7,6 +7,7 @@ import SocialGlyph from './SocialGlyph.vue';
 import GameUiFeedbackArt from './GameUiFeedbackArt.vue';
 
 export type ExploreChatTab = 'world' | 'recruitment' | 'team' | 'friend' | 'system';
+export type InspectPlayerTarget = { gameId?: number; senderId?: string | number; name: string; portrait?: PanelPortrait; avatarUrl?: string; own?: boolean };
 
 const props = defineProps<{
   open: boolean;
@@ -27,6 +28,7 @@ const props = defineProps<{
   systemHasMore: boolean;
   systemError: string;
   partyBusy: boolean;
+  invitationCount?: number;
   panelStyle: Record<string, string>;
   messagePortrait: (message: ChatMessage) => PanelPortrait | undefined;
   friendPortrait: (channel: ChatChannel) => PanelPortrait | undefined;
@@ -51,6 +53,8 @@ const emit = defineEmits<{
   'list-element': [element: HTMLElement | null];
   'drag-start': [event: PointerEvent];
   'resize-start': [event: PointerEvent];
+  'inspect-player': [player: InspectPlayerTarget];
+  'open-invitations': [];
 }>();
 
 const tabs = [
@@ -81,6 +85,20 @@ const timeText = (value: string, withDate = false) => {
 const noticeText = (item: WebNotification) => item.messages.map(message => message.text || message.markdown || message.format?.map(part => typeof part.value === 'string' || typeof part.value === 'number' ? String(part.value) : '').join('') || '').filter(Boolean).join('\n');
 const updateDraft = (event: Event) => emit('update:draft', (event.target as HTMLInputElement).value);
 const send = () => { if (canSubmit.value) emit('send'); };
+const inspectMessage = (message: ChatMessage) => emit('inspect-player', {
+  gameId: message.recruitment?.leaderGameId ?? message.senderGameId,
+  senderId: message.senderId,
+  name: message.recruitment?.creatorName || message.senderName,
+  portrait: message.recruitment?.leaderPortrait ?? props.messagePortrait(message),
+  avatarUrl: message.recruitment?.leaderAvatarUrl ?? message.senderAvatarUrl,
+  own: message.recruitment?.own ?? message.own,
+});
+const inspectFriend = (channel: ChatChannel) => emit('inspect-player', {
+  gameId: channel.gameId,
+  name: channel.name,
+  portrait: props.friendPortrait(channel),
+  avatarUrl: channel.avatarUrl,
+});
 const tabKeydown = (event: KeyboardEvent, index: number) => {
   let next = index;
   if (event.key === 'ArrowRight') next = (index + 1) % tabs.length;
@@ -117,23 +135,23 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <section v-if="open" ref="panelElement" class="explore-chat-panel" :style="[panelStyle, panelArt]" role="dialog" aria-modal="false" aria-label="冒险聊天面板" @keydown.esc.stop.prevent="emit('close')">
+  <section v-if="open" ref="panelElement" class="explore-chat-panel exploration-window" :style="[panelStyle, panelArt]" role="dialog" aria-modal="false" aria-label="冒险聊天面板" @keydown.esc.stop.prevent="emit('close')">
     <header class="explore-chat-heading" @pointerdown="emit('drag-start', $event)">
       <nav class="explore-chat-tabs" role="tablist" aria-label="聊天频道" @pointerdown.stop>
         <button v-for="(item, index) in tabs" :key="item.key" type="button" role="tab" :aria-label="`${item.label}频道`" :aria-selected="tab === item.key" :tabindex="tab === item.key ? 0 : -1" :class="{ active: tab === item.key }" @click="emit('select-tab', item.key)" @keydown="tabKeydown($event, index)"><span>{{ item.label }}</span></button>
       </nav>
-      <button ref="closeElement" type="button" class="explore-chat-close" aria-label="关闭聊天面板" @pointerdown.stop @click.stop="emit('close')"><img :src="gameAssetUrl('/assets/light-anime/skill-stationery-v1/handwritten-close-red.png')" alt="" aria-hidden="true" draggable="false" /></button>
+      <span aria-hidden="true" />
     </header>
+    <button ref="closeElement" type="button" class="explore-chat-close exploration-window-close" aria-label="关闭聊天面板" @pointerdown.stop @click.stop="emit('close')"><span class="exploration-close-mark" aria-hidden="true" /></button>
 
     <div class="explore-chat-page">
     <div class="explore-chat-channel-heading">
       <div><strong>{{ channelName || `${activeTab.label}频道` }}</strong><span>{{ activeTab.caption }}</span></div>
-      <button v-if="tab === 'team' || tab === 'recruitment'" type="button" class="explore-chat-text-button" @click="emit('manage-party')"><SocialGlyph name="party" :size="17" />管理队伍</button>
-      <button v-else-if="tab === 'system'" type="button" class="explore-chat-text-button" :disabled="systemLoading" @click="emit('refresh-system')"><SocialGlyph name="refresh" :size="17" />{{ systemLoading ? '读取中' : '刷新' }}</button>
+      <div class="explore-chat-channel-actions"><button v-if="tab === 'team' || tab === 'recruitment'" type="button" class="explore-chat-text-button" @click="emit('manage-party')"><SocialGlyph name="party" :size="17" />管理队伍</button><button v-else-if="tab === 'system'" type="button" class="explore-chat-text-button" :disabled="systemLoading" @click="emit('refresh-system')"><SocialGlyph name="refresh" :size="17" />{{ systemLoading ? '读取中' : '刷新' }}</button><button type="button" class="explore-chat-text-button explore-chat-invitations" @click="emit('open-invitations')"><SocialGlyph name="mail" :size="17" />组队邀请<small v-if="invitationCount && invitationCount > 0">{{ invitationCount }}</small></button></div>
     </div>
 
-    <div v-if="tab === 'friend' && friendChannels.length" class="explore-chat-friends" role="listbox" aria-label="好友私信对象">
-      <button v-for="channel in friendChannels" :key="channel.id" type="button" role="option" :aria-selected="activeChannelId === channel.id" :class="{ active: activeChannelId === channel.id }" @click="emit('select-friend', channel.id)"><SocialAvatar :name="channel.name" :portrait="friendPortrait(channel)" :size="34" shape="round" /><span>{{ channel.name }}<small v-if="channel.unreadCount">{{ channel.unreadCount }} 条未读</small></span></button>
+    <div v-if="tab === 'friend' && friendChannels.length" class="explore-chat-friends" role="group" aria-label="好友私信对象">
+      <div v-for="channel in friendChannels" :key="channel.id" class="explore-chat-friend" :class="{ active: activeChannelId === channel.id }"><button type="button" class="explore-chat-player-avatar" :aria-label="`查看${channel.name}的玩家名片`" @click="inspectFriend(channel)"><SocialAvatar :name="channel.name" :portrait="friendPortrait(channel)" :avatar-url="channel.avatarUrl" :size="34" shape="round" /></button><button type="button" class="explore-chat-friend-select" :aria-pressed="activeChannelId === channel.id" :aria-label="`与${channel.name}私聊`" @click="emit('select-friend', channel.id)"><span>{{ channel.name }}<small v-if="channel.unreadCount">{{ channel.unreadCount }} 条未读</small></span></button></div>
     </div>
 
     <div v-if="tab === 'system'" class="explore-chat-system">
@@ -156,14 +174,14 @@ onBeforeUnmount(() => {
           <article v-for="message in messages" :key="message.id" class="explore-chat-message" :class="{ 'is-own': message.own, 'is-recruitment': Boolean(message.recruitment) }">
             <template v-if="message.recruitment">
               <div class="explore-chat-recruitment">
-                <div class="explore-chat-recruitment-heading"><SocialAvatar :name="message.recruitment.creatorName || message.senderName" :portrait="message.recruitment.leaderPortrait" :size="40" shape="round" /><div><strong>{{ message.recruitment.creatorName || message.senderName }}</strong><small>队长<span v-if="message.recruitment.leaderGameId"> · {{ message.recruitment.leaderGameId }}</span></small></div><span class="explore-chat-recruitment-count">{{ message.recruitment.memberCount }}/{{ message.recruitment.targetCount }} 人</span></div>
+                <div class="explore-chat-recruitment-heading"><button type="button" class="explore-chat-player-avatar" :aria-label="`查看${message.recruitment.creatorName || message.senderName}的玩家名片`" @click="inspectMessage(message)"><SocialAvatar :name="message.recruitment.creatorName || message.senderName" :portrait="message.recruitment.leaderPortrait" :avatar-url="message.recruitment.leaderAvatarUrl || message.senderAvatarUrl" :size="40" shape="round" /></button><div><button type="button" class="explore-chat-player-name" @click="inspectMessage(message)"><strong>{{ message.recruitment.creatorName || message.senderName }}</strong></button><small>队长<span v-if="message.recruitment.leaderGameId"> · {{ message.recruitment.leaderGameId }}</span></small></div><span class="explore-chat-recruitment-count">{{ message.recruitment.memberCount }}/{{ message.recruitment.targetCount }} 人</span></div>
                 <h3><SocialGlyph name="flag" :size="23" />{{ message.recruitment.title || message.recruitment.partyName }}</h3>
                 <p class="explore-chat-recruitment-region"><SocialGlyph name="location" :size="17" />{{ message.recruitment.regionName || '地区未提供' }}</p>
                 <p v-if="message.recruitment.description" class="explore-chat-recruitment-description">{{ message.recruitment.description }}</p>
                 <div class="explore-chat-recruitment-footer"><span>{{ recruitmentStatus(message.recruitment) || `空余 ${message.recruitment.openSlots ?? Math.max(0, message.recruitment.targetCount - message.recruitment.memberCount)} 位` }}</span><button v-if="canApply(message.recruitment)" type="button" class="explore-chat-primary" :disabled="partyBusy" @click="emit('apply', message)"><SocialGlyph name="add" :size="18" />申请加入</button><time :datetime="message.createdAt">{{ timeText(message.createdAt) }}</time></div>
               </div>
             </template>
-            <template v-else><SocialAvatar :name="message.senderName" :id="message.senderId" :portrait="messagePortrait(message)" :size="39" shape="round" /><div class="explore-chat-message-body"><div class="explore-chat-message-meta"><strong>{{ message.senderName }}</strong><time :datetime="message.createdAt">{{ timeText(message.createdAt) }}</time></div><p class="explore-chat-bubble">{{ message.content }}</p></div></template>
+            <template v-else><button type="button" class="explore-chat-player-avatar" :aria-label="`查看${message.senderName}的玩家名片`" @click="inspectMessage(message)"><SocialAvatar :name="message.senderName" :id="message.senderId" :portrait="messagePortrait(message)" :avatar-url="message.senderAvatarUrl" :size="39" shape="round" /></button><div class="explore-chat-message-body"><div class="explore-chat-message-meta"><button type="button" class="explore-chat-player-name" @click="inspectMessage(message)"><strong>{{ message.senderName }}</strong></button><time :datetime="message.createdAt">{{ timeText(message.createdAt) }}</time></div><p class="explore-chat-bubble">{{ message.content }}</p></div></template>
           </article>
         </div>
         <button v-if="hasNew" type="button" class="explore-chat-latest" @click="emit('latest')">有新消息，跳到最新<SocialGlyph name="down" :size="16" /></button>
@@ -177,27 +195,34 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-.explore-chat-panel { --chat-ink:#5a4939; --chat-teal:#458f82; position:fixed; z-index:160; left:50%; top:calc(var(--app-viewport-height,100dvh) / 2); display:flex; flex-direction:column; width:min(720px,calc(100vw - 20px)); height:min(var(--chat-height,560px),calc(var(--app-viewport-height,100dvh) - 24px)); max-height:calc(var(--app-viewport-height,100dvh) - 24px); min-width:0; box-sizing:border-box; overflow:hidden; transform:translate(calc(-50% + var(--modal-x,0px)),calc(-50% + var(--modal-y,0px))); color:var(--chat-ink); border:1px solid #9b7b56; border-radius:8px; background:#fcf6e4; box-shadow:0 12px 36px #46372e45; font-family:inherit; isolation:isolate; pointer-events:auto; }
+.explore-chat-panel { --chat-ink:#5a4939; --chat-teal:#458f82; position:fixed; z-index:160; left:50%; top:calc(var(--app-viewport-height,100dvh) / 2); display:flex; flex-direction:column; width:var(--explore-window-width); max-width:calc(100vw - 24px); height:min(var(--chat-height,var(--explore-window-height)),calc(var(--app-viewport-height,100dvh) - 24px)); max-height:calc(var(--app-viewport-height,100dvh) - 24px); min-width:0; min-height:0; box-sizing:border-box; overflow:visible; transform:translate(calc(-50% + var(--modal-x,0px)),calc(-50% + var(--modal-y,0px))); color:var(--chat-ink); border:1px solid #9b7b56; border-radius:8px; background:#fcf6e4; box-shadow:0 12px 36px #46372e45; font-family:inherit; isolation:isolate; pointer-events:auto; }
 .explore-chat-panel *, .explore-chat-panel *::before, .explore-chat-panel *::after { box-sizing:border-box; }
 .explore-chat-panel button { display:inline-flex; align-items:center; justify-content:center; gap:5px; margin:0; min-width:0; min-height:0; font-family:inherit; font-size:12px; font-weight:600; line-height:1.35; letter-spacing:0; text-shadow:none; cursor:pointer; transition:background .15s,border-color .15s,box-shadow .15s; }
 .explore-chat-panel button:disabled { cursor:default; opacity:.5; }
 .explore-chat-panel button:focus-visible, .explore-chat-panel input:focus-visible { outline:2px solid #377f75; outline-offset:2px; }
 .explore-chat-heading { position:relative; flex:none; display:grid; grid-template-columns:minmax(0,1fr) 44px; gap:6px; align-items:center; min-height:54px; padding:5px 8px 5px 10px; cursor:move; touch-action:none; }
-.explore-chat-panel .explore-chat-close { position:static; width:44px; height:44px; padding:5px; border:1px solid #c45043; border-radius:4px; background:transparent; box-shadow:none; }
-.explore-chat-close img { display:block; width:32px; height:32px; object-fit:contain; pointer-events:none; }
+.explore-chat-panel .explore-chat-close { position:absolute; z-index:3; top:-1px; right:-1px; display:grid; place-items:center; flex:none; width:36px; height:36px; min-width:36px; min-height:36px; margin:0; padding:0; border:2px solid #fff7ef; border-image:none; border-radius:10px; color:#fff; background:#d94b48; transform:translate(50%,-50%); box-shadow:0 3px 8px #78352f40; touch-action:manipulation; }
 .explore-chat-tabs { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:4px; min-width:0; padding:0; }
 .explore-chat-panel .explore-chat-tabs button { width:100%; height:44px; padding:3px 1px; border:0; border-bottom:2px solid transparent; border-radius:0; color:#79654b; background:transparent; box-shadow:none; font-size:15px; white-space:nowrap; }
 .explore-chat-panel .explore-chat-tabs button.active { color:#386e4c; border-bottom-color:#7a9c68; background:#e5edd7; box-shadow:none; }
 .explore-chat-page { display:flex; flex:1; flex-direction:column; min-height:0; min-width:0; overflow:hidden; margin:0 8px 4px; border:14px solid transparent; border-image:var(--chat-parchment) 170 fill / 14px stretch; }
 .explore-chat-channel-heading { flex:none; display:flex; align-items:center; justify-content:space-between; gap:10px; min-height:37px; margin:0 4px; padding:3px 1px 7px; border-bottom:1px dashed #bca98780; }
 .explore-chat-channel-heading>div { min-width:0; display:flex; align-items:baseline; gap:10px; }
-.explore-chat-channel-heading strong { font-size:13px; color:#477e6e; white-space:nowrap; }
+.explore-chat-channel-heading>div:first-child { flex:1; }
+.explore-chat-channel-heading strong { min-width:0; overflow:hidden; font-size:13px; color:#477e6e; text-overflow:ellipsis; white-space:nowrap; }
 .explore-chat-channel-heading span { font-size:10px; color:#9b896d; }
+.explore-chat-channel-heading>.explore-chat-channel-actions { flex:none; display:flex; align-items:center; flex-wrap:wrap; justify-content:flex-end; gap:7px; }
 .explore-chat-panel .explore-chat-text-button { flex:none; padding:3px 0 3px 4px; border:0; border-radius:5px; background:transparent; color:#65816a; font-size:11px; }
+.explore-chat-invitations small { display:inline-grid; place-items:center; min-width:15px; height:15px; padding:0 3px; border-radius:8px; background:#dce9c9; color:#597e58; font-size:9px; font-weight:600; }
 .explore-chat-conversation, .explore-chat-system { position:relative; display:flex; flex:1; flex-direction:column; min-height:0; min-width:0; overflow:hidden; padding:0 4px; }
 .explore-chat-friends { display:flex; flex:none; align-items:center; gap:7px; padding:7px 4px; overflow-x:auto; overscroll-behavior:contain; scrollbar-width:thin; }
-.explore-chat-panel .explore-chat-friends button { justify-content:flex-start; flex:none; max-width:190px; padding:4px 9px 4px 4px; border:1px solid #c4b092; border-radius:24px; background:#fff9eec9; color:#78674f; }
-.explore-chat-panel .explore-chat-friends button.active { background:#deefda; border-color:#78a996; color:#3c7f6c; }
+.explore-chat-friend { display:flex; align-items:center; flex:none; gap:5px; max-width:190px; padding:4px 9px 4px 4px; border:1px solid #c4b092; border-radius:24px; background:#fff9eec9; color:#78674f; }
+.explore-chat-friend.active { background:#deefda; border-color:#78a996; color:#3c7f6c; }
+.explore-chat-panel .explore-chat-friend-select { justify-content:flex-start; align-self:stretch; padding:0; border:0; border-radius:5px; color:inherit; background:transparent; text-align:left; }
+.explore-chat-panel .explore-chat-player-avatar { flex:none; padding:0; border:0; border-radius:50%; background:transparent; line-height:0; }
+.explore-chat-panel .explore-chat-player-name { display:inline-flex; justify-content:flex-start; max-width:100%; padding:0; border:0; border-radius:3px; color:inherit; background:transparent; font-size:inherit; text-align:left; }
+.explore-chat-panel .explore-chat-player-name:hover { color:#377f75; }
+.explore-chat-panel .explore-chat-player-avatar:hover { box-shadow:0 0 0 2px #79a995; }
 .explore-chat-friends span { min-width:0; max-width:125px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:11px; }
 .explore-chat-friends small { display:block; color:#a17e56; font-size:9px; text-align:left; }
 .explore-chat-message-list, .explore-chat-system-list { flex:1; min-height:0; min-width:0; overflow:auto; padding:11px 2px; overscroll-behavior:contain; scrollbar-width:thin; scrollbar-color:#b5c6a9 #f4ecd9; }
@@ -255,6 +280,8 @@ onBeforeUnmount(() => {
   .explore-chat-channel-heading>div { gap:5px; }
   .explore-chat-channel-heading strong { font-size:12px; }
   .explore-chat-channel-heading>div>span { display:none; }
+  .explore-chat-channel-heading>.explore-chat-channel-actions { gap:4px; }
+  .explore-chat-panel .explore-chat-channel-actions .explore-chat-text-button { gap:3px; padding-left:0; font-size:10px; }
   .explore-chat-friends { padding-block:6px; }
   .explore-chat-message { gap:6px; margin-bottom:12px; }
   .explore-chat-message-body { max-width:calc(100% - 45px); }
@@ -270,13 +297,12 @@ onBeforeUnmount(() => {
   .explore-chat-panel .explore-chat-latest { right:15px; bottom:61px; }
 }
 @media (max-height:450px) {
-  .explore-chat-panel { height:calc(var(--app-viewport-height,100dvh) - 18px); max-height:calc(var(--app-viewport-height,100dvh) - 18px); }
   .explore-chat-heading { min-height:48px; padding-block:2px; }
   .explore-chat-page { border-width:10px; border-image-width:10px; }
   .explore-chat-channel-heading { min-height:27px; padding-block:2px 4px; }
   .explore-chat-friends { padding-block:3px; }
   .explore-chat-friends :deep(.social-avatar) { width:28px; height:28px; }
-  .explore-chat-panel .explore-chat-friends button { padding-block:2px; }
+  .explore-chat-friend { padding-block:2px; }
   .explore-chat-panel .explore-chat-history { min-height:21px; padding-block:2px; }
   .explore-chat-message-list, .explore-chat-system-list { padding-block:7px; }
   .explore-chat-composer { padding-top:5px; }

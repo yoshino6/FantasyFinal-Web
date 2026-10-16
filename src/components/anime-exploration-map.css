@@ -250,12 +250,12 @@
 .world-map-panel.anime-adventure.exploration-map.exploration-canvas .map-target-entity {
   position: absolute; top: 0; left: 0; display: block; width: var(--map-entity-hit-size, var(--map-avatar-size)); height: calc(var(--map-entity-hit-size, var(--map-avatar-size)) * 1.25);
   min-width: 0; min-height: 0; padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none;
-  opacity: 1; overflow: visible; pointer-events: auto; cursor: pointer; transition: none; isolation: auto;
+  opacity: 1; overflow: visible; pointer-events: none; transition: none; isolation: auto;
 }
 .world-map-panel.anime-adventure.exploration-map.exploration-canvas .map-target-entity:disabled { pointer-events: none; cursor: default; opacity: 1; filter: none; }
 .exploration-canvas .map-target-entity:focus-visible { outline: 2px solid #fff3b6; outline-offset: 3px; }
 .exploration-canvas .map-entity-ground {
-  position: absolute; z-index: 0; left: 50%; bottom: calc(var(--map-avatar-size) * -.09); width: calc(var(--map-avatar-size) * .72); height: calc(var(--map-avatar-size) * .18);
+  position: absolute; z-index: 0; left: 50%; bottom: calc(var(--map-ground-size, var(--map-avatar-size)) * -.09); width: calc(var(--map-ground-size, var(--map-avatar-size)) * .72); height: calc(var(--map-ground-size, var(--map-avatar-size)) * .18);
   transform: translateX(-50%); box-sizing: border-box; border: 2px solid; border-radius: 50%; pointer-events: none;
 }
 .exploration-canvas .map-entity-ground.ground-hostile { border-color: #ff827b; background: #e9514c54; box-shadow: 0 0 8px #e74d4c88, inset 0 0 5px #b72d325e; }
@@ -272,9 +272,9 @@
 .exploration-canvas .map-target-entity.is-selected .map-entity-art-box { filter: drop-shadow(0 0 3px #fff2ba) drop-shadow(0 3px 2px #25362b66); }
 @media (prefers-reduced-motion: reduce) { .exploration-canvas .map-target-entity.is-monster .map-entity-breath { animation: none; } }
 .exploration-canvas .map-player-position { position: absolute; z-index: 3; top: 0; left: 0; display: block; width: 0; height: 0; pointer-events: none; will-change: transform; }
-.exploration-canvas .map-player-position > :is(.animated-map-avatar, img, .anime-icon) { position: absolute; bottom: -5px; left: 0; width: var(--map-avatar-size); height: calc(var(--map-avatar-size) * 1.25); transform: translateX(-50%); object-fit: contain; }
-.exploration-canvas .map-player-position > .animated-map-avatar { bottom: calc(var(--map-avatar-size) * -1.25 * var(--map-avatar-ground-padding, .059375)); }
-.exploration-canvas .map-player-position > .animated-map-avatar.is-left { transform: translateX(-50%) scaleX(-1); }
+.exploration-canvas .map-player-art > :is(.animated-map-avatar, img, .anime-icon) { position: absolute; bottom: -5px; left: 0; width: var(--map-avatar-size); height: calc(var(--map-avatar-size) * 1.25); object-fit: contain; }
+.exploration-canvas .map-player-art > .animated-map-avatar { bottom: calc(var(--map-avatar-size) * -1.25 * var(--map-avatar-ground-padding, .059375)); }
+.exploration-canvas .map-player-art > .animated-map-avatar.is-left { transform: scaleX(-1); }
 .exploration-canvas .map-player-ground { position: absolute; left: 0; top: calc(var(--map-avatar-size) * -.09); width: calc(var(--map-avatar-size) * .72); height: calc(var(--map-avatar-size) * .18); transform: translateX(-50%); box-sizing: border-box; border: 2px solid #d4ffe9b0; border-radius: 50%; background: #6ee5c74d; box-shadow: 0 0 12px #c0ffbf8a; }
 .exploration-canvas .map-canvas-toolbar { position: fixed; z-index: 10; top: var(--exploration-controls-top, 160px); left: 50%; transform: translateX(-50%); display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: stretch; gap: 8px; width: min(1260px, calc(100vw - 32px)); max-width: none; pointer-events: none; color: #4d4c39; }
 .exploration-canvas .map-canvas-coordinate { grid-column: 1; grid-row: 1; display: flex; align-items: center; flex-wrap: wrap; gap: 3px 10px; width: max-content; min-width: 0; max-width: 100%; padding: 7px 12px; background: #fff8e8e0 var(--canvas-paper) center / 100% 100% no-repeat; box-shadow: 0 2px 8px #26433025; }
@@ -366,3 +366,7 @@
   .exploration-canvas .world-map-zoom { right: 20px; }
   .exploration-canvas .map-canvas-manual { left: 130px; }
 }
+
+.exploration-canvas .map-player-art { position: absolute; left: 0; bottom: 0; width: var(--map-avatar-size); height: calc(var(--map-avatar-size) * 1.25); transform: translateX(-50%); pointer-events: none; }
+.exploration-canvas .map-standing-scenery { position: absolute; display: block; pointer-events: none; }
+.exploration-canvas .map-standing-scenery > img { display: block; width: 100%; height: 100%; pointer-events: none; }

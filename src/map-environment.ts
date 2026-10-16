@@ -29,6 +29,8 @@ const DIRECTIONAL_FOOTPRINTS: Record<string, { width: number; height: number; bo
   forest_log: { width: 3, height: 1 }, ruin_wall: { width: 3, height: 1, bodyCoverage: .9 },
   reed_cluster: { width: 2, height: 1 }
 };
+/** The footprint is the base on the ground, not the height of an upright facade. */
+export const environmentStanding = (assetKey: string) => ['ruin_wall', 'dead_tree', 'ancient_statue', 'living_oak', 'living_birch', 'living_pine'].includes(assetKey);
 
 /** Invalid or fractional footprints never acquire a collision-shaped hit area. */
 export function environmentFootprint(object: EnvironmentObjectView): EnvironmentPosition[] {
@@ -102,25 +104,26 @@ export function environmentSpriteStyle(assetKey: string, shape?: Pick<Environmen
   };
 }
 
-/** Sprite bounds can overhang; only exact full-cell masks are rendered opaque. */
+/** Upright silhouettes rise north of their base; low ground objects retain their masks. */
 export function environmentGeometry(object: EnvironmentObjectView, cellSize: number) {
   const cells = environmentFootprint(object);
+  const standing = environmentStanding(object.assetKey);
   const directional = environmentDirectionalSprite(object.assetKey, object);
   const single = directional ?? environmentSingleSprite(object.assetKey);
   if (single) {
     const aspect = single.width / single.height;
     const coverage = directional?.bodyCoverage;
     const scale = Math.min((coverage ? object.width * coverage : object.width + .1) / ((single.right - single.left) * aspect),
-      (coverage ? object.height * coverage : object.height + .1) / (single.bottom - single.top));
+      (standing ? object.height + 1.35 : coverage ? object.height * coverage : object.height + .1) / (single.bottom - single.top));
     const width = scale * aspect * cellSize, height = scale * cellSize;
     const sprite = { left: (object.width - 1) / 2 * cellSize - (single.left + single.right) / 2 * width,
-      top: (.5 - (coverage ? object.height * (1 - coverage) / 2 : 0)) * cellSize - single.bottom * height, width, height };
+      top: (standing ? .15 : .5 - (coverage ? object.height * (1 - coverage) / 2 : 0)) * cellSize - single.bottom * height, width, height };
     // Fit the visible body at alpha>=16; reserve every alpha>0 tail as well.
     // WorldMapPanel reads this envelope for scenery clearance, not just the trunk.
     const alpha = single.alphaEnvelope;
     const painted = { left: sprite.left + alpha.left * width, top: sprite.top + alpha.top * height,
       width: (alpha.right - alpha.left) * width, height: (alpha.bottom - alpha.top) * height };
-    return { sprite, rotation: 0, painted, cells: cells.map(cell => ({ ...cell,
+    return { sprite, rotation: 0, painted, standing, cells: cells.map(cell => ({ ...cell,
       left: (cell.x - object.x - .5) * cellSize, top: -(cell.y - object.y + .5) * cellSize,
       width: cellSize, height: cellSize })) };
   }
@@ -138,13 +141,13 @@ export function environmentGeometry(object: EnvironmentObjectView, cellSize: num
   // Small authored tips may overhang, but a tall default allowance must not
   // push half the subject into the translucent layer.
   const scale = Math.min((object.width + .1) / (bounds.right - bounds.left),
-    (object.height + .1) / (bounds.bottom - bounds.top));
+    (object.height + (standing ? 1.35 : .1)) / (bounds.bottom - bounds.top));
   const sprite = { left: ((object.width - 1) / 2 - (bounds.left + bounds.right) / 2 * scale) * cellSize,
-    top: (.5 - bounds.bottom * scale) * cellSize, width: scale * cellSize, height: scale * cellSize };
+    top: ((standing ? .15 : .5) - bounds.bottom * scale) * cellSize, width: scale * cellSize, height: scale * cellSize };
   // Origin is the centre of the south-west occupied cell. Convert northward y.
   const painted = { left: sprite.left + bounds.left * sprite.width, top: sprite.top + bounds.top * sprite.height,
     width: (bounds.right - bounds.left) * sprite.width, height: (bounds.bottom - bounds.top) * sprite.height };
-  return { sprite, rotation: 0, painted, cells: cells.map(cell => ({ ...cell,
+  return { sprite, rotation: 0, painted, standing, cells: cells.map(cell => ({ ...cell,
     left: (cell.x - object.x - 0.5) * cellSize,
     top: -(cell.y - object.y + 0.5) * cellSize, width: cellSize, height: cellSize })) };
 }

@@ -9,6 +9,9 @@ import type { HandbookSection } from './handbook-api';
 import StoryDialog from './components/StoryDialog.vue';
 import { createIdempotencyKey } from './idempotency-key';
 import ExploreChatPanel, { type ExploreChatTab } from './components/ExploreChatPanel.vue';
+import PlayerCardDialog from './components/PlayerCardDialog.vue';
+import PartyInvitationsDialog from './components/PartyInvitationsDialog.vue';
+import { usePlayerCard } from './usePlayerCard';
 import LazyPanelState from './components/LazyPanelState.vue';
 import type { AdvancedMentor, AdvancedTrialStarted } from './advanced-profession-api';
 import type { HomePurchaseSiteTarget } from './home-purchase-api';
@@ -24,6 +27,7 @@ import './anime-inventory-panel.css';
 import CharacterPortrait from './components/CharacterPortrait.vue';
 import CharacterInfoPanel from './components/CharacterInfoPanel.vue';
 import AnimeIcon from './components/AnimeIcon.vue';
+import AvatarCropDialog from './components/AvatarCropDialog.vue';
 import GameUiFeedbackArt from './components/GameUiFeedbackArt.vue';
 import TabArtIcon, { type TabArtKey } from './components/TabArtIcon.vue';
 import SocialAvatar from './components/SocialAvatar.vue';
@@ -53,6 +57,8 @@ import { BgmPlayer, type BgmScene } from './bgm';
 import { useAppViewport } from './useAppViewport';
 import { useViewportPagination } from './useViewportPagination';
 import ViewportPagination from './components/ViewportPagination.vue';
+import { preparePlayerAssets, type BootProgress } from './boot-assets';
+import { createCommonAssetPaths, createPlayerAssetPlan } from './player-asset-plan';
 
 // Keep unopened gameplay screens out of the login module graph. A failed code
 // download waits for an explicit page reload and never repeats a gameplay action.
@@ -175,6 +181,75 @@ const passwordConfirmation = ref('');
 const showPasswordConfirmation = ref(false);
 const registrationLoginId = ref('');
 const loggedIn = ref(Boolean(api.token()));
+const gameReady = ref(false);
+const gameLoadStatus = ref('正在读取角色资料…');
+const gameLoadError = ref('');
+const gameLoadNeedsReload = ref(false);
+const gameLoadProgress = ref<BootProgress>({ fraction: 0, completed: 0, total: 0, loadedBytes: 0, totalBytes: 0 });
+let gameLoadController: AbortController | null = null;
+let backgroundLoadController: AbortController | null = null;
+let backgroundLoadTimer: number | undefined;
+let gameLoadVersion = 0;
+const gameLoadElapsed = ref(0);
+let gameLoadStartedAt = performance.now();
+let gameLoadElapsedTimer: number | undefined;
+let authPreloadController: AbortController | null = null;
+let authPreloadPromise: Promise<void> | undefined;
+const authPreloadedPaths = new Set<string>();
+let appDisposed = false;
+const stopAuthPreloading = async () => {
+  authPreloadController?.abort();
+  await authPreloadPromise;
+};
+const startAuthPreloading = () => {
+  if (appDisposed || loggedIn.value || authPreloadController) return;
+  const controller = new AbortController();
+  authPreloadController = controller;
+  // Public interface art is shared by every account. Account-specific artwork
+  // is still selected only after the server returns this player's current state.
+  const paths = [
+    '/assets/light-anime/auth-v4/loading-scene-wide-v1.webp',
+    '/assets/light-anime/auth-v4/register-scene-wide-v1.webp',
+    ...createCommonAssetPaths()
+  ].filter(path => !authPreloadedPaths.has(path));
+  let next = 0;
+  const worker = async () => {
+    while (next < paths.length && !controller.signal.aborted) {
+      const path = paths[next++];
+      try {
+        await preparePlayerAssets([path], () => {}, controller.signal);
+        authPreloadedPaths.add(path);
+      } catch { /* Optional preloading never blocks authentication; foreground loading can retry. */ }
+    }
+  };
+  authPreloadPromise = Promise.all([worker(), worker()]).then(() => {}).finally(() => {
+    if (authPreloadController === controller) authPreloadController = null;
+  });
+};
+watch(loggedIn, value => {
+  if (value) {
+    gameLoadStartedAt = performance.now();
+    gameLoadElapsed.value = 0;
+    gameLoadStatus.value = '正在读取角色资料…';
+    void stopAuthPreloading();
+  }
+  else void stopAuthPreloading().then(startAuthPreloading);
+});
+const cancelBackgroundLoading = () => {
+  if (backgroundLoadTimer !== undefined) window.clearTimeout(backgroundLoadTimer);
+  backgroundLoadTimer = undefined;
+  backgroundLoadController?.abort();
+  backgroundLoadController = null;
+};
+const cancelGamePreparation = () => {
+  gameLoadVersion += 1;
+  gameLoadController?.abort();
+  gameLoadController = null;
+  cancelBackgroundLoading();
+  gameReady.value = false;
+  gameLoadError.value = '';
+  gameLoadProgress.value = { fraction: 0, completed: 0, total: 0, loadedBytes: 0, totalBytes: 0 };
+};
 const appShell = ref<HTMLElement | null>(null);
 const appViewportStyle = useAppViewport();
 const characterScene = computed<CharacterScene | undefined>(() => loggedIn.value && tab.value === 'character'
@@ -215,7 +290,7 @@ let partyRequestVersion = 0;
 const catalog = ref<CommandCatalogItem[]>([]);
 const commandCatalogRef = ref<{ showInteractionResult: (result: CommandActionResult) => void; showInteractionError: (error: unknown) => void } | null>(null);
 const catalogOpen = ref(false);
-const exploreCanvasActive = computed(() => loggedIn.value && tab.value === 'explore' && !panel.value?.inBattle && !negotiation.value && !catalogOpen.value);
+const exploreCanvasActive = computed(() => loggedIn.value && gameReady.value && tab.value === 'explore' && !panel.value?.inBattle && !negotiation.value && !catalogOpen.value);
 const explorationViewportStyle = useExplorationViewport(appShell, exploreCanvasActive);
 const catalogLoaded = ref(false);
 const manualOpen = ref(false);
@@ -259,6 +334,23 @@ let mailLoadVersion = 0;
 let mailDetailVersion = 0;
 const inboxUnreadCount = computed(() => notificationUnreadCount.value + mailUnreadCount.value);
 const settingsOpen = ref(false);
+const settingsPage = ref<'overview' | 'password'>('overview');
+const settingsExpanded = ref<'game' | 'account' | null>(null);
+const settingsRenderExploration = ref(true);
+const settingsAvatarInput = ref<HTMLInputElement | null>(null);
+const settingsAvatarSource = ref('');
+const settingsAvatarError = ref('');
+const settingsAvatarBusy = ref(false);
+let settingsAvatarVersion = 0;
+let settingsAvatarController: AbortController | undefined;
+const settingsRedeemCode = ref('');
+const settingsRedeemBusy = ref(false);
+const settingsRedeemFeedback = ref('');
+const settingsRedeemFailed = ref(false);
+const settingsUploadedAvatar = computed(() => {
+  const value = panel.value?.account?.avatarUrl;
+  return typeof value === 'string' && /^data:image\/(?:jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(value) ? value : '';
+});
 const worldSection = ref<WorldSection>('overview');
 const musicVolume = ref(70);
 const musicEnabled = ref(true);
@@ -274,21 +366,24 @@ const toggleMusic = () => {
   bgmPlayer?.update(bgmScene.value, musicEnabled.value, musicVolume.value);
   bgmPlayer?.unlock();
 };
-const settingsAvatar = ref('compass');
 const settingsNickname = ref('');
-const settingsGender = ref<'男' | '女'>('男');
+const settingsGender = ref<'男' | '女' | ''>('');
+const selectedSettingsGender = (gender: unknown) => gender === '男' || gender === '女' ? gender : '';
+type SettingsIdentityChange = { kind: 'rename' | 'gender'; value: string; status: Awaited<ReturnType<typeof api.identityChanges>>; error: string };
+const settingsIdentityChange = ref<SettingsIdentityChange | null>(null);
+const settingsIdentityBusy = ref(false);
+const settingsProfileFeedback = ref('');
+const settingsIdentityCost = computed(() => {
+  const change = settingsIdentityChange.value;
+  return change ? change.kind === 'rename' ? change.status.rename : change.status.genderChange : null;
+});
+const settingsIdentityAvailable = computed(() => Boolean(settingsIdentityCost.value && (settingsIdentityCost.value.freeRemaining > 0 || settingsIdentityCost.value.cardQuantity >= settingsIdentityCost.value.requiredQuantity)));
 const settingsCurrentPassword = ref('');
 const settingsNewPassword = ref('');
 const settingsPasswordConfirmation = ref('');
 const showSettingsCurrentPassword = ref(false);
 const showSettingsNewPassword = ref(false);
 const showSettingsPasswordConfirmation = ref(false);
-const settingsAvatarOptions = [
-  { id: 'compass', label: '星图', icon: 'star' },
-  { id: 'flame', label: '火花', icon: 'flame' },
-  { id: 'leaf', label: '叶灵', icon: 'leaf' },
-  { id: 'moon', label: '月影', icon: 'moon' }
-] as const;
 const persistLocalSetting = (key: string, value: string | number | boolean) => {
   try { localStorage.setItem(`fantasy-final.${key}`, String(value)); } catch { /* 浏览器禁用存储时仍可继续使用页面 */ }
 };
@@ -297,11 +392,11 @@ const readLocalSetting = (key: string, fallback: string) => {
 };
 musicVolume.value = Math.min(100, Math.max(0, Number(readLocalSetting('music-volume', '70')) || 0));
 musicEnabled.value = readLocalSetting('music-enabled', 'true') !== 'false';
-settingsAvatar.value = readLocalSetting('avatar', 'compass');
+settingsRenderExploration.value = readLocalSetting('exploration-render', 'true') !== 'false';
 watch(musicVolume, value => persistLocalSetting('music-volume', value));
 watch(musicEnabled, value => persistLocalSetting('music-enabled', value));
 watch([bgmScene, musicEnabled, musicVolume], ([scene, enabled, volume]) => bgmPlayer?.update(scene, enabled, volume));
-watch(settingsAvatar, value => persistLocalSetting('avatar', value));
+watch(settingsRenderExploration, value => persistLocalSetting('exploration-render', value));
 type RegionMapSidebarHandle = { openSidebar: (regionCode?: string) => void; closeSidebar: () => void };
 const regionMapSidebarRef = ref<RegionMapSidebarHandle | null>(null);
 type InventoryCategory = '全部' | '装备' | '道具' | '材料';
@@ -409,10 +504,10 @@ const mapRestingHeading = ref<MapHeading>('down');
 const mapMovePending = computed(() => mapRoute.pending.value || committedMapMotion.pending.value);
 const mapMovementTarget = computed(() => mapRoute.target.value ?? committedMapMotion.target.value ?? travelVisual.value?.target);
 const travelVisual = computed(() => panel.value?.summary?.travel?.activityType !== 'hunt' ? panel.value?.summary?.travel?.visual : undefined);
-const mapTravelMotion = useExplorationTravelMotion(travelVisual, computed(() => loggedIn.value && tab.value === 'explore' && !panel.value?.inBattle && !negotiation.value));
+const mapTravelMotion = useExplorationTravelMotion(travelVisual, computed(() => loggedIn.value && gameReady.value && tab.value === 'explore' && !panel.value?.inBattle && !negotiation.value));
 const travelMapVision = useExplorationTravelVision({
   visual: travelVisual, frame: mapTravelMotion,
-  enabled: computed(() => loggedIn.value && tab.value === 'explore' && !panel.value?.inBattle && !negotiation.value && !mapMovePending.value),
+  enabled: computed(() => loggedIn.value && gameReady.value && tab.value === 'explore' && !panel.value?.inBattle && !negotiation.value && !mapMovePending.value),
   session: () => currentAuthRequest(), isCurrentSession: session => isCurrentAuthRequest(session),
   load: signal => api.exploreLocalMap(signal, 'travel')
 });
@@ -426,6 +521,8 @@ const mapTravelVisualCenter = computed(() => {
 });
 const mapMovementHeading = computed(() => mapRoute.pending.value ? undefined : mapSceneMotion.value?.heading ?? mapRestingHeading.value);
 const mapMovementSpeed = computed(() => mapRoute.pending.value ? mapRoute.speed.value : mapSceneMotion.value?.speed);
+const mapActualMovementSpeed = computed(() => [mapMovementSpeed.value, mapRenderSnapshot.value?.movement.speed, panel.value?.movement?.speed, panel.value?.summary?.movement?.speed]
+  .find(value => typeof value === 'number' && Number.isFinite(value) && value > 0));
 const mapAuthoritativeMovementSpeed = computed(() => [panel.value?.movement?.speed, panel.value?.summary?.movement?.speed, panel.value?.movement?.maximum, panel.value?.summary?.movementMaximum].find(value => typeof value === 'number' && Number.isFinite(value) && value > 0) ?? 1);
 const clearMapMoveAnimation = () => { mapTargetPopupRequest.value = undefined; mapRouteStoppedResult = undefined; mapRestingHeading.value = 'down'; mapRoute.reset(); committedMapMotion.reset(); travelMapVision.reset(); committedVisionRequest?.abort(); committedMapSnapshot.value = undefined; };
 let mapNavigationVersion = 0;
@@ -467,7 +564,7 @@ const floatingDockSide = ref<FloatingDockSide>('right');
 const floatingDockVerticalRatio = ref(0.5);
 const floatingSocialPanelOffset = ref({ x: 0, y: 0 });
 const teamPanelOffset = ref({ x: 0, y: 0 });
-const floatingSocialHeight = ref(560);
+const floatingSocialHeight = ref(0);
 let floatingDragState: { pointerId: number; startX: number; startY: number; originX: number; originY: number; originLeft: number; originTop: number; width: number; height: number; moved: boolean; captured: boolean } | null = null;
 let modalDragState: { kind: 'social' | 'team'; pointerId: number; startX: number; startY: number; originX: number; originY: number; moved: boolean; captured: boolean } | null = null;
 let socialResizeState: { pointerId: number; startY: number; originHeight: number; originOffsetY: number; minHeight: number; maxHeight: number; captured: boolean } | null = null;
@@ -606,7 +703,7 @@ const setModalOffset = (kind: 'social' | 'team', offset: { x: number; y: number 
 const floatingSocialPanelStyle = computed(() => ({
   '--modal-x': `${floatingSocialPanelOffset.value.x}px`,
   '--modal-y': `${floatingSocialPanelOffset.value.y}px`,
-  '--chat-height': `${floatingSocialHeight.value}px`
+  '--chat-height': floatingSocialHeight.value > 0 ? `${floatingSocialHeight.value}px` : 'var(--explore-window-height)'
 } as Record<string, string>));
 const teamPanelStyle = computed(() => ({
   '--modal-x': `${teamPanelOffset.value.x}px`,
@@ -1140,7 +1237,7 @@ const requestStoppedMapTarget = async (result: MovementStopResult | undefined, r
   const pointIds = stoppedMovementPointIds(result, current, mapPoints.value);
   if (pointIds.length) mapTargetPopupRequest.value = { id: ++mapTargetPopupId, pointIds, playerKey, regionCode, position: { ...mapCurrent.value } };
 };
-const mapMoveRange = computed(() => Math.max(0, Math.min(Number(panel.value?.movement?.step ?? panel.value?.summary?.movementStep ?? 1), Number(localMapMatchesCurrent.value ? localExplorationMap.value!.actionRange : panel.value?.nearby?.actionRange ?? panel.value?.nearby?.range ?? 0))));
+const mapMoveRange = computed(() => Math.max(0, Number(mapRenderSnapshot.value?.range ?? panel.value?.nearby?.range ?? 0)));
 const mapSightRange = computed(() => Math.max(0, Number(mapRenderSnapshot.value?.range ?? panel.value?.nearby?.range ?? 0)));
 const regionMap = computed(() => {
   const source = panel.value?.regionMap;
@@ -1306,7 +1403,10 @@ const loadPanel = async () => {
 };
 const mergeNotifications = (current: WebNotification[], incoming: WebNotification[]) => {
   const byId = new Map<number, WebNotification>();
-  for (const item of [...current, ...incoming]) byId.set(item.id, item);
+  // Match the inbox service: gameplay feedback belongs in its action panel.
+  for (const item of [...current, ...incoming]) {
+    if (['system', 'party', 'friend', 'mail', 'world'].includes(item.category)) byId.set(item.id, item);
+  }
   return Array.from(byId.values()).sort((a, b) => b.id - a.id);
 };
 const resetNotificationState = () => {
@@ -1835,14 +1935,102 @@ const storyGuideFrom = (result: GameActionMessage & { messages?: GameActionMessa
     messages
   };
 };
-const loadLocalExplorationMap = async () => {
+const loadLocalExplorationMap = async (signal?: AbortSignal): Promise<api.ExploreLocalMap | undefined> => {
   const request = currentAuthRequest();
   if (!request.token || tab.value !== 'explore' || !panel.value?.summary) return;
   const version = ++localMapRequestVersion;
   try {
-    const result = await api.exploreLocalMap();
-    if (isCurrentAuthRequest(request) && version === localMapRequestVersion && result.origin.x === mapCurrent.value.x && result.origin.y === mapCurrent.value.y && result.origin.z === mapCurrent.value.z) localExplorationMap.value = result;
-  } catch (value) { if (isCurrentAuthRequest(request) && version === localMapRequestVersion) { localExplorationMap.value = undefined; setError(value); } }
+    const result = await api.exploreLocalMap(signal);
+    if (isCurrentAuthRequest(request) && version === localMapRequestVersion && result.origin.x === mapCurrent.value.x && result.origin.y === mapCurrent.value.y && result.origin.z === mapCurrent.value.z) {
+      localExplorationMap.value = result;
+      return result;
+    }
+  } catch (value) { if (!signal?.aborted && isCurrentAuthRequest(request) && version === localMapRequestVersion) { localExplorationMap.value = undefined; setError(value); } }
+};
+const preparePlayerExperience = async () => {
+  const request = currentAuthRequest();
+  if (!request.token) return;
+  gameLoadController?.abort();
+  cancelBackgroundLoading();
+  const controller = new AbortController();
+  gameLoadController = controller;
+  const version = ++gameLoadVersion;
+  const current = () => version === gameLoadVersion && !controller.signal.aborted && isCurrentAuthRequest(request);
+  gameReady.value = false;
+  gameLoadError.value = '';
+  gameLoadNeedsReload.value = false;
+  gameLoadProgress.value = { fraction: 0, completed: 0, total: 0, loadedBytes: 0, totalBytes: 0 };
+  gameLoadStartedAt = performance.now();
+  gameLoadElapsed.value = 0;
+  error.value = '';
+  try {
+    // Settle cancelled public downloads before starting the four foreground
+    // workers. Verified files remain in the versioned resource cache.
+    await stopAuthPreloading();
+    if (!current()) return;
+    gameLoadStatus.value = '正在读取角色资料…';
+    if (!panel.value) await loadPanel();
+    if (!current()) return;
+    const snapshot = panel.value;
+    if (!snapshot) throw new Error(error.value || '角色资料读取失败，请检查网络后重试。');
+    if (snapshot.account?.hasCharacter !== false && !snapshot.summary) throw new Error('角色资料不完整，请稍后重试。');
+    let localMap: api.ExploreLocalMap | undefined;
+    if (snapshot.account?.hasCharacter !== false && snapshot.summary && !snapshot.inBattle) {
+      gameLoadStatus.value = '正在读取当前探索地图…';
+      localMap = await loadLocalExplorationMap(controller.signal);
+      if (!current()) return;
+      if (!localMap) throw new Error(error.value || '探索地图读取失败，请检查网络后重试。');
+    }
+    const plan = createPlayerAssetPlan(snapshot, localMap);
+    gameLoadStatus.value = snapshot.account?.hasCharacter === false ? '正在准备冒险序章…'
+      : snapshot.inBattle ? '正在准备当前战斗画面…' : '正在准备当前探索画面…';
+    const openingScreen = snapshot.account?.hasCharacter !== false
+      ? (snapshot.inBattle ? import('./components/TurnBattlePanel.vue') : import('./components/WorldMapPanel.vue')).catch(reason => {
+        gameLoadNeedsReload.value = true;
+        throw reason;
+      }) : Promise.resolve();
+    await Promise.all([
+      preparePlayerAssets(plan.opening, progress => { if (current()) gameLoadProgress.value = progress; }, controller.signal),
+      openingScreen
+    ]);
+    if (!current()) return;
+    gameLoadStatus.value = '资源已就绪，正在进入游戏…';
+    gameReady.value = true;
+    const backgroundPaths = musicEnabled.value
+      ? [...plan.background, `/assets/audio/bgm/${bgmScene.value}.mp3`] : plan.background;
+    if (backgroundPaths.length) {
+      const backgroundController = new AbortController();
+      backgroundLoadController = backgroundController;
+      // Let the first gameplay frame paint before downloading the player's
+      // other tabs. Failure here never blocks the current screen.
+      backgroundLoadTimer = window.setTimeout(() => {
+        backgroundLoadTimer = undefined;
+        if (!current() || !gameReady.value) return;
+        let next = 0;
+        const worker = async () => {
+          while (next < backgroundPaths.length && !backgroundController.signal.aborted) {
+            const path = backgroundPaths[next++];
+            // An optional image can fail without preventing the remaining
+            // owned resources from being cached for later tabs.
+            try { await preparePlayerAssets([path], () => {}, backgroundController.signal); }
+            catch { /* The destination tab retains its normal on-demand image fallback. */ }
+          }
+        };
+        void Promise.all([worker(), worker()])
+          .finally(() => { if (backgroundLoadController === backgroundController) backgroundLoadController = null; });
+      }, 1200);
+    }
+  } catch (value) {
+    if (current()) gameLoadError.value = gameLoadNeedsReload.value
+      ? '游戏界面下载中断，请重新加载页面。'
+      : api.userFacingErrorMessage(value);
+  } finally {
+    if (version === gameLoadVersion) gameLoadController = null;
+  }
+};
+const retryPlayerExperience = () => {
+  if (gameLoadNeedsReload.value) window.location.reload();
+  else void preparePlayerExperience();
 };
 const performEnvironmentAction = async (operation: 'clear' | 'cancel' | 'settle', object?: EnvironmentObjectView) => {
   const request = currentAuthRequest();
@@ -1877,7 +2065,7 @@ const settleDueEnvironment = async () => {
   try { await performEnvironmentAction('settle'); }
   finally { if (environmentSettlement === settlement) environmentSettlement = null; }
 };
-watch(() => [tab.value, loggedIn.value, mapCurrent.value.x, mapCurrent.value.y, mapCurrent.value.z, panel.value?.nearby?.range, panel.value?.nearby?.actionRange], () => { if (!mapRoute.replaying.value) void loadLocalExplorationMap(); }, { flush: 'post' });
+watch(() => [tab.value, loggedIn.value, gameReady.value, mapCurrent.value.x, mapCurrent.value.y, mapCurrent.value.z, panel.value?.nearby?.range, panel.value?.nearby?.actionRange], () => { if (gameReady.value && !mapRoute.replaying.value) void loadLocalExplorationMap(); }, { flush: 'post' });
 const isStoryCommand = (command: string) => /^\/(?:注册|询问|选择去向|天堂|天赋目录|天赋详情|选择恩赐|初行选择|初章|继续剧情)(?:\s|$)/.test(command.trim());
 type CommandSurface = 'story' | 'manual' | 'interaction' | 'catalog';
 const showStoryResult = (result: CommandActionResult) => {
@@ -2074,6 +2262,7 @@ const submitAuth = async () => {
       ? await api.login(gameId.value, password.value)
       : await api.register(displayName.value, password.value, passwordConfirmation.value);
     api.saveToken(result.accessToken);
+    cancelGamePreparation();
     loggedIn.value = true;
     authGeneration += 1;
     registrationLoginId.value = mode === 'register' ? result.loginId : '';
@@ -2082,6 +2271,7 @@ const submitAuth = async () => {
     passwordConfirmation.value = '';
     await loadPanel();
     if (mode === 'register' || panel.value?.account?.hasCharacter === false) await loadRegistrationGuide();
+    await preparePlayerExperience();
     await loadSocial();
     await loadNotifications();
     await loadGameMailUnread();
@@ -2184,6 +2374,7 @@ const openAdventureManual = (section: 'tasks' | 'footprints' | 'codex' | 'warran
 };
 const selectManualCategory = (category: ManualCategory) => {
   manualCategory.value = category;
+  manualMessages.value = [];
   void loadManualCommand(`/任务分类 ${category}`);
 };
 const runManualCommand = (command: string) => {
@@ -2737,14 +2928,135 @@ const addSocialFriend = async () => {
   socialGameId.value = '';
   await socialAction(`/加好友 ${gameId}`);
 };
+const playerCards = usePlayerCard({
+  session: currentAuthRequest,
+  isCurrentSession: isCurrentAuthRequest,
+  socialChanged: loadSocial,
+  partyChanged: async () => { await Promise.all([refreshPartyData(), loadPanel()]); },
+  whisper: async (targetGameId, isCurrent) => {
+    const request = currentAuthRequest();
+    await loadSocial();
+    if (!isCurrentAuthRequest(request) || !isCurrent()) return;
+    const channel = channels.value.find(item => item.type === 'friend' && item.gameId === targetGameId);
+    if (!channel) throw new Error('私信频道暂不可用，请刷新好友关系后重试。');
+    lastFriendChatChannel.value = channel.id;
+    openFloatingSocial('friend');
+    selectChannel(channel.id);
+  }
+});
+const playerCardBusy = computed(() => playerCards.busy.value || busy.value || criticalPending.value || partyBusy.value);
+const chatMessagesForView = computed(() => messages.value.map(message => message.own && settingsUploadedAvatar.value
+  ? { ...message, senderAvatarUrl: settingsUploadedAvatar.value } : message));
+watch(floatingSocialOpen, value => {
+  if (!value) playerCards.closeAll();
+  else if (loggedIn.value && panel.value?.account?.hasCharacter !== false) void playerCards.refreshInvitations(true);
+});
+watch([loggedIn, () => panel.value?.account?.uid], ([signedIn, owner], previous) => {
+  if (!signedIn || (previous?.[1] && owner !== previous[1])) playerCards.reset();
+});
+onBeforeUnmount(playerCards.reset);
 const openSettings = () => {
   if (criticalPending.value && !showStoryGuide.value) return;
+  settingsIdentityChange.value = null;
+  settingsIdentityBusy.value = false;
+  settingsPage.value = 'overview';
+  settingsExpanded.value = null;
+  settingsRedeemFeedback.value = '';
+  settingsProfileFeedback.value = '';
   settingsNickname.value = String(panel.value?.summary?.name ?? panel.value?.account?.displayName ?? displayName.value ?? '');
   const gender = panel.value?.summary?.gender;
-  if (gender === '男' || gender === '女') settingsGender.value = gender;
+  settingsGender.value = selectedSettingsGender(gender);
   settingsOpen.value = true;
 };
-const closeSettings = () => { settingsOpen.value = false; };
+const closeSettings = () => {
+  if (settingsAvatarBusy.value || settingsRedeemBusy.value || settingsIdentityBusy.value) return;
+  settingsIdentityChange.value = null;
+  setCriticalPending('identityChange', false);
+  settingsOpen.value = false;
+};
+const toggleSettingsSection = (section: 'game' | 'account') => {
+  settingsExpanded.value = settingsExpanded.value === section ? null : section;
+};
+const clearSettingsAvatar = () => {
+  settingsAvatarVersion += 1;
+  settingsAvatarController?.abort();
+  settingsAvatarController = undefined;
+  if (settingsAvatarSource.value) URL.revokeObjectURL(settingsAvatarSource.value);
+  settingsAvatarSource.value = '';
+  settingsAvatarError.value = '';
+  settingsAvatarBusy.value = false;
+  setCriticalPending('avatarUpload', false);
+};
+const selectSettingsAvatar = (event: Event) => {
+  const input = event.target as HTMLInputElement;
+  const file = input.files?.[0];
+  input.value = '';
+  if (!file || settingsAvatarBusy.value || criticalPending.value) return;
+  clearSettingsAvatar();
+  if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+    settingsAvatarError.value = '请选择 JPG、PNG 或 WebP 图片。';
+    return;
+  }
+  if (file.size > 8 * 1024 * 1024) {
+    settingsAvatarError.value = '图片不能超过 8 MB，请选择较小的图片。';
+    return;
+  }
+  settingsAvatarSource.value = URL.createObjectURL(file);
+};
+const uploadSettingsAvatar = async (imageData: string) => {
+  if (settingsAvatarBusy.value || criticalPending.value) return;
+  const request = currentAuthRequest();
+  const version = ++settingsAvatarVersion;
+  settingsAvatarController = new AbortController();
+  settingsAvatarBusy.value = true;
+  settingsAvatarError.value = '';
+  setCriticalPending('avatarUpload', true);
+  try {
+    const result = await api.uploadAvatar(imageData, settingsAvatarController.signal);
+    if (version !== settingsAvatarVersion || !isCurrentAuthRequest(request)) return;
+    if (panel.value?.account) panel.value = { ...panel.value, account: { ...panel.value.account, avatarUrl: result.avatarUrl } };
+    notice.value = '头像已上传。';
+    clearSettingsAvatar();
+  } catch (reason) {
+    if (version === settingsAvatarVersion && isCurrentAuthRequest(request)) settingsAvatarError.value = api.userFacingErrorMessage(reason);
+  } finally {
+    if (version === settingsAvatarVersion) {
+      settingsAvatarBusy.value = false;
+      settingsAvatarController = undefined;
+      setCriticalPending('avatarUpload', false);
+    }
+  }
+};
+const redeemSettingsCode = async () => {
+  if (settingsRedeemBusy.value || criticalPending.value || busy.value) return;
+  const code = settingsRedeemCode.value.trim();
+  settingsRedeemFeedback.value = '';
+  settingsRedeemFailed.value = false;
+  if (!code) { settingsRedeemFeedback.value = '请输入兑换码。'; settingsRedeemFailed.value = true; return; }
+  const request = currentAuthRequest();
+  settingsRedeemBusy.value = true;
+  setCriticalPending('redeemCode', true);
+  try {
+    const result = await api.redeemCode(code);
+    if (!isCurrentAuthRequest(request)) return;
+    settingsRedeemCode.value = '';
+    settingsRedeemFeedback.value = result.message;
+    await loadGameMailUnread();
+    if (notificationOpen.value) void loadGameMails();
+  } catch (reason) {
+    if (isCurrentAuthRequest(request)) { settingsRedeemFeedback.value = api.userFacingErrorMessage(reason); settingsRedeemFailed.value = true; }
+  } finally {
+    settingsRedeemBusy.value = false;
+    setCriticalPending('redeemCode', false);
+  }
+};
+watch(() => panel.value?.account?.uid, () => {
+  clearSettingsAvatar();
+  settingsRedeemCode.value = '';
+  settingsRedeemFeedback.value = '';
+  settingsExpanded.value = null;
+});
+onBeforeUnmount(clearSettingsAvatar);
 const copyAccountId = async (value: string) => {
   if (!value) return;
   try {
@@ -2774,6 +3086,7 @@ const saveSettingsPassword = async () => {
     realtime.value = null;
     api.saveToken(result.accessToken);
     authGeneration += 1;
+    playerCards.reset();
     settingsCurrentPassword.value = '';
     settingsNewPassword.value = '';
     settingsPasswordConfirmation.value = '';
@@ -2782,21 +3095,110 @@ const saveSettingsPassword = async () => {
     await connectRealtime();
   } catch (e) { setError(e); } finally { busy.value = false; }
 };
+const normalizedSettingsName = (name: string) => name.trim().replace(/\s+/g, ' ');
+const requestSettingsIdentityChange = async (kind: 'rename' | 'gender', value: string) => {
+  const request = currentAuthRequest();
+  if (!request.token || busy.value || criticalPending.value || settingsIdentityBusy.value) return;
+  settingsProfileFeedback.value = '';
+  const current = kind === 'rename' ? normalizedSettingsName(panel.value?.summary?.name ?? '') : panel.value?.summary?.gender;
+  if (value === current) {
+    if (kind === 'rename') settingsProfileFeedback.value = '昵称未发生变化，无需修改。';
+    return;
+  }
+  busy.value = true;
+  settingsIdentityBusy.value = true;
+  setCriticalPending('identityChange', true);
+  try {
+    const status = await api.identityChanges();
+    if (!isCurrentAuthRequest(request) || !settingsOpen.value) return;
+    settingsGender.value = selectedSettingsGender(status.gender);
+    if (value === (kind === 'rename' ? normalizedSettingsName(status.name) : status.gender)) {
+      settingsProfileFeedback.value = kind === 'rename' ? '昵称未发生变化，无需修改。' : '性别未发生变化，无需修改。';
+      return;
+    }
+    settingsIdentityChange.value = { kind, value, status, error: '' };
+  } catch (e) {
+    if (isCurrentAuthRequest(request)) setError(e);
+  } finally {
+    if (isCurrentAuthRequest(request)) {
+      busy.value = false;
+      settingsIdentityBusy.value = false;
+      if (!settingsIdentityChange.value) setCriticalPending('identityChange', false);
+    }
+  }
+};
 const saveSettingsNickname = async () => {
-  const name = settingsNickname.value.trim().replace(/\s+/g, ' ');
+  const name = normalizedSettingsName(settingsNickname.value);
   if (Array.from(name).length < 2 || Array.from(name).length > 24) {
     setError('昵称需要为 2～24 个字符。');
     return;
   }
   settingsNickname.value = name;
-  await runCommand(`/角色改名 ${name}`);
+  await requestSettingsIdentityChange('rename', name);
 };
 const saveSettingsGender = async (gender: '男' | '女') => {
-  settingsGender.value = gender;
-  await runCommand(`/改性 ${gender}`);
+  await requestSettingsIdentityChange('gender', gender);
+};
+const cancelSettingsIdentityChange = () => {
+  if (settingsIdentityBusy.value) return;
+  settingsIdentityChange.value = null;
+  setCriticalPending('identityChange', false);
+};
+const confirmSettingsIdentityChange = async () => {
+  const change = settingsIdentityChange.value;
+  const request = currentAuthRequest();
+  if (!change || !request.token || busy.value || settingsIdentityBusy.value || !settingsIdentityAvailable.value) return;
+  busy.value = true;
+  settingsIdentityBusy.value = true;
+  change.error = '';
+  try {
+    const status = await api.identityChanges();
+    if (!isCurrentAuthRequest(request)) return;
+    const current = change.kind === 'rename' ? normalizedSettingsName(status.name) : status.gender;
+    if (current === change.value) {
+      settingsGender.value = selectedSettingsGender(status.gender);
+      settingsProfileFeedback.value = change.kind === 'rename' ? '昵称未发生变化，无需修改。' : '性别未发生变化，无需修改。';
+      settingsIdentityChange.value = null;
+      return;
+    }
+    const quoted = change.kind === 'rename' ? change.status.rename : change.status.genderChange;
+    const cost = change.kind === 'rename' ? status.rename : status.genderChange;
+    change.status = status;
+    if (cost.freeRemaining !== quoted.freeRemaining || cost.code !== quoted.code || cost.requiredQuantity !== quoted.requiredQuantity) {
+      change.error = '免费次数或所需道具已更新，请核对后重新确认。';
+      return;
+    }
+    if (!cost.freeRemaining && cost.cardQuantity < cost.requiredQuantity) {
+      change.error = `${cost.itemName}不足，暂时无法修改。`;
+      return;
+    }
+    const result = await api.command(change.kind === 'rename' ? `/角色改名 ${change.value}` : `/改性 ${change.value}`);
+    if (!isCurrentAuthRequest(request)) return;
+    const updated = await api.panel();
+    if (!isCurrentAuthRequest(request)) return;
+    panel.value = updated;
+    settingsNickname.value = updated.summary?.name ?? status.name;
+    settingsGender.value = selectedSettingsGender(updated.summary?.gender);
+    const actual = change.kind === 'rename' ? normalizedSettingsName(updated.summary?.name ?? '') : updated.summary?.gender;
+    if (actual !== change.value) {
+      change.error = result.text ?? '修改未完成，请检查当前次数或道具后再试。';
+      return;
+    }
+    settingsIdentityChange.value = null;
+    settingsProfileFeedback.value = result.text ?? '修改完成。';
+  } catch (e) {
+    if (isCurrentAuthRequest(request)) change.error = api.userFacingErrorMessage(e);
+  } finally {
+    if (isCurrentAuthRequest(request)) {
+      busy.value = false;
+      settingsIdentityBusy.value = false;
+      if (!settingsIdentityChange.value) setCriticalPending('identityChange', false);
+    }
+  }
 };
 const logout = () => {
   if (criticalPending.value) return;
+  cancelGamePreparation();
   const hadToken = Boolean(api.token());
   authGeneration += 1;
   busy.value = false;
@@ -2885,6 +3287,7 @@ const logout = () => {
   tab.value = 'explore';
 };
 const handleAuthInvalidated = () => {
+  cancelGamePreparation();
   authGeneration += 1;
   busy.value = false;
   realtime.value?.close();
@@ -3127,6 +3530,10 @@ watch(() => localExplorationMap.value?.environmentJob, job => {
 }, { deep: true });
 
 onMounted(async () => {
+  gameLoadElapsedTimer = window.setInterval(() => {
+    if (loggedIn.value && !gameReady.value) gameLoadElapsed.value = Math.floor((performance.now() - gameLoadStartedAt) / 1000);
+  }, 1000);
+  if (!loggedIn.value) startAuthPreloading();
   restoreFloatingDockPlacement();
   void constrainFloatingDock();
   bgmPlayer = new BgmPlayer();
@@ -3140,6 +3547,7 @@ onMounted(async () => {
     authGeneration += 1;
     await loadPanel();
     if (panel.value?.account?.hasCharacter === false) await loadRegistrationGuide();
+    await preparePlayerExperience();
     await loadSocial();
     await loadNotifications();
     await loadGameMailUnread();
@@ -3148,9 +3556,11 @@ onMounted(async () => {
   window.addEventListener('resize', constrainFloatingDock);
   let notificationPollCount = 0;
   refreshTimer = window.setInterval(() => {
+    if (!gameReady.value) return;
     if (!mapMovePending.value) void loadPanel();
     if (tab.value === 'explore' && !mapMovePending.value && !busy.value) void loadLocalExplorationMap();
     if (tab.value === 'social' || floatingSocialOpen.value || desktopExploreVisible()) { void loadMessages(); void loadSocial(); }
+    if (floatingSocialOpen.value) void playerCards.refreshInvitations(true);
     notificationPollCount += 1;
     if (notificationPollCount % 2 === 0) {
       if (desktopExploreVisible() && !partyLoading.value && !partyBusy.value) void refreshPartyData();
@@ -3160,6 +3570,7 @@ onMounted(async () => {
     }
   }, 8000);
   actionCountdownTimer = window.setInterval(() => {
+    if (!gameReady.value) return;
     if (localExplorationMap.value?.environmentJob) {
       if (environmentRemaining.value > 0) environmentRemaining.value = Math.max(0, environmentRemaining.value - 1);
       else if (Date.now() >= nextEnvironmentSettleAt) {
@@ -3185,7 +3596,11 @@ onMounted(async () => {
   }, 1000);
 });
 onBeforeUnmount(() => {
+  appDisposed = true;
+  void stopAuthPreloading();
+  if (gameLoadElapsedTimer !== undefined) window.clearInterval(gameLoadElapsedTimer);
   clearMapMoveAnimation();
+  cancelGamePreparation();
   window.removeEventListener('pointerdown', unlockBgm);
   window.removeEventListener('touchend', unlockBgm);
   window.removeEventListener('click', unlockBgm);
@@ -3209,7 +3624,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div ref="appShell" class="app-shell" data-visual="light-anime" data-viewport-layout :data-page="loggedIn ? tab : loginMode" :data-explore-canvas="exploreCanvasActive || undefined" :data-character-scene="characterScene" :data-scene-framed="sceneFramed || undefined" :style="{ ...appViewportStyle, ...sceneFramingStyle, ...explorationViewportStyle, '--anime-city': `url(${ANIME_SCENES.city})`, '--anime-forest': `url(${ANIME_SCENES.forest})`, '--anime-auth': `url(${ANIME_SCENES.auth})`, '--anime-main-scene': `url(${ANIME_MAIN_SCENES[tab]})`, '--explore-terrain': `url(${terrainForRegion(regionMap.currentRegionCode, mapCurrent.name)})` }">
+  <div ref="appShell" class="app-shell" data-visual="light-anime" data-viewport-layout :data-page="loggedIn ? gameReady ? tab : 'loading' : loginMode" :data-explore-canvas="exploreCanvasActive || undefined" :data-character-scene="characterScene" :data-scene-framed="sceneFramed || undefined" :style="{ ...appViewportStyle, ...sceneFramingStyle, ...explorationViewportStyle, '--anime-city': `url(${ANIME_SCENES.city})`, '--anime-forest': `url(${ANIME_SCENES.forest})`, '--anime-auth': `url(${ANIME_SCENES.auth})`, '--anime-main-scene': `url(${ANIME_MAIN_SCENES[tab]})`, '--explore-terrain': `url(${terrainForRegion(regionMap.currentRegionCode, mapCurrent.name)})` }">
     <div v-if="!loggedIn" class="auth-screen">
       <img class="auth-hero" :src="ANIME_AUTH_ART[loginMode]" width="1920" height="1080" :alt="loginMode === 'login' ? '梨子喵伸手邀请旅人，球兔背着背包准备冒险' : '梨子喵递来冒险地图，球兔在冒险柜台旁等候'" fetchpriority="high" />
       <section class="auth-stage" :class="`auth-stage--${loginMode}`" aria-label="幻想次元旅人入口">
@@ -3254,6 +3669,26 @@ onBeforeUnmount(() => {
       </section>
     </div>
 
+    <section v-else-if="!gameReady" class="player-load-screen ff-boot-screen" :class="{ 'has-load-error': gameLoadError }" :aria-busy="!gameLoadError" aria-live="polite" aria-label="正在进入幻想次元">
+      <img class="ff-boot-hero" src="/assets/light-anime/auth-v4/loading-scene-wide-v1.webp" width="1672" height="940" alt="更大的世界就去冒险吧！梨子喵与球兔前往百纳镇" />
+      <div class="ff-boot-inner">
+        <img class="ff-boot-logo" :src="ANIME_LOGO" width="1942" height="809" alt="幻想次元" />
+        <div class="ff-boot-track-wrap">
+          <div class="ff-boot-status-row">
+            <p v-if="!gameLoadError" class="ff-boot-status">{{ gameLoadStatus }}</p>
+            <p v-else class="ff-boot-status player-load-error" role="alert">{{ gameLoadError }}</p>
+            <span class="ff-boot-count">{{ gameLoadProgress.total ? `${gameLoadProgress.completed} / ${gameLoadProgress.total} 项` : '准备中' }}</span>
+            <span class="ff-boot-elapsed" aria-hidden="true">已用 {{ gameLoadElapsed }} 秒</span>
+          </div>
+          <div class="ff-boot-progress-row">
+            <svg class="ff-boot-paw" viewBox="0 0 48 48" aria-hidden="true"><ellipse cx="10" cy="14" rx="5" ry="7" fill="currentColor" transform="rotate(-24 10 14)" /><ellipse cx="21" cy="9" rx="5" ry="7" fill="currentColor" transform="rotate(-7 21 9)" /><ellipse cx="33" cy="10" rx="5" ry="7" fill="currentColor" transform="rotate(10 33 10)" /><ellipse cx="42" cy="19" rx="4.5" ry="6.5" fill="currentColor" transform="rotate(26 42 19)" /><path d="M13 31c3-3 4-10 11-10s8 7 12 11c7 10-1 14-8 10-4-2-5-2-9 0-9 4-14-4-6-11Z" fill="currentColor" /></svg>
+            <div class="player-load-track ff-boot-track" role="progressbar" :aria-valuenow="Math.floor(gameLoadProgress.fraction * 100)" aria-valuemin="0" aria-valuemax="100" :aria-label="gameLoadStatus"><div class="ff-boot-fill" :style="{ width: `${(gameLoadProgress.fraction * 100).toFixed(1)}%` }" /></div>
+            <span class="ff-boot-percent" aria-hidden="true">{{ Math.floor(gameLoadProgress.fraction * 100) }}%</span>
+          </div>
+        </div>
+        <div class="player-load-actions"><button v-if="gameLoadError" type="button" class="primary-button" @click="retryPlayerExperience">{{ gameLoadNeedsReload ? '重新加载页面' : '重试加载' }}</button><button type="button" class="soft-button" @click="logout">退出登录</button></div>
+      </div>
+    </section>
     <template v-else>
       <header class="topbar" :class="{ 'story-topbar': showStoryGuide }">
         <div class="page-brand"><div class="anime-wordmark original-game-logo"><img :src="ANIME_LOGO" width="1942" height="809" alt="幻想次元" /></div></div>
@@ -3304,30 +3739,33 @@ onBeforeUnmount(() => {
           <NegotiationPanel v-else-if="negotiation" :player-portrait="portraitBaseAsset(characterData.portrait)" :negotiation="negotiation" :disabled="busy" @action="runNegotiationAction" />
           <template v-else>
           <div class="explore-frame card-surface">
-            <WorldMapPanel class="explore-map" :player-portrait="portraitBaseAsset(characterData.portrait)" :player-identity="characterData.portrait" :player-key="panel?.account?.uid ?? panel?.account?.gameUserId" @heading-change="heading => mapRestingHeading = heading" :region-code="mapVisionRegionCode" :moving="mapAvatarMoving" :movement-target="mapMovementTarget" :display-position="mapDisplayPosition" :travel-visual-center="mapTravelVisualCenter" :movement-heading="mapMovementHeading" :movement-speed="mapMovementSpeed" :cells="mapCells" :environment="mapEnvironment" :surface-scene="mapSurfaceScene" :ground-window="mapGroundWindow" :current="mapVisionCurrent" :bounds="mapBounds" :points="mapPoints" :target-popup-request="mapTargetPopupRequest" @target-popup-consumed="id => { if (mapTargetPopupRequest?.id === id) mapTargetPopupRequest = undefined; }" :move-range="mapMoveRange" :sight-range="mapSightRange" :disabled="busy || Boolean(mapActionLock)" :action-lock="mapActionLock" :action-art="mapActionArtwork" @move="runAnimatedMapMove" @action="runAnimatedMapAction" @stop-action="stopMapAction" @clear-environment="runClearEnvironment" @open-region-map="openRegionMapSidebar" :chat-open="Boolean(floatingSocialOpen)" @open-chat="toggleFloatingSocial('chat')" @open-auto-battle="openAutoBattle" >
+            <WorldMapPanel class="explore-map" :render-scene="settingsRenderExploration" :player-portrait="portraitBaseAsset(characterData.portrait)" :player-identity="characterData.portrait" :player-key="panel?.account?.uid ?? panel?.account?.gameUserId" @heading-change="heading => mapRestingHeading = heading" :region-code="mapVisionRegionCode" :moving="mapAvatarMoving" :movement-target="mapMovementTarget" :display-position="mapDisplayPosition" :travel-visual-center="mapTravelVisualCenter" :movement-heading="mapMovementHeading" :movement-speed="mapMovementSpeed" :actual-movement-speed="mapActualMovementSpeed" :mapped-settlement="mapRenderSnapshot?.mappedSettlement" :cells="mapCells" :environment="mapEnvironment" :surface-scene="mapSurfaceScene" :ground-window="mapGroundWindow" :current="mapVisionCurrent" :bounds="mapBounds" :points="mapPoints" :target-popup-request="mapTargetPopupRequest" @target-popup-consumed="id => { if (mapTargetPopupRequest?.id === id) mapTargetPopupRequest = undefined; }" :move-range="mapMoveRange" :sight-range="mapSightRange" :disabled="busy || Boolean(mapActionLock)" :action-lock="mapActionLock" :action-art="mapActionArtwork" @move="runAnimatedMapMove" @action="runAnimatedMapAction" @stop-action="stopMapAction" @clear-environment="runClearEnvironment" @open-region-map="openRegionMapSidebar" :chat-open="Boolean(floatingSocialOpen)" @open-chat="toggleFloatingSocial('chat')" @open-auto-battle="openAutoBattle" >
               <template #map-footer><AdventureManualDock inline :sections="['tasks', 'footprints', 'codex', 'warrants']" @select="openAdventureManual" /></template>
             </WorldMapPanel>
           </div>
           <RegionMapSidebar ref="regionMapSidebarRef" :regions="regionMap.regions" :members="regionMap.members" :landmarks="regionMap.landmarks" :current-region-code="regionMap.currentRegionCode" :disabled="busy" :loading="busy" @travel="runRegionTravel" />
           <div v-if="pendingInteractions.length" class="interaction-choice-backdrop exploration-nearby-layer" role="presentation" @click.self="pendingInteractions = []">
-            <div class="interaction-choice card-surface" role="dialog" aria-modal="true" aria-label="附近互动">
-              <button type="button" class="dialog-close" aria-label="关闭互动选择" @click="pendingInteractions = []"><SocialGlyph name="close" :size="18" /></button>
-              <header class="exploration-dialog-heading"><SocialGlyph name="paw" :size="29" /><div><h3>这里发现了目标</h3><p>选择要查看的互动对象。</p></div></header>
+            <div class="interaction-choice card-surface exploration-window" data-window-theme="map" role="dialog" aria-modal="true" aria-label="附近互动">
+              <button type="button" class="dialog-close exploration-window-close" aria-label="关闭互动选择" @click="pendingInteractions = []"><span class="exploration-close-mark" aria-hidden="true" /></button>
+              <header class="exploration-dialog-heading exploration-window-heading"><div><h3>这里发现了目标</h3><p>选择要查看的互动对象。</p></div></header>
+              <div class="exploration-window-body">
               <div v-if="selectedPendingInteraction" class="nearby-encounter-preview"><span class="encounter-illustration"><img class="encounter-target-art" :src="pendingInteractionArtwork(selectedPendingInteraction)" alt="" /></span><div><small>{{ interactionTypeName(selectedPendingInteraction.type) }}</small><strong>{{ selectedPendingInteraction.name }}</strong></div><SocialGlyph class="encounter-paw" name="paw" :size="46" /></div>
               <div class="interaction-choice-list" role="group" aria-label="选择附近互动对象"><button v-for="target in pendingInteractions" :key="`${target.type}:${target.id}`" type="button" class="soft-button" :class="{ selected: selectedPendingInteraction === target }" :aria-pressed="selectedPendingInteraction === target" :disabled="busy" @click="pendingInteractionSelection = `${target.type}:${target.id}`"><span class="encounter-row-icon"><img class="encounter-target-art" :src="pendingInteractionArtwork(target)" alt="" /></span><span><strong>{{ target.name }}</strong><small>{{ interactionTypeName(target.type) }}<template v-if="target.description"> · {{ target.description }}</template></small></span><AnimeIcon name="arrow" :size="18" /></button></div>
               <section v-if="selectedPendingInteraction" class="nearby-encounter-detail"><h4><SocialGlyph name="leaf" :size="24" />{{ selectedPendingInteraction.name }}</h4><div><img class="encounter-target-art" :src="pendingInteractionArtwork(selectedPendingInteraction)" alt="" /><p>{{ selectedPendingInteraction.description || `查看${selectedPendingInteraction.name}，了解此处可进行的互动。` }}</p></div><button type="button" class="primary-button" :disabled="busy" @click="openSelectedPendingInteraction"><SocialGlyph name="search" :size="22" />查看互动</button></section>
+              </div>
             </div>
           </div>
           </template>
         </section>
 
         <div v-if="autoBattleOpen" class="auto-battle-backdrop exploration-auto-layer" role="presentation" @click.self="closeAutoBattle">
-          <section class="auto-battle-dialog card-surface" role="dialog" aria-modal="true" aria-label="自动战斗设置">
-            <header class="auto-battle-dialog-header">
-            <button type="button" class="dialog-close" aria-label="关闭自动战斗设置" :disabled="autoBattleBusy" @click="closeAutoBattle"><SocialGlyph name="close" :size="18" /></button>
-            <div class="section-heading auto-battle-heading"><div><h2><SocialGlyph name="paw" :size="27" />自动战斗设置</h2></div><span class="auto-battle-state" :class="{ enabled: autoBattleSettings?.settings.enabled }">{{ autoBattleLoadError ? '读取失败' : !autoBattleSettings ? '读取中' : autoBattleSettings.settings.enabled ? '运行中' : '未开启' }}</span></div>
+          <section class="auto-battle-dialog card-surface exploration-window" data-window-theme="auto" role="dialog" aria-modal="true" aria-label="自动战斗设置">
+            <button type="button" class="dialog-close exploration-window-close" aria-label="关闭自动战斗设置" :disabled="autoBattleBusy" @click="closeAutoBattle"><span class="exploration-close-mark" aria-hidden="true" /></button>
+            <header class="auto-battle-dialog-header exploration-window-heading">
+            <div class="section-heading auto-battle-heading"><div><p class="exploration-window-kicker">AUTO BATTLE</p><h2><SocialGlyph name="paw" :size="27" />自动</h2></div></div>
             </header>
             <div class="auto-battle-dialog-body">
+            <span class="auto-battle-state" :class="{ enabled: autoBattleSettings?.settings.enabled }">{{ autoBattleLoadError ? '读取失败' : !autoBattleSettings ? '读取中' : autoBattleSettings.settings.enabled ? '运行中' : '未开启' }}</span>
             <div v-if="autoBattleSettings" class="auto-battle-content">
               <div class="auto-battle-mode-tabs" role="group" aria-label="自动战斗模式"><button type="button" :class="{ active: autoBattleMode === 'pve' }" :aria-pressed="autoBattleMode === 'pve'" :disabled="autoBattleBusy" @click="switchAutoBattleMode('pve')"><TabArtIcon name="forest" :size="26" />PVE 探索</button><button type="button" :class="{ active: autoBattleMode === 'pvp' }" :aria-pressed="autoBattleMode === 'pvp'" :disabled="autoBattleBusy" @click="switchAutoBattleMode('pvp')"><TabArtIcon name="equipment" :size="26" />PVP 对战</button></div>
               <div class="auto-battle-switches"><div class="auto-battle-toggle-row"><AnimeIcon name="sword" :size="29" /><span><strong>自动战斗</strong><small>按照配置的顺序执行战斗</small></span><button type="button" role="switch" :aria-checked="autoBattleSettings.settings.enabled" aria-label="自动战斗" class="toggle-button" :class="{ active: autoBattleSettings.settings.enabled }" :disabled="autoBattleBusy" @click="saveAutoBattleSetting({ operation: 'enabled', enabled: !autoBattleSettings.settings.enabled })"><i />{{ autoBattleSettings.settings.enabled ? '已开启' : '已关闭' }}</button></div><div class="auto-battle-toggle-row"><ExplorePotionGlyph /><span><strong>自动嗑药</strong><small>根据生命与魔力阈值使用药剂</small></span><button type="button" role="switch" :aria-checked="autoBattleSettings.settings.autoPotionEnabled" aria-label="自动嗑药" class="toggle-button" :class="{ active: autoBattleSettings.settings.autoPotionEnabled }" :disabled="autoBattleBusy" @click="saveAutoBattleSetting({ operation: 'potion', enabled: !autoBattleSettings.settings.autoPotionEnabled })"><i />{{ autoBattleSettings.settings.autoPotionEnabled ? '已开启' : '已关闭' }}</button></div></div>
@@ -3489,31 +3927,66 @@ onBeforeUnmount(() => {
       <Transition name="settings-drawer">
         <div v-if="settingsOpen" class="settings-layer" :class="{ 'story-settings-layer': showStoryGuide }">
           <button type="button" class="settings-backdrop" aria-label="关闭设置" @click="closeSettings" />
-          <aside class="settings-drawer card-surface" role="dialog" aria-modal="true" aria-labelledby="settings-title">
-            <header class="settings-header"><div><p class="eyebrow">PREFERENCES</p><h2 id="settings-title">设置</h2></div><button type="button" class="dialog-close" aria-label="关闭设置" @click="closeSettings">×</button></header>
-            <div class="settings-content">
-              <section class="settings-section settings-help"><div class="settings-section-heading"><div><h3>冒险操作目录</h3><p>查找已开放的操作，查看参数和执行预览</p></div><button type="button" class="soft-button" :disabled="criticalPending || showStoryGuide || Boolean(registrationLoginId)" @click="closeSettings(); openCommandCatalog()"><AnimeIcon name="book" :size="20" />打开目录</button></div></section>
-              <section class="settings-section"><div class="settings-section-heading"><div><h3>背景音乐</h3><p>随场景切换，音量设置保存在本机</p></div><button type="button" class="settings-switch" :class="{ active: musicEnabled }" @click="toggleMusic">{{ musicEnabled ? '开启' : '关闭' }}</button></div><label class="settings-range"><span>音量 {{ musicVolume }}%</span><input v-model.number="musicVolume" type="range" min="0" max="100" step="1" :disabled="!musicEnabled" /></label></section>
-              <section class="settings-section"><div class="settings-section-heading"><div><h3>头像</h3><p>仅保存在当前浏览器</p></div></div><div class="avatar-picker" role="listbox" aria-label="选择头像"><button v-for="avatar in settingsAvatarOptions" :key="avatar.id" type="button" class="avatar-choice" :class="{ active: settingsAvatar === avatar.id }" :aria-label="avatar.label" :aria-selected="settingsAvatar === avatar.id" @click="settingsAvatar = avatar.id"><AnimeIcon :name="avatar.icon" :size="30" /><small>{{ avatar.label }}</small></button></div></section>
-              <section class="settings-section"><div class="settings-section-heading"><div><h3>角色资料</h3><p>修改后会同步到角色面板</p></div></div><form class="settings-form" @submit.prevent="saveSettingsNickname"><label>昵称<input v-model="settingsNickname" maxlength="24" autocomplete="nickname" placeholder="输入角色昵称" /></label><button type="submit" class="primary-button" :disabled="busy">保存昵称</button></form><div class="settings-gender"><span>性别</span><div><button type="button" :class="{ active: settingsGender === '男' }" :disabled="busy" @click="saveSettingsGender('男')">男</button><button type="button" :class="{ active: settingsGender === '女' }" :disabled="busy" @click="saveSettingsGender('女')">女</button></div></div></section>
-              <section class="settings-section settings-account">
-                <h3>账号</h3>
+          <aside class="settings-drawer card-surface" role="dialog" aria-modal="true" aria-labelledby="settings-title" :inert="Boolean(settingsIdentityChange)">
+            <header class="settings-header"><div><h2 id="settings-title">{{ settingsPage === 'password' ? (panel?.account?.passwordLoginEnabled === false ? '设置密码' : '修改密码') : '设置' }}</h2></div><button type="button" class="dialog-close" aria-label="关闭设置" @click="closeSettings">×</button></header>
+            <div class="settings-content settings-arranged" :class="{ 'has-expanded-settings': settingsExpanded !== null }">
+              <template v-if="settingsPage === 'overview'">
+              <section class="settings-section settings-avatar-section" aria-label="头像">
+                <span class="settings-avatar-preview"><img class="settings-avatar-image" :class="{ uploaded: settingsUploadedAvatar }" :src="settingsUploadedAvatar || portraitBaseAsset(characterData.portrait)" alt="当前头像" /></span>
+                <div class="settings-avatar-actions"><h3>头像</h3><button type="button" class="soft-button" :disabled="busy || criticalPending || showStoryGuide || Boolean(registrationLoginId)" @click="settingsAvatarInput?.click()">上传头像</button><small>选择图片后裁剪</small></div>
+                <input ref="settingsAvatarInput" class="settings-avatar-file" type="file" accept="image/jpeg,image/png,image/webp" aria-label="头像图片" tabindex="-1" @change="selectSettingsAvatar" />
+                <p v-if="settingsAvatarError && !settingsAvatarSource" class="settings-inline-feedback error-text" role="alert">{{ settingsAvatarError }}</p>
+              </section>
+              <section class="settings-section settings-profile-section" aria-label="资料"><div class="settings-section-heading"><h3>资料</h3></div><form class="settings-form" @submit.prevent="saveSettingsNickname"><label><span class="sr-only">昵称</span><input v-model="settingsNickname" maxlength="24" autocomplete="nickname" placeholder="输入角色昵称" /></label><button type="submit" class="primary-button" :disabled="busy || criticalPending">改名</button></form><div class="settings-gender"><span>性别</span><div><button type="button" :class="{ active: settingsGender === '男' }" :aria-pressed="settingsGender === '男'" :disabled="busy || criticalPending || settingsGender === '男'" @click="saveSettingsGender('男')">男</button><button type="button" :class="{ active: settingsGender === '女' }" :aria-pressed="settingsGender === '女'" :disabled="busy || criticalPending || settingsGender === '女'" @click="saveSettingsGender('女')">女</button></div></div><p v-if="settingsProfileFeedback" class="settings-inline-feedback" role="status">{{ settingsProfileFeedback }}</p></section>
+              <section class="settings-section settings-accordion">
+                <button type="button" class="settings-accordion-toggle" :class="{ active: settingsExpanded === 'game' }" :aria-expanded="settingsExpanded === 'game'" aria-controls="settings-game-options" @click="toggleSettingsSection('game')"><span>游戏设置</span><span class="settings-chevron" aria-hidden="true">{{ settingsExpanded === 'game' ? '△' : '▽' }}</span></button>
+                <div v-if="settingsExpanded === 'game'" id="settings-game-options" class="settings-accordion-content settings-game-options">
+                  <div class="settings-section-heading"><span>探索场景渲染</span><button type="button" role="switch" class="settings-switch" :class="{ active: settingsRenderExploration }" :aria-checked="settingsRenderExploration" aria-label="探索场景渲染" @click="settingsRenderExploration = !settingsRenderExploration"><span class="settings-switch-track" aria-hidden="true"><span class="settings-switch-text">{{ settingsRenderExploration ? '开' : '关' }}</span><span class="settings-switch-knob" /></span></button></div>
+                  <div class="settings-section-heading"><span>背景音乐</span><button type="button" role="switch" class="settings-switch" :class="{ active: musicEnabled }" :aria-checked="musicEnabled" aria-label="背景音乐" @click="toggleMusic"><span class="settings-switch-track" aria-hidden="true"><span class="settings-switch-text">{{ musicEnabled ? '开' : '关' }}</span><span class="settings-switch-knob" /></span></button></div>
+                  <label class="settings-range"><span>音量 {{ musicVolume }}%</span><input v-model.number="musicVolume" type="range" min="0" max="100" step="1" :disabled="!musicEnabled" aria-label="背景音乐音量" /></label>
+                  <button type="button" class="soft-button settings-catalog-entry" :disabled="criticalPending || showStoryGuide || Boolean(registrationLoginId)" @click="closeSettings(); openCommandCatalog()">冒险操作目录</button>
+                </div>
+              </section>
+              <section class="settings-section settings-accordion settings-account">
+                <button type="button" class="settings-accordion-toggle" :class="{ active: settingsExpanded === 'account' }" :aria-expanded="settingsExpanded === 'account'" aria-controls="settings-account-options" @click="toggleSettingsSection('account')"><span>账号设置</span><span class="settings-chevron" aria-hidden="true">{{ settingsExpanded === 'account' ? '△' : '▽' }}</span></button>
+                <div v-if="settingsExpanded === 'account'" id="settings-account-options" class="settings-accordion-content settings-account-options">
                 <div v-if="panel?.account?.loginId" class="account-id-row"><span>永久登录号</span><strong>{{ panel.account.loginId }}</strong><button type="button" class="soft-button" @click="copyAccountId(panel.account.loginId)">复制</button></div>
                 <div v-if="panel?.account?.gameUserId" class="account-id-row"><span>Game ID</span><strong>{{ panel.account.gameUserId }}</strong><button type="button" class="soft-button" @click="copyAccountId(panel.account.gameUserId)">复制</button></div>
+                <button v-if="panel?.account" type="button" class="soft-button settings-password-entry" :disabled="busy || criticalPending" @click="settingsPage = 'password'">{{ panel.account.passwordLoginEnabled === false ? '设置密码' : '修改密码' }} <span aria-hidden="true">›</span></button>
+                </div>
+              </section>
+              <section class="settings-section settings-redeem" aria-label="兑换码"><h3>兑换码</h3><form class="settings-form" @submit.prevent="redeemSettingsCode"><label><span class="sr-only">兑换码</span><input v-model="settingsRedeemCode" maxlength="64" autocomplete="off" autocapitalize="characters" placeholder="输入兑换码" /></label><button type="submit" class="primary-button" :disabled="busy || criticalPending">{{ settingsRedeemBusy ? '兑换中' : '兑换' }}</button></form><p v-if="settingsRedeemFeedback" class="settings-inline-feedback" :class="{ 'error-text': settingsRedeemFailed }" :role="settingsRedeemFailed ? 'alert' : 'status'">{{ settingsRedeemFeedback }}</p></section>
+              <button type="button" class="danger-button wide settings-logout" :disabled="busy || criticalPending" @click="logout">退出账号</button>
+              </template>
+              <section v-else class="settings-section settings-password-page">
+                <button type="button" class="soft-button settings-password-back" @click="settingsPage = 'overview'">‹ 返回设置</button>
                 <form v-if="panel?.account" class="settings-password-form" @submit.prevent="saveSettingsPassword">
-                  <strong>{{ panel.account.passwordLoginEnabled === false ? '设置密码' : '修改密码' }}</strong>
                   <div v-if="panel.account.passwordLoginEnabled !== false" class="password-field"><input v-model="settingsCurrentPassword" :type="showSettingsCurrentPassword ? 'text' : 'password'" autocomplete="current-password" aria-label="当前密码" placeholder="当前密码" /><button type="button" class="password-toggle" :aria-label="showSettingsCurrentPassword ? '隐藏当前密码' : '显示当前密码'" @click="showSettingsCurrentPassword = !showSettingsCurrentPassword">{{ showSettingsCurrentPassword ? '隐藏' : '显示' }}</button></div>
                   <div class="password-field"><input v-model="settingsNewPassword" :type="showSettingsNewPassword ? 'text' : 'password'" autocomplete="new-password" aria-label="新密码" placeholder="新密码（8～64 位）" /><button type="button" class="password-toggle" :aria-label="showSettingsNewPassword ? '隐藏新密码' : '显示新密码'" @click="showSettingsNewPassword = !showSettingsNewPassword">{{ showSettingsNewPassword ? '隐藏' : '显示' }}</button></div>
                   <div class="password-field"><input v-model="settingsPasswordConfirmation" :type="showSettingsPasswordConfirmation ? 'text' : 'password'" autocomplete="new-password" aria-label="确认新密码" placeholder="再次输入新密码" /><button type="button" class="password-toggle" :aria-label="showSettingsPasswordConfirmation ? '隐藏确认密码' : '显示确认密码'" @click="showSettingsPasswordConfirmation = !showSettingsPasswordConfirmation">{{ showSettingsPasswordConfirmation ? '隐藏' : '显示' }}</button></div>
                   <button type="submit" class="primary-button wide" :disabled="busy">{{ panel.account.passwordLoginEnabled === false ? '设置密码' : '保存新密码' }}</button>
                 </form>
-                <p>退出后需要使用登录号或 Game ID 与密码重新登录。</p>
-                <button type="button" class="danger-button wide" @click="logout">退出账号</button>
               </section>
             </div>
           </aside>
         </div>
       </Transition>
+
+      <div v-if="settingsOpen && settingsIdentityChange && settingsIdentityCost" class="settings-identity-cover" @click.self="cancelSettingsIdentityChange">
+        <section class="settings-identity-dialog" role="alertdialog" aria-modal="true" aria-labelledby="settings-identity-title" aria-describedby="settings-identity-cost">
+          <h3 id="settings-identity-title">{{ settingsIdentityChange.kind === 'rename' ? '确认改名' : '确认修改性别' }}</h3>
+          <dl class="settings-identity-values"><div><dt>当前{{ settingsIdentityChange.kind === 'rename' ? '昵称' : '性别' }}</dt><dd>{{ settingsIdentityChange.kind === 'rename' ? settingsIdentityChange.status.name : settingsIdentityChange.status.gender }}</dd></div><div><dt>修改为</dt><dd>{{ settingsIdentityChange.value }}</dd></div></dl>
+          <div id="settings-identity-cost" class="settings-identity-cost">
+            <p>剩余免费次数：{{ settingsIdentityCost.freeRemaining }} 次</p>
+            <p v-if="settingsIdentityCost.freeRemaining > 0">本次使用免费次数，不消耗{{ settingsIdentityCost.itemName }}。</p>
+            <template v-else><p>需要：{{ settingsIdentityCost.itemName }} × {{ settingsIdentityCost.requiredQuantity }}</p><p>当前持有：{{ settingsIdentityCost.cardQuantity }} 张</p><p v-if="!settingsIdentityAvailable" class="error-text">{{ settingsIdentityCost.itemName }}不足，暂时无法修改。</p></template>
+          </div>
+          <p v-if="settingsIdentityChange.error" class="settings-identity-error" role="alert">{{ settingsIdentityChange.error }}</p>
+          <div class="settings-identity-actions"><button type="button" aria-label="关闭修改确认" :disabled="settingsIdentityBusy" @click="cancelSettingsIdentityChange">取消</button><button type="button" class="settings-identity-confirm" :disabled="settingsIdentityBusy || !settingsIdentityAvailable" @click="confirmSettingsIdentityChange">{{ settingsIdentityBusy ? '修改中…' : '确认修改' }}</button></div>
+        </section>
+      </div>
+
+      <AvatarCropDialog v-if="settingsAvatarSource" :source="settingsAvatarSource" :busy="settingsAvatarBusy" :error="settingsAvatarError" @cancel="clearSettingsAvatar" @confirm="uploadSettingsAvatar" />
 
       <div class="floating-social-layer" :inert="showStoryGuide || Boolean(registrationLoginId)" aria-label="社交快捷入口">
         <div v-show="tab === 'explore'" ref="floatingDockRef" class="floating-social-dock" :class="{ expanded: floatingDockExpanded, 'dock-side-left': floatingDockSide === 'left' }" :style="floatingDockStyle" @pointerdown="startFloatingDockDrag">
@@ -3530,7 +4003,9 @@ onBeforeUnmount(() => {
           </Transition>
         </div>
 
-        <ExploreChatPanel :open="Boolean(floatingSocialOpen)" :tab="exploreChatTab" :messages="messages" :friend-channels="friendChannels" :active-channel-id="activeChannel" :channel-name="exploreChatChannelName" v-model:draft="messageDraft" :busy="busy || criticalPending" :can-send="exploreChatCanSend" :status-text="exploreChatStatusText" :has-earlier="chatHasEarlier" :loading-earlier="chatLoadingEarlier" :has-new="chatHasNewMessages" :system-items="notificationItems" :system-loading="notificationLoading || notificationLoadingMore" :system-has-more="notificationHasMore" :system-error="notificationError" :party-busy="partyBusy" :panel-style="floatingSocialPanelStyle" :message-portrait="socialMessagePortrait" :friend-portrait="socialPortraitFor" :recruitment-status="chatRecruitmentStatus" :can-apply="canApplyChatRecruitment" @close="closeFloatingSocial" @select-tab="selectExploreChatTab" @select-friend="selectChannel" @send="sendChat" @earlier="loadEarlierMessages" @latest="jumpToLatestMessages" @scroll="handleChatScroll" @manage-party="toggleTeamPopup" @apply="applyChatRecruitment" @refresh-system="loadNotifications" @more-system="loadOlderNotifications" @panel-element="element => floatingSocialPanelRef = element" @list-element="element => chatMessageListRef = element" @drag-start="event => startModalDrag('social', event)" @resize-start="startSocialResize" />
+        <ExploreChatPanel :open="Boolean(floatingSocialOpen)" :tab="exploreChatTab" :messages="chatMessagesForView" :friend-channels="friendChannels" :active-channel-id="activeChannel" :channel-name="exploreChatChannelName" v-model:draft="messageDraft" :busy="busy || criticalPending" :can-send="exploreChatCanSend" :status-text="exploreChatStatusText" :has-earlier="chatHasEarlier" :loading-earlier="chatLoadingEarlier" :has-new="chatHasNewMessages" :system-items="notificationItems" :system-loading="notificationLoading || notificationLoadingMore" :system-has-more="notificationHasMore" :system-error="notificationError" :party-busy="partyBusy" :panel-style="floatingSocialPanelStyle" :message-portrait="socialMessagePortrait" :friend-portrait="socialPortraitFor" :recruitment-status="chatRecruitmentStatus" :can-apply="canApplyChatRecruitment" :invitation-count="playerCards.invitations.value.length" @inspect-player="playerCards.inspect" @open-invitations="playerCards.showInvitations" @close="closeFloatingSocial" @select-tab="selectExploreChatTab" @select-friend="selectChannel" @send="sendChat" @earlier="loadEarlierMessages" @latest="jumpToLatestMessages" @scroll="handleChatScroll" @manage-party="toggleTeamPopup" @apply="applyChatRecruitment" @refresh-system="loadNotifications" @more-system="loadOlderNotifications" @panel-element="element => floatingSocialPanelRef = element" @list-element="element => chatMessageListRef = element" @drag-start="event => startModalDrag('social', event)" @resize-start="startSocialResize" />
+        <PlayerCardDialog :open="playerCards.open.value" :profile="playerCards.profile.value" :loading="playerCards.loading.value" :busy="playerCardBusy" :error="playerCards.error.value" :notice="playerCards.notice.value" @close="playerCards.closeProfile" @retry="playerCards.reloadProfile" @add-friend="playerCards.addFriend" @invite-party="playerCards.inviteParty" @whisper="playerCards.whisper" @open-invitations="playerCards.showInvitations" />
+        <PartyInvitationsDialog :open="playerCards.invitationsOpen.value" :items="playerCards.invitations.value" :loading="playerCards.invitationsLoading.value" :busy="playerCardBusy" :error="playerCards.invitationsError.value" :notice="playerCards.invitationsNotice.value" @close="playerCards.closeInvitations" @retry="playerCards.refreshInvitations()" @respond="playerCards.respondInvitation" @inspect-player="playerCards.inspect" />
 
         <section v-if="teamPopupOpen" ref="teamPanelRef" :style="teamPanelStyle" class="floating-social-panel team-info-panel card-surface" role="dialog" aria-modal="false" aria-label="队伍信息">
           <div class="floating-social-panel-heading" @pointerdown="startModalDrag('team', $event)">
@@ -3550,7 +4025,7 @@ onBeforeUnmount(() => {
 
       <StoryDialog :open="showStoryGuide && !registrationLoginId" :messages="storyGuide?.messages ?? []" :busy="busy || storyLoading" :error="storyError" :in-battle="Boolean(panel?.inBattle)" :can-finish="Boolean(panel?.account?.hasCharacter && !panel?.pendingStory)" @action="action => runIssuedAction(action, 'story')" @command="command => runCommand(command, { surface: 'story' })" @refresh="refreshStoryGuide" @finish="leaveStory" />
 
-      <AdventureManualPanel :open="manualOpen && !showStoryGuide" title="任务" :category="manualCategory" :available-categories="['主线', '支线', '委托', '悬赏']" :messages="manualMessages" :busy="manualBusy || busy" :error="manualError" @close="manualOpen = false" @category="selectManualCategory" @command="runManualCommand" @action="action => runIssuedAction(action, 'manual')" />
+      <AdventureManualPanel :open="manualOpen && !showStoryGuide" title="任务" :category="manualCategory" :available-categories="['主线', '支线', '委托', '悬赏', '其他']" :messages="manualMessages" :busy="manualBusy || busy" :error="manualError" @close="manualOpen = false" @category="selectManualCategory" @command="runManualCommand" @action="action => runIssuedAction(action, 'manual')" />
       <HandbookContent :open="handbookOpen && !showStoryGuide" :section="handbookSection" @close="handbookOpen = false" @updated="() => loadPanel()" />
       <BankPanel :open="bankOpen && !showStoryGuide" @close="bankOpen = false" @updated="loadPanel" />
       <GuildShopPanel v-if="guildShopTargetId" :open="!showStoryGuide" :target-id="guildShopTargetId" :initial-side="commerceSide" @close="guildShopTargetId = null" @updated="loadPanel" />

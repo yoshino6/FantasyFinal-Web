@@ -5,6 +5,7 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { join, relative } from 'node:path';
 import { CHARACTER_ADVANCED_ASSETS, CHARACTER_BASE_ASSETS, CHARACTER_VARIANT_ASSETS } from './src/character-assets';
+import { COMMON_ASSET_PATHS } from './src/common-asset-paths';
 import storyManifest from './src/story-illustrations-manifest.json';
 
 const startupStartedAt = performance.now();
@@ -31,6 +32,7 @@ const webRoot = fileURLToPath(new URL('.', import.meta.url));
 const publicRoot = join(webRoot, 'public');
 const imageExtensions = /\.(?:png|svg|webp|jpe?g|gif|avif|mp3|ogg|wav|woff2?)$/i;
 const paths = new Set<string>();
+const commonAssetPaths = new Set<string>(COMMON_ASSET_PATHS);
 // Only the public entry artwork/frames block boot; gameplay assets stay demand-loaded.
 const criticalPaths = [
   '/assets/light-anime/auth-v4/fantasy-logo.webp',
@@ -145,7 +147,7 @@ export default defineConfig(({ command }) => ({
       const path = id.split('?')[0].replaceAll('\\', '/');
       // Dynamic registries apply gameAssetUrl after selecting a complete path.
       if (!path.startsWith(`${sourceRoot}/`) || !/\.(?:vue|ts|css)$/.test(path)
-        || /(?:character-assets|item-assets|bgm|game-assets|boot-assets)\.ts$/.test(path)) return null;
+        || /(?:character-assets|item-assets|bgm|game-assets|boot-assets|common-asset-paths)\.ts$/.test(path)) return null;
       const transformed = versionStaticUrls(source);
       return transformed === source ? null : { code: transformed, map: null };
     },
@@ -159,10 +161,11 @@ export default defineConfig(({ command }) => ({
   define: {
     __FF_BOOT_ASSET_REVISION__: JSON.stringify(bootAssetRevision),
     // Vite injects defines into its development client. Keep that client small;
-    // portrait availability also uses this manifest; retain released variants.
+    // portrait availability and public preloading also use this manifest.
     // Boot preloading independently filters only the login artwork.
     __FF_BOOT_ASSETS__: JSON.stringify(command === 'serve'
       ? bootAssets.filter(asset => criticalPaths.includes(asset.path)
+        || commonAssetPaths.has(asset.path)
         || Object.values(CHARACTER_VARIANT_ASSETS).some(registry => Object.values(registry).includes(asset.path))) : bootAssets)
   },
   // Only the application is an entry. Historical previews under design contain

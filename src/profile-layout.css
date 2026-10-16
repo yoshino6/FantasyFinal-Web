@@ -54,9 +54,9 @@
   overflow:hidden; text-overflow:ellipsis;
 }
 @media(max-height:450px) {
-  .app-shell[data-visual='light-anime'][data-viewport-layout][data-character-scene='profile'] .topbar { height:32px; }
+  .app-shell[data-visual='light-anime'][data-viewport-layout][data-character-scene='profile'] .topbar { height:42px; }
   .app-shell[data-visual='light-anime'][data-viewport-layout][data-character-scene='profile'] .page-brand .original-game-logo>img { width:90px; height:28px; }
-  .app-shell[data-visual='light-anime'][data-viewport-layout][data-character-scene='profile'] :is(.inbox-button,.settings-button) { width:26px; height:26px; }
+  .app-shell[data-visual='light-anime'][data-viewport-layout][data-character-scene='profile'] :is(.inbox-button,.settings-button) { width:36.4px; height:36.4px; }
   .app-shell[data-visual='light-anime'][data-viewport-layout][data-character-scene='profile'] .main-section-tabs { height:28px; }
   .app-shell[data-visual='light-anime'][data-viewport-layout][data-character-scene='profile'] .bottom-nav { height:35px; }
 }

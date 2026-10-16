@@ -1,25 +1,39 @@
 import { ref } from 'vue';
 import type { ExploreLocalMap, ExploreRoutePosition, ExploreRoutePreview, ExploreRouteStep, PanelNearbyPoint } from './api';
+import { mappedSettlementRouteCells, prepareMappedSettlementGround } from './map-mapped-settlement-ground';
 
 type Position = { x: number; y: number; z?: number };
 type Session = { generation: number; token: string };
+type LocalRouteHint = ExploreRoutePreview & { serverPreviewFirst?: boolean };
 const same = (a: Position, b: Position) => a.x === b.x && a.y === b.y && (a.z ?? 0) === (b.z ?? 0);
 export const localRouteDuration = (distance: number, movementSpeed = 1) => Math.max(0, distance) * 1000 / movementSpeed;
 
 /** A plan over already authorized cells is a hint; each step still commits on the server. */
-export function knownExplorationRoute(snapshot: ExploreLocalMap | undefined, from: Position & { regionId?: number }, to: Position, knownTargets: readonly PanelNearbyPoint[] = snapshot?.nearby?.points ?? []): ExploreRoutePreview | undefined {
-  if (!snapshot || snapshot.environmentJob || !same(snapshot.origin, from)
+export function knownExplorationRoute(snapshot: ExploreLocalMap | undefined, from: Position & { regionId?: number }, to: Position, knownTargets: readonly PanelNearbyPoint[] = snapshot?.nearby?.points ?? []): LocalRouteHint | undefined {
+  if (!snapshot || snapshot.environmentJob || snapshot.travelView || !same(snapshot.origin, from)
     || from.regionId !== undefined && snapshot.origin.regionId !== from.regionId
     || ![snapshot.origin.x, snapshot.origin.y, snapshot.origin.z, snapshot.origin.regionId].every(Number.isSafeInteger)
     || snapshot.origin.regionId <= 0 || ![to.x, to.y, to.z ?? from.z ?? 0].every(Number.isSafeInteger)
+    || !Array.isArray(snapshot.cells) || snapshot.cells.length > 16384
     || (to.z ?? from.z ?? 0) !== snapshot.origin.z
-    || ![snapshot.actionRange, snapshot.movement.step].every(value => Number.isSafeInteger(value) && value >= 0)
+    || ![snapshot.range, snapshot.actionRange, snapshot.movement.step].every(value => Number.isSafeInteger(value) && value >= 0)
+    || snapshot.pathBudget !== undefined && (!Number.isSafeInteger(snapshot.pathBudget) || snapshot.pathBudget < 0)
     || !Number.isFinite(snapshot.movement.speed) || Number(snapshot.movement.speed) <= 0) return;
-  const budget = Math.min(snapshot.actionRange, snapshot.movement.step);
+  // Every real observed cell can be a walking destination. Older snapshots
+  // still ask for server planning first, independently of QQ's selected step.
+  const legacy = snapshot.pathBudget === undefined;
+  let radius = snapshot.range;
+  const originCell = snapshot.cells.find(cell => same(cell, snapshot.origin));
+  const prepared = Math.abs(to.x - from.x) + Math.abs(to.y - from.y) > radius
+    ? prepareMappedSettlementGround(snapshot.surfaceScene, snapshot.mappedSettlement, { current: snapshot.origin, regionCode: originCell?.regionCode ?? '', originCell }) : undefined;
+  const mappedCells = mappedSettlementRouteCells(prepared, snapshot.cells);
+  const sourceCells = mappedCells ?? snapshot.cells;
+  if (mappedCells) radius = Math.max(snapshot.range, ...mappedCells.map(cell => Math.abs(cell.x - from.x) + Math.abs(cell.y - from.y)));
   const key = (position: Position) => `${position.x}:${position.y}`;
-  const allowed = new Map(snapshot.cells.filter(cell => cell.passable && cell.reachable !== false
+  const allowed = new Map(sourceCells.filter(cell => cell.passable && (!('reachable' in cell) || cell.reachable !== false)
     && [cell.x, cell.y, cell.z, cell.regionId].every(Number.isSafeInteger) && Number(cell.regionId) > 0
-    && cell.z === snapshot.origin.z && Math.abs(cell.x - from.x) + Math.abs(cell.y - from.y) <= budget).map(cell => [key(cell), cell]));
+    && cell.z === snapshot.origin.z && Math.abs(cell.x - from.x) + Math.abs(cell.y - from.y) <= radius).map(cell => [key(cell), cell]));
+  const budget = mappedCells || legacy ? Math.max(0, allowed.size - 1) : Math.min(snapshot.pathBudget!, Math.max(0, allowed.size - 1));
   const start = key(snapshot.origin), destination = key(to);
   if (destination === start || !allowed.has(destination)) return;
   const interactiveTypes = new Set(['NPC', '域民', '怪物', '建筑', '资源', '矿脉', '植被', '地标', '地下入口', '入口', '玩家', '地点']);
@@ -43,7 +57,7 @@ export function knownExplorationRoute(snapshot: ExploreLocalMap | undefined, fro
     return visited.has(destination) ? previous : undefined;
   };
   // Targets are route preferences, not new terrain walls. Keep a reachable
-  // destination usable when every detour exceeds the existing move budget.
+  // destination usable when every detour exceeds the authorized path budget.
   const previous = (avoid.size ? walk(true) : undefined) ?? walk(false);
   if (!previous) return;
   const path: ExploreRoutePosition[] = [];
@@ -51,19 +65,32 @@ export function knownExplorationRoute(snapshot: ExploreLocalMap | undefined, fro
     const cell = allowed.get(cursor)!;
     path.unshift({ x: cell.x, y: cell.y, z: cell.z, regionId: cell.regionId! });
   }
-  const plan: ExploreRoutePreview = { ok: true, origin: { ...snapshot.origin }, sightRange: snapshot.range, actionRange: snapshot.actionRange, moveRange: snapshot.movement.step, path, stepMilliseconds: 1000 / Number(snapshot.movement.speed) };
+  const legacyBudget = Math.min(snapshot.range, snapshot.actionRange, snapshot.movement.step);
+  const serverPreviewFirst = !!mappedCells || legacy && (path.length > legacyBudget
+    || path.some(cell => Math.abs(cell.x - from.x) + Math.abs(cell.y - from.y) > legacyBudget));
+  const plan: LocalRouteHint = { ok: true, origin: { ...snapshot.origin }, sightRange: mappedCells ? radius : snapshot.range, actionRange: snapshot.actionRange, moveRange: radius,
+    pathBudget: budget, ...(serverPreviewFirst ? { serverPreviewFirst: true } : {}), path, stepMilliseconds: 1000 / Number(snapshot.movement.speed) };
   try { validateExplorationRoute(plan, from, to); return plan; } catch { return; }
 }
 
 // A preview is authoritative, but never execute malformed/non-adjacent instructions.
 export function validateExplorationRoute(preview: ExploreRoutePreview, from: Position, to: Position) {
   const origin = preview.origin;
-  const budget = Math.min(preview.moveRange, preview.actionRange);
+  // Extra sight can extend movement through real observed cells without
+  // extending mining, combat, or other target interaction distances.
+  const radius = preview.pathBudget === undefined ? Math.min(preview.moveRange, preview.actionRange, preview.sightRange) : Math.min(preview.moveRange, preview.sightRange);
+  const budget = preview.pathBudget ?? radius;
   if (!Number.isFinite(preview.stepMilliseconds) || preview.stepMilliseconds <= 0) throw new Error('当前移动速度已变化，请刷新地图。');
-  if (!same(origin, from) || !Number.isSafeInteger(origin.regionId) || origin.regionId <= 0 || ![preview.moveRange, preview.actionRange].every(value => Number.isSafeInteger(value) && value >= 0) || !preview.path.length || preview.path.length > budget) throw new Error('当前位置或路线已变化，请重新选择目标。');
+  if (!same(origin, from) || !Number.isSafeInteger(origin.regionId) || origin.regionId <= 0 || ![preview.moveRange, preview.actionRange, preview.sightRange, budget].every(value => Number.isSafeInteger(value) && value >= 0)
+    || preview.pathBudget !== undefined && budget > 2 * radius * (radius + 1)
+    || !preview.path.length || preview.path.length > budget) throw new Error('当前位置或路线已变化，请重新选择目标。');
+  const visited = new Set([`${origin.x}:${origin.y}:${origin.z}`]);
   let previous: Position = origin;
   for (const node of preview.path) {
-    if (![node.x, node.y, node.z, node.regionId].every(Number.isSafeInteger) || node.z !== origin.z || Math.abs(node.x - previous.x) + Math.abs(node.y - previous.y) !== 1 || Math.abs(node.x - origin.x) + Math.abs(node.y - origin.y) > budget) throw new Error('服务器路线不可通行，请重新选择目标。');
+    const key = `${node.x}:${node.y}:${node.z}`;
+    if (![node.x, node.y, node.z, node.regionId].every(Number.isSafeInteger) || node.regionId <= 0 || node.z !== origin.z || visited.has(key)
+      || Math.abs(node.x - previous.x) + Math.abs(node.y - previous.y) !== 1 || Math.abs(node.x - origin.x) + Math.abs(node.y - origin.y) > radius) throw new Error('服务器路线不可通行，请重新选择目标。');
+    visited.add(key);
     previous = node;
   }
   if (!same(previous, to)) throw new Error('路线终点发生变化，请重新选择目标。');
@@ -75,7 +102,7 @@ export function useExplorationRoute(options: {
   isCurrentSession: (session: Session) => boolean;
   active: () => boolean;
   /** Optional current authorized window; this replaces only the redundant plan read. */
-  localPreview?: (to: { x: number; y: number; z: number }) => ExploreRoutePreview | undefined;
+  localPreview?: (to: { x: number; y: number; z: number }) => LocalRouteHint | undefined;
   preview: (to: { x: number; y: number; z: number }, signal: AbortSignal) => Promise<ExploreRoutePreview>;
   step: (to: ExploreRoutePosition, from: ExploreRoutePosition, signal: AbortSignal) => Promise<ExploreRouteStep>;
   apply: (result: ExploreRouteStep, show: boolean) => Promise<void>;
@@ -130,7 +157,19 @@ export function useExplorationRoute(options: {
     try {
       const to = { ...destination, z: destination.z ?? from.z ?? 0 };
       const localPreview = options.localPreview?.(to);
-      const preview = localPreview ?? await options.preview(to, abort.signal);
+      let preview: ExploreRoutePreview;
+      if (localPreview && !localPreview.serverPreviewFirst) preview = localPreview;
+      else {
+        try { preview = await options.preview(to, abort.signal); }
+        catch (error) {
+          // Older previews may cap an observed destination by the selected
+          // step, or cap mapped public ground by perception. Adjacent writes
+          // retain real position, collision, permission and action authority.
+          if (!localPreview?.serverPreviewFirst || !error || typeof error !== 'object' || !('code' in error) || error.code !== 'OUT_OF_RANGE'
+            || 'status' in error && error.status !== 400) throw error;
+          preview = localPreview;
+        }
+      }
       if (!valid() || cancelling.value || !options.active()) return;
       validateExplorationRoute(preview, options.current(), to);
       displayPosition.value = { ...preview.origin };
@@ -139,7 +178,7 @@ export function useExplorationRoute(options: {
       let confirmed = preview.origin;
       const path: Position[] = [preview.origin];
       const reduced = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
-      const predicting = !!localPreview && !reduced;
+      const predicting = !!localPreview && !localPreview.serverPreviewFirst && !reduced;
       const predictedPath: Position[] = [preview.origin, ...preview.path];
       const applications: Promise<unknown>[] = [];
       let producerDone = false, playbackDone = reduced, wakePlayback = () => {}, finishPlayback = () => {};

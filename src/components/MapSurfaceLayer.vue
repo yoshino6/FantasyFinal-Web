@@ -4,18 +4,19 @@ import { SURFACE_ATLASES, surfaceSnapshotClock, type MapSurfaceScene, type Surfa
 import { MapSurfaceRenderer, type SurfaceDrawStats } from '../map-surface-renderer';
 import { MapSurfaceGroundWebGL } from '../map-surface-ground-webgl';
 import type { MapVector } from '../exploration-map-geometry';
-const props = defineProps<{ scene: MapSurfaceScene; cells: readonly SurfaceCell[]; perceptionCells?: readonly SurfaceCell[]; mistGroundCells?: readonly SurfaceCell[]; camera: MapVector; viewport: { width: number; height: number }; cellSize: number; z: number; fallbackRegionCode: string; perceptionCenter?: MapVector; perceptionRange?: number; perceptionMoving?: boolean; sceneryExclusions?: readonly SurfaceRect[]; visualOnly?: boolean }>();
+const props = defineProps<{ scene: MapSurfaceScene; cells: readonly SurfaceCell[]; perceptionCells?: readonly SurfaceCell[]; mistGroundCells?: readonly SurfaceCell[]; ownedMapGroundCells?: readonly SurfaceCell[]; camera: MapVector; viewport: { width: number; height: number }; cellSize: number; z: number; fallbackRegionCode: string; perceptionCenter?: MapVector; perceptionRange?: number; perceptionMoving?: boolean; sceneryExclusions?: readonly SurfaceRect[]; visualOnly?: boolean }>();
 const canvas = ref<HTMLCanvasElement>(), mist = ref<HTMLCanvasElement>(), ground = ref<HTMLCanvasElement>(), gpuActive = ref(false);
 let renderer: MapSurfaceRenderer | undefined, clock = surfaceSnapshotClock(toRaw(props.scene), performance.now());
 let groundRenderer: MapSurfaceGroundWebGL | undefined;
 let frame = 0, timer: ReturnType<typeof setTimeout> | undefined;
 let dirty = true, drawing = false, drawVersion = 0;
-const currentView = () => ({ cells: props.cells, perceptionCells: props.perceptionCells, mistGroundCells: props.mistGroundCells, camera: props.camera, viewport: props.viewport, cellSize: props.cellSize, z: props.z, perceptionCenter: props.perceptionCenter, perceptionRange: props.perceptionRange, sceneryExclusions: props.sceneryExclusions });
+const currentView = () => ({ cells: props.cells, perceptionCells: props.perceptionCells, mistGroundCells: props.mistGroundCells, ownedMapGroundCells: props.ownedMapGroundCells, camera: props.camera, viewport: props.viewport, cellSize: props.cellSize, z: props.z, perceptionCenter: props.perceptionCenter, perceptionRange: props.perceptionRange, sceneryExclusions: props.sceneryExclusions });
 function drawMist() {
   if (renderer && mist.value) {
     const view = currentView();
     renderer.drawMist(mist.value, props.scene, view, props.fallbackRegionCode);
     renderer.applyMistVeil(mist.value, props.scene, view);
+    renderer.clearOwnedMapMist(mist.value, props.scene, view);
   }
 }
 function visibilityChanged() { invalidate(); }
@@ -34,7 +35,7 @@ function drawLatest() {
   try {
     const elapsed = clock.elapsed(performance.now());
     const view = currentView();
-    gpuActive.value = groundRenderer?.draw(props.scene, view) ?? false;
+    gpuActive.value = groundRenderer?.draw(props.scene, renderer.staticGroundView(props.scene, view)) ?? false;
     const stats: SurfaceDrawStats = renderer.draw(canvas.value, props.scene, elapsed, view, { skipGround: gpuActive.value });
     drawMist();
     const diagnostics = groundRenderer?.diagnostics;
@@ -86,13 +87,14 @@ watch(() => [props.camera.x, props.camera.y, props.viewport.width, props.viewpor
 watch(() => props.cells, viewChanged);
 watch(() => props.perceptionCells, viewChanged);
 watch(() => props.mistGroundCells, viewChanged);
+watch(() => props.ownedMapGroundCells, viewChanged);
 watch(() => props.sceneryExclusions, viewChanged);
 onUpdated(drawLatest);
 onMounted(() => { renderer = new MapSurfaceRenderer(invalidate, refreshRasterDiagnostics); if (ground.value) groundRenderer = new MapSurfaceGroundWebGL(ground.value, invalidate); tick(); viewChanged(); drawLatest(); document.addEventListener('visibilitychange', visibilityChanged); });
 onBeforeUnmount(() => { clearTimeout(timer); cancelAnimationFrame(frame); renderer?.dispose(); groundRenderer?.dispose(); document.removeEventListener('visibilitychange', visibilityChanged); });
 </script>
 <template>
-  <canvas ref="mist" class="map-surface-mist" data-fog-style="irregular-inward-glass" data-fog-boundary="rounded-observed-union" data-fog-inner-cells="0.5" data-fog-covers="terrain-scenery-entities" data-fog-ground="public-ground-pattern-only" data-fog-blur-css="7" data-fog-veil-alpha="0.36" data-fog-moving="false" aria-hidden="true" />
+  <canvas ref="mist" class="map-surface-mist" :data-fog-mode="ownedMapGroundCells?.length ? 'owned-public-map-ground' : 'perception'" data-fog-style="irregular-inward-glass" data-fog-boundary="rounded-observed-union" data-fog-inner-cells="0.5" data-fog-covers="terrain-scenery-entities" data-fog-ground="public-ground-pattern-only" data-fog-blur-css="7" data-fog-veil-alpha="0.36" data-fog-moving="false" aria-hidden="true" />
   <canvas ref="ground" class="map-surface-gpu" :style="{ visibility: gpuActive ? 'visible' : 'hidden' }" aria-hidden="true" />
   <canvas ref="canvas" class="map-surface-layer" aria-hidden="true" :data-visual-only="visualOnly ? 'true' : undefined" :data-scope-token="scene.scopeToken" :data-snapshot-id="scene.snapshotId" :data-server-now-ms="scene.serverNowMs" :data-perception-x="perceptionCenter?.x" :data-perception-y="perceptionCenter?.y" :data-perception-range="perceptionRange" :data-perception-moving="perceptionMoving ? 'true' : undefined" :data-atlas-count="SURFACE_ATLASES.length" />
 </template>

@@ -9,44 +9,44 @@
     <link rel="preload" as="image" href="/assets/light-anime/auth-v4/loading-scene-wide-v1.webp" />
     <link rel="preload" as="image" href="/assets/light-anime/auth-v4/fantasy-logo.webp" />
     <style>
-      #ff-boot { position: fixed; z-index: 9999; inset: 0; isolation: isolate; overflow: hidden; color: #233768; background: #c8e1bc; font-family: "KaiTi", "STKaiti", "Microsoft YaHei", sans-serif; transition: opacity .24s ease; }
-      #ff-boot, #ff-boot * { box-sizing: border-box; }
-      #ff-boot.is-hidden { display: none; }
-      #ff-boot.is-exiting { opacity: 0; pointer-events: none; }
+      .ff-boot-screen { position: fixed; z-index: 9999; inset: 0; isolation: isolate; overflow: hidden; color: #233768; background: #c8e1bc; font-family: "KaiTi", "STKaiti", "Microsoft YaHei", sans-serif; transition: opacity .24s ease; }
+      .ff-boot-screen, .ff-boot-screen * { box-sizing: border-box; }
+      .ff-boot-screen.is-hidden { display: none; }
+      .ff-boot-screen.is-exiting { opacity: 0; pointer-events: none; }
       .ff-boot-inner { position: absolute; z-index: 1; top: 50%; left: 50%; isolation: isolate; container-type: inline-size; width: max(calc(100vw * 940 * 940 / 1672 / 1672), calc(100dvh * 940 / 1672)); aspect-ratio: 940 / 1672; margin: 0; padding: 0; text-align: center; background: transparent; transform: translate(-50%, -50%); }
       .ff-boot-hero { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; }
       .ff-boot-logo { position: absolute; z-index: 2; top: 9cqw; left: 50%; display: block; width: 55%; height: auto; max-height: 23cqw; object-fit: contain; transform: translateX(-50%); }
       .ff-boot-track-wrap { position: absolute; z-index: 2; top: 83.5106%; left: 50%; display: grid; align-content: center; gap: .8cqw; width: min(112.5894%, calc(100vw - 24px)); height: 10.1064%; margin: 0; padding: 1cqw 4.7cqw 1.3cqw; border: 0; background: transparent; transform: translateX(-50%); }
       .ff-boot-status-row { display: flex; align-items: baseline; justify-content: center; flex-wrap: wrap; gap: 1.3cqw; min-width: 0; }
-      #ff-boot-status { flex: 0 1 auto; margin: 0; min-width: 0; color: #233768; font-size: clamp(11px, 3.4cqw, 32px); font-weight: 700; line-height: 1.2; letter-spacing: .025em; overflow-wrap: anywhere; text-shadow: 0 1px #fffbee; }
-      #ff-boot.has-load-error #ff-boot-status { font-size: clamp(10px, 2.6cqw, 23px); line-height: 1.15; }
-      #ff-boot-count { flex: none; color: #7c7464; font-family: "Microsoft YaHei", sans-serif; font-size: clamp(8px, 1.9cqw, 16px); font-variant-numeric: tabular-nums; line-height: 1.3; white-space: nowrap; }
-      #ff-boot-elapsed { color: #7c7464; font-family: "Microsoft YaHei", sans-serif; font-size: clamp(8px, 1.9cqw, 16px); font-variant-numeric: tabular-nums; white-space: nowrap; }
+      .ff-boot-status { flex: 0 1 auto; margin: 0; min-width: 0; color: #233768; font-size: clamp(11px, 3.4cqw, 32px); font-weight: 700; line-height: 1.2; letter-spacing: .025em; overflow-wrap: anywhere; text-shadow: 0 1px #fffbee; }
+      .ff-boot-screen.has-load-error .ff-boot-status { font-size: clamp(10px, 2.6cqw, 23px); line-height: 1.15; }
+      .ff-boot-count { flex: none; color: #7c7464; font-family: "Microsoft YaHei", sans-serif; font-size: clamp(8px, 1.9cqw, 16px); font-variant-numeric: tabular-nums; line-height: 1.3; white-space: nowrap; }
+      .ff-boot-elapsed { color: #7c7464; font-family: "Microsoft YaHei", sans-serif; font-size: clamp(8px, 1.9cqw, 16px); font-variant-numeric: tabular-nums; white-space: nowrap; }
       .ff-boot-progress-row { display: grid; grid-template-columns: minmax(16px, 5.2cqw) minmax(0, 1fr) minmax(36px, 8cqw); align-items: center; gap: 1.6cqw; min-width: 0; }
       .ff-boot-paw { display: block; width: 100%; height: auto; color: #b38268; }
-      #ff-boot-track { width: 100%; height: clamp(10px, 2.8cqw, 26px); overflow: hidden; border: 1px solid #a89b83; border-radius: 99px; background: #cabda7; box-shadow: inset 0 1px 3px #78644b2e, 0 1px #fff9e9; }
-      #ff-boot-fill { width: 0; height: 100%; border-radius: inherit; background: repeating-linear-gradient(130deg, #7edcff 0 9px, #46c6f9 9px 18px); box-shadow: inset 0 0 0 1px #2198ce, inset 0 2px 2px #d4fbff99; transition: width .18s ease-out; }
-      #ff-boot-percent { color: #192b66; font-size: clamp(16px, 4.2cqw, 38px); font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; white-space: nowrap; }
+      .ff-boot-track { width: 100%; height: clamp(10px, 2.8cqw, 26px); overflow: hidden; border: 1px solid #a89b83; border-radius: 99px; background: #cabda7; box-shadow: inset 0 1px 3px #78644b2e, 0 1px #fff9e9; }
+      .ff-boot-fill { width: 0; height: 100%; border-radius: inherit; background: repeating-linear-gradient(130deg, #7edcff 0 9px, #46c6f9 9px 18px); box-shadow: inset 0 0 0 1px #2198ce, inset 0 2px 2px #d4fbff99; transition: width .18s ease-out; }
+      .ff-boot-percent { color: #192b66; font-size: clamp(16px, 4.2cqw, 38px); font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; white-space: nowrap; }
       #ff-boot-chase[hidden] { display: none; }
       #ff-boot-retry { position: absolute; z-index: 2; top: min(calc(100% - clamp(44px, 8.7cqw, 82px) - 6px), calc(50% + 50dvh - clamp(44px, 8.7cqw, 82px) - 6px)); left: 50%; display: flex; align-items: center; justify-content: center; gap: 1.5cqw; width: clamp(132px, 30.3cqw, 285px); min-height: clamp(44px, 8.7cqw, 82px); margin: 0; padding: 5px 10px; color: #233768; border: 2px solid #d4bc97; border-radius: 5px; background: linear-gradient(115deg, #fffdf4, #fff5df); box-shadow: inset 0 0 0 2px #fffdf4, inset 0 0 0 3px #e3d3b8, 0 2px 6px #59623d40; transform: translateX(-50%); font: inherit; font-size: clamp(16px, 3.8cqw, 32px); font-weight: 700; line-height: 1.2; cursor: pointer; }
       #ff-boot-retry svg { flex: 0 0 auto; width: clamp(20px, 5cqw, 43px); height: auto; }
       #ff-boot-retry[hidden] { display: none; }
       #ff-boot-retry:focus-visible { outline: 3px solid #3bb9e9; outline-offset: 3px; }
-      @media (prefers-reduced-motion: reduce) { #ff-boot, #ff-boot-fill { transition: none; } }
+      @media (prefers-reduced-motion: reduce) { .ff-boot-screen, .ff-boot-fill { transition: none; } }
     </style>
   </head>
   <body>
-    <div id="ff-boot" role="status" aria-live="polite" aria-label="正在加载幻想次元">
+    <div id="ff-boot" class="ff-boot-screen" role="status" aria-live="polite" aria-label="正在加载幻想次元">
       <img class="ff-boot-hero" src="/assets/light-anime/auth-v4/loading-scene-wide-v1.webp" width="1672" height="940" alt="更大的世界就去冒险吧！梨子喵与球兔前往百纳镇，藤蔓纸板与向左右延展的风景连成完整画面" fetchpriority="high" />
       <div class="ff-boot-inner">
         <img class="ff-boot-logo" src="/assets/light-anime/auth-v4/fantasy-logo.webp" width="1942" height="809" alt="幻想次元" fetchpriority="high" />
         <div class="ff-boot-track-wrap">
           <span id="ff-boot-chase" aria-hidden="true" hidden></span>
-          <div class="ff-boot-status-row"><p id="ff-boot-status">正在加载游戏界面…</p><span id="ff-boot-count">准备中</span><span id="ff-boot-elapsed" aria-hidden="true">已用 0 秒</span></div>
+          <div class="ff-boot-status-row"><p id="ff-boot-status" class="ff-boot-status">正在加载游戏界面…</p><span id="ff-boot-count" class="ff-boot-count">准备中</span><span id="ff-boot-elapsed" class="ff-boot-elapsed" aria-hidden="true">已用 0 秒</span></div>
           <div class="ff-boot-progress-row">
             <svg class="ff-boot-paw" viewBox="0 0 48 48" aria-hidden="true"><ellipse cx="10" cy="14" rx="5" ry="7" fill="currentColor" transform="rotate(-24 10 14)" /><ellipse cx="21" cy="9" rx="5" ry="7" fill="currentColor" transform="rotate(-7 21 9)" /><ellipse cx="33" cy="10" rx="5" ry="7" fill="currentColor" transform="rotate(10 33 10)" /><ellipse cx="42" cy="19" rx="4.5" ry="6.5" fill="currentColor" transform="rotate(26 42 19)" /><path d="M13 31c3-3 4-10 11-10s8 7 12 11c7 10-1 14-8 10-4-2-5-2-9 0-9 4-14-4-6-11Z" fill="currentColor" /></svg>
-            <div id="ff-boot-track" role="progressbar" aria-label="游戏资源加载进度" aria-describedby="ff-boot-count" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="ff-boot-fill"></div></div>
-            <span id="ff-boot-percent" aria-hidden="true">0%</span>
+            <div id="ff-boot-track" class="ff-boot-track" role="progressbar" aria-label="游戏资源加载进度" aria-describedby="ff-boot-count" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="ff-boot-fill" class="ff-boot-fill"></div></div>
+            <span id="ff-boot-percent" class="ff-boot-percent" aria-hidden="true">0%</span>
           </div>
         </div>
         <button id="ff-boot-retry" type="button" hidden><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M26 12a11 11 0 1 0-1 12" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" /><path d="m18 11 9 3 2-9" fill="currentColor" /></svg><span>重新加载</span></button>

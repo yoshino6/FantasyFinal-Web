@@ -262,13 +262,13 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown));
     </Transition>
 
     <Transition name="region-map-slide">
-      <aside v-if="open" id="region-map-drawer" class="region-map-drawer anime-adventure exploration-region" :style="terrainStyle" :data-region-code="activeRegionCode" role="dialog" aria-modal="true" aria-label="世界地图">
-        <header class="drawer-header">
+      <aside v-if="open" id="region-map-drawer" class="region-map-drawer anime-adventure exploration-region exploration-window" data-window-theme="map" :style="terrainStyle" :data-region-code="activeRegionCode" role="dialog" aria-modal="true" aria-label="世界地图">
+        <button type="button" class="drawer-close exploration-window-close" aria-label="收起地图" @click="closeSidebar"><span class="exploration-close-mark" aria-hidden="true" /></button>
+        <header class="drawer-header exploration-window-heading">
           <div>
-            <p class="drawer-kicker">WORLD MAP</p>
-            <h2><AnimeIcon name="map" :size="30" />世界地图</h2>
+            <p class="drawer-kicker exploration-window-kicker">WORLD MAP</p>
+            <h2><AnimeIcon name="map" :size="30" />地图</h2>
           </div>
-          <button type="button" class="drawer-close" aria-label="收起地图" @click="closeSidebar"><AnimeIcon name="close" /></button>
         </header>
 
         <div v-if="regions.length" class="region-tabs" aria-label="区域选择">
@@ -342,7 +342,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown));
 
         <div v-if="selectedMarkerGroup" class="travel-confirm-wrap" role="presentation" @click.self="selectedMarkerGroup = null">
           <div class="travel-confirm region-target-chooser" role="dialog" aria-modal="true" aria-labelledby="region-target-chooser-title">
-            <button type="button" class="drawer-close chooser-close" aria-label="关闭同坐标目标" @click="selectedMarkerGroup = null"><AnimeIcon name="close" /></button>
+            <button type="button" class="drawer-close chooser-close exploration-window-close" aria-label="关闭同坐标目标" @click="selectedMarkerGroup = null"><span class="exploration-close-mark" aria-hidden="true" /></button>
             <p class="drawer-kicker">同坐标目标</p>
             <h3 id="region-target-chooser-title">选择目的地（{{ selectedMarkerGroup.length }}）</h3>
             <div class="region-target-choices">

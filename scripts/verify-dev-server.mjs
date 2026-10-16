@@ -28,6 +28,25 @@ try {
   // The development manifest is intentionally small, but must still resolve
   // distinct profile/equipment portraits instead of silently using defaults.
   const developmentAssets = JSON.parse(vite.config.define.__FF_BOOT_ASSETS__);
+  const commonRegistry = {};
+  runInNewContext(ts.transpileModule(await readFile(join(root, 'src/common-asset-paths.ts'), 'utf8'), {
+    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 }
+  }).outputText, { exports: commonRegistry });
+  const commonPaths = commonRegistry.COMMON_ASSET_PATHS;
+  assert.equal(commonPaths.length, 11, 'Development retains only the shared public resource selection');
+  const gameRegistry = {};
+  runInNewContext(ts.transpileModule(await readFile(join(root, 'src/game-assets.ts'), 'utf8'), {
+    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 }
+  }).outputText, { exports: gameRegistry, __FF_BOOT_ASSETS__: developmentAssets });
+  const assetsByPath = new Map(developmentAssets.map(asset => [asset.path, asset]));
+  for (const path of commonPaths) {
+    const asset = assetsByPath.get(path);
+    assert.ok(asset, `Development preloading must share the rendered resource URL: ${path}`);
+    assert.match(asset.hash, /^[a-f0-9]{16}$/, `Development preloading needs the current hash: ${path}`);
+    assert.ok(asset.bytes > 0, `Development preload progress needs the resource size: ${path}`);
+    assert.equal(gameRegistry.gameAssetUrl(path), `${path}?ffv=${asset.hash}`,
+      `Development rendering and preloading share the current version URL: ${path}`);
+  }
   const portraitRegistry = {};
   runInNewContext(ts.transpileModule(await readFile(join(root, 'src/character-assets.ts'), 'utf8'), {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 }
@@ -107,6 +126,7 @@ try {
     devEnvBytes: Buffer.byteLength(envSource),
     devAssetsModuleBytes: Buffer.byteLength(assetsSource),
     portraitVariants,
+    commonPreloadAssets: commonPaths.length,
     watchDirectories: directories.length,
     watchEntries: Object.values(watched).reduce((sum, children) => sum + children.length, 0),
     designDirectories: 0,

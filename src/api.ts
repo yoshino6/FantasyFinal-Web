@@ -6,7 +6,7 @@ export type Panel = {
   text?: string;
   buttons?: GameActionButton[];
   messages?: GameActionMessage[];
-  account?: { uid?: string; loginId?: string; gameUserId?: string; displayName?: string; hasCharacter?: boolean; passwordLoginEnabled?: boolean };
+  account?: { uid?: string; loginId?: string; gameUserId?: string; displayName?: string; hasCharacter?: boolean; passwordLoginEnabled?: boolean; avatarUrl?: string | null };
   equipment?: PanelEquippedItem[];
   skills?: PanelSkills;
   evolution?: PanelEvolution;
@@ -308,10 +308,10 @@ export type AutoBattleConfig = {
 export type AutoBattleSkillChoice = { id: number | null; name: string };
 export type AutoBattlePotionChoice = { id: number; name: string };
 
-export type SocialIdentity = { portrait?: PanelPortrait; gender?: string; level?: number; profession?: string };
+export type SocialIdentity = { portrait?: PanelPortrait; avatarUrl?: string; gender?: string; level?: number; profession?: string };
 export type AffinityProgress = { min: number; nextMin: number | null; toNext: number };
 export type ChatChannel = SocialIdentity & { id: string; name: string; type: 'world' | 'friend' | 'party'; unreadCount?: number; gameId?: number };
-export type ChatMessage = { id: number; senderName: string; senderId?: string; senderPortrait?: PanelPortrait; content: string; createdAt: string; own?: boolean; recruitmentId?: number; recruitment?: Recruitment };
+export type ChatMessage = { id: number; senderName: string; senderId?: string | number; senderGameId?: number; senderPortrait?: PanelPortrait; senderAvatarUrl?: string; content: string; createdAt: string; own?: boolean; recruitmentId?: number; recruitment?: Recruitment };
 export type SocialFriend = SocialIdentity & { name: string; gameId: number; status: 'friend' | 'oath' | string; affinity: number; stage: string; affinityProgress?: AffinityProgress };
 export type SocialSummary = {
   friends: SocialFriend[];
@@ -320,7 +320,18 @@ export type SocialSummary = {
   oathRequests: (SocialIdentity & { id: number; name: string; gameId: number; affinity: number; stage: string; affinityProgress?: AffinityProgress; expiresAt: string })[];
   oathReleaseRequests: (SocialIdentity & { id: number; name: string; gameId: number; expiresAt: string })[];
 };
-export type Recruitment = { id: number; partyId: string; partyName: string; title?: string; description?: string; creatorName?: string; leaderGameId?: number; leaderPortrait?: PanelPortrait; regionCode?: string; regionName?: string; targetCount: number; memberCount: number; openSlots?: number; status?: 'open' | 'closed'; applicationStatus?: 'pending' | 'accepted' | 'rejected' | 'cancelled' | 'expired' | null; createdAt: string; expiresAt?: string; own?: boolean; applied?: boolean };
+export type Recruitment = { id: number; partyId: string; partyName: string; title?: string; description?: string; creatorName?: string; leaderGameId?: number; leaderPortrait?: PanelPortrait; leaderAvatarUrl?: string; regionCode?: string; regionName?: string; targetCount: number; memberCount: number; openSlots?: number; status?: 'open' | 'closed'; applicationStatus?: 'pending' | 'accepted' | 'rejected' | 'cancelled' | 'expired' | null; createdAt: string; expiresAt?: string; own?: boolean; applied?: boolean };
+export type PlayerCardProfile = SocialIdentity & {
+  gameId: number; name: string; level: number; rank?: string; regionName?: string;
+  secondaryProfession?: string; secondaryLevel?: number | null;
+  skillsVisible?: boolean; skills?: { name: string; level: number; category: string }[];
+  viewer: {
+    isSelf: boolean; isFriend: boolean; friendRequestStatus: 'none' | 'incoming' | 'outgoing';
+    incomingFriendRequestId?: number; sameParty: boolean; canInviteParty: boolean; inviteDisabledReason?: string;
+    partyInvitationStatus?: 'none' | 'incoming' | 'outgoing'; incomingPartyInvitationId?: number;
+  };
+};
+export type PartyInvitation = { id: number; inviterGameId: number; inviterName: string; partyName: string; expiresAt: string };
 export type PartyApplication = SocialIdentity & { id: number; gameId: number; name: string; message: string; status: string; createdAt: string; respondedAt?: string | null };
 export type WebPartyMember = SocialIdentity & { id: number; gameId: number; name: string; level: number; isLeader: boolean; isSelf: boolean; regionCode: string; regionName: string; position: { x: number; y: number; z: number } };
 export type WebParty = { id: string; name: string; story: boolean; leaderId: number; leaderGameId: number | null; ownId: number; isLeader: boolean; leader: WebPartyMember | null; members: WebPartyMember[]; memberCount: number; maxMembers: number; regionCode: string; regionName: string; position: { x: number; y: number; z: number } | null; canLeave: boolean; canRename: boolean; canRecruit: boolean; canPublishRecruitment: boolean; recruitment: Recruitment | null; pendingApplicationCount: number };
@@ -474,6 +485,11 @@ export const register = (displayName: string, password: string, passwordConfirma
 export const login = (loginId: string, password: string) => request<AuthResult>('/login', { method: 'POST', body: JSON.stringify({ loginId, password }) });
 export const setPassword = (newPassword: string, passwordConfirmation: string) => request<PasswordResult>('/password/set', { method: 'POST', body: JSON.stringify({ newPassword, passwordConfirmation }) });
 export const changePassword = (currentPassword: string, newPassword: string, passwordConfirmation: string) => request<PasswordResult>('/password/change', { method: 'POST', body: JSON.stringify({ currentPassword, newPassword, passwordConfirmation }) });
+export const uploadAvatar = (imageData: string, signal?: AbortSignal) => request<{ ok: true; avatarUrl: string }>('/profile/avatar', { method: 'POST', body: JSON.stringify({ imageData }), signal });
+export type IdentityChangeAllowance = { freeRemaining: 0 | 1; cardQuantity: number; itemName: string; code: string; requiredQuantity: 1 };
+export type IdentityChanges = { ok: true; name: string; gender: string; rename: IdentityChangeAllowance; genderChange: IdentityChangeAllowance };
+export const identityChanges = () => request<IdentityChanges>('/profile/identity-changes');
+export const redeemCode = (code: string) => request<{ ok: true; alreadyRedeemed: boolean; mailId: number; message: string }>('/redeem-code', { method: 'POST', body: JSON.stringify({ code }) });
 export const logout = () => request<{ ok: true }>('/logout', { method: 'POST' });
 export const panel = () => request<Panel>('/panel');
 export const equippedEquipmentDetail = (slot: string, signal?: AbortSignal) => request<EquippedEquipmentDetailResponse>(`/equipment/${encodeURIComponent(slot)}/detail`, { signal });
@@ -494,10 +510,11 @@ export type ExploreTravelVisual = {
   segments: { kind: 'walk' | 'portal' | 'guild'; instant: boolean; from: ExploreTravelVisualPoint; to: ExploreTravelVisualPoint; distance: number; startAt: number; arrivalAt: number; waypoints: (ExploreTravelVisualPoint & { distance: number; at: number })[] }[];
 };
 export type ExploreGroundWindow = { cells: { x: number; y: number; z: number; regionId: number; regionCode: string }[]; terrainFields: MapSurfaceScene['terrainFields']; padding?: number; scopeToken?: 'world:0' };
-export type ExploreLocalMap = { ok: true; origin: ExploreRoutePosition; range: number; actionRange: number; movement: { step: number; maximum: number; speed?: number }; cells: { x: number; y: number; z: number; regionId?: number; regionCode?: string; passable: boolean; reachable?: boolean }[]; environment?: EnvironmentObjectView[]; environmentJob?: EnvironmentJobView | null; surfaceScene?: MapSurfaceScene; groundWindow?: ExploreGroundWindow; travelView?: { id: string; serverNow: number; position: ExploreTravelVisualPoint; committedOrigin: ExploreRoutePosition }; nearby?: { points: PanelNearbyPoint[]; range: number; actionRange: number } };
+export type MappedSettlementReceipt = { schemaVersion: 1; regionId: number; regionCode: string; z: number; scopeToken: string; terrainSeed: number; areas: { minX: number; maxX: number; minY: number; maxY: number }[]; excludedAreas: { minX: number; maxX: number; minY: number; maxY: number }[] };
+export type ExploreLocalMap = { ok: true; origin: ExploreRoutePosition; range: number; actionRange: number; pathBudget?: number; mappedSettlement?: MappedSettlementReceipt; movement: { step: number; maximum: number; speed?: number }; cells: { x: number; y: number; z: number; regionId?: number; regionCode?: string; passable: boolean; reachable?: boolean }[]; environment?: EnvironmentObjectView[]; environmentJob?: EnvironmentJobView | null; surfaceScene?: MapSurfaceScene; groundWindow?: ExploreGroundWindow; travelView?: { id: string; serverNow: number; position: ExploreTravelVisualPoint; committedOrigin: ExploreRoutePosition }; nearby?: { points: PanelNearbyPoint[]; range: number; actionRange: number } };
 export type EnvironmentJobView = { id: string; objectId: string; objectName: string; finishesAt: string; remainingSeconds: number; ready: boolean };
 export type EnvironmentActionResult = { kind: 'clearing' | 'cancelled' | 'idle' | 'settled'; message: string; text?: string; job?: EnvironmentJobView | null; objectId?: string; alreadySettled?: boolean; rewards?: { code: string; name: string; quantity: number }[]; panel?: Panel };
-export type ExploreRoutePreview = { ok: true; origin: ExploreRoutePosition; sightRange: number; actionRange: number; moveRange: number; path: ExploreRoutePosition[]; stepMilliseconds: number };
+export type ExploreRoutePreview = { ok: true; origin: ExploreRoutePosition; sightRange: number; actionRange: number; moveRange: number; pathBudget?: number; path: ExploreRoutePosition[]; stepMilliseconds: number };
 export type ExploreStepState = { position: ExploreRoutePosition; region: string; hp: number; mp: number; stamina: number; movement: ExploreLocalMap['movement']; nearby: { points: PanelNearbyPoint[]; range: number; actionRange: number } };
 export type ExploreRouteStep = CommandActionResult & { kind: string; text: string; position: ExploreRoutePosition; moved: boolean; localMap?: Omit<ExploreLocalMap, 'ok'>; stepState?: ExploreStepState };
 export const exploreLocalMap = (signal?: AbortSignal, view?: 'travel') => request<ExploreLocalMap>(`/explore/local-map${view === 'travel' ? '?view=travel' : ''}`, { signal }).then(result => {
@@ -554,6 +571,15 @@ export const claimAllGameMails = () => request<{ ok: true; mailCount: number; it
 export const deleteGameMail = (id: number) => request<{ ok: true; unreadCount: number }>(`/mail/${id}`, { method: 'DELETE' });
 export const channels = () => request<{ channels: ChatChannel[] }>('/chat/channels');
 export const socialSummary = () => request<SocialSummary>('/social/summary');
+export const playerCard = async (gameId: number): Promise<PlayerCardProfile> => {
+  const result = await request<{ player: Omit<PlayerCardProfile, 'viewer'>; viewer: PlayerCardProfile['viewer'] }>(`/social/players/${gameId}`);
+  return { ...result.player, viewer: result.viewer };
+};
+export const requestPlayerFriend = (gameId: number) => request<{ message: string }>(`/social/players/${gameId}/friend-request`, { method: 'POST' });
+export const acceptPlayerFriendRequest = (requestId: number) => request<{ message: string }>(`/social/friend-requests/${requestId}/accept`, { method: 'POST' });
+export const invitePlayerToParty = (gameId: number) => request<{ message: string; invitationId: number }>(`/social/players/${gameId}/party-invitation`, { method: 'POST' });
+export const playerPartyInvitations = () => request<{ items: PartyInvitation[] }>('/social/party-invitations');
+export const respondPlayerPartyInvitation = (id: number, action: 'accept' | 'reject') => request<{ message: string; partyId?: string }>(`/social/party-invitations/${id}/respond`, { method: 'POST', body: JSON.stringify({ action }) });
 export const realtimeTicket = () => request<{ ticket: string; expiresIn: number }>('/realtime-ticket');
 export const messages = (channelId: string, beforeId?: number, limit = 20) => {
   const query = new URLSearchParams({ limit: String(limit) });

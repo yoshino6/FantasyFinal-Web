@@ -10,7 +10,7 @@ import { materialColor, rasterGroundTile, type GroundMaterial, type GroundRaster
 import { worldToViewport, type MapVector } from './exploration-map-geometry';
 import { isPavedSurfaceRegion, markOpacity, roundedSurfaceRoad, safeSurfacePoints, sampleSurfaceColor, sampleSurfaceRoad, surfaceChunkCoordinate, surfaceNoise, surfaceMaterialIndex, surfacePalette, surfaceRandom, surfaceSceneryVariant, surfaceSplat, surfaceSprite, surfaceWalkFootsteps, walkOpacity, SURFACE_ATLASES, SURFACE_FOOTPRINT_ASSET, SURFACE_GROUND_MATERIAL, type MapSurfaceScene, type SurfaceCell, type SurfacePoint, type SurfaceTerrainField, type SurfaceRoad } from './map-surface';
 
-type View = { camera: MapVector; viewport: { width: number; height: number }; cellSize: number; cells: readonly SurfaceCell[]; z: number; perceptionCells?: readonly SurfaceCell[]; perceptionCenter?: MapVector; perceptionRange?: number; sceneryExclusions?: readonly SurfaceRect[]; mistGroundCells?: readonly SurfaceCell[] };
+type View = { camera: MapVector; viewport: { width: number; height: number }; cellSize: number; cells: readonly SurfaceCell[]; z: number; perceptionCells?: readonly SurfaceCell[]; perceptionCenter?: MapVector; perceptionRange?: number; sceneryExclusions?: readonly SurfaceRect[]; mistGroundCells?: readonly SurfaceCell[]; ownedMapGroundCells?: readonly SurfaceCell[] };
 export type SurfaceDrawStats = { scenery: number; skippedScenery: number; sceneryVariants: [number, number]; walks: number; marks: number; groundChunks: number; groundGenerated: number; authorizedCells: number; visibleCells: number; missingAtlases: number; groundMaterial: boolean };
 // One lazy tile avoids generating sixteen 128px cells for a single entering
 // cell. All samples still use the identical global 1/8-cell lattice.
@@ -83,6 +83,7 @@ export class MapSurfaceRenderer {
   private geometryWeight = 0;
   private authorizedGround?: AuthorizedGround;
   private perceivedGround?: { authorization: AuthorizedGround; key: string; ground: AuthorizedGround };
+  private ownedMapGround?: { key: string; owned: SurfaceCell[]; cells: SurfaceCell[]; visible: SurfaceCell[] };
   private groundPrefetch?: { authorization: AuthorizedGround; scope: string; x: number; y: number; cells: SurfaceCell[]; fields: Map<number, SurfaceTerrainField>; probes: number };
   private groundPrefetchCreated = 0;
   private sceneryScene?: MapSurfaceScene;
@@ -145,6 +146,7 @@ export class MapSurfaceRenderer {
   get rasterCacheEvictions() { return this.rasterEvictions; }
   get drawDiagnostics() { return { ...this.lastDrawPhases, perceptionMaskBuilds: this.perceptionMaskBuilds, perceptionMaskReuses: this.perceptionMaskReuses, visibilityMaskBuilds: this.visibilityMaskBuilds,
     groundPrefetchCreated: this.groundPrefetchCreated, groundPrefetchCandidates: this.groundPrefetch?.cells.length ?? 0, groundPrefetchProbes: this.groundPrefetch?.probes ?? 0,
+    ownedMapGroundCells: this.ownedMapGround?.owned.length ?? 0,
     mistBuilds: this.mistBuilds, mistReuses: this.mistReuses, mistPatternBuilds: this.mistPatternBuilds,
     mistScatterBuilds: this.mistScatterBuilds, mistColorSamples: this.mistColorSamples, mistMs: this.mistMs,
     mistBackdropBuilds: this.mistBackdropBuilds, mistDecorativeBackdrop: !!this.mistBaseView?.backdrop,
@@ -239,7 +241,7 @@ export class MapSurfaceRenderer {
       this.rasterCache.delete(oldest); this.rasterBytes -= entry.bytes; this.rasterEvictions++; entry.remove();
     }
   }
-  dispose() { this.disposed = true; clearTimeout(this.workerTimer); this.groundWorker?.terminate(); this.groundWorker = undefined; this.workerBusy = undefined; this.workerBusyBackground = false; this.workerReady = false; this.clearRasterCache(); this.geometryCache.clear(); this.geometryWeight = 0; this.authorizedGround = undefined; this.perceivedGround = undefined; this.sceneryScene = undefined; this.orderedScenery = []; this.atlases.clear(); this.materials = []; for (const source of this.materialCanvases) source.width = source.height = 0; this.materialCanvases = []; for (const source of this.pavedMaterials.values()) source.width = source.height = 0; this.pavedMaterials.clear(); this.trails.width = 0; this.trails.height = 0; this.visibility.width = 0; this.visibility.height = 0; this.perceptionVisibility.width = 0; this.perceptionVisibility.height = 0; this.mistBase.width = this.mistBase.height = 0; this.mistGround.width = this.mistGround.height = 0; this.mistOuterVisibility.width = this.mistOuterVisibility.height = 0; this.mistNearVisibility.width = this.mistNearVisibility.height = this.mistBlend.width = this.mistBlend.height = 0; this.mistOuterVisibilityKey = ''; this.mistSnapshot = undefined; this.mistBaseView = undefined; this.mistBlendView = undefined; this.mistVeilMask.width = this.mistVeilMask.height = 0; this.mistVeilMaskView = undefined; }
+  dispose() { this.disposed = true; clearTimeout(this.workerTimer); this.groundWorker?.terminate(); this.groundWorker = undefined; this.workerBusy = undefined; this.workerBusyBackground = false; this.workerReady = false; this.clearRasterCache(); this.geometryCache.clear(); this.geometryWeight = 0; this.authorizedGround = undefined; this.perceivedGround = undefined; this.ownedMapGround = undefined; this.sceneryScene = undefined; this.orderedScenery = []; this.atlases.clear(); this.materials = []; for (const source of this.materialCanvases) source.width = source.height = 0; this.materialCanvases = []; for (const source of this.pavedMaterials.values()) source.width = source.height = 0; this.pavedMaterials.clear(); this.trails.width = 0; this.trails.height = 0; this.visibility.width = 0; this.visibility.height = 0; this.perceptionVisibility.width = 0; this.perceptionVisibility.height = 0; this.mistBase.width = this.mistBase.height = 0; this.mistGround.width = this.mistGround.height = 0; this.mistOuterVisibility.width = this.mistOuterVisibility.height = 0; this.mistNearVisibility.width = this.mistNearVisibility.height = this.mistBlend.width = this.mistBlend.height = 0; this.mistOuterVisibilityKey = ''; this.mistSnapshot = undefined; this.mistBaseView = undefined; this.mistBlendView = undefined; this.mistVeilMask.width = this.mistVeilMask.height = 0; this.mistVeilMaskView = undefined; }
   private geometry(cells: readonly SurfacePoint[]): CellGeometry {
     const key = cells.map(cell => `${cell.x},${cell.y}`).join(';'), cached = this.geometryCache.get(key);
     if (cached) { this.geometryCache.delete(key); this.geometryCache.set(key, cached); return cached; }
@@ -285,6 +287,41 @@ export class MapSurfaceRenderer {
     for (const cell of known) if (cell.passable !== false) { const cells = passableByRegion.get(cell.regionId!) ?? []; cells.push(cell); passableByRegion.set(cell.regionId!, cells); }
     const ground = { key, known, passableByRegion, passable: known.filter(cell => cell.passable === true), anchors: new Map(known.map(cell => [`${cell.x}:${cell.y}`, cell])) };
     this.perceivedGround = { authorization, key, ground }; return ground;
+  }
+  private ownedMapGroundFor(scene: MapSurfaceScene, view: View) {
+    if (scene.scopeToken !== `world:${view.z}` || !view.ownedMapGroundCells?.length) { this.ownedMapGround = undefined; return; }
+    const authorization = this.groundAuthorization(scene, view.cells, view.z), foreground = this.perceptionAuthorization(scene, authorization, view);
+    const key = `${scene.scopeToken}|${authorization.key}|${foreground.key}|${view.ownedMapGroundCells.map(cell => `${cell.x},${cell.y},${cell.z ?? view.z},${cell.regionId},${cell.regionCode}`).join(';')}`;
+    if (this.ownedMapGround?.key === key) return this.ownedMapGround;
+    // These cells come only from the separately validated owned-map receipt.
+    // They authorize static terrain, never observed objects or interaction.
+    const owned = authorizedSurfaceCells(scene, view.ownedMapGroundCells, view.z).filter(cell => {
+      const actual = authorization.anchors.get(`${cell.x}:${cell.y}`);
+      return !actual || actual.regionId === cell.regionId;
+    });
+    const cells = new Map(authorization.anchors), visible = new Map(foreground.anchors);
+    for (const cell of owned) {
+      const key = `${cell.x}:${cell.y}`;
+      if (!cells.has(key)) cells.set(key, cell);
+      if (!visible.has(key)) visible.set(key, cell);
+    }
+    return this.ownedMapGround = { key, owned, cells: [...cells.values()], visible: [...visible.values()] };
+  }
+  /** GPU terrain uses this view; all object/trace rendering keeps the original. */
+  staticGroundView(scene: MapSurfaceScene, view: View): View {
+    const ground = this.ownedMapGroundFor(scene, view);
+    return ground?.owned.length ? { ...view, cells: ground.cells, perceptionCells: ground.visible } : view;
+  }
+  clearOwnedMapMist(canvas: HTMLCanvasElement, scene: MapSurfaceScene, view: View) {
+    if (this.disposed || !canvas.width || !canvas.height || view.cellSize <= 0 || view.viewport.width <= 0 || view.viewport.height <= 0) return;
+    const owned = this.ownedMapGroundFor(scene, view)?.owned;
+    if (!owned?.length) return;
+    const viewport = surfaceViewportRect(view.camera, view.viewport, view.cellSize), visible = owned.filter(cell => surfaceCellVisible(cell, viewport));
+    if (!visible.length) return;
+    const context = canvas.getContext('2d')!;
+    context.save(); context.setTransform(canvas.width / view.viewport.width, 0, 0, canvas.height / view.viewport.height, 0, 0);
+    context.globalAlpha = 1; context.globalCompositeOperation = 'destination-out'; context.fillStyle = '#000';
+    this.clip(context, visible, view); context.fillRect(0, 0, view.viewport.width, view.viewport.height); context.restore();
   }
   private scenery(scene: MapSurfaceScene) {
     if (this.sceneryScene !== scene) {
@@ -920,15 +957,17 @@ export class MapSurfaceRenderer {
     const generatedBefore = this.groundGenerated;
     const context = canvas.getContext('2d')!, stats: SurfaceDrawStats = { scenery: 0, skippedScenery: 0, sceneryVariants: [0, 0], walks: 0, marks: 0, groundChunks: 0, groundGenerated: 0, authorizedCells: 0, visibleCells: 0, missingAtlases: SURFACE_ATLASES.length - this.atlases.size, groundMaterial: this.materials.length === 6 };
     context.setTransform(dpr, 0, 0, dpr, 0, 0); context.clearRect(0, 0, view.viewport.width, view.viewport.height);
-    if (view.cellSize <= 0 || !view.cells.length) return stats;
+    if (view.cellSize <= 0 || !view.cells.length && !view.ownedMapGroundCells?.length) return stats;
     const authorization = this.groundAuthorization(scene, view.cells, view.z), foreground = this.perceptionAuthorization(scene, authorization, view), { known, anchors } = foreground;
+    const staticView = this.staticGroundView(scene, view), groundKnown = staticView === view ? known : staticView.perceptionCells!;
     const viewport = surfaceViewportRect(view.camera, view.viewport, view.cellSize);
     const visible = known.filter(cell => view.perceptionCells === undefined ? surfaceCellVisible(cell, viewport, view.perceptionCenter, view.perceptionRange) : surfaceCellVisible(cell, viewport));
+    const groundVisible = staticView === view ? visible : groundKnown.filter(cell => surfaceCellVisible(cell, viewport));
     stats.authorizedCells = authorization.known.length; stats.visibleCells = visible.length;
     const visibleRegions = new Set(visible.map(cell => cell.regionId));
-    context.save(); this.clip(context, known, view);
+    context.save(); this.clip(context, groundKnown, view);
     for (const field of scene.terrainFields) {
-      const cells = visible.filter(cell => cell.regionId === field.regionId); if (!cells.length) continue;
+      const cells = groundVisible.filter(cell => cell.regionId === field.regionId); if (!cells.length) continue;
       context.save(); this.clip(context, cells, view);
       if (!options.skipGround) {
         context.imageSmoothingEnabled = true; context.imageSmoothingQuality = 'high';
@@ -940,8 +979,12 @@ export class MapSurfaceRenderer {
       }
       context.restore();
     }
-    if (!options.skipGround) this.drawTerrainTransitions(context, scene, visible, view, authorization.known);
+    if (!options.skipGround) this.drawTerrainTransitions(context, scene, groundVisible, view, staticView === view ? authorization.known : staticView.cells);
+    context.restore();
     if (!options.skipGround) this.prefetchGround(scene, authorization, visible, view);
+    // Owned-map cells stop here. Roads, history and scenery still use actual
+    // perception and its original passability/region identities.
+    context.save(); this.clip(context, known, view);
     for (const field of scene.terrainFields) {
       if (!visibleRegions.has(field.regionId)) continue;
       const cells = foreground.passableByRegion.get(field.regionId) ?? [];
@@ -991,11 +1034,13 @@ export class MapSurfaceRenderer {
     }
     context.restore();
     this.lastDrawPhases.sceneryMs = performance.now() - phaseStarted; phaseStarted = performance.now();
-    // Ground coordinates share the exact foreground cell union.
+    // Grid coordinates share the static ground union, including owned maps.
     // Paint after scenery, before the DOM entities; one union fill keeps
     // adjoining lines and their intersections at the same black opacity.
+    context.restore();
+    context.save(); this.clip(context, groundKnown, view);
     context.fillStyle = '#0007'; context.beginPath();
-    for (const cell of visible) {
+    for (const cell of groundVisible) {
       const p = this.point({ x: cell.x - .5, y: cell.y + .5 }, view);
       context.rect(p.x, p.y, view.cellSize, 1);
       context.rect(p.x, p.y, 1, view.cellSize);

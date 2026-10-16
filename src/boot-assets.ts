@@ -3,6 +3,9 @@ import { GAME_ASSETS, gameAssetUrl } from './game-assets';
 export const BOOT_READY_KEY = 'fantasy-final.boot-assets.v1';
 const RESOURCE_CACHE = 'ff-game-assets-v2';
 const DOWNLOAD_WORKERS = 4;
+// Development manifests omit most artwork. This is a progress budget, not the
+// downloaded file size; unknown files finish only after their full body arrives.
+const UNKNOWN_ASSET_BYTES = 128 * 1024;
 const retryAssets = new Set<string>();
 const bootPaths = new Set([
   '/assets/light-anime/auth-v4/fantasy-logo.webp',
@@ -11,6 +14,7 @@ const bootPaths = new Set([
   '/assets/light-anime/auth-v4/paper-panel-v1.webp'
 ]);
 const BOOT_ASSETS = GAME_ASSETS.filter(asset => bootPaths.has(asset.path));
+type DownloadAsset = { path: string; hash?: string; bytes: number };
 
 export type BootProgress = {
   fraction: number;
@@ -36,21 +40,13 @@ function mimeType(path: string): string {
     ?? 'application/octet-stream';
 }
 
-/**
- * Only necessary login artwork must finish before mount. The loading scene is
- * already requested by HTML, and registration artwork loads on its own screen.
- * Other resources load
- * when their screen is rendered or their music is played.
- * Each file has a content hash URL, so new releases reuse unchanged resources.
- * Public HTTP IPs fall back to normal browser HTTP caching without a SW/Cache API.
- */
-export async function prepareBootAssets(onProgress: (progress: BootProgress) => void,
-  signal: AbortSignal, _revision: string, _refresh: boolean): Promise<void> {
+async function prepareAssets(assets: readonly DownloadAsset[], onProgress: (progress: BootProgress) => void,
+  signal: AbortSignal, pruneOldAssets: boolean): Promise<void> {
   const cache = await openResourceCache();
   let canWriteCache = Boolean(cache);
-  const loaded = BOOT_ASSETS.map(() => 0);
-  const finished = BOOT_ASSETS.map(() => false);
-  const totalBytes = BOOT_ASSETS.reduce((sum, asset) => sum + asset.bytes, 0);
+  const loaded = assets.map(() => 0);
+  const finished = assets.map(() => false);
+  const totalBytes = assets.reduce((sum, asset) => sum + asset.bytes, 0);
   const controller = new AbortController();
   const cancel = () => controller.abort(signal.reason);
   signal.addEventListener('abort', cancel, { once: true });
@@ -61,19 +57,20 @@ export async function prepareBootAssets(onProgress: (progress: BootProgress) => 
     const now = performance.now();
     if (!force && now - lastReport < 50) return;
     lastReport = now;
-    const loadedBytes = loaded.reduce((sum, bytes) => sum + bytes, 0);
-    onProgress({ fraction: totalBytes ? loadedBytes / totalBytes : 1,
-      completed: finished.filter(Boolean).length, total: BOOT_ASSETS.length, loadedBytes, totalBytes });
+    const loadedBytes = Math.min(totalBytes, loaded.reduce((sum, bytes, index) =>
+      sum + Math.min(assets[index].bytes, Math.max(0, bytes)), 0));
+    onProgress({ fraction: totalBytes ? Math.min(1, loadedBytes / totalBytes) : 1,
+      completed: finished.filter(Boolean).length, total: assets.length, loadedBytes, totalBytes });
   };
   report(true);
 
   async function loadAsset(index: number): Promise<void> {
     controller.signal.throwIfAborted();
-    const asset = BOOT_ASSETS[index];
-    const url = gameAssetUrl(asset.path);
+    const asset = assets[index];
+    const url = asset.hash ? gameAssetUrl(asset.path) : asset.path;
     let cached: Response | undefined;
-    try { cached = await cache?.match(url); } catch { /* Private-mode storage may be disabled. */ }
-    if (cached?.ok && cached.headers.get('X-FF-Asset-Hash') === asset.hash
+    try { if (asset.hash) cached = await cache?.match(url); } catch { /* Private-mode storage may be disabled. */ }
+    if (asset.hash && cached?.ok && cached.headers.get('X-FF-Asset-Hash') === asset.hash
       && Number(cached.headers.get('Content-Length')) === asset.bytes) {
       loaded[index] = asset.bytes;
       finished[index] = true;
@@ -97,7 +94,8 @@ export async function prepareBootAssets(onProgress: (progress: BootProgress) => 
           if (done) break;
           received += value.byteLength;
           chunks.push(new Uint8Array(value));
-          // Reserve the last percent for integrity checking and storing this file.
+          // Keep unlisted files within their estimated budget even if their
+          // response is much larger; reserve the last percent for completion.
           loaded[index] = Math.min(asset.bytes * .99, received);
           report();
         }
@@ -107,16 +105,16 @@ export async function prepareBootAssets(onProgress: (progress: BootProgress) => 
       received = bytes.byteLength;
       chunks.push(new Uint8Array(bytes));
     }
-    if (received !== asset.bytes) throw new Error(`游戏资源不完整：${asset.path}`);
+    if (asset.hash && received !== asset.bytes) throw new Error(`游戏资源不完整：${asset.path}`);
     const blob = new Blob(chunks, { type: mimeType(asset.path) });
     // Secure browsers can also reject a stale or damaged file of the same size.
-    if (globalThis.crypto?.subtle) {
+    if (asset.hash && globalThis.crypto?.subtle) {
       const digest = await crypto.subtle.digest('SHA-256', await blob.arrayBuffer());
       const hash = [...new Uint8Array(digest)].map(byte => byte.toString(16).padStart(2, '0')).join('').slice(0, 16);
       if (hash !== asset.hash) throw new Error(`游戏资源版本不匹配：${asset.path}`);
     }
     controller.signal.throwIfAborted();
-    if (canWriteCache && cache) {
+    if (asset.hash && canWriteCache && cache) {
       try {
         await cache.put(url, new Response(blob, { headers: {
           'Content-Type': blob.type, 'Content-Length': String(asset.bytes),
@@ -137,11 +135,11 @@ export async function prepareBootAssets(onProgress: (progress: BootProgress) => 
   let failure: unknown;
   const worker = async () => {
     try {
-      while (next < BOOT_ASSETS.length) {
+      while (next < assets.length) {
         const index = next++;
         try { await loadAsset(index); }
         catch (error) {
-          retryAssets.add(BOOT_ASSETS[index].path);
+          retryAssets.add(assets[index].path);
           throw error;
         }
       }
@@ -151,11 +149,11 @@ export async function prepareBootAssets(onProgress: (progress: BootProgress) => 
     }
   };
   try {
-    await Promise.all(Array.from({ length: Math.min(DOWNLOAD_WORKERS, BOOT_ASSETS.length) }, worker));
+    await Promise.all(Array.from({ length: Math.min(DOWNLOAD_WORKERS, assets.length) }, worker));
     if (failure) throw failure;
     controller.signal.throwIfAborted();
     report(true);
-    if (cache && canWriteCache) {
+    if (pruneOldAssets && cache && canWriteCache) {
       // Prune only after every resource succeeds; interrupted downloads keep their
       // completed files, and a retry resumes from them instead of starting over.
       const currentUrls = new Set(GAME_ASSETS.map(asset => new URL(gameAssetUrl(asset.path), location.href).href));
@@ -163,4 +161,27 @@ export async function prepareBootAssets(onProgress: (progress: BootProgress) => 
       void caches.keys().then(keys => Promise.all(keys.filter(key => key.startsWith('ff-boot-v1-')).map(key => caches.delete(key)))).catch(() => undefined);
     }
   } finally { signal.removeEventListener('abort', cancel); }
+}
+
+/** Only login artwork blocks the initial mount; gameplay artwork is selected after authentication. */
+export function prepareBootAssets(onProgress: (progress: BootProgress) => void,
+  signal: AbortSignal, _revision: string, _refresh: boolean): Promise<void> {
+  return prepareAssets(BOOT_ASSETS, onProgress, signal, true);
+}
+
+/** Download this player's current artwork before showing gameplay. Unknown development paths use normal HTTP caching. */
+export function preparePlayerAssets(paths: readonly string[], onProgress: (progress: BootProgress) => void,
+  signal: AbortSignal): Promise<void> {
+  const manifest = new Map(GAME_ASSETS.map(asset => [asset.path, asset]));
+  const selected = new Map<string, DownloadAsset>();
+  for (const value of paths) {
+    const url = new URL(value, location.href);
+    if (url.origin !== new URL(location.href).origin || !url.pathname.startsWith('/assets/')) {
+      throw new Error(`无效的游戏资源路径：${value}`);
+    }
+    const path = url.pathname;
+    if (selected.has(path)) continue;
+    selected.set(path, manifest.get(path) ?? { path, bytes: UNKNOWN_ASSET_BYTES });
+  }
+  return prepareAssets([...selected.values()], onProgress, signal, false);
 }

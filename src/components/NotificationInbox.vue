@@ -43,8 +43,9 @@ import AnimeIcon from './AnimeIcon.vue';
 import GameUiFeedbackArt from './GameUiFeedbackArt.vue';
 import './anime-adventure.css';
 import '../game-ui-inbox.css';
-import { computed, nextTick, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import InventoryItemIcon from './InventoryItemIcon.vue';
+import { useViewportPagination } from '../useViewportPagination';
 
 type NotificationCategory = NotificationInboxCategory;
 type FormatNode = NotificationInboxFormatNode;
@@ -52,6 +53,9 @@ type MessageButton = NotificationInboxMessageButton;
 type InboxItem = NotificationInboxItem;
 type RenderedMessage = { text: string; images: string[]; buttons: MessageButton[] };
 type InboxTab = 'notice' | 'mail';
+type DetailPage = { kind: 'text'; text: string } | { kind: 'image'; src: string }
+  | { kind: 'actions'; buttons: MessageButton[] }
+  | { kind: 'attachments'; attachments: NotificationInboxMailAttachment[] };
 
 const props = withDefaults(defineProps<{
   open: boolean;
@@ -112,9 +116,22 @@ const deleteConfirmMailId = ref<number | null>(null);
 const claimAllConfirm = ref(false);
 const closeButton = ref<HTMLButtonElement | null>(null);
 const renderedMessages = ref<RenderedMessage[]>([]);
+const noticeRows = ref<HTMLElement | null>(null);
+const mailRows = ref<HTMLElement | null>(null);
+const detailContent = ref<HTMLElement | null>(null);
+const detailPages = ref<DetailPage[]>([]);
+const detailPage = ref(1);
+const detailMetrics = ref({ width: 0, height: 0, font: '', lineHeight: '22px' });
+const inboxRowHeight = (element: HTMLElement | null) => element ? parseFloat(getComputedStyle(element).getPropertyValue('--inbox-row-height')) || 80 : 80;
+const noticePaging = useViewportPagination(() => props.items, { container: noticeRows, rowHeight: () => inboxRowHeight(noticeRows.value), gap: 8 });
+const mailPaging = useViewportPagination(() => props.mailItems, { container: mailRows, rowHeight: () => inboxRowHeight(mailRows.value), gap: 8 });
+const pendingNoticePage = ref<number | null>(null);
+const pendingMailPage = ref<number | null>(null);
 const selected = computed(() => props.items.find(item => item.id === selectedId.value) ?? null);
 const selectedMail = computed(() => props.mailDetail?.id === selectedMailId.value ? props.mailDetail : null);
-const visibleItems = computed(() => props.items);
+const visibleItems = noticePaging.visibleItems;
+const visibleMails = mailPaging.visibleItems;
+const currentDetailPage = computed(() => detailPages.value[detailPage.value - 1]);
 const totalUnreadCount = computed(() => Math.max(0, props.unreadCount) + Math.max(0, props.mailUnreadCount));
 const unreadLabel = computed(() => totalUnreadCount.value > 99 ? '99+' : String(totalUnreadCount.value));
 
@@ -194,11 +211,13 @@ function safeBitmapUrl(value: unknown, objectUrls: string[]): string | null {
 }
 
 function openItem(item: InboxItem) {
+  detailPage.value = 1;
   selectedId.value = item.id;
   if (!item.isRead && props.markingReadId !== item.id) emit('mark-read', item.id);
 }
 
 function openMail(item: NotificationInboxMailItem) {
+  detailPage.value = 1;
   selectedMailId.value = item.id;
   deleteConfirmMailId.value = null;
   emit('open-mail', item.id);
@@ -208,6 +227,96 @@ function closeDetail() {
   selectedId.value = null;
   selectedMailId.value = null;
   deleteConfirmMailId.value = null;
+  detailPage.value = 1;
+}
+
+function nextListPage(tab: InboxTab) {
+  const paging = tab === 'mail' ? mailPaging : noticePaging;
+  const items = tab === 'mail' ? props.mailItems : props.items;
+  if (paging.page.value < paging.totalPages.value) { paging.setPage(paging.page.value + 1); return; }
+  if (tab === 'mail' ? !props.mailHasMore || props.mailLoading || props.mailLoadingMore : !props.hasMore || props.loading || props.loadingMore) return;
+  // A server batch can end partway through a local page. Fill that page first so no appended row is skipped.
+  const next = paging.page.value + (items.length % paging.pageSize.value === 0 && items.length > 0 ? 1 : 0);
+  if (tab === 'mail') { pendingMailPage.value = next; emit('mail-load-more'); }
+  else { pendingNoticePage.value = next; emit('load-more'); }
+}
+
+function refreshCurrentTab() {
+  if (activeTab.value === 'mail') { pendingMailPage.value = null; mailPaging.reset(); emit('mail-refresh'); }
+  else { pendingNoticePage.value = null; noticePaging.reset(); emit('refresh'); }
+}
+
+function setDetailPage(next: number) {
+  detailPage.value = Math.max(1, Math.min(detailPages.value.length || 1, next));
+}
+
+let detailObserver: ResizeObserver | undefined;
+function measureDetail() {
+  const element = detailContent.value;
+  if (!element) return;
+  const style = getComputedStyle(element);
+  detailMetrics.value = { width: element.clientWidth, height: element.clientHeight, font: style.font, lineHeight: style.lineHeight };
+}
+
+function paginateDetail() {
+  const { width, height, font, lineHeight } = detailMetrics.value;
+  if (!width || !height) return;
+  const pages: DetailPage[] = [];
+  // Measure the real wrapped text, including explicit newlines, instead of cropping a fixed character count.
+  const measure = document.createElement('p');
+  Object.assign(measure.style, { position: 'fixed', left: '-100000px', top: '0', visibility: 'hidden', margin: '0', padding: '0', width: `${width}px`, font, lineHeight, whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' });
+  document.body.append(measure);
+  const addText = (text: string) => {
+    const characters = Array.from(text);
+    let start = 0;
+    while (start < characters.length) {
+      let low = 1;
+      let high = characters.length - start;
+      let fit = 1;
+      while (low <= high) {
+        const count = Math.floor((low + high) / 2);
+        measure.textContent = characters.slice(start, start + count).join('');
+        if (measure.getBoundingClientRect().height <= Math.max(1, height - 4)) { fit = count; low = count + 1; }
+        else high = count - 1;
+      }
+      pages.push({ kind: 'text', text: characters.slice(start, start + fit).join('') });
+      start += fit;
+    }
+  };
+  try {
+    if (activeTab.value === 'mail' && selectedMail.value) {
+      addText(selectedMail.value.body || '这封邮件没有正文。');
+      const style = getComputedStyle(detailContent.value!);
+      const attachmentMetric = (name: string, fallback: number) => parseFloat(style.getPropertyValue(`--inbox-attachment-${name}`)) || fallback;
+      const gap = attachmentMetric('gap', 8);
+      const headingSpace = attachmentMetric('heading-space', 30);
+      Object.assign(measure.style, { width: `${Math.max(1, width - attachmentMetric('text-reserve', 104))}px`, fontSize: `${attachmentMetric('font-size', 13)}px`, fontWeight: '700', lineHeight: `${attachmentMetric('line-height', 18)}px` });
+      let attachments: NotificationInboxMailAttachment[] = [];
+      let usedHeight = headingSpace;
+      for (const attachment of selectedMail.value.attachments) {
+        measure.textContent = attachment.name;
+        const rowHeight = Math.max(attachmentMetric('min-height', 60), measure.getBoundingClientRect().height + attachmentMetric('vertical-reserve', 36));
+        if (attachments.length && usedHeight + rowHeight + gap > height) {
+          pages.push({ kind: 'attachments', attachments });
+          attachments = [];
+          usedHeight = headingSpace;
+        }
+        attachments.push(attachment);
+        usedHeight += rowHeight + gap;
+      }
+      if (attachments.length) pages.push({ kind: 'attachments', attachments });
+    } else {
+      for (const message of renderedMessages.value) {
+        if (message.text) addText(message.text);
+        pages.push(...message.images.map(src => ({ kind: 'image' as const, src })));
+        // One command per page keeps long labels readable on narrow screens.
+        pages.push(...message.buttons.map(button => ({ kind: 'actions' as const, buttons: [button] })));
+      }
+      if (!pages.length) addText('这条消息没有正文。');
+    }
+  } finally { measure.remove(); }
+  detailPages.value = pages;
+  setDetailPage(detailPage.value);
 }
 
 function requestDeleteMail(id: number) {
@@ -232,6 +341,8 @@ function changeMailFilter(filter: NotificationInboxMailFilter) {
   if (filter === props.mailFilter) return;
   closeDetail();
   claimAllConfirm.value = false;
+  pendingMailPage.value = null;
+  mailPaging.reset();
   emit('mail-filter-change', filter);
 }
 
@@ -242,8 +353,12 @@ function onKeydown(event: KeyboardEvent) {
 }
 
 watch(() => props.open, async (open, _previous, onCleanup) => {
+  pendingNoticePage.value = null;
+  pendingMailPage.value = null;
   if (!open) { closeDetail(); claimAllConfirm.value = false; return; }
   activeTab.value = 'notice';
+  noticePaging.reset();
+  mailPaging.reset();
   window.addEventListener('keydown', onKeydown);
   onCleanup(() => window.removeEventListener('keydown', onKeydown));
   await nextTick();
@@ -253,6 +368,35 @@ watch(() => props.open, async (open, _previous, onCleanup) => {
 watch(() => props.mailItems, items => {
   if (selectedMailId.value !== null && !items.some(item => item.id === selectedMailId.value) && !props.mailLoading) closeDetail();
 });
+
+watch(() => props.mailFilter, () => { pendingMailPage.value = null; mailPaging.reset(); });
+watch([() => props.items, () => props.loadingMore, () => props.loading], async () => {
+  if (pendingNoticePage.value === null || props.loadingMore || props.loading) return;
+  await nextTick();
+  if (pendingNoticePage.value === null) return;
+  noticePaging.setPage(pendingNoticePage.value);
+  pendingNoticePage.value = null;
+});
+watch([() => props.mailItems, () => props.mailLoadingMore, () => props.mailLoading], async () => {
+  if (pendingMailPage.value === null || props.mailLoadingMore || props.mailLoading) return;
+  await nextTick();
+  if (pendingMailPage.value === null) return;
+  mailPaging.setPage(pendingMailPage.value);
+  pendingMailPage.value = null;
+});
+watch(detailContent, async element => {
+  detailObserver?.disconnect();
+  await nextTick();
+  if (element) detailObserver?.observe(element);
+  measureDetail();
+}, { flush: 'post' });
+watch([detailMetrics, renderedMessages, selectedMail, activeTab], paginateDetail, { flush: 'post' });
+onMounted(() => {
+  detailObserver = new ResizeObserver(measureDetail);
+  if (detailContent.value) detailObserver.observe(detailContent.value);
+  measureDetail();
+});
+onBeforeUnmount(() => detailObserver?.disconnect());
 
 watch(selected, (item, _previous, onCleanup) => {
   const objectUrls: string[] = [];
@@ -281,84 +425,93 @@ watch(selected, (item, _previous, onCleanup) => {
             <h2 id="inbox-heading">消息信箱</h2>
             <span v-if="totalUnreadCount > 0" class="inbox-unread" :aria-label="`${totalUnreadCount} 条未读`">{{ unreadLabel }}</span>
           </div>
-          <button ref="closeButton" type="button" class="inbox-close" aria-label="关闭消息信箱" @click="emit('close')"><AnimeIcon name="close" /></button>
+          <button ref="closeButton" type="button" class="inbox-close" aria-label="关闭消息信箱" @click="emit('close')"><span aria-hidden="true">×</span></button>
         </header>
 
         <div class="inbox-tabs" role="tablist" aria-label="消息类别">
           <button type="button" role="tab" :aria-selected="activeTab === 'notice'" :class="{ active: activeTab === 'notice' }" @click="changeTab('notice')">通知<span v-if="unreadCount > 0" class="inbox-tab-count">{{ unreadCount > 99 ? '99+' : unreadCount }}</span></button>
           <button type="button" role="tab" :aria-selected="activeTab === 'mail'" :class="{ active: activeTab === 'mail' }" @click="changeTab('mail')">邮件<span v-if="mailUnreadCount > 0" class="inbox-tab-count">{{ mailUnreadCount > 99 ? '99+' : mailUnreadCount }}</span></button>
-          <button type="button" class="inbox-refresh" aria-label="刷新消息" :disabled="activeTab === 'mail' ? mailLoading : loading" @click="activeTab === 'mail' ? emit('mail-refresh') : emit('refresh')">刷新</button>
+          <button type="button" class="inbox-refresh" aria-label="刷新消息" :disabled="activeTab === 'mail' ? mailLoading : loading" @click="refreshCurrentTab">刷新</button>
         </div>
 
-        <div v-if="activeTab === 'notice'" class="inbox-body">
+        <div v-if="activeTab === 'notice'" class="inbox-body" :class="{ 'has-detail': selected }">
           <div class="inbox-list" role="tabpanel" aria-label="通知列表">
-            <p v-if="error" class="inbox-error" role="alert">{{ error }} <button type="button" @click="emit('refresh')">重试</button></p>
-            <p v-if="loading && !items.length" class="inbox-state game-ui-empty-message" role="status"><GameUiFeedbackArt name="loading" :size="36" /><span>正在读取消息…</span></p>
-            <template v-else>
+            <p v-if="error" class="inbox-error" role="alert"><span :title="error">{{ error }}</span><button type="button" @click="emit('refresh')">重试</button></p>
+            <div ref="noticeRows" class="inbox-page-rows">
+              <p v-if="loading && !items.length" class="inbox-state game-ui-empty-message" role="status"><GameUiFeedbackArt name="loading" :size="36" /><span>正在读取消息…</span></p>
+              <template v-else>
               <button v-for="item in visibleItems" :key="item.id" type="button" class="inbox-row" :class="{ unread: !item.isRead, selected: selectedId === item.id }" @click="openItem(item)">
                 <span class="inbox-row-icon" :class="`category-${item.category}`" aria-hidden="true"><AnimeIcon :name="item.category === 'mail' ? 'mail' : item.category === 'battle' ? 'sword' : item.category === 'quest' ? 'scroll' : 'settings'" :size="36" /></span>
                 <span class="inbox-row-main"><span class="inbox-row-title">{{ item.title || categoryNames[item.category] }}</span><span class="inbox-row-preview">{{ item.messages?.[0]?.text || item.messages?.[0]?.markdown || '点击查看详情' }}</span></span>
                 <span class="inbox-row-meta"><time :datetime="item.createdAt">{{ formatDate(item.createdAt) }}</time><i v-if="!item.isRead" class="inbox-unread-dot" aria-label="未读" /></span>
               </button>
               <p v-if="!visibleItems.length && !loading && !error" class="inbox-state game-ui-empty-message"><GameUiFeedbackArt name="empty" :size="36" /><span>还没有通知</span></p>
-              <button v-if="hasMore" type="button" class="inbox-load-more" :disabled="loadingMore || loading" @click="emit('load-more')">{{ loadingMore ? '正在加载…' : '查看更早的消息' }}</button>
-            </template>
+              </template>
+            </div>
+            <nav class="inbox-pagination" aria-label="通知分页">
+              <button type="button" aria-label="上一页通知" :disabled="noticePaging.page.value <= 1 || loading || loadingMore" @click="noticePaging.setPage(noticePaging.page.value - 1)">‹</button>
+              <span role="status">第 {{ noticePaging.page.value }} / {{ noticePaging.totalPages.value }} 页{{ hasMore ? '+' : '' }}</span>
+              <button type="button" aria-label="下一页通知" :disabled="loading || loadingMore || (noticePaging.page.value >= noticePaging.totalPages.value && !hasMore)" @click="nextListPage('notice')">{{ loadingMore ? '…' : '›' }}</button>
+            </nav>
           </div>
 
           <article v-if="selected" class="inbox-detail" :aria-label="selected.title || '消息详情'">
             <div class="inbox-detail-top"><button type="button" class="inbox-back" @click="closeDetail">‹ 返回</button><span>{{ categoryNames[selected.category] }}</span></div>
-            <h3>{{ selected.title || categoryNames[selected.category] }}</h3>
+            <h3 :title="selected.title || categoryNames[selected.category]">{{ selected.title || categoryNames[selected.category] }}</h3>
             <time :datetime="selected.createdAt">{{ formatDate(selected.createdAt, true) }}</time>
-            <div class="inbox-detail-messages">
-              <div v-for="(message, index) in renderedMessages" :key="index" class="inbox-message">
-                <p v-if="message.text" class="inbox-message-text">{{ message.text }}</p>
-                <img v-for="(src, imageIndex) in message.images" :key="imageIndex" class="inbox-message-image" :src="src" alt="消息图片" loading="lazy" />
-                <div v-if="message.buttons.length" class="inbox-message-actions"><button v-for="button in message.buttons" :key="`${button.command}:${button.label}`" type="button" @click="emit('open-command', button.command)">{{ button.label }}</button></div>
-              </div>
-              <p v-if="!renderedMessages.length" class="inbox-state game-ui-empty-message"><GameUiFeedbackArt name="message" :size="36" /><span>这条消息没有正文。</span></p>
+            <div ref="detailContent" class="inbox-detail-content" aria-live="polite">
+              <p v-if="currentDetailPage?.kind === 'text'" class="inbox-message-text">{{ currentDetailPage.text }}</p>
+              <img v-else-if="currentDetailPage?.kind === 'image'" class="inbox-message-image" :src="currentDetailPage.src" alt="消息图片" />
+              <div v-else-if="currentDetailPage?.kind === 'actions'" class="inbox-message-actions"><button v-for="button in currentDetailPage.buttons" :key="`${button.command}:${button.label}`" type="button" @click="emit('open-command', button.command)">{{ button.label }}</button></div>
             </div>
+            <nav class="inbox-content-pagination" aria-label="通知正文分页"><button type="button" aria-label="上一页正文" :disabled="detailPage <= 1" @click="setDetailPage(detailPage - 1)">‹</button><span role="status">正文 {{ detailPage }} / {{ detailPages.length || 1 }}</span><button type="button" aria-label="下一页正文" :disabled="detailPage >= detailPages.length" @click="setDetailPage(detailPage + 1)">›</button></nav>
             <button v-if="!selected.isRead" type="button" class="inbox-mark-read" :disabled="markingReadId === selected.id" @click="emit('mark-read', selected.id)">{{ markingReadId === selected.id ? '标记中…' : '标为已读' }}</button>
           </article>
-          <div v-else class="inbox-detail-placeholder" aria-hidden="true"><img class="inbox-placeholder-art" src="/assets/light-anime/game-ui-v1/inbox-ornament.webp" width="1536" height="1024" alt="" /><p>选择一条消息查看完整内容</p></div>
         </div>
 
-        <div v-else class="inbox-body" role="tabpanel" aria-label="游戏邮件">
+        <div v-else class="inbox-body" :class="{ 'has-detail': selectedMailId !== null }" role="tabpanel" aria-label="游戏邮件">
           <div class="inbox-list inbox-mail-list">
             <div class="inbox-mail-filters" role="group" aria-label="邮件筛选">
               <button v-for="filter in mailFilters" :key="filter.id" type="button" :class="{ active: mailFilter === filter.id }" :aria-pressed="mailFilter === filter.id" @click="changeMailFilter(filter.id)">{{ filter.label }}</button>
             </div>
-            <div class="inbox-mail-scroll">
-              <p v-if="mailError" class="inbox-error" role="alert">{{ mailError }} <button type="button" @click="emit('mail-refresh')">重试</button></p>
+            <p v-if="mailError" class="inbox-error" role="alert"><span :title="mailError">{{ mailError }}</span><button type="button" @click="emit('mail-refresh')">重试</button></p>
+            <div ref="mailRows" class="inbox-page-rows">
               <p v-if="mailLoading && !mailItems.length" class="inbox-state game-ui-empty-message" role="status"><GameUiFeedbackArt name="loading" :size="36" /><span>正在读取邮件…</span></p>
               <template v-else>
-                <button v-for="mail in mailItems" :key="mail.id" type="button" class="inbox-row" :class="{ unread: !mail.isRead, selected: selectedMailId === mail.id }" @click="openMail(mail)">
+                <button v-for="mail in visibleMails" :key="mail.id" type="button" class="inbox-row" :class="{ unread: !mail.isRead, selected: selectedMailId === mail.id }" @click="openMail(mail)">
                   <span class="inbox-row-icon category-mail" aria-hidden="true"><AnimeIcon name="mail" :size="36" /></span>
-                  <span class="inbox-row-main"><span class="inbox-row-title">{{ mail.title }}</span><span class="inbox-row-preview">{{ mail.preview || mail.senderName }}</span><span v-if="mail.hasAttachments" class="inbox-mail-attachment-label">{{ mail.claimedAt ? '附件已领取' : '有附件' }}</span></span>
-                  <span class="inbox-row-meta"><time :datetime="mail.createdAt">{{ formatDate(mail.createdAt) }}</time><i v-if="!mail.isRead" class="inbox-unread-dot" aria-label="未读" /></span>
+                  <span class="inbox-row-main"><span class="inbox-row-title">{{ mail.title }}</span><span class="inbox-row-preview">{{ mail.preview || mail.senderName }}</span></span>
+                  <span class="inbox-row-meta"><time :datetime="mail.createdAt">{{ formatDate(mail.createdAt) }}</time><span v-if="mail.hasAttachments" class="inbox-mail-attachment-label">{{ mail.claimedAt ? '已领取' : '有附件' }}</span><i v-if="!mail.isRead" class="inbox-unread-dot" aria-label="未读" /></span>
                 </button>
                 <p v-if="!mailItems.length && !mailLoading && !mailError" class="inbox-state game-ui-empty-message"><GameUiFeedbackArt name="empty" :size="36" /><span>{{ mailFilter === 'unread' ? '没有未读邮件' : mailFilter === 'attachments' ? '没有带附件的邮件' : '邮箱空空如也' }}</span></p>
-                <button v-if="mailHasMore" type="button" class="inbox-load-more" :disabled="mailLoadingMore || mailLoading" @click="emit('mail-load-more')">{{ mailLoadingMore ? '正在加载…' : '查看更早的邮件' }}</button>
               </template>
             </div>
-            <div class="inbox-mail-footer"><button type="button" :disabled="mailActionBusy || mailLoading" @click="requestClaimAllMail">{{ claimAllConfirm ? '确认领取所有邮件附件' : '全部领取附件' }}</button></div>
+            <nav class="inbox-pagination inbox-mail-pagination" aria-label="邮件分页">
+              <button type="button" aria-label="上一页邮件" :disabled="mailPaging.page.value <= 1 || mailLoading || mailLoadingMore" @click="mailPaging.setPage(mailPaging.page.value - 1)">‹</button>
+              <span role="status">第 {{ mailPaging.page.value }} / {{ mailPaging.totalPages.value }} 页{{ mailHasMore ? '+' : '' }}</span>
+              <button type="button" aria-label="下一页邮件" :disabled="mailLoading || mailLoadingMore || (mailPaging.page.value >= mailPaging.totalPages.value && !mailHasMore)" @click="nextListPage('mail')">{{ mailLoadingMore ? '…' : '›' }}</button>
+            </nav>
+            <div class="inbox-mail-footer"><button type="button" :disabled="mailActionBusy || mailLoading" @click="requestClaimAllMail">{{ claimAllConfirm ? '确认全部领取' : '全部领取附件' }}</button></div>
           </div>
 
           <article v-if="selectedMailId !== null" class="inbox-detail" :aria-label="selectedMail?.title || '邮件详情'">
             <div class="inbox-detail-top"><button type="button" class="inbox-back" @click="closeDetail">‹ 返回</button><span>游戏邮件</span></div>
             <p v-if="mailDetailLoading || (!selectedMail && !mailError)" class="inbox-state game-ui-empty-message" role="status"><GameUiFeedbackArt name="loading" :size="36" /><span>正在读取邮件…</span></p>
-            <p v-else-if="!selectedMail && mailError" class="inbox-error" role="alert">{{ mailError }} <button type="button" @click="emit('open-mail', selectedMailId)">重试</button></p>
+            <p v-else-if="!selectedMail && mailError" class="inbox-error" role="alert"><span :title="mailError">{{ mailError }}</span><button type="button" @click="emit('open-mail', selectedMailId)">重试</button></p>
             <template v-else-if="selectedMail">
-              <h3>{{ selectedMail.title }}</h3>
-              <time :datetime="selectedMail.createdAt">{{ formatDate(selectedMail.createdAt, true) }}</time>
-              <p class="inbox-mail-sender">来自：{{ selectedMail.senderName }}</p>
-              <div class="inbox-message inbox-mail-body"><p class="inbox-message-text">{{ selectedMail.body || '这封邮件没有正文。' }}</p></div>
-              <div v-if="selectedMail.attachments.length" class="inbox-mail-attachments">
-                <h4>附件</h4>
-                <div v-for="attachment in selectedMail.attachments" :key="attachment.itemId" class="inbox-mail-attachment">
+              <h3 :title="selectedMail.title">{{ selectedMail.title }}</h3>
+              <div class="inbox-detail-meta"><time :datetime="selectedMail.createdAt">{{ formatDate(selectedMail.createdAt, true) }}</time><p class="inbox-mail-sender" :title="`来自：${selectedMail.senderName}`">来自：{{ selectedMail.senderName }}</p></div>
+              <div ref="detailContent" class="inbox-detail-content inbox-mail-body" aria-live="polite">
+                <p v-if="currentDetailPage?.kind === 'text'" class="inbox-message-text">{{ currentDetailPage.text }}</p>
+                <div v-else-if="currentDetailPage?.kind === 'attachments'" class="inbox-mail-attachments">
+                  <h4>附件</h4>
+                  <div v-for="attachment in currentDetailPage.attachments" :key="attachment.itemId" class="inbox-mail-attachment">
                   <InventoryItemIcon :name="attachment.name" :code="attachment.code" :item-type="attachment.itemType" />
                   <span><strong>{{ attachment.name }}</strong><small>{{ attachment.rarity }}</small></span><b>×{{ attachment.quantity }}</b>
+                  </div>
                 </div>
               </div>
+              <nav class="inbox-content-pagination" aria-label="邮件正文分页"><button type="button" aria-label="上一页正文" :disabled="detailPage <= 1" @click="setDetailPage(detailPage - 1)">‹</button><span role="status">{{ currentDetailPage?.kind === 'attachments' ? '附件' : '正文' }} {{ detailPage }} / {{ detailPages.length || 1 }}</span><button type="button" aria-label="下一页正文" :disabled="detailPage >= detailPages.length" @click="setDetailPage(detailPage + 1)">›</button></nav>
               <div class="inbox-mail-actions">
                 <button v-if="selectedMail.hasAttachments && !selectedMail.claimedAt" type="button" class="inbox-mail-claim" :disabled="mailActionBusy" @click="emit('claim-mail', selectedMail.id)">{{ mailActionBusy ? '处理中…' : '领取附件' }}</button>
                 <button type="button" class="inbox-mail-delete" :disabled="mailActionBusy || (selectedMail.hasAttachments && !selectedMail.claimedAt)" :title="selectedMail.hasAttachments && !selectedMail.claimedAt ? '请先领取附件' : '删除邮件'" @click="requestDeleteMail(selectedMail.id)">{{ deleteConfirmMailId === selectedMail.id ? '确认删除' : '删除邮件' }}</button>
@@ -366,7 +519,6 @@ watch(selected, (item, _previous, onCleanup) => {
               <p v-if="selectedMail.hasAttachments && !selectedMail.claimedAt" class="inbox-delete-hint">请先领取附件</p>
             </template>
           </article>
-          <div v-else class="inbox-detail-placeholder" aria-hidden="true"><img class="inbox-placeholder-art" src="/assets/light-anime/game-ui-v1/inbox-ornament.webp" width="1536" height="1024" alt="" /><p>选择一封邮件查看正文与附件</p></div>
         </div>
       </section>
     </div>
@@ -374,7 +526,7 @@ watch(selected, (item, _previous, onCleanup) => {
 </template>
 
 <style scoped>
-.inbox-backdrop { position: fixed; z-index: 90; inset: 0; display: grid; place-items: center; padding: 20px; background: rgba(43, 36, 54, .42); backdrop-filter: blur(4px); }
+.inbox-backdrop { position: fixed; z-index: 90; inset: 0; display: flex; justify-content: flex-end; align-items: stretch; padding: 0; overflow: hidden; background: rgba(43, 36, 54, .42); backdrop-filter: blur(4px); }
 .inbox-dialog { display: flex; flex-direction: column; width: min(780px, calc(100vw - 40px)); height: min(620px, calc(100dvh - 40px)); min-height: 0; overflow: hidden; color: #51465a; background: #fffaf6; border: 1px solid rgba(255,255,255,.9); border-radius: 22px; box-shadow: 0 24px 68px rgba(55, 41, 65, .28); }
 .inbox-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 15px 17px 11px; }
 .inbox-heading-group { display: flex; align-items: center; gap: 8px; min-width: 0; }

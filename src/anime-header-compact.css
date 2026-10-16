@@ -33,8 +33,8 @@
   gap:6px;
 }
 .app-shell[data-visual='light-anime'][data-viewport-layout] :is(.inbox-button,.settings-button) {
-  width:34px;
-  height:34px;
+  width:47.6px;
+  height:47.6px;
   min-width:0;
   min-height:0;
 }
@@ -45,16 +45,16 @@
   .app-shell[data-visual='light-anime'][data-viewport-layout] .page-brand { margin-top:4px; }
   .app-shell[data-visual='light-anime'][data-viewport-layout] .original-game-logo { width:min(94px,100%); height:34px; }
   .app-shell[data-visual='light-anime'][data-viewport-layout] .top-actions { margin-top:7px; gap:3px; }
-  .app-shell[data-visual='light-anime'][data-viewport-layout] :is(.inbox-button,.settings-button) { width:28px; height:28px; }
+  .app-shell[data-visual='light-anime'][data-viewport-layout] :is(.inbox-button,.settings-button) { width:39.2px; height:39.2px; }
 }
 @media(max-height:450px) {
-  .app-shell[data-visual='light-anime'][data-viewport-layout] .topbar { height:38px; }
+  .app-shell[data-visual='light-anime'][data-viewport-layout] .topbar { height:42px; }
   .app-shell[data-visual='light-anime'][data-viewport-layout] .page-context { --title-width:110px; }
   .app-shell[data-visual='light-anime'][data-viewport-layout] .page-context>strong { font-size:19px; }
   .app-shell[data-visual='light-anime'][data-viewport-layout] .page-brand { margin-top:2px; }
   .app-shell[data-visual='light-anime'][data-viewport-layout] .original-game-logo { width:min(82px,100%); height:26px; }
   .app-shell[data-visual='light-anime'][data-viewport-layout] .top-actions { margin-top:4px; gap:3px; }
-  .app-shell[data-visual='light-anime'][data-viewport-layout] :is(.inbox-button,.settings-button) { width:24px; height:24px; }
+  .app-shell[data-visual='light-anime'][data-viewport-layout] :is(.inbox-button,.settings-button) { width:33.6px; height:33.6px; }
   .app-shell[data-visual='light-anime'][data-viewport-layout][data-character-scene='profile'] .page-context { --title-width:100px; }
   .app-shell[data-visual='light-anime'][data-viewport-layout] .connection-dot { padding:2px 6px; font-size:10px; }
 }

@@ -18,18 +18,18 @@
   },
   "ruin_wall": {
     "east": {
-      "assetPath": "/assets/light-anime/map-surface-v3/ruin-wall-east-v1.png",
-      "width": 2172,
-      "height": 724,
-      "left": 0.034530386740331494,
-      "top": 0.31353591160220995,
-      "right": 0.966390423572744,
-      "bottom": 0.7596685082872928,
+      "assetPath": "/assets/light-anime/map-surface-v3/ruin-wall-east-standing-v2.png",
+      "width": 1902,
+      "height": 827,
+      "left": 0.02786540483701367,
+      "top": 0.13301088270858524,
+      "right": 0.973186119873817,
+      "bottom": 0.8597339782345829,
       "alphaEnvelope": {
-        "left": 0.016114180478821363,
-        "top": 0.020718232044198894,
-        "right": 0.9898710865561694,
-        "bottom": 1
+        "left": 0.01629863301787592,
+        "top": 0.06650544135429262,
+        "right": 0.9763406940063092,
+        "bottom": 0.973397823458283
       }
     },
     "north": {

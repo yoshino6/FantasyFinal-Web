@@ -8,14 +8,19 @@ import MapSurfaceLayer from './MapSurfaceLayer.vue';
 import { surfaceSnapshotClock, validSurfaceScene, type MapSurfaceScene, type SurfaceCell, type SurfaceRect } from '../map-surface';
 import { fallbackSurfaceScene } from '../map-surface-fallback';
 import { groundWindowCells, groundWindowScene } from '../exploration-ground-window';
+import { prepareMappedSettlementGround, mappedSettlementViewport, mappedSettlementViewportCells, type MappedSettlementReceipt, type MappedSettlementViewport } from '../map-mapped-settlement-ground';
 import { settlementSurfaceScene, type SettlementObservedAnchor, type SettlementPublicBounds } from '../map-settlement-layout';
 import type { ExploreGroundWindow } from '../api';
-import { environmentApproach, environmentDistance, environmentFootprint, environmentGeometry, environmentSpriteStyle, type EnvironmentObjectView } from '../map-environment';
+import { environmentApproach, environmentDistance, environmentFootprint, environmentGeometry, environmentSpriteStyle, environmentDirectionalSprite, environmentSingleSprite, ENVIRONMENT_ATLAS, ENVIRONMENT_SPRITES, type EnvironmentObjectView } from '../map-environment';
 import type { PanelPortrait } from '../api';
 import { currentTargetPopupRequest, type MapTargetPopupRequest } from '../exploration-target-popup';
-import { mapAvatarGroundPadding, mapTargetArt, mapTargetSpriteStyle } from '../exploration-assets';
+import { mapAvatarAtlas, mapAvatarGroundPadding, mapAvatarPaintedSize, mapTargetArt, mapTargetPaintedSize, mapTargetSpriteStyle, mapTargetSpriteFrame } from '../exploration-assets';
+import { mapActorSpriteBox, mapSpriteOverlapMask, type MapSpriteBox } from '../map-sprite-overlap';
+import { loadMapSpriteSilhouette } from '../map-sprite-silhouette';
+import { standingSceneryGeometry } from '../map-standing-scenery';
+import { gameAssetUrl } from '../game-assets';
 import { cellGroundStyle, type TerrainContext } from '../exploration-terrain';
-import { cameraForZoom, clampMapZoom, inPerception, viewportToWorld, withinMovement, worldToViewport, type MapVector } from '../exploration-map-geometry';
+import { cameraForZoom, clampMapZoom, inPerception, viewportToWorld, worldToViewport, type MapVector } from '../exploration-map-geometry';
 import './anime-adventure.css';
 import './anime-exploration-map.css';
 
@@ -42,19 +47,20 @@ type MapEntityLayout = Omit<MapEntity, 'foot'>;
 
 const props = withDefaults(defineProps<{
   current?: MapPosition; displayPosition?: MapPosition; regionCode?: string;
-  travelVisualCenter?: MapVisualCenter; movementHeading?: MapHeading; movementSpeed?: number;
+  travelVisualCenter?: MapVisualCenter; movementHeading?: MapHeading; movementSpeed?: number; actualMovementSpeed?: number;
   playerPortrait?: string; playerIdentity?: PanelPortrait; playerKey?: string; moving?: boolean;
   movementTarget?: MapPosition; bounds?: MapBounds; points?: ExploreMapPoint[]; cells?: ExploreMapCell[];
   environment?: EnvironmentObjectView[];
   surfaceScene?: MapSurfaceScene;
   groundWindow?: ExploreGroundWindow;
+  mappedSettlement?: MappedSettlementReceipt;
   targetPopupRequest?: MapTargetPopupRequest;
   moveRange?: number; sightRange?: number; title?: string; subtitle?: string;
-  disabled?: boolean; loading?: boolean; actionLock?: MapActionLock | null; actionArt?: string; chatOpen?: boolean;
+  disabled?: boolean; loading?: boolean; actionLock?: MapActionLock | null; actionArt?: string; chatOpen?: boolean; renderScene?: boolean;
 }>(), {
   current: () => ({ x: 0, y: 0, name: '未知区域' }), regionCode: '', playerPortrait: '',
   moving: false, points: () => [], moveRange: 2, sightRange: 3, title: '附近地图',
-  subtitle: '点击方格前往，点击目标互动；拖动缩放地图。', disabled: false, loading: false, actionLock: null,
+  subtitle: '点击方格前往，到达后点击所在方格互动；拖动缩放地图。', disabled: false, loading: false, actionLock: null, renderScene: true,
 });
 const emit = defineEmits<{
   (event: 'move', position: MapPosition): void;
@@ -80,6 +86,9 @@ const selectedPoint = ref<ExploreMapPoint | null>(null);
 const selectedCell = ref<MapCell | null>(null);
 const selectedEnvironment = ref<EnvironmentObjectView | null>(null);
 const gestureActive = ref(false);
+const playerSpriteFrame = ref(0);
+const silhouettePaths = ref(new Map<string, string>());
+const requestedSilhouettes = new Set<string>();
 // A display position can outlive its walking animation while a committed step
 // is still being received. Keep the camera, grid and fog on that position;
 // props.current remains the authority for movement and interaction checks.
@@ -109,7 +118,7 @@ const visualVisibility = (point: MapVector) => {
   // the interpolated player every frame. Never slice an edge tile diagonally.
   return inPerception(point, sceneCenter.value, radius.value) ? 1 : 0;
 };
-const moveRange = computed(() => Math.max(0, Math.floor(Number(props.moveRange) || 0)));
+const actualSpeedLabel = computed(() => typeof props.actualMovementSpeed === 'number' && Number.isFinite(props.actualMovementSpeed) && props.actualMovementSpeed > 0 ? props.actualMovementSpeed : '—');
 const side = computed(() => radius.value * 2 + 1);
 const baseCellSize = computed(() => Math.min(viewport.value.width, viewport.value.height) / Math.min(side.value, 7));
 const cellSize = computed(() => baseCellSize.value * zoom.value);
@@ -137,29 +146,49 @@ const serverCellIndex = computed(() => props.cells === undefined ? null : new Ma
 // Unknown scenery uses only the current authoritative region. A travel visual
 // must not reveal the terrain or decorations of its unobserved destination.
 const terrainContext = computed<TerrainContext>(() => ({ fallbackRegion: { code: props.regionCode, name: props.current.name } }));
-const cells = computed<MapCell[]>(() => (continuousPerception.value && props.cells ? props.cells.map(cell => ({ x: cell.x, y: cell.y, z: cell.z ?? props.current.z }))
+const cells = computed<MapCell[]>(() => {
+  const observed = (continuousPerception.value && props.cells ? props.cells.map(cell => ({ x: cell.x, y: cell.y, z: cell.z ?? props.current.z }))
   : Array.from({ length: side.value * side.value }, (_, index) => ({ x: sceneCenter.value.x - radius.value + index % side.value, y: sceneCenter.value.y + radius.value - Math.floor(index / side.value), z: sceneCenter.value.z })))
+    .filter(position => continuousPerception.value ? visualVisibility(position) > 0
+      : inPerception(position, sceneCenter.value, radius.value) && inPerception(position, props.current, radius.value));
+  const positions = new Map(observed.map(position => [`${position.x}:${position.y}:${position.z ?? 0}`, position]));
+  for (const cell of ownedMapGroundCells.value) positions.set(`${cell.x}:${cell.y}:${cell.z ?? 0}`, { x: cell.x, y: cell.y, z: cell.z ?? props.current.z });
+  return [...positions.values()]
   .map((position): MapCell | null => {
   const { x, y } = position;
-  if (continuousPerception.value ? (position.z ?? 0) !== (props.current.z ?? 0) || !visualVisibility(position)
-    : !inPerception(position, sceneCenter.value, radius.value) || !inPerception(position, props.current, radius.value)) return null;
+  if ((position.z ?? 0) !== (props.current.z ?? 0)) return null;
   const points = pointIndex.value.get(`${x}:${y}`) ?? [], kinds = points.map(pointKind);
   const key = `${x}:${y}:${position.z ?? 0}`;
-  if (serverCellIndex.value !== null && !serverCellIndex.value.has(key)) return null;
+  const mapped = ownedMapCellIndex.value.has(key);
+  if (!mapped && serverCellIndex.value !== null && !serverCellIndex.value.has(key)) return null;
   const serverCell = serverCellIndex.value?.get(key);
-  const passable = serverCell?.passable === true;
+  // Mapped ground offers a destination request, never a client route or a
+  // collision verdict. The server checks its real footprint before walking.
+  const passable = serverCell ? serverCell.passable === true : mapped;
   const reachable = serverCell?.reachable !== false;
-  const terrainCell = { ...position, regionId: serverCell?.regionId, regionCode: serverCell?.regionCode };
-  return { key, position, regionId: serverCell?.regionId, regionCode: serverCell?.regionCode || props.regionCode,
+  const terrainCell = { ...position, regionId: serverCell?.regionId ?? (mapped ? ownedMapGround.value?.receipt.regionId : undefined), regionCode: serverCell?.regionCode || props.regionCode };
+  return { key, position, regionId: terrainCell.regionId, regionCode: terrainCell.regionCode,
     groundStyle: cellGroundStyle(terrainCell, terrainContext.value),
     isCurrent: x === sceneCenter.value.x && y === sceneCenter.value.y,
     // Current-region bounds must not veto a reachable neighbouring region.
-    isMovable: passable && reachable && withinMovement(position, props.current, moveRange.value), passable, reachable, points,
+    isMovable: passable && reachable && (mapped || inPerception(position, props.current, radius.value)), passable, reachable, points,
     kind: ['monster', 'ore', 'building', 'resource', 'friendly'].find(kind => kinds.includes(kind)) ?? 'empty' };
-}).filter((cell): cell is MapCell => cell !== null));
+}).filter((cell): cell is MapCell => cell !== null);
+});
 // Keep ground authorization independent of animated points and camera frames.
 // The GPU uploads this tiny integer mask only when the committed window changes.
-const surfaceBaseScene = computed(() => groundWindowScene(props.surfaceScene && toRaw(props.surfaceScene), props.groundWindow, props.current.z ?? 0));
+const receivedSurfaceScene = computed(() => groundWindowScene(props.surfaceScene && toRaw(props.surfaceScene), props.groundWindow, props.current.z ?? 0));
+const ownedMapGround = computed(() => prepareMappedSettlementGround(receivedSurfaceScene.value, props.mappedSettlement, {
+  current: props.current, regionCode: props.regionCode,
+  originCell: serverCellIndex.value?.get(`${props.current.x}:${props.current.y}:${props.current.z ?? 0}`),
+}));
+const surfaceBaseScene = computed(() => ownedMapGround.value?.scene ?? receivedSurfaceScene.value);
+const ownedMapViewport = computed<MappedSettlementViewport | undefined>((previous) => {
+  const next = ownedMapGround.value && mappedSettlementViewport({ camera: camera.value, viewport: viewport.value, cellSize: cellSize.value });
+  return previous && next && previous.minX === next.minX && previous.maxX === next.maxX && previous.minY === next.minY && previous.maxY === next.maxY ? previous : next;
+});
+const ownedMapGroundCells = computed(() => mappedSettlementViewportCells(ownedMapGround.value, ownedMapViewport.value));
+const ownedMapCellIndex = computed(() => new Set(ownedMapGroundCells.value.map(cell => `${cell.x}:${cell.y}:${cell.z ?? 0}`)));
 const surfaceCells = computed(() => groundWindowCells(surfaceBaseScene.value, (props.cells ?? []).filter(cell => (cell.z ?? props.current.z ?? 0) === (props.current.z ?? 0)
   && (continuousPerception.value || inPerception(cell, props.current, radius.value) && inPerception(cell, sceneCenter.value, radius.value)))
   .map(cell => ({ ...cell, regionCode: cell.regionCode || props.regionCode }))
@@ -233,10 +262,13 @@ const isBuildingPoint = (point: ExploreMapPoint) => /^(?:建筑|building)$/i.tes
 const entitySize = (point: ExploreMapPoint) => avatarSize.value * (isBuildingPoint(point) ? 2 : 1);
 const entityDepth = (position: MapVector, offsetY = 0) => Math.max(2, 20 + Math.round((sceneCenter.value.y + radius.value - position.y + offsetY) * 100));
 const entityStyle = (entity: MapEntity) => ({
-  transform: `translate3d(${entity.foot.x - avatarSize.value / 2}px, ${entity.foot.y - avatarSize.value * 1.25}px, 0)`,
+  transform: props.renderScene ? `translate3d(${entity.foot.x - avatarSize.value / 2}px, ${entity.foot.y - avatarSize.value * 1.25}px, 0)`
+    : `translate3d(${entity.foot.x}px, ${entity.foot.y - cellSize.value * .12}px, 0) translate(-50%, -50%)`,
   zIndex: entityDepth(entity.point, entity.offset.y),
   '--map-avatar-size': `${entitySize(entity.point)}px`,
+  '--map-ground-size': `${avatarSize.value}px`,
   '--map-entity-hit-size': `${avatarSize.value}px`,
+  '--map-marker-width': `${Math.max(32, Math.min(112, cellSize.value * .86 / Math.max(1, Math.ceil(Math.sqrt(entity.count)))))}px`,
   '--map-avatar-ground-padding': mapAvatarGroundPadding(entity.point.portrait),
   opacity: visualVisibility(entity.point),
 });
@@ -266,6 +298,7 @@ const perceptionRows = computed(() => {
   }).filter((row): row is { row: number; left: number; right: number } => row !== null);
 });
 const perceptionClip = computed(() => {
+  if (ownedMapGround.value) return 'none';
   if (continuousPerception.value) return 'none'; // Every moving cell still comes from the adjacent authorized snapshots.
   const total = side.value, rows = perceptionRows.value;
   if (!rows.length) return 'polygon(0 0, 0 0, 0 0)';
@@ -280,8 +313,8 @@ const perceptionClip = computed(() => {
   return `polygon(${vertices.join(',')})`;
 });
 const environmentPerceptionClip = computed(() => {
-  if (hasContinuousGround.value) return `path("${cells.value.map(cell => {
-    const p = worldToViewport({ x: cell.position.x - .5, y: cell.position.y + .5 }, camera.value, cellSize.value, viewport.value);
+  if (hasContinuousGround.value) return `path("${perceptionCells.value.map(cell => {
+    const p = worldToViewport({ x: cell.x - .5, y: cell.y + .5 }, camera.value, cellSize.value, viewport.value);
     return `M${p.x} ${p.y}h${cellSize.value}v${cellSize.value}h${-cellSize.value}Z`;
   }).join(' ')}")`;
   if (!perceptionRows.value.length) return 'polygon(0 0, 0 0, 0 0)';
@@ -299,6 +332,83 @@ const visibleEnvironment = computed<EnvironmentObjectView[]>((previous) => {
     && inPerception(cell, sceneCenter.value, radius.value)) && serverCellIndex.value?.has(`${cell.x}:${cell.y}:${cell.z}`)));
   return previous?.length === next.length && next.every((object, index) => object === previous[index]) ? previous : next;
 });
+const environmentCellIndex = computed(() => {
+  const index = new Map<string, EnvironmentObjectView>();
+  for (const object of visibleEnvironment.value) for (const cell of environmentFootprint(object)) {
+    if (object.blocking !== false || object.destructible) index.set(`${cell.x}:${cell.y}:${cell.z}`, object);
+  }
+  return index;
+});
+// World-relative pixels avoid recomputing the stationary overlap set when the
+// camera follows a walking player. Only the player's box changes each frame.
+const stationarySpriteBoxes = computed<MapSpriteBox[]>(() => props.renderScene ? [
+  ...entityLayouts.value.map(entity => {
+    const size = entitySize(entity.point), point = entity.point;
+    const painted = point.portrait ? mapAvatarPaintedSize(point.portrait, size) : mapTargetPaintedSize(point, size);
+    return mapActorSpriteBox(`point:${point.id}`, { x: (point.x + entity.offset.x) * cellSize.value, y: (-point.y + entity.offset.y) * cellSize.value }, size, { ...painted, groundBase: entity.kind === 'ore' });
+  }),
+  ...visibleEnvironment.value.map(object => {
+    const { painted } = environmentGeometry(object, cellSize.value);
+    return { id: `environment:${object.id}`, left: object.x * cellSize.value + painted.left, right: object.x * cellSize.value + painted.left + painted.width,
+      top: -object.y * cellSize.value + painted.top, bottom: -object.y * cellSize.value + painted.top + painted.height };
+  }),
+  ...standingScenery.value.map(({ item, geometry }) => ({ id: `scenery:${item.id}`,
+    left: item.x * cellSize.value + geometry.painted.left, right: item.x * cellSize.value + geometry.painted.left + geometry.painted.width,
+    top: -item.y * cellSize.value + geometry.painted.top, bottom: -item.y * cellSize.value + geometry.painted.top + geometry.painted.height })),
+] : []);
+type SpriteArtwork = { source: string; frame: { left: number; top: number; width: number; height: number }; crop?: { column: number; row: number; columns: number; rows: number }; flip?: boolean };
+const artworkKey = (art: SpriteArtwork) => `${art.source}:${art.crop ? `${art.crop.column}:${art.crop.row}:${art.crop.columns}:${art.crop.rows}` : 'full'}`;
+const spriteArtwork = computed(() => {
+  const art = new Map<string, SpriteArtwork>();
+  const actor = (id: string, foot: MapVector, size: number, portrait?: PanelPortrait, point?: ExploreMapPoint, frame = 0, left = false) => {
+    const atlas = mapAvatarAtlas(portrait);
+    if (portrait && atlas.src) art.set(id, { source: atlas.src, frame: { left: foot.x - size / 2, top: foot.y - size * 1.25 * (1 - mapAvatarGroundPadding(portrait)), width: size, height: size * 1.25 },
+      crop: { column: frame % atlas.columns, row: Math.floor(frame / atlas.columns), columns: atlas.columns, rows: atlas.rows }, flip: atlas.nativeLeftFrames.includes(frame) !== left });
+    else {
+      const target = portrait ? { type: '玩家' } : point ?? { type: '玩家' };
+      const relative = mapTargetSpriteFrame(target, size, pointKind(target as ExploreMapPoint) === 'ore');
+      art.set(id, { source: mapTargetArt(target).src, frame: { ...relative, left: foot.x + relative.left, top: foot.y + relative.top } });
+    }
+  };
+  for (const entity of entityLayouts.value) actor(`point:${entity.point.id}`, { x: (entity.point.x + entity.offset.x) * cellSize.value, y: (-entity.point.y + entity.offset.y) * cellSize.value }, entitySize(entity.point), entity.point.portrait, entity.point);
+  actor('player', { x: playerPosition.value.x * cellSize.value, y: -playerPosition.value.y * cellSize.value }, avatarSize.value, props.playerIdentity, undefined, playerSpriteFrame.value, movementDirection.value === 'left');
+  for (const object of visibleEnvironment.value) {
+    const native = environmentDirectionalSprite(object.assetKey, object) ?? environmentSingleSprite(object.assetKey), { sprite } = environmentGeometry(object, cellSize.value);
+    const registeredIndex = ENVIRONMENT_SPRITES.indexOf(object.assetKey as typeof ENVIRONMENT_SPRITES[number]), index = registeredIndex < 0 ? 1 : registeredIndex;
+    art.set(`environment:${object.id}`, { source: gameAssetUrl(native?.assetPath ?? ENVIRONMENT_ATLAS),
+      frame: { ...sprite, left: object.x * cellSize.value + sprite.left, top: -object.y * cellSize.value + sprite.top },
+      ...(native ? {} : { crop: { column: index % 4, row: Math.floor(index / 4), columns: 4, rows: 4 } }) });
+  }
+  for (const { item, geometry } of standingScenery.value) art.set(`scenery:${item.id}`, { source: gameAssetUrl(geometry.source), frame: { ...geometry.frame, left: item.x * cellSize.value + geometry.frame.left, top: -item.y * cellSize.value + geometry.frame.top } });
+  return art;
+});
+const allSpriteBoxes = computed(() => [...stationarySpriteBoxes.value,
+  mapActorSpriteBox('player', { x: playerPosition.value.x * cellSize.value, y: -playerPosition.value.y * cellSize.value }, avatarSize.value,
+    props.playerIdentity ? mapAvatarPaintedSize(props.playerIdentity, avatarSize.value) : undefined)].map(box => {
+    const art = spriteArtwork.value.get(box.id), path = art && silhouettePaths.value.get(artworkKey(art));
+    // A walking atlas frame can extend beyond the measured idle silhouette.
+    // Keep its full source frame eligible; the real alpha outline alone decides
+    // which pixels fade, including arms and feet in every animation frame.
+    const frame = art?.frame;
+    return { ...box, ...(frame ? { left: Math.min(box.left, frame.left), right: Math.max(box.right, frame.left + frame.width),
+      top: Math.min(box.top, frame.top), bottom: Math.max(box.bottom, frame.top + frame.height) } : {}),
+      ...(art && path ? { silhouette: { path, frame: art.frame, flip: art.flip } } : {}) };
+  }));
+const spriteBoxIndex = computed(() => new Map(allSpriteBoxes.value.map(box => [box.id, box])));
+const overlapMask = (id: string, frame: { left: number; top: number; width: number; height: number }) => {
+  const box = spriteBoxIndex.value.get(id);
+  return box ? mapSpriteOverlapMask(box, allSpriteBoxes.value, frame) : {};
+};
+const entityArtMask = (entity: MapEntity) => {
+  const size = entitySize(entity.point);
+  return overlapMask(`point:${entity.point.id}`, { left: (entity.point.x + entity.offset.x) * cellSize.value - size / 2,
+    top: (-entity.point.y + entity.offset.y) * cellSize.value - size * 1.25, width: size, height: size * 1.25 });
+};
+const playerArtMask = computed(() => overlapMask('player', { left: playerPosition.value.x * cellSize.value - avatarSize.value / 2,
+  top: -playerPosition.value.y * cellSize.value - avatarSize.value * 1.25, width: avatarSize.value, height: avatarSize.value * 1.25 }));
+const environmentArtMask = (object: EnvironmentObjectView) => overlapMask(`environment:${object.id}`, {
+  left: camera.value.x * cellSize.value - viewport.value.width / 2, top: -camera.value.y * cellSize.value - viewport.value.height / 2,
+  width: viewport.value.width, height: viewport.value.height });
 const sceneryExclusions = computed<SurfaceRect[]>(() => {
   const margin = .08;
   // Reserve actual authorized resource/NPC/monster actor envelopes. The moving
@@ -330,10 +440,40 @@ const settlementBounds = computed<SettlementPublicBounds | undefined>(() => {
     ? { ...props.bounds, regionId: cell.regionId!, regionCode: props.regionCode } : undefined;
 });
 const decoratedGroundScene = computed(() => settlementSurfaceScene(toRaw(groundScene.value), props.cells, props.current.z ?? 0, sceneryExclusions.value, settlementAnchors.value, settlementBounds.value));
+const standingScenery = computed(() => (props.renderScene ? decoratedGroundScene.value?.scenery ?? [] : []).flatMap(item => {
+  const cell = serverCellIndex.value?.get(`${item.x}:${item.y}:${item.z}`);
+  const geometry = standingSceneryGeometry(item, cellSize.value);
+  return geometry && item.z === (props.current.z ?? 0) && cell?.regionId === item.regionId && cell.passable === true
+    && inPerception(item, sceneCenter.value, radius.value) && (continuousPerception.value || inPerception(item, props.current, radius.value))
+    ? [{ item, geometry }] : [];
+}));
+// Standing props share the actors' depth order. The ground pass keeps brushwork,
+// roads and traces, so a grid line can no longer cross the face of a town lamp.
+const flatGroundScene = computed(() => {
+  const source = decoratedGroundScene.value;
+  if (!source) return source;
+  const scenery = source.scenery.filter(item => !standingSceneryGeometry(item, cellSize.value));
+  if (scenery.length === source.scenery.length) return source;
+  const scene = { ...source, scenery };
+  const clock = surfaceSnapshotClock(toRaw(source), performance.now());
+  surfaceSnapshotClock(scene, clock.receivedAt);
+  return scene;
+});
+const standingSceneryStyle = ({ item, geometry }: typeof standingScenery.value[number]) => {
+  const point = worldToViewport(item, camera.value, cellSize.value, viewport.value);
+  const frame = { ...geometry.frame, left: item.x * cellSize.value + geometry.frame.left, top: -item.y * cellSize.value + geometry.frame.top };
+  return { left: `${point.x + geometry.frame.left}px`, top: `${point.y + geometry.frame.top}px`, width: `${geometry.frame.width}px`, height: `${geometry.frame.height}px`,
+    zIndex: entityDepth(item, geometry.groundY / cellSize.value), ...overlapMask(`scenery:${item.id}`, frame) };
+};
 const environmentVisibility = (object: EnvironmentObjectView) => Math.max(0, ...environmentFootprint(object).map(visualVisibility));
 const environmentOrigin = (object: EnvironmentObjectView) => worldToViewport(object, camera.value, cellSize.value, viewport.value);
+const environmentMarkerStyle = (object: EnvironmentObjectView) => {
+  const position = environmentOrigin(object);
+  return { left: `${position.x}px`, top: `${position.y + cellSize.value * .26}px`, zIndex: entityDepth(object, .48),
+    maxWidth: `${Math.max(32, Math.min(112, cellSize.value * .86))}px` };
+};
 const approachEnvironmentPosition = computed(() => selectedEnvironment.value
-  ? environmentApproach(selectedEnvironment.value, props.current, (props.cells ?? []).filter(cell => withinMovement(cell, props.current, moveRange.value))) : undefined);
+  ? environmentApproach(selectedEnvironment.value, props.current, (props.cells ?? []).filter(cell => inPerception(cell, props.current, radius.value))) : undefined);
 const selectedEnvironmentDistance = computed(() => selectedEnvironment.value ? environmentDistance(selectedEnvironment.value, props.current) : Infinity);
 const perceptionEdges = computed(() => {
   const known = new Set(perceptionRows.value.flatMap(({ row, left, right }) => Array.from({ length: right - left + 1 }, (_, index) => `${left + index}:${row}`)));
@@ -370,6 +510,14 @@ const playerStyle = computed(() => {
   return { transform: `translate3d(${point.x}px, ${point.y}px, 0)`, '--map-avatar-size': `${avatarSize.value}px`, '--map-avatar-ground-padding': mapAvatarGroundPadding(props.playerIdentity), zIndex: entityDepth(playerPosition.value) };
 });
 const movementDirection = ref<MapHeading>(props.movementHeading ?? 'down');
+watch(spriteArtwork, artwork => {
+  for (const art of artwork.values()) {
+    const key = artworkKey(art);
+    if (!art.source || requestedSilhouettes.has(key)) continue;
+    requestedSilhouettes.add(key);
+    void loadMapSpriteSilhouette(art.source, art.crop).then(path => { if (path) silhouettePaths.value.set(key, path); });
+  }
+}, { immediate: true, flush: 'post' });
 let hasMovementDirection = !!props.movementHeading;
 function rememberHeading(heading: MapHeading, notify = true) {
   hasMovementDirection = true;
@@ -406,7 +554,7 @@ watch([() => props.playerKey, () => props.playerIdentity?.baseKey, () => props.p
 const pointArt = (point: ExploreMapPoint) => mapTargetArt(point).src;
 const pointIcon = (point: ExploreMapPoint) => /玩家|队员|NPC|域民/.test(point.type || '') ? 'party' : /怪物|敌人|魔物/.test(point.type || '') ? 'paw' : /建筑|地点/.test(point.type || '') ? 'home' : 'map';
 const pointLevel = (point: ExploreMapPoint) => typeof point.level === 'number' && Number.isFinite(point.level) ? point.level : undefined;
-const selectablePosition = (position: MapPosition) => inPerception(position, props.current, radius.value) && withinMovement(position, props.current, moveRange.value)
+const selectablePosition = (position: MapPosition) => (position.z ?? props.current.z ?? 0) === (props.current.z ?? 0) && inPerception(position, props.current, radius.value)
   && (serverCellIndex.value?.get(`${position.x}:${position.y}:${position.z ?? props.current.z ?? 0}`)?.passable === true
     && serverCellIndex.value.get(`${position.x}:${position.y}:${position.z ?? props.current.z ?? 0}`)?.reachable !== false);
 const blocked = computed(() => props.disabled || props.loading || props.moving || !!displayPosition.value || !!props.travelVisualCenter);
@@ -449,8 +597,15 @@ function openRequestedTargetPopup() {
 }
 let ignoreClickUntil = 0;
 function chooseCell(cell: MapCell) {
-  if (performance.now() < ignoreClickUntil || blocked.value || !cell.isMovable) return;
-  if (cell.isCurrent) return;
+  if (performance.now() < ignoreClickUntil || blocked.value) return;
+  const object = environmentCellIndex.value.get(cell.key);
+  if (object && (!cell.isMovable || cell.isCurrent)) { chooseEnvironment(object); return; }
+  if (cell.isCurrent) {
+    if (cell.points.length === 1) choosePoint(cell.points[0]!);
+    else if (cell.points.length > 1) { closePoint(); selectedCell.value = cell; }
+    return;
+  }
+  if (!cell.isMovable) return;
   emit('move', cell.position); closePoint();
 }
 function moveToSelectedCell() {
@@ -561,7 +716,7 @@ onMounted(() => {
 watch([() => sceneRegionCode.value, () => sceneCenter.value.z], () => {
   freeCamera.value = { ...sceneCenter.value }; closePoint();
 });
-watch([() => sceneCenter.value.x, () => sceneCenter.value.y, () => props.current.x, () => props.current.y, () => props.moveRange, () => props.sightRange], () => {
+watch([() => sceneCenter.value.x, () => sceneCenter.value.y, () => props.current.x, () => props.current.y, () => props.sightRange], () => {
   freeCamera.value = clampCamera(freeCamera.value);
   if (selectedPoint.value && !selectablePosition(selectedPoint.value)) closePoint();
   if (selectedCell.value && !selectablePosition(selectedCell.value.position)) closePoint();
@@ -587,40 +742,57 @@ onBeforeUnmount(() => { observer?.disconnect(); pointers.clear(); document.remov
 </script>
 
 <template>
-  <section class="world-map-panel anime-adventure exploration-map exploration-canvas" :data-region-code="sceneRegionCode" :data-surface-mode="hasSurfaceScene ? 'server-scene' : groundScene ? 'cosmetic-fallback' : 'no-authorized-ground'" aria-label="探索地图">
-    <div ref="viewportElement" class="world-map-viewport" :class="{ 'is-dragging': gestureActive, 'has-surface-scene': hasContinuousGround }" :data-zoom="zoom" :data-camera-x="camera.x" :data-camera-y="camera.y" :data-visual-center-x="sceneCenter.x" :data-visual-center-y="sceneCenter.y" :data-travel-visual="!!travelVisualCenter" tabindex="0" aria-label="可拖动缩放的感知地图" @pointerdown="onPointerDown" @pointermove="onPointerMove" @pointerup="onPointerEnd" @pointercancel="onPointerEnd" @lostpointercapture="onLostPointerCapture" @wheel="onWheel" @keydown="onMapKeydown">
-      <div v-if="!hasContinuousGround" class="world-map-fog-terrain" aria-hidden="true"><div class="map-fog-ground-grid" :style="fogTerrainStyle" :data-cell-size="cellSize"><span v-for="tile in fogTiles" :key="tile.key" class="map-fog-ground-tile" :style="{ ...fogGroundStyle, ...tile.style }" :data-fog-x="tile.x" :data-fog-y="tile.y" :data-region-code="regionCode" /></div></div>
+  <section class="world-map-panel anime-adventure exploration-map exploration-canvas" :class="{ 'is-lightweight': !renderScene }" :data-region-code="sceneRegionCode" :data-render-scene="renderScene" :data-surface-mode="!renderScene ? 'lightweight' : hasSurfaceScene ? 'server-scene' : groundScene ? 'cosmetic-fallback' : 'no-authorized-ground'" aria-label="探索地图">
+    <div ref="viewportElement" class="world-map-viewport" :class="{ 'is-dragging': gestureActive, 'has-surface-scene': renderScene && hasContinuousGround }" :data-zoom="zoom" :data-camera-x="camera.x" :data-camera-y="camera.y" :data-visual-center-x="sceneCenter.x" :data-visual-center-y="sceneCenter.y" :data-travel-visual="!!travelVisualCenter" tabindex="0" aria-label="可拖动缩放的感知地图" @pointerdown="onPointerDown" @pointermove="onPointerMove" @pointerup="onPointerEnd" @pointercancel="onPointerEnd" @lostpointercapture="onLostPointerCapture" @wheel="onWheel" @keydown="onMapKeydown">
+      <div v-if="renderScene && !hasContinuousGround" class="world-map-fog-terrain" aria-hidden="true"><div class="map-fog-ground-grid" :style="fogTerrainStyle" :data-cell-size="cellSize"><span v-for="tile in fogTiles" :key="tile.key" class="map-fog-ground-tile" :style="{ ...fogGroundStyle, ...tile.style }" :data-fog-x="tile.x" :data-fog-y="tile.y" :data-region-code="regionCode" /></div></div>
       <div class="world-map-fog" :data-authority-x="current.x" :data-authority-y="current.y" :data-center-x="sceneCenter.x" :data-center-y="sceneCenter.y" :data-range="radius" :data-perception-empty="!perceptionRows.length" aria-hidden="true" />
-      <MapSurfaceLayer v-if="decoratedGroundScene" :scene="decoratedGroundScene" :visual-only="!hasSurfaceScene" :cells="surfaceCells" :perception-cells="perceptionCells" :mist-ground-cells="mistGroundCells" :camera="camera" :viewport="viewport" :cell-size="cellSize" :z="current.z ?? 0" :fallback-region-code="regionCode" :perception-center="continuousPerception ? playerPosition : current" :perception-range="radius" :perception-moving="continuousPerception" :scenery-exclusions="sceneryExclusions" />
-      <div class="world-map-world" :class="{ 'is-travel-visual': !!travelVisualCenter, 'has-surface-scene': hasContinuousGround }" :style="{ ...worldStyle, clipPath: perceptionClip }" role="grid" :aria-label="`附近感知地图，范围 ${radius} 格`">
-        <button v-for="cell in cells" :key="cell.key" type="button" class="world-map-cell" :style="cellStyle(cell)" :class="{ 'is-current': cell.isCurrent, 'is-movable': cell.isMovable, 'is-out-of-range': !cell.isMovable, 'has-point': cell.points.length, 'is-selected': selectedPoint ? cell.points.some(point => point.id === selectedPoint?.id) : selectedCell?.key === cell.key }" :data-x="cell.position.x" :data-y="cell.position.y" :data-region-id="cell.regionId" :data-region-code="cell.regionCode" :data-kind="cell.kind" data-visible="true" :data-movable="cell.isMovable" :data-passable="cell.passable" :data-reachable="cell.reachable" :disabled="blocked || !cell.isMovable" :aria-label="cell.isCurrent ? '当前位置' : `前往坐标 ${cell.position.x}, ${cell.position.y}`" role="gridcell" @click="chooseCell(cell)">
+      <MapSurfaceLayer v-if="renderScene && flatGroundScene" :scene="flatGroundScene" :visual-only="!hasSurfaceScene" :cells="surfaceCells" :perception-cells="perceptionCells" :mist-ground-cells="mistGroundCells" :owned-map-ground-cells="ownedMapGroundCells" :camera="camera" :viewport="viewport" :cell-size="cellSize" :z="current.z ?? 0" :fallback-region-code="regionCode" :perception-center="continuousPerception ? playerPosition : current" :perception-range="radius" :perception-moving="continuousPerception" :scenery-exclusions="sceneryExclusions" />
+      <div class="world-map-world" :class="{ 'is-travel-visual': !!travelVisualCenter, 'has-surface-scene': renderScene && hasContinuousGround }" :style="{ ...worldStyle, clipPath: perceptionClip }" role="grid" :aria-label="`附近感知地图，范围 ${radius} 格`">
+        <button v-for="cell in cells" :key="cell.key" type="button" class="world-map-cell" :style="cellStyle(cell)" :class="{ 'is-current': cell.isCurrent, 'is-movable': cell.isMovable, 'is-out-of-range': !cell.isMovable, 'has-point': cell.points.length, 'is-selected': selectedPoint ? cell.points.some(point => point.id === selectedPoint?.id) : selectedCell?.key === cell.key }" :data-x="cell.position.x" :data-y="cell.position.y" :data-region-id="cell.regionId" :data-region-code="cell.regionCode" :data-kind="cell.kind" data-visible="true" :data-movable="cell.isMovable" :data-passable="cell.passable" :data-reachable="cell.reachable" :disabled="blocked || (!cell.isMovable && !environmentCellIndex.has(cell.key))" :aria-label="cell.isCurrent ? '当前位置' : `前往坐标 ${cell.position.x}, ${cell.position.y}`" role="gridcell" @click="chooseCell(cell)">
           <span class="map-cell-tint" :class="`tint-${cell.kind}`" aria-hidden="true" />
+          <span v-if="!renderScene" class="map-cell-coordinate">{{ cell.position.x }}, {{ cell.position.y }}</span>
         </button>
         <span v-for="edge in perceptionEdges" :key="edge.key" class="map-perception-edge" :class="`edge-${edge.edge}`" :style="edge.style" aria-hidden="true" />
       </div>
       <div class="map-entities-layer" :style="{ '--map-avatar-size': `${avatarSize}px` }">
-        <MapEnvironmentObject v-for="object in visibleEnvironment" :key="object.id" :object="object" :style="{ opacity: environmentVisibility(object) }" :cell-size="cellSize" :origin="environmentOrigin(object)" :depth="object.blocking === false && !object.destructible ? 1 : entityDepth(object, 0.48)" :perception-clip="environmentPerceptionClip" :selected="selectedEnvironment?.id === object.id" :disabled="blocked" @inspect="chooseEnvironment" />
-        <button v-for="entity in entities" :key="entity.point.id" type="button" class="map-target-entity" :class="{ 'is-monster': entity.kind === 'monster', 'is-building': isBuildingPoint(entity.point), 'is-selected': selectedPoint?.id === entity.point.id }" :style="entityStyle(entity)" :data-point-id="entity.point.id" :data-x="entity.point.x" :data-y="entity.point.y" :data-cell-key="entity.cellKey" :data-entity-index="entity.index" :data-entity-count="entity.count" :data-offset-x="entity.offset.x" :data-offset-y="entity.offset.y" :data-foot-x="entity.foot.x" :data-foot-y="entity.foot.y" :data-entity-size="entitySize(entity.point)" :data-affinity="entity.affinity" :data-movable="selectablePosition(entity.point)" :disabled="blocked || !selectablePosition(entity.point)" :aria-label="`查看 ${entity.point.name}`" :title="entity.point.name" @click="choosePoint(entity.point)">
-          <span v-if="entity.affinity !== 'neutral' || isBuildingPoint(entity.point)" class="map-entity-ground" :class="isBuildingPoint(entity.point) ? 'ground-building' : `ground-${entity.affinity}`" aria-hidden="true" />
-          <span class="map-entity-art-box" aria-hidden="true"><span class="map-entity-breath"><AnimatedMapAvatar v-if="entity.point.portrait" :portrait="entity.point.portrait" :style="normalizedArt(entity.point)" :running="false" grounded direction="down" /><img v-else-if="pointArt(entity.point)" class="map-entity-image" :style="normalizedArt(entity.point)" :src="pointArt(entity.point)" alt="" /><AnimeIcon v-else :name="pointIcon(entity.point)" size="100%" /></span></span>
-        </button>
+        <template v-if="renderScene"><MapEnvironmentObject v-for="object in visibleEnvironment" :key="object.id" :object="object" :style="{ opacity: environmentVisibility(object) }" :cell-size="cellSize" :origin="environmentOrigin(object)" :depth="object.blocking === false && !object.destructible ? 1 : entityDepth(object, environmentGeometry(object, cellSize).standing ? .15 : .48)" :perception-clip="environmentPerceptionClip" :overlap-mask="environmentArtMask(object)" /></template>
+        <template v-else><span v-for="object in visibleEnvironment" :key="object.id" type="button" class="map-environment-marker" :style="environmentMarkerStyle(object)" aria-hidden="true">{{ object.name }}</span></template>
+        <span v-for="scenery in standingScenery" :key="scenery.item.id" class="map-standing-scenery" :style="standingSceneryStyle(scenery)" :data-scenery-id="scenery.item.id" :data-asset-key="scenery.item.assetKey" :data-x="scenery.item.x" :data-y="scenery.item.y" :data-ground-y="scenery.geometry.groundY" aria-hidden="true"><img :src="gameAssetUrl(scenery.geometry.source)" alt="" /></span>
+        <span v-for="entity in entities" :key="entity.point.id" class="map-target-entity" :class="{ 'is-monster': entity.kind === 'monster', 'is-building': isBuildingPoint(entity.point), 'is-selected': selectedPoint?.id === entity.point.id }" :style="entityStyle(entity)" :data-point-id="entity.point.id" :data-x="entity.point.x" :data-y="entity.point.y" :data-cell-key="entity.cellKey" :data-entity-index="entity.index" :data-entity-count="entity.count" :data-offset-x="entity.offset.x" :data-offset-y="entity.offset.y" :data-foot-x="entity.foot.x" :data-foot-y="entity.foot.y" :data-entity-size="entitySize(entity.point)" :data-affinity="entity.affinity" :data-movable="selectablePosition(entity.point)" aria-hidden="true" :title="entity.point.name">
+          <span v-if="renderScene && (entity.affinity !== 'neutral' || isBuildingPoint(entity.point))" class="map-entity-ground" :class="isBuildingPoint(entity.point) ? 'ground-building' : `ground-${entity.affinity}`" aria-hidden="true" />
+          <span v-if="renderScene" class="map-entity-art-box" :style="entityArtMask(entity)" aria-hidden="true"><span class="map-entity-breath"><AnimatedMapAvatar v-if="entity.point.portrait" :portrait="entity.point.portrait" :style="normalizedArt(entity.point)" :running="false" grounded direction="down" /><img v-else-if="pointArt(entity.point)" class="map-entity-image" :style="normalizedArt(entity.point)" :src="pointArt(entity.point)" alt="" /><AnimeIcon v-else :name="pointIcon(entity.point)" size="100%" /></span></span>
+          <span v-else class="map-target-label">{{ entity.point.name }}</span>
+        </span>
       </div>
-      <span class="map-player-position" :style="playerStyle" :data-player-x="playerPosition.x" :data-player-y="playerPosition.y" :data-movement-heading="movementDirection" :data-movement-speed="movementSpeed" aria-label="玩家当前位置"><span class="map-player-ground" /><AnimatedMapAvatar v-if="playerIdentity" :portrait="playerIdentity" :identity-key="playerKey" :running="moving" :direction="movementDirection" :movement-speed="movementSpeed" grounded /><img v-else-if="playerPortrait" :src="playerPortrait" alt="冒险者" /><AnimeIcon v-else name="sword" :size="44" /></span>
+      <span class="map-player-position" :style="playerStyle" :data-player-x="playerPosition.x" :data-player-y="playerPosition.y" :data-movement-heading="movementDirection" :data-movement-speed="movementSpeed" aria-label="玩家当前位置"><template v-if="renderScene"><span class="map-player-ground" /><span class="map-player-art" :style="playerArtMask"><AnimatedMapAvatar v-if="playerIdentity" :portrait="playerIdentity" :identity-key="playerKey" @frame-change="playerSpriteFrame = $event" :running="moving" :direction="movementDirection" :movement-speed="movementSpeed" grounded /><img v-else-if="playerPortrait" :src="playerPortrait" alt="冒险者" /><AnimeIcon v-else name="sword" :size="44" /></span></template><span v-else class="map-player-label">我</span></span>
     </div>
     <div class="map-canvas-toolbar map-canvas-control">
       <div class="map-canvas-coordinate"><strong>{{ sceneCenter.name || '未知区域' }}</strong><span>({{ sceneCenter.x }}, {{ sceneCenter.y }}<template v-if="sceneCenter.z !== undefined">, {{ sceneCenter.z }}</template>) · ↑ N</span></div>
       <label class="map-follow-toggle"><input type="checkbox" :checked="followPlayer" aria-label="始终角色在中心" @change="setFollow" /><span>始终角色在中心</span></label>
-      <div class="map-canvas-legend"><span><i class="monster" />怪物</span><span><i class="ore" />矿脉</span><span><i class="building" />建筑 / NPC</span><small>移动 {{ moveRange }} · 感知 {{ radius }}</small></div>
+      <div class="map-canvas-legend"><span><i class="monster" />怪物</span><span><i class="ore" />矿脉</span><span><i class="building" />建筑 / NPC</span><small>移速 {{ actualSpeedLabel }} 格/秒 · 感知 {{ radius }}</small></div>
       <div class="map-canvas-shortcuts map-canvas-control"><button type="button" aria-label="打开世界地图" :disabled="disabled || loading" @click="emit('open-region-map')"><AnimeAdventureArt name="map" :size="35" /><span>地图</span></button><button type="button" aria-label="打开自动战斗设置" :disabled="disabled || loading" @click="emit('open-auto-battle')"><AnimeAdventureArt name="auto" :size="35" /><span>自动</span></button><button type="button" class="map-sidebar-toggle" :aria-expanded="chatOpen" aria-label="打开聊天频道" @click="emit('open-chat')"><AnimeIcon name="mail" :size="29" /><span>频道</span></button></div>
     </div>
     <div class="world-map-zoom map-canvas-control"><button type="button" aria-label="放大地图" @click="setZoom(zoom + 0.1)"><AnimeIcon name="plus" :size="20" /></button><input type="range" min="50" max="300" step="1" :value="Math.round(zoom * 100)" aria-label="地图缩放倍率" @input="setZoom(Number(($event.target as HTMLInputElement).value) / 100)" /><output class="world-map-zoom-value">{{ Math.round(zoom * 100) }}%</output><button type="button" aria-label="缩小地图" @click="setZoom(zoom - 0.1)"><AnimeIcon name="minus" :size="20" /></button></div>
     <div v-if="$slots['map-footer']" class="map-canvas-manual map-canvas-control"><slot name="map-footer" /></div>
     <div v-if="loading" class="world-map-loading" role="status">正在更新附近地图…</div>
-    <div v-if="actionLock" class="world-map-action-lock"><div class="world-map-action-card" role="status" aria-live="off"><img v-if="actionArt" class="world-map-action-art" :src="actionArt" alt="" /><strong>{{ actionLock.title }}</strong><span>{{ actionLock.detail }}</span><p v-if="actionLock.countdown">剩余 <b>{{ actionLock.countdown }}</b></p><button v-if="actionLock.stopLabel" type="button" :disabled="actionLock.stopDisabled" @click="emit('stop-action')">{{ actionLock.stopLabel }}</button></div></div>
-    <div v-if="selectedCell || selectedPoint || selectedEnvironment" class="map-point-sheet-wrapper"><section class="map-point-dialog" role="dialog" aria-modal="false" :aria-label="selectedEnvironment?.name ?? selectedPoint?.name ?? '坐标互动'"><button type="button" class="dialog-close" aria-label="关闭地点详情" @click="closePoint"><AnimeIcon name="close" :size="22" /></button>
-      <template v-if="selectedEnvironment"><div class="map-sheet-heading"><span class="dialog-point-icon environment-detail-art" :style="environmentSpriteStyle(selectedEnvironment.assetKey, selectedEnvironment)" aria-hidden="true" /><div><p class="eyebrow">{{ selectedEnvironment.destructible ? '可清理障碍' : '环境景观' }} · {{ selectedEnvironment.width }}×{{ selectedEnvironment.height }} 整格占地</p><h4>{{ selectedEnvironment.name }}</h4><p class="dialog-coordinate">({{ selectedEnvironment.x }}, {{ selectedEnvironment.y }}, {{ selectedEnvironment.z }}) · {{ environmentFootprint(selectedEnvironment).length }} 个完整方格</p></div></div><p class="dialog-description">{{ selectedEnvironment.description }}</p><p v-if="selectedEnvironment.state === 'clearing' && selectedEnvironment.remainingSeconds !== undefined" class="environment-work-copy">正在清理 · 剩余约 {{ Math.ceil(selectedEnvironment.remainingSeconds) }} 秒</p><p v-else-if="selectedEnvironment.destructible" class="environment-work-copy">清理约 {{ Math.ceil(selectedEnvironment.workSeconds) }} 秒，可能获得材料。</p><div class="dialog-actions"><button v-if="selectedEnvironmentDistance > 1" class="map-dialog-button tone-primary" type="button" :disabled="blocked || !approachEnvironmentPosition" @click="approachEnvironment">靠近</button><button v-if="selectedEnvironment.destructible" class="map-dialog-button tone-primary" type="button" :disabled="blocked || !selectedEnvironment.canClear || selectedEnvironmentDistance > 1" @click="clearEnvironment">清理</button></div><p v-if="selectedEnvironment.clearReason" class="map-observation-only">{{ selectedEnvironment.clearReason }}</p><p v-else-if="selectedEnvironmentDistance > 1" class="map-observation-only">靠近占地边缘后可互动。</p><p v-else-if="!selectedEnvironment.destructible" class="map-observation-only">这处景观无法清理，可以绕行。</p></template>
-      <template v-if="selectedPoint"><div class="map-sheet-heading"><span class="dialog-point-icon"><AnimatedMapAvatar v-if="selectedPoint.portrait" :portrait="selectedPoint.portrait" :running="false" direction="down" /><img v-else-if="pointArt(selectedPoint)" :src="pointArt(selectedPoint)" alt="" /><AnimeIcon v-else :name="pointIcon(selectedPoint)" :size="48" /></span><div><p class="eyebrow">{{ selectedPoint.type || '附近目标' }}<template v-if="pointLevel(selectedPoint) !== undefined"> · Lv.{{ pointLevel(selectedPoint) }}</template></p><h4>{{ selectedPoint.name }}</h4><p class="dialog-coordinate">({{ selectedPoint.x }}, {{ selectedPoint.y }}<template v-if="selectedPoint.z !== undefined">, {{ selectedPoint.z }}</template>)</p></div></div><p class="dialog-description">{{ selectedPoint.description || '选择下方操作，与这个目标互动。' }}</p><div v-if="selectedPoint.discovered !== false && selectedPoint.actions?.length" class="dialog-actions"><button v-for="action in selectedPoint.actions" :key="action.id" type="button" class="map-dialog-button" :class="`tone-${action.tone || 'soft'}`" :disabled="blocked" @click="runPointAction(selectedPoint, action)">{{ action.label }}</button></div><button v-else-if="selectedPoint.discovered !== false && selectedPoint.interactable !== false" type="button" class="map-dialog-button tone-primary" :disabled="blocked" @click="defaultInteract(selectedPoint)">查看互动</button><p v-else class="map-observation-only">这个目标暂时只能观察。</p></template>
-      <template v-else-if="selectedCell"><p class="eyebrow">{{ selectedCell.isCurrent ? '当前位置' : '坐标互动' }}</p><h4>({{ selectedCell.position.x }}, {{ selectedCell.position.y }}<template v-if="selectedCell.position.z !== undefined">, {{ selectedCell.position.z }}</template>)</h4><ul v-if="selectedCell.points.length" class="map-cell-target-list"><li v-for="point in selectedCell.points" :key="point.id"><button type="button" class="map-cell-target" :disabled="blocked" @click="choosePoint(point)"><span class="map-cell-target-art"><AnimatedMapAvatar v-if="point.portrait" :portrait="point.portrait" :running="false" direction="down" /><img v-else-if="pointArt(point)" :src="pointArt(point)" alt="" /><AnimeIcon v-else :name="pointIcon(point)" :size="30" /></span><span><strong>{{ point.name }}</strong><small>{{ point.type || '附近目标' }}<template v-if="pointLevel(point) !== undefined"> · Lv.{{ pointLevel(point) }}</template></small></span><AnimeIcon name="arrow" :size="19" /></button></li></ul><button v-else-if="!selectedCell.isCurrent" type="button" class="map-dialog-button tone-primary" :disabled="blocked" @click="moveToSelectedCell">前往</button><p v-else class="map-observation-only">你正站在这里。</p></template>
-    </section></div>
+    <div v-if="actionLock" class="world-map-action-lock"><div class="world-map-action-card" role="status" aria-live="off"><img v-if="renderScene && actionArt" class="world-map-action-art" :src="actionArt" alt="" /><strong>{{ actionLock.title }}</strong><span>{{ actionLock.detail }}</span><p v-if="actionLock.countdown">剩余 <b>{{ actionLock.countdown }}</b></p><button v-if="actionLock.stopLabel" type="button" :disabled="actionLock.stopDisabled" @click="emit('stop-action')">{{ actionLock.stopLabel }}</button></div></div>
+    <div v-if="selectedCell || selectedPoint || selectedEnvironment" class="map-point-sheet-wrapper"><section class="map-point-dialog exploration-window" data-window-theme="map" role="dialog" aria-modal="false" :aria-label="selectedEnvironment?.name ?? selectedPoint?.name ?? '坐标互动'"><button type="button" class="dialog-close exploration-window-close" aria-label="关闭地点详情" @click="closePoint"><span class="exploration-close-mark" aria-hidden="true" /></button><header class="exploration-window-heading"><h3>地点详情</h3></header><div class="exploration-window-body" tabindex="0" aria-label="地点详情内容">
+      <template v-if="selectedEnvironment"><div class="map-sheet-heading"><span v-if="renderScene" class="dialog-point-icon environment-detail-art" :style="environmentSpriteStyle(selectedEnvironment.assetKey, selectedEnvironment)" aria-hidden="true" /><div><p class="eyebrow">{{ selectedEnvironment.destructible ? '可清理障碍' : '环境景观' }} · {{ selectedEnvironment.width }}×{{ selectedEnvironment.height }} 整格占地</p><h4>{{ selectedEnvironment.name }}</h4><p class="dialog-coordinate">({{ selectedEnvironment.x }}, {{ selectedEnvironment.y }}, {{ selectedEnvironment.z }}) · {{ environmentFootprint(selectedEnvironment).length }} 个完整方格</p></div></div><p class="dialog-description">{{ selectedEnvironment.description }}</p><p v-if="selectedEnvironment.state === 'clearing' && selectedEnvironment.remainingSeconds !== undefined" class="environment-work-copy">正在清理 · 剩余约 {{ Math.ceil(selectedEnvironment.remainingSeconds) }} 秒</p><p v-else-if="selectedEnvironment.destructible" class="environment-work-copy">清理约 {{ Math.ceil(selectedEnvironment.workSeconds) }} 秒，可能获得材料。</p><div class="dialog-actions"><button v-if="selectedEnvironmentDistance > 1" class="map-dialog-button tone-primary" type="button" :disabled="blocked || !approachEnvironmentPosition" @click="approachEnvironment">靠近</button><button v-if="selectedEnvironment.destructible" class="map-dialog-button tone-primary" type="button" :disabled="blocked || !selectedEnvironment.canClear || selectedEnvironmentDistance > 1" @click="clearEnvironment">清理</button></div><p v-if="selectedEnvironment.clearReason" class="map-observation-only">{{ selectedEnvironment.clearReason }}</p><p v-else-if="selectedEnvironmentDistance > 1" class="map-observation-only">靠近占地边缘后可互动。</p><p v-else-if="!selectedEnvironment.destructible" class="map-observation-only">这处景观无法清理，可以绕行。</p></template>
+      <template v-if="selectedPoint"><div class="map-sheet-heading"><span v-if="renderScene" class="dialog-point-icon"><AnimatedMapAvatar v-if="selectedPoint.portrait" :portrait="selectedPoint.portrait" :running="false" direction="down" /><img v-else-if="pointArt(selectedPoint)" :src="pointArt(selectedPoint)" alt="" /><AnimeIcon v-else :name="pointIcon(selectedPoint)" :size="48" /></span><div><p class="eyebrow">{{ selectedPoint.type || '附近目标' }}<template v-if="pointLevel(selectedPoint) !== undefined"> · Lv.{{ pointLevel(selectedPoint) }}</template></p><h4>{{ selectedPoint.name }}</h4><p class="dialog-coordinate">({{ selectedPoint.x }}, {{ selectedPoint.y }}<template v-if="selectedPoint.z !== undefined">, {{ selectedPoint.z }}</template>)</p></div></div><p class="dialog-description">{{ selectedPoint.description || '选择下方操作，与这个目标互动。' }}</p><div v-if="selectedPoint.discovered !== false && selectedPoint.actions?.length" class="dialog-actions"><button v-for="action in selectedPoint.actions" :key="action.id" type="button" class="map-dialog-button" :class="`tone-${action.tone || 'soft'}`" :disabled="blocked" @click="runPointAction(selectedPoint, action)">{{ action.label }}</button></div><button v-else-if="selectedPoint.discovered !== false && selectedPoint.interactable !== false" type="button" class="map-dialog-button tone-primary" :disabled="blocked" @click="defaultInteract(selectedPoint)">查看互动</button><p v-else class="map-observation-only">这个目标暂时只能观察。</p></template>
+      <template v-else-if="selectedCell"><p class="eyebrow">{{ selectedCell.isCurrent ? '当前位置' : '坐标互动' }}</p><h4>({{ selectedCell.position.x }}, {{ selectedCell.position.y }}<template v-if="selectedCell.position.z !== undefined">, {{ selectedCell.position.z }}</template>)</h4><ul v-if="selectedCell.points.length" class="map-cell-target-list"><li v-for="point in selectedCell.points" :key="point.id"><button type="button" class="map-cell-target" :disabled="blocked" @click="choosePoint(point)"><span v-if="renderScene" class="map-cell-target-art"><AnimatedMapAvatar v-if="point.portrait" :portrait="point.portrait" :running="false" direction="down" /><img v-else-if="pointArt(point)" :src="pointArt(point)" alt="" /><AnimeIcon v-else :name="pointIcon(point)" :size="30" /></span><span><strong>{{ point.name }}</strong><small>{{ point.type || '附近目标' }}<template v-if="pointLevel(point) !== undefined"> · Lv.{{ pointLevel(point) }}</template></small></span><AnimeIcon name="arrow" :size="19" /></button></li></ul><button v-else-if="!selectedCell.isCurrent" type="button" class="map-dialog-button tone-primary" :disabled="blocked" @click="moveToSelectedCell">前往</button><p v-else class="map-observation-only">你正站在这里。</p></template>
+    </div></section></div>
   </section>
 </template>
+
+<style scoped>
+.world-map-panel.anime-adventure.exploration-map.exploration-canvas.is-lightweight .world-map-cell { background: #edf3e8; color: #587263; --cell-border: #9cafa0; }
+.world-map-panel.anime-adventure.exploration-map.exploration-canvas.is-lightweight .world-map-cell.is-out-of-range { background: #d4dfd6; }
+.world-map-panel.anime-adventure.exploration-map.exploration-canvas.is-lightweight .world-map-cell.is-current { background: #cce8d8; --cell-border: #507e6c; }
+.is-lightweight .world-map-fog { background: #dee7e1; }
+.map-cell-coordinate { position: absolute; left: 4px; bottom: 3px; font-size: clamp(8px, 2vw, 11px); line-height: 1.2; }
+.world-map-panel.anime-adventure.exploration-map.exploration-canvas.is-lightweight .map-target-entity { display: grid; place-items: center; width: var(--map-marker-width); height: auto; min-height: 24px; padding: 3px 4px; border: 1px solid #708b79; border-radius: 5px; background: #f8fbef; color: #335b48; }
+.world-map-panel.anime-adventure.exploration-map.exploration-canvas.is-lightweight .map-target-entity.is-monster { border-color: #bb7772; color: #8c3f3b; background: #fff1ec; }
+.map-target-label { display: block; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10px; line-height: 1.3; }
+.map-environment-marker { position: absolute; transform: translate(-50%, -50%); min-height: 23px; padding: 3px 5px; border: 1px solid #8c986e; border-radius: 5px; background: #f4f4de; color: #5f6845; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10px; line-height: 1.3; pointer-events: none; }
+.map-player-label { position: absolute; left: -12px; top: -12px; display: grid; place-items: center; width: 24px; height: 24px; border: 2px solid #fff; border-radius: 50%; background: #2a7a6b; color: #fff; font-size: 12px; font-weight: 700; }
+</style>

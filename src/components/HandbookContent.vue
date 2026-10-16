@@ -1,16 +1,18 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 import AnimeIcon from './AnimeIcon.vue';
+import AchievementIcon from './AchievementIcon.vue';
+import CodexContent from './CodexContent.vue';
 import GameUiFeedbackArt from './GameUiFeedbackArt.vue';
-import SkillIcon from './SkillIcon.vue';
-import InventoryItemIcon from './InventoryItemIcon.vue';
 import { gameAssetUrl } from '../game-assets';
 import './anime-adventure.css';
 import { userFacingErrorMessage } from '../api';
 import { createIdempotencyKey } from '../idempotency-key';
+import { normalizeItemRarity } from '../item-rarity';
+import '../footprints.css';
 import * as handbook from '../handbook-api';
 import type {
-  AchievementEntry, AchievementPage, AchievementRewards, CodexDetail, CodexKind, CodexPage,
+  AchievementEntry, AchievementPage, AchievementRewards,
   HandbookSection, PursuitRecord, WarrantDetail, WarrantFilter, WarrantPage, WarrantPost,
   WarrantRewardInput, WarrantRewardItem, WarrantRewardPreview
 } from '../handbook-api';
@@ -19,7 +21,7 @@ const props = defineProps<{ open: boolean; section: HandbookSection }>();
 const emit = defineEmits<{ close: []; updated: [section: HandbookSection] }>();
 
 const title = computed(() => ({ footprints: '足迹', codex: '图鉴', warrants: '通缉' })[props.section]);
-const kindIcon = (kind: string) => kind === '装备' ? 'sword' : kind === '道具' ? 'scroll' : kind === '材料' ? 'stamina' : kind === '怪物' ? 'paw' : 'mana';
+const titleEnglish = computed(() => ({ footprints: 'FOOTPRINTS', codex: 'CODEX', warrants: 'WARRANTS' })[props.section]);
 const loading = ref(false);
 const detailLoading = ref(false);
 const working = ref(false);
@@ -30,18 +32,23 @@ const page = ref(1);
 const achievementCategory = ref('全部');
 const achievementPage = ref<AchievementPage | null>(null);
 const rewards = ref<AchievementRewards | null>(null);
-const codexKind = ref<CodexKind>('装备');
-const codexCategory = ref('全部');
-const codexKeyword = ref('');
-const keywordDraft = ref('');
-const codexPage = ref<CodexPage | null>(null);
+const storageOpen = ref(false);
+const rewardsLoading = ref(false);
+const rewardsError = ref('');
+const storageError = ref('');
+const storageNotice = ref('');
+const rewardsRefreshRequired = ref(false);
+const openingBoxKey = ref('');
+const storageButton = ref<HTMLButtonElement | null>(null);
+const storageCloseButton = ref<HTMLButtonElement | null>(null);
+const handbookCloseButton = ref<HTMLButtonElement | null>(null);
 const warrantTab = ref<'board' | 'posts' | 'pursuits'>('board');
 const warrantFilter = ref<WarrantFilter>('全部');
 const warrantPage = ref<WarrantPage | null>(null);
 const postsPage = ref<{ page: number; totalPages: number; entries: WarrantPost[] } | null>(null);
 const pursuitsPage = ref<{ page: number; totalPages: number; entries: PursuitRecord[] } | null>(null);
-const detail = ref<AchievementEntry | CodexDetail | WarrantDetail | null>(null);
-const detailType = ref<'achievement' | 'codex' | 'warrant' | null>(null);
+const detail = ref<AchievementEntry | WarrantDetail | null>(null);
+const detailType = ref<'achievement' | 'warrant' | null>(null);
 const boxQuantity = ref<Record<string, number>>({});
 const boxReceipt = ref<{ key: string; quantity: number; token: string } | null>(null);
 const rewardKind = ref<'copper' | 'item'>('copper');
@@ -57,14 +64,12 @@ const previewInput = ref<WarrantRewardInput | null>(null);
 let loadVersion = 0;
 let detailVersion = 0;
 let rewardItemsVersion = 0;
+let rewardsVersion = 0;
 
 const currentPage = computed(() => props.section === 'footprints' ? achievementPage.value
-  : props.section === 'codex' ? codexPage.value
-    : warrantTab.value === 'board' ? warrantPage.value : warrantTab.value === 'posts' ? postsPage.value : pursuitsPage.value);
+  : warrantTab.value === 'board' ? warrantPage.value : warrantTab.value === 'posts' ? postsPage.value : pursuitsPage.value);
 const pageCount = computed(() => currentPage.value?.totalPages ?? 1);
 const achievementCategories = computed(() => achievementPage.value?.visibleCategories ?? ['全部']);
-const codexKinds = computed(() => codexPage.value?.kinds ?? ['装备', '道具', '材料', '怪物', '技能'] as CodexKind[]);
-const codexCategories = computed(() => codexPage.value?.categories ?? [{ label: '全部', value: '全部' }]);
 const warrantFilters: WarrantFilter[] = ['全部', '已暴露', '近期露面', '无行踪'];
 
 async function load() {
@@ -74,17 +79,9 @@ async function load() {
   error.value = '';
   try {
     if (props.section === 'footprints') {
-      const [list, stock] = await Promise.all([
-        handbook.achievements(achievementCategory.value, page.value), handbook.achievementRewards()
-      ]);
+      const list = await handbook.achievements(achievementCategory.value, page.value);
       if (version !== loadVersion) return;
       achievementPage.value = list;
-      rewards.value = stock;
-      page.value = list.page;
-    } else if (props.section === 'codex') {
-      const list = await handbook.codex(codexKind.value, codexCategory.value, page.value, codexKeyword.value);
-      if (version !== loadVersion) return;
-      codexPage.value = list;
       page.value = list.page;
     } else if (warrantTab.value === 'board') {
       const list = await handbook.warrants(warrantFilter.value, page.value);
@@ -127,16 +124,17 @@ function resetDetail() {
 
 watch(() => [props.open, props.section] as const, ([open, section], previous) => {
   ++loadVersion;
+  storageOpen.value = false;
   if (!open) { resetDetail(); return; }
   if (!previous || previous[1] !== section) {
     page.value = 1;
     achievementCategory.value = '全部';
-    codexKind.value = '装备'; codexCategory.value = '全部'; codexKeyword.value = ''; keywordDraft.value = '';
     warrantTab.value = 'board'; warrantFilter.value = '全部';
     resetDetail();
   }
   notice.value = '';
-  void load();
+  if (section !== 'codex') void load();
+  void nextTick(() => { if (props.open && !storageOpen.value) handbookCloseButton.value?.focus(); });
 }, { immediate: true });
 
 watch([rewardKind, rewardAmount, rewardItemId, rewardQuantity], () => {
@@ -177,17 +175,6 @@ function selectAchievementCategory(category: string) {
   if (achievementCategory.value === category) return;
   achievementCategory.value = category; page.value = 1; resetDetail(); void load();
 }
-function selectCodexKind(kind: CodexKind) {
-  if (codexKind.value === kind) return;
-  codexKind.value = kind; codexCategory.value = '全部'; page.value = 1; resetDetail(); void load();
-}
-function selectCodexCategory(category: string) {
-  if (codexCategory.value === category) return;
-  codexCategory.value = category; page.value = 1; resetDetail(); void load();
-}
-function searchCodex() {
-  codexKeyword.value = keywordDraft.value.trim(); page.value = 1; resetDetail(); void load();
-}
 function selectWarrantTab(tab: 'board' | 'posts' | 'pursuits') {
   if (warrantTab.value === tab) return;
   warrantTab.value = tab; page.value = 1; resetDetail(); void load();
@@ -197,7 +184,7 @@ function selectWarrantFilter(filter: WarrantFilter) {
   warrantFilter.value = filter; page.value = 1; resetDetail(); void load();
 }
 
-async function showDetail(type: 'achievement' | 'codex' | 'warrant', id: string | number) {
+async function showDetail(type: 'achievement' | 'warrant', id: string | number) {
   const version = ++detailVersion;
   detail.value = null;
   detailType.value = type;
@@ -208,8 +195,7 @@ async function showDetail(type: 'achievement' | 'codex' | 'warrant', id: string 
   previewInput.value = null;
   try {
     const result = type === 'achievement' ? await handbook.achievementDetail(String(id))
-      : type === 'codex' ? await handbook.codexDetail(codexKind.value, String(id))
-        : await handbook.warrantDetail(Number(id));
+      : await handbook.warrantDetail(Number(id));
     if (version === detailVersion) {
       detail.value = result;
       if (type === 'warrant' && rewardKind.value === 'item' &&
@@ -224,28 +210,76 @@ async function showDetail(type: 'achievement' | 'codex' | 'warrant', id: string 
 
 function quantityForBox(key: string, available: number) {
   const value = Number(boxQuantity.value[key] ?? 1);
-  return Number.isInteger(value) && value >= 1 && value <= Math.min(100, available) ? value : null;
+  return Number.isSafeInteger(available) && available > 0 && Number.isInteger(value) && value >= 1 && value <= Math.min(100, available) ? value : null;
+}
+
+async function loadRewards() {
+  const version = ++rewardsVersion;
+  rewardsLoading.value = true;
+  rewardsError.value = '';
+  try {
+    const stock = await handbook.achievementRewards();
+    if (version !== rewardsVersion) return;
+    rewards.value = stock;
+    for (const action of stock.actions) {
+      if (boxQuantity.value[action.boxKey] === undefined) boxQuantity.value[action.boxKey] = 1;
+    }
+    rewardsRefreshRequired.value = false;
+  } catch (cause) {
+    if (version === rewardsVersion) {
+      rewardsError.value = userFacingErrorMessage(cause);
+      rewardsRefreshRequired.value = true;
+    }
+  } finally {
+    if (version === rewardsVersion) rewardsLoading.value = false;
+  }
+}
+
+async function openStorage() {
+  storageOpen.value = true;
+  storageError.value = '';
+  if (!working.value) void loadRewards();
+  await nextTick();
+  storageCloseButton.value?.focus();
+}
+
+async function closeStorage() {
+  storageOpen.value = false;
+  await nextTick();
+  storageButton.value?.focus();
+}
+
+function trapDialogFocus(event: KeyboardEvent) {
+  const controls = Array.from((event.currentTarget as HTMLElement).querySelectorAll<HTMLElement>('button:not(:disabled), input:not(:disabled), [tabindex="0"]'))
+    .filter(control => control.getClientRects().length > 0 && !control.closest('[inert]'));
+  const first = controls[0];
+  const last = controls[controls.length - 1];
+  if (!controls.includes(document.activeElement as HTMLElement)) { event.preventDefault(); (event.shiftKey ? last : first)?.focus(); }
+  else if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+  else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
 }
 
 async function openBox(key: string, available: number) {
   const quantity = quantityForBox(key, available);
-  if (!quantity || working.value) return;
+  if (!quantity || working.value || rewardsLoading.value || rewardsRefreshRequired.value) return;
   working.value = true;
-  error.value = '';
-  notice.value = '';
-  if (!boxReceipt.value || boxReceipt.value.key !== key || boxReceipt.value.quantity !== quantity) {
-    boxReceipt.value = { key, quantity, token: createIdempotencyKey() };
-  }
+  openingBoxKey.value = key;
+  storageError.value = '';
+  storageNotice.value = '';
   try {
+    if (!boxReceipt.value || boxReceipt.value.key !== key || boxReceipt.value.quantity !== quantity) {
+      boxReceipt.value = { key, quantity, token: createIdempotencyKey() };
+    }
     const result = await handbook.openAchievementBox(key, boxReceipt.value.token, quantity);
-    notice.value = `开启${result.boxName}：${result.items.map(item => `${item.name} ×${item.quantity}`).join('、')}`;
+    storageNotice.value = `已开启${result.boxName} ×${result.quantity}，获得：${result.items.map(item => `${item.name} ×${item.quantity}`).join('、')}`;
     boxReceipt.value = null;
+    boxQuantity.value[key] = 1;
+    rewardsRefreshRequired.value = true;
     emit('updated', 'footprints');
-    try { rewards.value = await handbook.achievementRewards(); }
-    catch { notice.value += '（奖励数量刷新失败，可重新打开足迹查看。）'; }
+    await loadRewards();
   } catch (cause) {
-    error.value = userFacingErrorMessage(cause);
-  } finally { working.value = false; }
+    storageError.value = `${userFacingErrorMessage(cause)} 可使用相同数量重试。`;
+  } finally { working.value = false; openingBoxKey.value = ''; }
 }
 
 function makeRewardInput(): WarrantRewardInput {
@@ -289,21 +323,6 @@ async function submitReward() {
   } finally { working.value = false; }
 }
 
-const detailFields = computed(() => {
-  if (detailType.value !== 'codex' || !detail.value) return [];
-  const data = (detail.value as CodexDetail).detail;
-  const labels: Record<string, string> = {
-    category: '分类', type: '类型', requiredLevel: '需求等级', description: '描述', obtainSource: '获取途径',
-    weight: '重量', level: '等级', inRange: '可鉴定范围', informationLevel: '鉴定等级', skills: '技能',
-    weaknesses: '弱点', resistances: '抗性', skillKind: '技能类型', element: '元素', rangeType: '距离',
-    targetScope: '目标范围', power: '威力', manaCost: '法力消耗', cooldownTurns: '冷却回合',
-    chantTurns: '吟唱回合', effects: '效果'
-  };
-  return Object.entries(labels).filter(([key]) => data[key] !== undefined && data[key] !== null && data[key] !== '')
-    .map(([key, label]) => ({ label, value: Array.isArray(data[key]) ? (data[key] as unknown[]).join('、') || '暂无记录'
-      : typeof data[key] === 'boolean' ? data[key] ? '是' : '否' : String(data[key]) }));
-});
-
 function positionText(position: WarrantDetail['position']) {
   return position ? `（${position.x}, ${position.y}, ${position.z}）` : '行踪未明';
 }
@@ -318,55 +337,55 @@ function dateText(value: string | null) {
 <template>
   <Teleport to="body">
     <div v-if="open" class="handbook-backdrop" role="presentation" @click.self="emit('close')">
-      <section class="handbook-dialog anime-adventure" :class="`handbook-${section}`" role="dialog" aria-modal="true" :aria-label="`冒险手册${title}`" @keydown.esc="emit('close')">
-        <header class="handbook-header">
+      <section class="handbook-dialog anime-adventure exploration-window" :class="`handbook-${section}`" :data-window-theme="section" role="dialog" :aria-modal="!storageOpen" :aria-hidden="storageOpen || undefined" :inert="storageOpen" :aria-label="`冒险手册${title}`" @keydown.esc="emit('close')" @keydown.tab="trapDialogFocus">
+        <button ref="handbookCloseButton" class="icon-button exploration-window-close" type="button" :aria-label="`关闭${title}`" @click="emit('close')"><span class="exploration-close-mark" aria-hidden="true" /></button>
+        <header class="handbook-header exploration-window-heading">
           <div class="heading-mark" aria-hidden="true"><AnimeIcon :name="section === 'footprints' ? 'paw' : section === 'codex' ? 'book' : 'sword'" :size="40" /></div>
-          <div class="heading-copy"><small>冒险手册 · ADVENTURE NOTES</small><h2>{{ title }}</h2></div>
-          <button class="icon-button" type="button" :aria-label="`关闭${title}`" @click="emit('close')"><AnimeIcon name="close" /></button>
+          <div class="heading-copy"><small class="exploration-window-kicker">{{ titleEnglish }}</small><h2>{{ title }}</h2></div>
         </header>
 
-        <div class="handbook-body">
+        <template v-if="section === 'footprints'">
+          <nav class="chip-row footprints-categories" aria-label="足迹分类">
+            <button v-for="category in achievementCategories" :key="category" type="button" :class="{ selected: achievementCategory === category }" :aria-pressed="achievementCategory === category" :disabled="loading" @click="selectAchievementCategory(category)">{{ category }}</button>
+          </nav>
+          <div class="footprints-summary"><span>旅途成就</span><span>{{ achievementPage ? `已完成 ${achievementPage.total} 项` : '只记录已经达成的成就' }}</span></div>
+          <div class="handbook-body footprints-scroll" role="region" aria-label="足迹内容" tabindex="0" :aria-busy="loading || detailLoading">
+            <template v-if="!detailType">
+              <div v-if="error" class="footprints-state" role="alert"><p>{{ error }}</p><button type="button" @click="load">重新加载</button></div>
+              <p v-else-if="loading" class="footprints-state game-ui-empty-message" role="status"><GameUiFeedbackArt name="loading" :size="36" /><span>正在翻阅足迹…</span></p>
+              <div v-else-if="achievementPage?.entries.length" class="footprints-list">
+                <button v-for="entry in achievementPage.entries" :key="entry.id" class="footprints-achievement" :data-achievement-id="entry.id" :data-rarity="normalizeItemRarity(entry.rarity)" type="button" @click="showDetail('achievement', entry.id)">
+                  <span class="footprints-emblem"><AchievementIcon :entry="entry" /></span>
+                  <span class="footprints-entry-copy"><span class="footprints-entry-title"><strong class="achievement-name">{{ entry.name }}</strong><small>{{ entry.rarity }}</small></span><span class="footprints-description">{{ entry.description }}</span><small class="footprints-completed-at">{{ entry.category }}<span aria-hidden="true"> · </span>{{ entry.completedAt }}</small></span>
+                  <span class="footprints-completion"><strong>已达成</strong><span>全服 {{ entry.percentage }}</span><small>第 {{ entry.rank }} 位达成</small></span>
+                </button>
+              </div>
+              <div v-else class="footprints-state game-ui-empty-message"><GameUiFeedbackArt name="empty" :size="36" /><span>还没有留下这一类足迹，继续冒险吧。</span></div>
+            </template>
+            <template v-else>
+              <button class="back-button" type="button" @click="resetDetail"><AnimeIcon name="arrow" :size="18" />返回列表</button>
+              <p v-if="detailLoading" class="footprints-state game-ui-empty-message" role="status"><GameUiFeedbackArt name="loading" :size="36" /><span>正在查看详情…</span></p>
+              <div v-else-if="detailError" class="footprints-state" role="alert"><p>{{ detailError }}</p><button type="button" @click="resetDetail">返回列表重试</button></div>
+              <article v-else-if="detail" class="detail-card footprints-detail" :data-rarity="normalizeItemRarity((detail as AchievementEntry).rarity)">
+                <div class="footprints-detail-heading"><span class="footprints-emblem"><AchievementIcon :entry="detail as AchievementEntry" /></span><div><p class="eyebrow">{{ (detail as AchievementEntry).category }} · {{ (detail as AchievementEntry).rarity }}</p><h3 class="achievement-name">{{ (detail as AchievementEntry).name }}</h3></div></div>
+                <p>{{ (detail as AchievementEntry).description }}</p>
+                <div class="detail-grid"><span>达成时间 <strong>{{ (detail as AchievementEntry).completedAt }}</strong></span><span>奖励 <strong>{{ (detail as AchievementEntry).attribute }}</strong></span><span>达成顺序 <strong>第 {{ (detail as AchievementEntry).rank }} 位</strong></span><span>全服完成率 <strong>{{ (detail as AchievementEntry).percentage }}</strong></span></div>
+              </article>
+            </template>
+          </div>
+          <footer class="footprints-footer">
+            <nav v-if="!detailType && achievementPage && pageCount > 1" class="pager footprints-pager" aria-label="足迹翻页"><button type="button" :disabled="loading || !!error || page <= 1" @click="changePage(page - 1)">上一页</button><span>{{ page }} / {{ pageCount }}</span><button type="button" :disabled="loading || !!error || page >= pageCount" @click="changePage(page + 1)">下一页</button></nav>
+            <button ref="storageButton" class="footprints-storage-button" type="button" aria-label="打开储物箱" @click="openStorage"><img :src="gameAssetUrl('/assets/items/chest.png')" alt="" />储物箱</button>
+          </footer>
+        </template>
+
+        <CodexContent v-else-if="section === 'codex'" @close="emit('close')" />
+        <div v-else class="handbook-body" role="region" :aria-label="`${title}内容`" tabindex="0">
           <p v-if="notice" class="notice" role="status">{{ notice }}</p>
           <p v-if="error" class="error" role="alert">{{ error }}</p>
 
           <template v-if="!detailType">
-            <template v-if="section === 'footprints'">
-              <p class="intro">旅途中留下的足迹，只记录已经达成的成就。</p>
-              <section v-if="rewards" class="reward-card" aria-label="足迹奖励">
-                <div class="section-heading"><AnimeIcon name="star" :size="26" /><h3>成就珍藏</h3></div>
-                <div v-if="rewards.actions.length" class="box-list">
-                  <div v-for="action in rewards.actions" :key="action.boxKey" class="box-row">
-                    <AnimeIcon class="box-art" name="home" :size="54" /><div><strong>{{ action.name }}</strong><small>持有 {{ action.available }} 个 · 每次最多开启 100 个</small></div>
-                    <div class="box-controls"><input v-model.number="boxQuantity[action.boxKey]" type="number" inputmode="numeric" min="1" :max="Math.min(100, action.available)" :aria-label="`${action.name}开启数量`" />
-                      <button type="button" :disabled="working || !quantityForBox(action.boxKey, action.available)" @click="openBox(action.boxKey, action.available)">开启</button></div>
-                  </div>
-                </div>
-                <p v-else class="quiet">目前没有可开启的道具匣。</p>
-                <div v-if="rewards.items.length" class="reward-items"><span v-for="item in rewards.items" :key="item.key" :title="item.description">{{ item.name }} ×{{ item.quantity }}</span></div>
-              </section>
-              <div class="chip-row" aria-label="足迹分类"><button v-for="category in achievementCategories" :key="category" type="button" :class="{ selected: achievementCategory === category }" :disabled="loading" @click="selectAchievementCategory(category)">{{ category }}</button></div>
-              <p v-if="!loading && achievementPage" class="count">已完成 {{ achievementPage.total }} 项</p>
-              <div v-if="!loading && achievementPage?.entries.length" class="entry-list">
-                <button v-for="entry in achievementPage.entries" :key="entry.id" class="entry-card" type="button" @click="showDetail('achievement', entry.id)">
-                  <span class="entry-icon achievement-emblem"><AnimeIcon name="star" :size="42" /></span><span class="entry-main"><strong>{{ entry.name }}</strong><small>{{ entry.category }} · {{ entry.rarity }} · {{ entry.completedAt }}</small><span>{{ entry.description }}</span></span><span class="achievement-stamp">已达成</span><span class="entry-arrow"><AnimeIcon name="arrow" :size="20" /></span>
-                </button>
-              </div>
-            </template>
-
-            <template v-else-if="section === 'codex'">
-              <p class="intro">图鉴收录你已发现的事物，继续冒险可解锁更多条目。</p>
-              <div class="chip-row" aria-label="图鉴分类"><button v-for="kind in codexKinds" :key="kind" type="button" :class="{ selected: codexKind === kind }" :disabled="loading" @click="selectCodexKind(kind)"><AnimeIcon :name="kindIcon(kind)" :size="22" />{{ kind }}</button></div>
-              <div class="chip-row subchips" aria-label="图鉴子分类"><button v-for="category in codexCategories" :key="category.value" type="button" :class="{ selected: codexCategory === category.value }" :disabled="loading" @click="selectCodexCategory(category.value)">{{ category.label }}</button></div>
-              <form class="search-row" @submit.prevent="searchCodex"><input v-model="keywordDraft" maxlength="80" type="search" placeholder="搜索已发现条目" aria-label="搜索图鉴" /><button type="submit" :disabled="loading">查找</button></form>
-              <div v-if="!loading && codexPage?.entries.length" class="entry-list codex-gallery">
-                <button v-for="entry in codexPage.entries" :key="entry.id" class="entry-card" type="button" @click="showDetail('codex', entry.detailId)">
-                  <span class="entry-icon"><img v-if="codexKind === '怪物' && entry.name.includes('球兔')" :src="gameAssetUrl('/assets/loading/ball-rabbit.png')" alt="" /><SkillIcon v-else-if="codexKind === '技能'" :code="entry.code" :name="entry.name" :size="48" /><AnimeIcon v-else-if="codexKind === '怪物'" :name="kindIcon(codexKind)" :size="48" /><InventoryItemIcon v-else :name="entry.name" :codex-id="entry.detailId" :item-type="codexKind" /></span><span class="entry-main"><strong>{{ entry.name }}</strong><small>{{ entry.category }}</small></span><span class="entry-arrow"><AnimeIcon name="arrow" :size="20" /></span>
-                </button>
-              </div>
-            </template>
-
-            <template v-else>
-              <div class="chip-row" aria-label="通缉记录"><button type="button" :class="{ selected: warrantTab === 'board' }" @click="selectWarrantTab('board')">通缉榜</button><button type="button" :class="{ selected: warrantTab === 'posts' }" @click="selectWarrantTab('posts')">我的上赏</button><button type="button" :class="{ selected: warrantTab === 'pursuits' }" @click="selectWarrantTab('pursuits')">追缉记录</button></div>
+              <div class="chip-row handbook-primary-tabs" aria-label="通缉记录"><button type="button" :class="{ selected: warrantTab === 'board' }" @click="selectWarrantTab('board')">通缉榜</button><button type="button" :class="{ selected: warrantTab === 'posts' }" @click="selectWarrantTab('posts')">我的上赏</button><button type="button" :class="{ selected: warrantTab === 'pursuits' }" @click="selectWarrantTab('pursuits')">追缉记录</button></div>
               <template v-if="warrantTab === 'board'">
                 <p class="intro">{{ warrantPage?.regionName ?? '当前地区' }}的生效通缉令。坐标仅在行踪明确时显示。</p>
                 <div class="chip-row subchips" aria-label="行踪筛选"><button v-for="filter in warrantFilters" :key="filter" type="button" :class="{ selected: warrantFilter === filter }" :disabled="loading" @click="selectWarrantFilter(filter)">{{ filter }}</button></div>
@@ -383,8 +402,6 @@ function dateText(value: string | null) {
               <div v-else-if="warrantTab === 'pursuits' && !loading && pursuitsPage?.entries.length" class="entry-list">
                 <article v-for="entry in pursuitsPage.entries" :key="entry.warrantId" class="entry-card static-card pursuit-card"><span class="entry-icon"><AnimeIcon name="sword" :size="44" /></span><span class="entry-main"><strong>{{ entry.wantedName }}</strong><small>{{ entry.regionName }}</small><span v-if="entry.capturedAt">缉获：{{ dateText(entry.capturedAt) }}</span><span v-if="entry.rewardClaimedAt">领取：{{ dateText(entry.rewardClaimedAt) }} · {{ entry.rewardCopper }} 铜币 · {{ entry.rewardItems }} 件物品</span></span><em class="pursuit-stamp">{{ entry.recordType === 'capture' ? '本人缉获' : '领取悬赏' }}</em></article>
               </div>
-            </template>
-
             <p v-if="loading" class="empty game-ui-empty-message" role="status"><GameUiFeedbackArt name="loading" :size="36" /><span>正在翻阅{{ title }}…</span></p>
             <p v-else-if="!error && !currentPage?.entries.length" class="empty game-ui-empty-message"><GameUiFeedbackArt name="empty" :size="36" /><span>这一页还没有记录。</span></p>
             <nav v-if="!loading && !error && currentPage && pageCount > 1" class="pager" aria-label="翻页"><button type="button" :disabled="page <= 1" @click="changePage(page - 1)">上一页</button><span>{{ page }} / {{ pageCount }}</span><button type="button" :disabled="page >= pageCount" @click="changePage(page + 1)">下一页</button></nav>
@@ -394,12 +411,6 @@ function dateText(value: string | null) {
             <button class="back-button" type="button" @click="resetDetail"><AnimeIcon name="arrow" :size="18" />返回列表</button>
             <p v-if="detailLoading" class="empty game-ui-empty-message" role="status"><GameUiFeedbackArt name="loading" :size="36" /><span>正在查看详情…</span></p>
             <p v-if="detailError" class="error" role="alert">{{ detailError }}</p>
-            <template v-if="detail && detailType === 'achievement'">
-              <article class="detail-card"><span class="detail-symbol"><AnimeIcon name="star" :size="40" /></span><p class="eyebrow">{{ (detail as AchievementEntry).category }} · {{ (detail as AchievementEntry).rarity }}</p><h3>{{ (detail as AchievementEntry).name }}</h3><p>{{ (detail as AchievementEntry).description }}</p><div class="detail-grid"><span>达成时间 <strong>{{ (detail as AchievementEntry).completedAt }}</strong></span><span>奖励 <strong>{{ (detail as AchievementEntry).attribute }}</strong></span><span>达成顺序 <strong>第 {{ (detail as AchievementEntry).rank }} 位</strong></span><span>全服完成率 <strong>{{ (detail as AchievementEntry).percentage }}</strong></span></div></article>
-            </template>
-            <template v-if="detail && detailType === 'codex'">
-              <article class="detail-card codex-spread"><div class="codex-illustration"><img v-if="(detail as CodexDetail).kind === '怪物' && String((detail as CodexDetail).detail.name).includes('球兔')" :src="gameAssetUrl('/assets/loading/ball-rabbit.png')" alt="球兔" /><SkillIcon v-else-if="(detail as CodexDetail).kind === '技能'" :code="String((detail as CodexDetail).detail.code || '')" :name="String((detail as CodexDetail).detail.name || '')" :size="100" /><AnimeIcon v-else :name="kindIcon((detail as CodexDetail).kind)" :size="100" /><span>冒险见闻 · 已发现</span></div><div><p class="eyebrow">{{ (detail as CodexDetail).kind }} · 已发现</p><h3>{{ (detail as CodexDetail).detail.name }}</h3><dl class="facts"><div v-for="field in detailFields" :key="field.label"><dt>{{ field.label }}</dt><dd>{{ field.value }}</dd></div></dl></div></article>
-            </template>
             <template v-if="detail && detailType === 'warrant'">
               <article class="detail-card warrant-detail-card"><span class="detail-symbol warrant-person"><AnimeIcon name="party" :size="72" /><strong>{{ (detail as WarrantDetail).name.slice(0, 1) }}</strong></span><p class="eyebrow">{{ (detail as WarrantDetail).regionName }} · {{ traceText((detail as WarrantDetail).trace) }}</p><h3>{{ (detail as WarrantDetail).name }}</h3><div class="detail-grid"><span>危险标记 <strong>{{ (detail as WarrantDetail).stars }} 星 · {{ (detail as WarrantDetail).skulls }} 骷髅</strong></span><span>最后行踪 <strong>{{ positionText((detail as WarrantDetail).position) }}</strong></span><span>铜币悬赏 <strong><AnimeIcon name="coin" :size="20" />{{ (detail as WarrantDetail).rewardCopper }}</strong></span><span>物品悬赏 <strong>{{ (detail as WarrantDetail).rewardItems }} 件</strong></span></div></article>
               <section v-if="(detail as WarrantDetail).actions.some(action => action.id === 'add_reward')" class="reward-card add-reward"><div class="section-heading"><AnimeIcon name="coin" :size="23" /><h3>追加赏金</h3></div><p class="quiet">只有被此人夺走失物的玩家可追加；提交前会核对背包余额。</p>
@@ -422,6 +433,34 @@ function dateText(value: string | null) {
             </template>
           </template>
         </div>
+      </section>
+    </div>
+    <div v-if="open && section === 'footprints' && storageOpen" class="handbook-backdrop footprints-storage-backdrop" role="presentation" @click.self="closeStorage">
+      <section class="footprints-storage-dialog" role="dialog" aria-modal="true" aria-label="成就储物箱" @keydown.esc.stop.prevent="closeStorage" @keydown.tab="trapDialogFocus">
+        <header class="footprints-storage-heading"><img :src="gameAssetUrl('/assets/items/chest.png')" alt="" /><div><small>成就奖励</small><h3>储物箱</h3></div><button ref="storageCloseButton" type="button" class="footprints-storage-close" aria-label="关闭储物箱" @click="closeStorage"><span aria-hidden="true">×</span></button></header>
+        <div class="footprints-storage-content" :aria-busy="rewardsLoading || working">
+          <p v-if="storageNotice" class="notice" role="status">{{ storageNotice }}</p>
+          <p v-if="storageError" class="error" role="alert">{{ storageError }}</p>
+          <div v-if="rewardsError" class="footprints-storage-error" role="alert"><p>{{ rewardsRefreshRequired && rewards ? '储物箱数量刷新失败，请刷新后继续开启。' : '储物箱加载失败，请重试。' }}</p><small>{{ rewardsError }}</small><button type="button" :disabled="working || rewardsLoading" @click="loadRewards">重试</button></div>
+          <p v-if="rewardsLoading" class="footprints-storage-state" role="status">正在整理储物箱…</p>
+          <template v-if="rewards">
+            <section class="footprints-storage-boxes" aria-label="成就道具匣"><h4>可开启的道具匣</h4>
+              <div v-if="rewards.actions.length" class="footprints-box-list">
+                <article v-for="action in rewards.actions" :key="action.boxKey" class="footprints-box" :data-box-key="action.boxKey">
+                  <img class="footprints-box-art" :src="gameAssetUrl(action.boxKey === 'collector_box' ? '/assets/items/gift-box.png' : '/assets/items/chest.png')" alt="" />
+                  <div class="footprints-box-copy"><strong>{{ action.name }}</strong><small>持有 {{ action.available }} 个</small><span v-if="Number.isSafeInteger(action.available) && action.available > 0">每次最多开启 {{ Math.min(100, action.available) }} 个</span><span v-else>可用数量异常，请刷新</span></div>
+                  <div class="footprints-box-controls"><input v-model.number="boxQuantity[action.boxKey]" type="number" inputmode="numeric" min="1" step="1" :max="Math.min(100, action.available)" :disabled="working || rewardsLoading || rewardsRefreshRequired" :aria-invalid="!quantityForBox(action.boxKey, action.available)" :aria-label="`${action.name}开启数量`" /><button type="button" :disabled="working || rewardsLoading || rewardsRefreshRequired || !quantityForBox(action.boxKey, action.available)" @click="openBox(action.boxKey, action.available)">{{ openingBoxKey === action.boxKey ? '开启中…' : '开启' }}</button><small v-if="!quantityForBox(action.boxKey, action.available)" class="footprints-quantity-error">{{ Number.isSafeInteger(action.available) && action.available > 0 ? `请输入 1–${Math.min(100, action.available)} 的整数` : '请刷新可用数量' }}</small></div>
+                </article>
+              </div>
+              <p v-else-if="!rewardsLoading && !rewardsError" class="footprints-storage-state">暂时没有可开启的道具匣，达成成就后再来看看。</p>
+            </section>
+            <section class="footprints-storage-items" aria-label="成就道具收藏"><h4>道具收藏</h4><p class="footprints-storage-tip">开出的道具已存入背包，使用方式可查看道具说明。</p>
+              <div v-if="rewards.items.length" class="footprints-collected-items"><article v-for="item in rewards.items" :key="item.key" :data-rarity="normalizeItemRarity(item.rarity)"><strong class="achievement-name">{{ item.name }} <span>×{{ item.quantity }}</span></strong><p>{{ item.description }}</p></article></div>
+              <p v-else class="footprints-storage-state">还没有收藏的成就道具。</p>
+            </section>
+          </template>
+        </div>
+        <footer class="footprints-storage-footer"><span>开启后自动存入背包</span><button type="button" :disabled="working || rewardsLoading" @click="loadRewards">刷新</button></footer>
       </section>
     </div>
   </Teleport>
@@ -451,4 +490,9 @@ button { cursor: pointer; font: inherit; }button:disabled { opacity: .5; cursor:
 @media (max-width: 600px) { .handbook-dialog { width: 100%; height: 100%; border-radius: 15px; }.handbook-header { padding: 13px 15px; }.handbook-body { padding: 14px 14px max(22px, env(safe-area-inset-bottom)); }.chip-row { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 3px; scrollbar-width: thin; }.chip-row button { flex: 0 0 auto; }.box-row { align-items: stretch; flex-direction: column; }.box-controls { justify-content: flex-end; }.detail-grid { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 600px) { .reward-item-list { grid-template-columns: 1fr; }.reward-item-choice { min-height: 48px; } }
 @media (max-width: 360px) { .detail-grid, .reward-fields { grid-template-columns: 1fr; }.facts div { grid-template-columns: 74px minmax(0, 1fr); } }
+@media (max-height: 430px) {
+  .handbook-dialog.handbook-codex.exploration-window[data-window-theme] > .exploration-window-heading { flex-basis: 44px; padding-block: 3px; }
+  .handbook-backdrop .handbook-dialog.anime-adventure.exploration-window.handbook-codex .heading-copy h2 { font-size: 20px; line-height: 1.2; }
+  .handbook-backdrop .handbook-dialog.anime-adventure.exploration-window.handbook-codex .heading-copy small { font-size: 8px; line-height: 1.2; }
+}
 </style>

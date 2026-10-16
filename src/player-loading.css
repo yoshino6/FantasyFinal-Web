@@ -1,0 +1,28 @@
+/* Initial boot and authenticated loading share the ff-boot artwork/layout
+   defined in index.html, so the cover remains available before Vue downloads. */
+.player-load-screen .player-load-error { color: #a0373b; }
+
+.player-load-actions {
+  position: absolute;
+  z-index: 2;
+  top: min(calc(100% - 54px), calc(50% + 50dvh - 54px - env(safe-area-inset-bottom)));
+  left: 50%;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  width: min(100vw - 24px, 360px);
+  transform: translateX(-50%);
+}
+
+.player-load-actions button {
+  min-height: 44px;
+  padding: 8px 18px;
+  color: #233768;
+  border: 2px solid #d4bc97;
+  border-radius: 5px;
+  background: linear-gradient(115deg, #fffdf4, #fff5df);
+  box-shadow: inset 0 0 0 2px #fffdf4, inset 0 0 0 3px #e3d3b8, 0 2px 6px #59623d40;
+  font-weight: 700;
+}
+
+.player-load-actions button:focus-visible { outline: 3px solid #3bb9e9; outline-offset: 3px; }

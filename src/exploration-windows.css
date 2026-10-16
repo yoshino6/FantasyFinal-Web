@@ -1,0 +1,240 @@
+/* Exploration windows share geometry; each painted heading owns its motif. */
+:root {
+  --explore-window-width: min(88vw, 760px);
+  --explore-window-height: clamp(50dvh, calc(88vw * 1.618), 72dvh);
+}
+
+.exploration-window[data-window-theme] {
+  --window-accent: #397e71;
+  --window-soft: #e4f1e6;
+  --window-art: url('/assets/light-anime/exploration-windows-v1/map.png');
+  --window-heading-art-width: calc(min(var(--explore-window-width), calc(100vw - 24px)) * .95);
+  --window-title-offset: -3px;
+}
+.exploration-window[data-window-theme]:not(.region-map-drawer) { position: relative; }
+.exploration-window[data-window-theme='auto'] {
+  --window-accent: #476d9a; --window-soft: #e8eff8;
+  --window-art: url('/assets/light-anime/exploration-windows-v1/auto.png');
+  --window-title-offset: -2px;
+}
+.exploration-window[data-window-theme='tasks'] {
+  --window-accent: #976b2e; --window-soft: #fbefd6;
+  --window-art: url('/assets/light-anime/exploration-windows-v1/tasks.png');
+  --window-title-offset: 1px;
+}
+.exploration-window[data-window-theme='warrants'] {
+  --window-accent: #ab5e53; --window-soft: #fae9df;
+  --window-art: url('/assets/light-anime/exploration-windows-v1/warrants.png');
+  --window-title-offset: -3px;
+}
+.exploration-window[data-window-theme='footprints'] {
+  --window-accent: #398577; --window-soft: #e2f2eb;
+  --window-art: url('/assets/light-anime/exploration-windows-v1/footprints.png');
+  --window-title-offset: 1px;
+}
+.exploration-window[data-window-theme='codex'] {
+  --window-accent: #80649e; --window-soft: #f0e9f7;
+  --window-art: url('/assets/light-anime/exploration-windows-v1/codex.png');
+  --window-title-offset: -1px;
+}
+
+:is(body, .app-shell[data-visual='light-anime']) .exploration-window[data-window-theme][role='dialog'] {
+  display: flex; flex-direction: column; flex: none;
+  box-sizing: border-box; width: var(--explore-window-width);
+  height: var(--explore-window-height); min-width: 0; min-height: 0;
+  max-width: calc(100vw - 24px); max-height: 75dvh;
+  padding: 8px 10px 16px; overflow: visible;
+  color: #514839; background: linear-gradient(135deg, #fffdf5, #faf3e3);
+  border: 2px solid #bdab7f; border-image: none; border-radius: 18px;
+  outline: 1px solid #fff7df; outline-offset: -6px;
+  box-shadow: 0 0 0 1px #fff6d4aa, 0 16px 55px #293a4059, inset 0 0 0 5px var(--window-soft);
+  isolation: isolate;
+}
+:is(body, .app-shell[data-visual='light-anime']) .exploration-window[data-window-theme]::after {
+  content: ''; position: absolute; z-index: -1; left: 12px; right: 12px; bottom: 3px;
+  height: 21px; border-bottom: 1px solid var(--window-accent); border-radius: 0 0 11px 11px;
+  background: var(--window-art) center bottom / 148px 56px no-repeat;
+  opacity: .35; pointer-events: none;
+}
+:is(body, .app-shell[data-visual='light-anime']) .exploration-window[data-window-theme] > .exploration-window-heading {
+  position: relative; z-index: 1; display: flex; align-items: center; justify-content: center;
+  flex: 0 0 76px; box-sizing: border-box; min-width: 0;
+  width: 100%; margin: 0; padding: 10px 37px 12px;
+  background: none;
+  border: 0; border-bottom: 1px solid #c6b38788;
+  text-align: center;
+}
+/* Scale the full PNG without changing the heading height or its divider. */
+.exploration-window[data-window-theme] > .exploration-window-heading::before {
+  content: ''; position: absolute; z-index: -1; left: 50%; top: 50%;
+  width: var(--window-heading-art-width); aspect-ratio: 8 / 3;
+  background: var(--window-art) center / contain no-repeat;
+  transform: translate(-50%, -50%); pointer-events: none;
+}
+.exploration-window[data-window-theme] .exploration-window-heading :is(h2, h3) {
+  display: flex; align-items: center; justify-content: center; gap: 5px;
+  margin: 0; color: #514839; font-family: KaiTi, STKaiti, serif;
+  font-size: clamp(19px, 5vw, 24px); line-height: 1.3;
+  text-shadow: 0 1px #fff; overflow-wrap: anywhere;
+}
+.exploration-window[data-window-theme] .exploration-window-heading :is(.drawer-kicker, .manual-heading-group p, .handbook-heading p) {
+  margin: 0 0 3px; color: var(--window-accent); font-size: 10px; letter-spacing: .12em;
+}
+.exploration-window[data-window-theme] .exploration-window-heading :is(.manual-heading-group, .handbook-heading) {
+  justify-content: center; min-width: 0; padding: 0; background: none; border: 0; border-image: none;
+}
+:is(body, .app-shell[data-visual='light-anime']) .exploration-window[data-window-theme] > .exploration-window-heading .exploration-window-kicker {
+  display: block; margin: 0; line-height: 1;
+}
+:is(body, .app-shell[data-visual='light-anime']) .exploration-window[data-window-theme] > .exploration-window-heading :is(h2, h3) {
+  margin: 0; line-height: 1;
+}
+:is(body, .app-shell[data-visual='light-anime']) .exploration-window[data-window-theme] > .exploration-window-heading .exploration-window-kicker + h2 {
+  margin-top: -2px;
+}
+.exploration-window[data-window-theme] > .exploration-window-heading:has(.exploration-window-kicker) > div {
+  transform: translateY(var(--window-title-offset));
+}
+.exploration-window[data-window-theme] .exploration-window-heading :is(.heading-copy, .manual-heading-group > div, .auto-battle-heading > div, .drawer-header > div) {
+  display: grid; justify-items: center; gap: 0;
+}
+.app-shell .exploration-auto-layer .exploration-window .auto-battle-heading .exploration-window-kicker {
+  color: var(--window-accent); font-size: 10px; letter-spacing: .12em;
+}
+.exploration-window[data-window-theme] .exploration-window-heading :is(.manual-mark, .handbook-mark, h2 > .anime-icon, h2 > .social-glyph) { display: none; }
+:is(body, .app-shell[data-visual='light-anime']) :is(.exploration-window[data-window-theme][role='dialog'], .region-target-chooser[role='dialog']) > .exploration-window-close {
+  position: absolute; z-index: 3; top: -2px; right: -2px; display: grid; place-items: center;
+  flex: none; box-sizing: border-box; width: 36px; height: 36px; min-width: 36px; min-height: 36px;
+  margin: 0; padding: 0; border: 2px solid #fff7ef; border-image: none;
+  border-radius: 10px; color: #fff; background: #d94b48;
+  transform: translate(50%, -50%); box-shadow: 0 3px 8px #78352f40;
+  cursor: pointer; touch-action: manipulation;
+}
+:is(body, .app-shell[data-visual='light-anime']) .exploration-window-close:hover { filter: brightness(.94); }
+:is(body, .app-shell[data-visual='light-anime']) .exploration-window-close:disabled { cursor: not-allowed; opacity: .6; }
+:is(body, .app-shell[data-visual='light-anime']) .exploration-window .exploration-window-close:focus-visible {
+  outline: 2px solid #fff; outline-offset: -5px;
+}
+.exploration-window-close > .exploration-close-mark { position: relative; display: block; width: 18px; height: 18px; pointer-events: none; }
+.exploration-close-mark::before, .exploration-close-mark::after {
+  content: ''; position: absolute; top: 50%; left: 50%; width: 19px; height: 3px;
+  border-radius: 2px; background: #fff; transform: translate(-50%, -50%) rotate(45deg);
+}
+.exploration-close-mark::after { transform: translate(-50%, -50%) rotate(-45deg); }
+.region-map-drawer.exploration-window:has(.travel-confirm-wrap) > .exploration-window-close { visibility: hidden; }
+.region-map-drawer.exploration-region.exploration-window .region-target-chooser {
+  overflow: visible;
+}
+.region-map-drawer.exploration-region.exploration-window .region-target-chooser[role='dialog'] > .exploration-window-close {
+  top: -12px; right: -12px;
+}
+.region-map-drawer.exploration-region.exploration-window .region-target-choices {
+  max-height: 44dvh; overflow-y: auto; overscroll-behavior: contain;
+}
+:is(body, .app-shell[data-visual='light-anime']) .exploration-window[data-window-theme] :is(.drawer-content, .manual-body, .handbook-body, .auto-battle-dialog-body, .exploration-window-body) {
+  flex: 1 1 0; min-width: 0; min-height: 0; overflow-x: hidden; overflow-y: auto;
+  padding: 12px 2px 8px; overscroll-behavior: contain; scrollbar-width: thin;
+  scrollbar-color: #c7b793 transparent; scrollbar-gutter: stable;
+}
+.exploration-window[data-window-theme] :is(.manual-categories, .region-tabs) {
+  flex: none; gap: 5px; margin: 0; padding: 8px 0; border-bottom: 1px solid #d5c6a4;
+}
+.exploration-window.exploration-window[data-window-theme] :is(.manual-categories > button, .region-tab) {
+  min-width: 0; min-height: 36px; padding: 6px 8px; color: #776a54;
+  border: 1px solid #d2c5a6; border-image: none; border-radius: 8px;
+  background: #fffcf5; font-size: 12px; box-shadow: none;
+}
+.exploration-window[data-window-theme] .manual-categories > button { flex: 1; }
+.exploration-window.exploration-window[data-window-theme] :is(.manual-categories > button.active, .region-tab.active) {
+  color: var(--window-accent); background: var(--window-soft); border-color: var(--window-accent); font-weight: 800;
+}
+.exploration-window[data-window-theme] :is(button, input, select):focus-visible {
+  outline: 2px solid var(--window-accent); outline-offset: 2px;
+}
+.manual-backdrop:has(.exploration-window), .handbook-backdrop:has(.exploration-window),
+.app-shell .exploration-auto-layer, .region-map-sidebar-shell:has(.exploration-window) .region-map-backdrop {
+  background: #263b4663; backdrop-filter: blur(4px);
+}
+
+/* A small map sits above the destination list instead of forcing a tall drawer. */
+.region-map-drawer.exploration-region.exploration-window .drawer-content { display: block; }
+.region-map-drawer.exploration-region.exploration-window .region-map-card {
+  margin: 0 0 12px; padding: 8px; border: 1px solid #d6c6a3; border-image: none;
+  border-radius: 11px; background: #fffdf3;
+}
+.region-map-drawer.exploration-region.exploration-window .region-mini-map {
+  width: 100%; height: auto; min-height: 0; aspect-ratio: 1.28; border-radius: 8px;
+}
+.region-map-drawer.exploration-region.exploration-window .drawer-section {
+  margin: 10px 0 0; padding: 9px; border: 1px solid #d6c6a3; border-image: none;
+  border-radius: 10px; background: #fffdf5;
+}
+.region-map-drawer.exploration-region.exploration-window .destination-row { min-height: 48px; }
+.region-map-drawer.exploration-region.exploration-window .region-tab { flex: 0 0 95px; }
+.region-map-drawer.exploration-region.exploration-window .region-tab-terrain { flex: 0 0 24px; width: 24px; height: 24px; }
+.region-map-drawer.exploration-region.exploration-window .region-tab-copy { min-width: 0; }
+.region-map-drawer.exploration-region.exploration-window .region-tab.active .region-tab-copy small { color: #557564; }
+
+/* Automatic battle keeps its mode and status separate from the scrollable setup. */
+.app-shell .exploration-auto-layer .exploration-window .auto-battle-heading { display: grid; justify-items: center; gap: 4px; margin: 0; padding: 0; border: 0; }
+.app-shell .exploration-window .auto-battle-heading h2 { font-size: 20px; }
+.app-shell .exploration-auto-layer .exploration-window .auto-battle-state { padding: 1px 8px; border: 0; border-radius: 20px; background: var(--window-soft); font-size: 10px; color: var(--window-accent); }
+.app-shell .exploration-window .auto-battle-content { gap: 12px; }
+.app-shell .exploration-window :is(.auto-battle-mode-tabs, .auto-battle-default-actions) { gap: 6px; }
+.app-shell .exploration-window :is(.auto-battle-mode-tabs button, .auto-battle-default-actions button, .toggle-button) {
+  min-height: 38px; padding: 5px 8px; border: 1px solid #c4cddd; border-image: none;
+  border-radius: 9px; color: #556a81; background: #fffcf5; font-size: 12px;
+}
+.app-shell .exploration-window :is(.auto-battle-mode-tabs button.active, .auto-battle-default-actions button.active, .toggle-button.active) {
+  color: #375c8a; background: #e5eef9; border-color: #829ebf;
+}
+.app-shell .exploration-window :is(.auto-battle-switches, .auto-battle-default, .auto-battle-potion-grid > label, .auto-battle-actions) {
+  min-width: 0; padding: 10px; border: 1px solid #ddd0b0; border-image: none;
+  border-radius: 11px; background: #fffdf5; box-shadow: none;
+}
+.app-shell .exploration-window .auto-battle-toggle-row { gap: 6px; }
+.app-shell .exploration-window .auto-battle-toggle-row > :is(.anime-icon, .explore-potion-glyph) { width: 24px; height: 24px; flex: 0 0 24px; }
+.app-shell .exploration-window .auto-battle-toggle-row strong { font-size: 12px; }
+.app-shell .exploration-window .auto-battle-toggle-row small { font-size: 10px; }
+.app-shell .exploration-window .auto-battle-potion-grid { grid-template-columns: 1fr; gap: 9px; }
+.app-shell .exploration-window .auto-battle-default { display: grid; gap: 8px; }
+.app-shell .exploration-window .auto-battle-action-row { grid-template-columns: 21px 28px minmax(0, 1fr) auto; gap: 5px; }
+.app-shell .exploration-window .auto-battle-action-row select { min-width: 0; font-size: 12px; }
+.app-shell .exploration-window .auto-battle-actions-heading { align-items: start; flex-direction: column; gap: 3px; }
+.app-shell .exploration-window .auto-battle-action-row .ghost-button { min-width: 30px; padding: 4px; }
+.app-shell .exploration-window .auto-battle-action-row .ghost-button > span { display: none; }
+.manual-backdrop .manual-dialog.exploration-window .manual-message {
+  padding: 12px; border: 1px solid #dfd1b3; border-image: none; border-radius: 10px; background: #fffdf7;
+}
+.manual-backdrop .exploration-window .manual-text { font-size: 13px; line-height: 1.8; }
+.manual-backdrop .exploration-window .manual-actions button { min-height: 40px; }
+
+/* Map target details use the same window without changing map entry controls. */
+.world-map-panel.anime-adventure.exploration-canvas.exploration-map .map-point-sheet-wrapper {
+  top: 50%; bottom: auto; width: var(--explore-window-width); transform: translate(-50%, -50%);
+}
+.world-map-panel.anime-adventure.exploration-canvas.exploration-map .map-point-dialog.exploration-window {
+  pointer-events: auto; text-align: left;
+}
+.app-shell .exploration-nearby-layer .exploration-window .exploration-window-heading p { margin: 3px 0 0; font-size: 10px; }
+.app-shell .exploration-nearby-layer .exploration-window .exploration-window-heading h3 { font-size: 18px; }
+
+@media (min-width: 600px) {
+  .exploration-window[data-window-theme] { --window-heading-art-width: 344px; }
+}
+@media (min-width: 760px) {
+  :root { --explore-window-height: clamp(50dvh, calc(min(88vw, 760px) / 1.618), 72dvh); }
+  .region-map-drawer.exploration-region.exploration-window .drawer-content { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 12px; align-content: start; }
+  .region-map-drawer.exploration-region.exploration-window .region-map-card { grid-row: span 3; margin: 0; }
+  .region-map-drawer.exploration-region.exploration-window .drawer-section { margin: 0; }
+  .app-shell .exploration-window .auto-battle-potion-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 360px) {
+  :is(body, .app-shell[data-visual='light-anime']) .exploration-window[data-window-theme][role='dialog'] { padding-inline: 7px; }
+}
+@media (max-height: 600px) {
+  :is(body, .app-shell[data-visual='light-anime']) .exploration-window[data-window-theme] > .exploration-window-heading { flex-basis: 60px; min-height: 0; padding-block: 4px; }
+}
+@media (orientation: landscape) and (max-height: 500px) {
+  :root { --explore-window-width: min(88vw, 680px); --explore-window-height: 74dvh; }
+}

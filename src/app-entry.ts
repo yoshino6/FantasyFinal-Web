@@ -4,6 +4,7 @@ import './styles.css';
 import './anime-theme.css';
 import './anime-character-inventory.css';
 import './anime-auth.css';
+import './player-loading.css';
 import './anime-character-growth.css';
 import './anime-main-scenes.css';
 import './anime-viewport-layout.css';
@@ -19,6 +20,8 @@ import './game-ui-inputs.css';
 import './game-ui-feedback.css';
 import './equipment-layout.css';
 import './item-rarity.css';
+import './exploration-handbook.css';
+import './exploration-windows.css';
 
 /** Keep the loading UI responsive while Vite/network prepares the game bundle. */
 export function mountApp(): void {

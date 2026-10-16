@@ -1,0 +1,821 @@
+{
+  "version": 1,
+  "entries": {
+    "ACH_BOSS_6eb7ffdc85b2dc": {
+      "targetKey": "monster_rootcrown_ram",
+      "difficulty": "ordinary"
+    },
+    "ACH_BOSS_dbbca08a5d861a": {
+      "targetKey": "monster_rootcrown_ram",
+      "difficulty": "powerful"
+    },
+    "ACH_BOSS_09bf89716bfa2b": {
+      "targetKey": "monster_rootcrown_ram",
+      "difficulty": "heroic"
+    },
+    "ACH_BOSS_b71217f995edc4": {
+      "targetKey": "monster_rootcrown_ram",
+      "difficulty": "infernal"
+    },
+    "ACH_BOSS_6afed34955130d": {
+      "targetKey": "monster_rootcrown_ram",
+      "difficulty": "abyssal"
+    },
+    "ACH_BOSS_5fd0328d59a666": {
+      "targetKey": "monster_rootcrown_ram",
+      "difficulty": "crimson"
+    },
+    "ACH_BOSS_351ca4bbb0b70d": {
+      "targetKey": "monster_rootcrown_ram",
+      "difficulty": "corrupted"
+    },
+    "ACH_BOSS_c708f8156ddcbf": {
+      "targetKey": "monster_rootcrown_ram",
+      "difficulty": "holy"
+    },
+    "ACH_BOSS_bad0dddd659631": {
+      "targetKey": "monster_rootcrown_ram",
+      "difficulty": "golden"
+    },
+    "ACH_BOSS_94dcc1c987de96": {
+      "targetKey": "monster_rootcrown_ram",
+      "difficulty": "brilliant"
+    },
+    "ACH_BOSS_943e9930ae15b7": {
+      "targetKey": "monster_rootcrown_ram",
+      "difficulty": "dreamlike"
+    },
+    "ACH_BOSS_e06a79d9b3d604": {
+      "targetKey": "monster_rootcrown_ram",
+      "difficulty": "fixed"
+    },
+    "ACH_BOSS_211a93c29c10e0": {
+      "targetKey": "monster_forest_slime",
+      "difficulty": "ordinary"
+    },
+    "ACH_BOSS_8ee313e8b006a1": {
+      "targetKey": "monster_forest_slime",
+      "difficulty": "powerful"
+    },
+    "ACH_BOSS_743ad75cf031e3": {
+      "targetKey": "monster_forest_slime",
+      "difficulty": "heroic"
+    },
+    "ACH_BOSS_29411f3e6e5cbf": {
+      "targetKey": "monster_forest_slime",
+      "difficulty": "infernal"
+    },
+    "ACH_BOSS_c04dc021877e37": {
+      "targetKey": "monster_forest_slime",
+      "difficulty": "abyssal"
+    },
+    "ACH_BOSS_dc61c2d04fca07": {
+      "targetKey": "monster_forest_slime",
+      "difficulty": "crimson"
+    },
+    "ACH_BOSS_88de3b8b917ae9": {
+      "targetKey": "monster_forest_slime",
+      "difficulty": "corrupted"
+    },
+    "ACH_BOSS_fb61e0f5c309a0": {
+      "targetKey": "monster_forest_slime",
+      "difficulty": "holy"
+    },
+    "ACH_BOSS_aab0aa0d815e26": {
+      "targetKey": "monster_forest_slime",
+      "difficulty": "golden"
+    },
+    "ACH_BOSS_379b1eb5dc655b": {
+      "targetKey": "monster_forest_slime",
+      "difficulty": "brilliant"
+    },
+    "ACH_BOSS_bbe2c9c138f2c5": {
+      "targetKey": "monster_forest_slime",
+      "difficulty": "dreamlike"
+    },
+    "ACH_BOSS_4254d316d3ee05": {
+      "targetKey": "monster_forest_slime",
+      "difficulty": "fixed"
+    },
+    "ACH_BOSS_36c12245fcc103": {
+      "targetKey": "monster_black_slime",
+      "difficulty": "ordinary"
+    },
+    "ACH_BOSS_b8149d7e5040e1": {
+      "targetKey": "monster_black_slime",
+      "difficulty": "powerful"
+    },
+    "ACH_BOSS_a0b79c85c35109": {
+      "targetKey": "monster_black_slime",
+      "difficulty": "heroic"
+    },
+    "ACH_BOSS_afabdf3b5e2f0a": {
+      "targetKey": "monster_black_slime",
+      "difficulty": "infernal"
+    },
+    "ACH_BOSS_d1f7f702f67fb4": {
+      "targetKey": "monster_black_slime",
+      "difficulty": "abyssal"
+    },
+    "ACH_BOSS_fac99d4407255b": {
+      "targetKey": "monster_black_slime",
+      "difficulty": "crimson"
+    },
+    "ACH_BOSS_ca6baa8259a5dc": {
+      "targetKey": "monster_black_slime",
+      "difficulty": "corrupted"
+    },
+    "ACH_BOSS_233756892232f8": {
+      "targetKey": "monster_black_slime",
+      "difficulty": "holy"
+    },
+    "ACH_BOSS_a7c4713070709e": {
+      "targetKey": "monster_black_slime",
+      "difficulty": "golden"
+    },
+    "ACH_BOSS_a2c747dd2e17ab": {
+      "targetKey": "monster_black_slime",
+      "difficulty": "brilliant"
+    },
+    "ACH_BOSS_2743b276b0afb2": {
+      "targetKey": "monster_black_slime",
+      "difficulty": "dreamlike"
+    },
+    "ACH_BOSS_7394adc8090a7c": {
+      "targetKey": "monster_black_slime",
+      "difficulty": "fixed"
+    },
+    "ACH_BOSS_27d0c8273257dd": {
+      "targetKey": "monster_dawntide_crocodile",
+      "difficulty": "ordinary"
+    },
+    "ACH_BOSS_9759b4c0ab7849": {
+      "targetKey": "monster_dawntide_crocodile",
+      "difficulty": "powerful"
+    },
+    "ACH_BOSS_9ba316354971d4": {
+      "targetKey": "monster_dawntide_crocodile",
+      "difficulty": "heroic"
+    },
+    "ACH_BOSS_e5d61da176a487": {
+      "targetKey": "monster_dawntide_crocodile",
+      "difficulty": "infernal"
+    },
+    "ACH_BOSS_6f07cfd44244ed": {
+      "targetKey": "monster_dawntide_crocodile",
+      "difficulty": "abyssal"
+    },
+    "ACH_BOSS_c9b0391c513ecd": {
+      "targetKey": "monster_dawntide_crocodile",
+      "difficulty": "crimson"
+    },
+    "ACH_BOSS_6ca2f3ce1075cf": {
+      "targetKey": "monster_dawntide_crocodile",
+      "difficulty": "corrupted"
+    },
+    "ACH_BOSS_f3a529d408b2cf": {
+      "targetKey": "monster_dawntide_crocodile",
+      "difficulty": "holy"
+    },
+    "ACH_BOSS_ae18a8212b24c6": {
+      "targetKey": "monster_dawntide_crocodile",
+      "difficulty": "golden"
+    },
+    "ACH_BOSS_2a7df151d516d4": {
+      "targetKey": "monster_dawntide_crocodile",
+      "difficulty": "brilliant"
+    },
+    "ACH_BOSS_c18122528914df": {
+      "targetKey": "monster_dawntide_crocodile",
+      "difficulty": "dreamlike"
+    },
+    "ACH_BOSS_c6ccdfd8de332f": {
+      "targetKey": "monster_dawntide_crocodile",
+      "difficulty": "fixed"
+    },
+    "ACH_BOSS_7e5cc53920d344": {
+      "targetKey": "monster_shadow_wolf_king",
+      "difficulty": "ordinary"
+    },
+    "ACH_BOSS_b25234b825436f": {
+      "targetKey": "monster_shadow_wolf_king",
+      "difficulty": "powerful"
+    },
+    "ACH_BOSS_141ce931b766e5": {
+      "targetKey": "monster_shadow_wolf_king",
+      "difficulty": "heroic"
+    },
+    "ACH_BOSS_ae79e1fe877d11": {
+      "targetKey": "monster_shadow_wolf_king",
+      "difficulty": "infernal"
+    },
+    "ACH_BOSS_76315d999ca79c": {
+      "targetKey": "monster_shadow_wolf_king",
+      "difficulty": "abyssal"
+    },
+    "ACH_BOSS_e9db55ba9c567c": {
+      "targetKey": "monster_shadow_wolf_king",
+      "difficulty": "crimson"
+    },
+    "ACH_BOSS_011560c750a9f8": {
+      "targetKey": "monster_shadow_wolf_king",
+      "difficulty": "corrupted"
+    },
+    "ACH_BOSS_c79aae83a69fdd": {
+      "targetKey": "monster_shadow_wolf_king",
+      "difficulty": "holy"
+    },
+    "ACH_BOSS_a9d78ed863fd8d": {
+      "targetKey": "monster_shadow_wolf_king",
+      "difficulty": "golden"
+    },
+    "ACH_BOSS_1116124fdc46d0": {
+      "targetKey": "monster_shadow_wolf_king",
+      "difficulty": "brilliant"
+    },
+    "ACH_BOSS_b9ffe0a0534c9d": {
+      "targetKey": "monster_shadow_wolf_king",
+      "difficulty": "dreamlike"
+    },
+    "ACH_BOSS_ded3611cf5ecc9": {
+      "targetKey": "monster_shadow_wolf_king",
+      "difficulty": "fixed"
+    },
+    "ACH_BOSS_13bd68efc584bc": {
+      "targetKey": "monster_shattertide_crab",
+      "difficulty": "ordinary"
+    },
+    "ACH_BOSS_eb3e729b269503": {
+      "targetKey": "monster_shattertide_crab",
+      "difficulty": "powerful"
+    },
+    "ACH_BOSS_b9ab166df7d6a1": {
+      "targetKey": "monster_shattertide_crab",
+      "difficulty": "heroic"
+    },
+    "ACH_BOSS_abec9410c24886": {
+      "targetKey": "monster_shattertide_crab",
+      "difficulty": "infernal"
+    },
+    "ACH_BOSS_c15cb3dd8cb9f9": {
+      "targetKey": "monster_shattertide_crab",
+      "difficulty": "abyssal"
+    },
+    "ACH_BOSS_f0974037501137": {
+      "targetKey": "monster_shattertide_crab",
+      "difficulty": "crimson"
+    },
+    "ACH_BOSS_72e86cd684d61e": {
+      "targetKey": "monster_shattertide_crab",
+      "difficulty": "corrupted"
+    },
+    "ACH_BOSS_342136d4852f77": {
+      "targetKey": "monster_shattertide_crab",
+      "difficulty": "holy"
+    },
+    "ACH_BOSS_6cf5bea7990a6c": {
+      "targetKey": "monster_shattertide_crab",
+      "difficulty": "golden"
+    },
+    "ACH_BOSS_5f41d87b3b33ed": {
+      "targetKey": "monster_shattertide_crab",
+      "difficulty": "brilliant"
+    },
+    "ACH_BOSS_213fdb304f9a11": {
+      "targetKey": "monster_shattertide_crab",
+      "difficulty": "dreamlike"
+    },
+    "ACH_BOSS_64ad02f30ac692": {
+      "targetKey": "monster_shattertide_crab",
+      "difficulty": "fixed"
+    },
+    "ACH_BOSS_656a51a0323118": {
+      "targetKey": "monster_death_knight",
+      "difficulty": "ordinary"
+    },
+    "ACH_BOSS_fc59b7188c0116": {
+      "targetKey": "monster_death_knight",
+      "difficulty": "powerful"
+    },
+    "ACH_BOSS_e2bc6d42ed2ed4": {
+      "targetKey": "monster_death_knight",
+      "difficulty": "heroic"
+    },
+    "ACH_BOSS_7fcfe0e534dd95": {
+      "targetKey": "monster_death_knight",
+      "difficulty": "infernal"
+    },
+    "ACH_BOSS_95e9335cb2aba0": {
+      "targetKey": "monster_death_knight",
+      "difficulty": "abyssal"
+    },
+    "ACH_BOSS_f54c06ae6a0922": {
+      "targetKey": "monster_death_knight",
+      "difficulty": "crimson"
+    },
+    "ACH_BOSS_2bf86e2f2d0676": {
+      "targetKey": "monster_death_knight",
+      "difficulty": "corrupted"
+    },
+    "ACH_BOSS_d9a1380b881284": {
+      "targetKey": "monster_death_knight",
+      "difficulty": "holy"
+    },
+    "ACH_BOSS_e3bf3042dc6b85": {
+      "targetKey": "monster_death_knight",
+      "difficulty": "golden"
+    },
+    "ACH_BOSS_36102c5d942bf9": {
+      "targetKey": "monster_death_knight",
+      "difficulty": "brilliant"
+    },
+    "ACH_BOSS_437b33438ffd85": {
+      "targetKey": "monster_death_knight",
+      "difficulty": "dreamlike"
+    },
+    "ACH_BOSS_5672d0150969cb": {
+      "targetKey": "monster_death_knight",
+      "difficulty": "fixed"
+    },
+    "ACH_BOSS_0a5f458c3915d7": {
+      "targetKey": "monster_skeleton_general",
+      "difficulty": "ordinary"
+    },
+    "ACH_BOSS_597ee50ba85fb1": {
+      "targetKey": "monster_skeleton_general",
+      "difficulty": "powerful"
+    },
+    "ACH_BOSS_bc5329228d5cd9": {
+      "targetKey": "monster_skeleton_general",
+      "difficulty": "heroic"
+    },
+    "ACH_BOSS_e2f4860addd9e2": {
+      "targetKey": "monster_skeleton_general",
+      "difficulty": "infernal"
+    },
+    "ACH_BOSS_18200033bc21ec": {
+      "targetKey": "monster_skeleton_general",
+      "difficulty": "abyssal"
+    },
+    "ACH_BOSS_8e99a14fb31720": {
+      "targetKey": "monster_skeleton_general",
+      "difficulty": "crimson"
+    },
+    "ACH_BOSS_4d0eac41498d28": {
+      "targetKey": "monster_skeleton_general",
+      "difficulty": "corrupted"
+    },
+    "ACH_BOSS_78f09416ab0be8": {
+      "targetKey": "monster_skeleton_general",
+      "difficulty": "holy"
+    },
+    "ACH_BOSS_fa2faa1c9fe60b": {
+      "targetKey": "monster_skeleton_general",
+      "difficulty": "golden"
+    },
+    "ACH_BOSS_907a8ac77de5e0": {
+      "targetKey": "monster_skeleton_general",
+      "difficulty": "brilliant"
+    },
+    "ACH_BOSS_60f32287c4ae80": {
+      "targetKey": "monster_skeleton_general",
+      "difficulty": "dreamlike"
+    },
+    "ACH_BOSS_40f9f9062e2c7e": {
+      "targetKey": "monster_skeleton_general",
+      "difficulty": "fixed"
+    },
+    "ACH_BOSS_703b42ee20c95b": {
+      "targetKey": "monster_goblin_king",
+      "difficulty": "ordinary"
+    },
+    "ACH_BOSS_1b22775957358e": {
+      "targetKey": "monster_goblin_king",
+      "difficulty": "powerful"
+    },
+    "ACH_BOSS_02a0caca2a0da1": {
+      "targetKey": "monster_goblin_king",
+      "difficulty": "heroic"
+    },
+    "ACH_BOSS_04ccf9e9b1a719": {
+      "targetKey": "monster_goblin_king",
+      "difficulty": "infernal"
+    },
+    "ACH_BOSS_7611dec51e1cd0": {
+      "targetKey": "monster_goblin_king",
+      "difficulty": "abyssal"
+    },
+    "ACH_BOSS_ddb797dc7f5415": {
+      "targetKey": "monster_goblin_king",
+      "difficulty": "crimson"
+    },
+    "ACH_BOSS_f6e8b0d3e9fa62": {
+      "targetKey": "monster_goblin_king",
+      "difficulty": "corrupted"
+    },
+    "ACH_BOSS_6a234e1960d675": {
+      "targetKey": "monster_goblin_king",
+      "difficulty": "holy"
+    },
+    "ACH_BOSS_4ad19d964dc3ed": {
+      "targetKey": "monster_goblin_king",
+      "difficulty": "golden"
+    },
+    "ACH_BOSS_e53e6991a9eeee": {
+      "targetKey": "monster_goblin_king",
+      "difficulty": "brilliant"
+    },
+    "ACH_BOSS_6ddfc825054ffa": {
+      "targetKey": "monster_goblin_king",
+      "difficulty": "dreamlike"
+    },
+    "ACH_BOSS_1198d554d8271a": {
+      "targetKey": "monster_goblin_king",
+      "difficulty": "fixed"
+    },
+    "ACH_BOSS_8f401758c1e459": {
+      "targetKey": "monster_gruen_mountainheart",
+      "difficulty": "ordinary"
+    },
+    "ACH_BOSS_f5e2e666d56a34": {
+      "targetKey": "monster_gruen_mountainheart",
+      "difficulty": "powerful"
+    },
+    "ACH_BOSS_18cf6c2a4b357c": {
+      "targetKey": "monster_gruen_mountainheart",
+      "difficulty": "heroic"
+    },
+    "ACH_BOSS_2f8fcfc89eb14c": {
+      "targetKey": "monster_gruen_mountainheart",
+      "difficulty": "infernal"
+    },
+    "ACH_BOSS_53f33a8359b57d": {
+      "targetKey": "monster_gruen_mountainheart",
+      "difficulty": "abyssal"
+    },
+    "ACH_BOSS_98907edc27c569": {
+      "targetKey": "monster_gruen_mountainheart",
+      "difficulty": "crimson"
+    },
+    "ACH_BOSS_19385750d6c939": {
+      "targetKey": "monster_gruen_mountainheart",
+      "difficulty": "corrupted"
+    },
+    "ACH_BOSS_7f720c6008d1b7": {
+      "targetKey": "monster_gruen_mountainheart",
+      "difficulty": "holy"
+    },
+    "ACH_BOSS_835db0d4a33822": {
+      "targetKey": "monster_gruen_mountainheart",
+      "difficulty": "golden"
+    },
+    "ACH_BOSS_009009707e64f3": {
+      "targetKey": "monster_gruen_mountainheart",
+      "difficulty": "brilliant"
+    },
+    "ACH_BOSS_67ccc8e6acd2f9": {
+      "targetKey": "monster_gruen_mountainheart",
+      "difficulty": "dreamlike"
+    },
+    "ACH_BOSS_30e613511a1f06": {
+      "targetKey": "monster_gruen_mountainheart",
+      "difficulty": "fixed"
+    },
+    "ACH_BOSS_85ad268b4cc7b8": {
+      "targetKey": "monster_necromancer_uz",
+      "difficulty": "ordinary"
+    },
+    "ACH_BOSS_3e50cc7f06eb4e": {
+      "targetKey": "monster_necromancer_uz",
+      "difficulty": "powerful"
+    },
+    "ACH_BOSS_96b4be13ec3047": {
+      "targetKey": "monster_necromancer_uz",
+      "difficulty": "heroic"
+    },
+    "ACH_BOSS_007198a5b6dea4": {
+      "targetKey": "monster_necromancer_uz",
+      "difficulty": "infernal"
+    },
+    "ACH_BOSS_dd1b63703b76b4": {
+      "targetKey": "monster_necromancer_uz",
+      "difficulty": "abyssal"
+    },
+    "ACH_BOSS_734e0a535ee655": {
+      "targetKey": "monster_necromancer_uz",
+      "difficulty": "crimson"
+    },
+    "ACH_BOSS_f8a4bddacfd24c": {
+      "targetKey": "monster_necromancer_uz",
+      "difficulty": "corrupted"
+    },
+    "ACH_BOSS_dc0605180ec8f6": {
+      "targetKey": "monster_necromancer_uz",
+      "difficulty": "holy"
+    },
+    "ACH_BOSS_2330044ec1b2fc": {
+      "targetKey": "monster_necromancer_uz",
+      "difficulty": "golden"
+    },
+    "ACH_BOSS_32ae4d8d465fe8": {
+      "targetKey": "monster_necromancer_uz",
+      "difficulty": "brilliant"
+    },
+    "ACH_BOSS_481549e6ee5a59": {
+      "targetKey": "monster_necromancer_uz",
+      "difficulty": "dreamlike"
+    },
+    "ACH_BOSS_fe3faaa2826fe3": {
+      "targetKey": "monster_necromancer_uz",
+      "difficulty": "fixed"
+    },
+    "ACH_BOSS_d68b9040e510ec": {
+      "targetKey": "monster_threehead_mother",
+      "difficulty": "ordinary"
+    },
+    "ACH_BOSS_7bcb1db139f93c": {
+      "targetKey": "monster_threehead_mother",
+      "difficulty": "powerful"
+    },
+    "ACH_BOSS_ceac8c79c9bd6a": {
+      "targetKey": "monster_threehead_mother",
+      "difficulty": "heroic"
+    },
+    "ACH_BOSS_01702fccebea82": {
+      "targetKey": "monster_threehead_mother",
+      "difficulty": "infernal"
+    },
+    "ACH_BOSS_19f4229ff6ba63": {
+      "targetKey": "monster_threehead_mother",
+      "difficulty": "abyssal"
+    },
+    "ACH_BOSS_428add0c00b9b2": {
+      "targetKey": "monster_threehead_mother",
+      "difficulty": "crimson"
+    },
+    "ACH_BOSS_9fb474b41e9762": {
+      "targetKey": "monster_threehead_mother",
+      "difficulty": "corrupted"
+    },
+    "ACH_BOSS_fca464b27ad0c5": {
+      "targetKey": "monster_threehead_mother",
+      "difficulty": "holy"
+    },
+    "ACH_BOSS_0438cc1f64f8cf": {
+      "targetKey": "monster_threehead_mother",
+      "difficulty": "golden"
+    },
+    "ACH_BOSS_e71cafbc3ad392": {
+      "targetKey": "monster_threehead_mother",
+      "difficulty": "brilliant"
+    },
+    "ACH_BOSS_782ce534f01a4b": {
+      "targetKey": "monster_threehead_mother",
+      "difficulty": "dreamlike"
+    },
+    "ACH_BOSS_46925737f84b37": {
+      "targetKey": "monster_threehead_mother",
+      "difficulty": "fixed"
+    },
+    "ACH_BOSS_4aaff92ee767eb": {
+      "targetKey": "monster_valk_forge_overseer",
+      "difficulty": "ordinary"
+    },
+    "ACH_BOSS_1d309295c4cbab": {
+      "targetKey": "monster_valk_forge_overseer",
+      "difficulty": "powerful"
+    },
+    "ACH_BOSS_b9243b56d3af66": {
+      "targetKey": "monster_valk_forge_overseer",
+      "difficulty": "heroic"
+    },
+    "ACH_BOSS_987923a8665bf1": {
+      "targetKey": "monster_valk_forge_overseer",
+      "difficulty": "infernal"
+    },
+    "ACH_BOSS_4f7511e25379d8": {
+      "targetKey": "monster_valk_forge_overseer",
+      "difficulty": "abyssal"
+    },
+    "ACH_BOSS_017dd56ae0f4b0": {
+      "targetKey": "monster_valk_forge_overseer",
+      "difficulty": "crimson"
+    },
+    "ACH_BOSS_d3f61635f8567d": {
+      "targetKey": "monster_valk_forge_overseer",
+      "difficulty": "corrupted"
+    },
+    "ACH_BOSS_13db24009dfebe": {
+      "targetKey": "monster_valk_forge_overseer",
+      "difficulty": "holy"
+    },
+    "ACH_BOSS_e5bc81891e9bda": {
+      "targetKey": "monster_valk_forge_overseer",
+      "difficulty": "golden"
+    },
+    "ACH_BOSS_ad2543b7cc0de6": {
+      "targetKey": "monster_valk_forge_overseer",
+      "difficulty": "brilliant"
+    },
+    "ACH_BOSS_dbc90cb8d38695": {
+      "targetKey": "monster_valk_forge_overseer",
+      "difficulty": "dreamlike"
+    },
+    "ACH_BOSS_8d60c5de72425b": {
+      "targetKey": "monster_valk_forge_overseer",
+      "difficulty": "fixed"
+    },
+    "ACH_BOSS_a41b893f47733e": {
+      "targetKey": "monster_fallingstar_mudid",
+      "difficulty": "ordinary"
+    },
+    "ACH_BOSS_558f60fa9bb7ed": {
+      "targetKey": "monster_fallingstar_mudid",
+      "difficulty": "powerful"
+    },
+    "ACH_BOSS_5fc52efb053a22": {
+      "targetKey": "monster_fallingstar_mudid",
+      "difficulty": "heroic"
+    },
+    "ACH_BOSS_cc74c7d95788f9": {
+      "targetKey": "monster_fallingstar_mudid",
+      "difficulty": "infernal"
+    },
+    "ACH_BOSS_1de248d076b6b6": {
+      "targetKey": "monster_fallingstar_mudid",
+      "difficulty": "abyssal"
+    },
+    "ACH_BOSS_ee3dfe72627a95": {
+      "targetKey": "monster_fallingstar_mudid",
+      "difficulty": "crimson"
+    },
+    "ACH_BOSS_2f63761c39eab5": {
+      "targetKey": "monster_fallingstar_mudid",
+      "difficulty": "corrupted"
+    },
+    "ACH_BOSS_45059a9e0f3cb3": {
+      "targetKey": "monster_fallingstar_mudid",
+      "difficulty": "holy"
+    },
+    "ACH_BOSS_089bb8cf47fad0": {
+      "targetKey": "monster_fallingstar_mudid",
+      "difficulty": "golden"
+    },
+    "ACH_BOSS_45b9b46a18533e": {
+      "targetKey": "monster_fallingstar_mudid",
+      "difficulty": "brilliant"
+    },
+    "ACH_BOSS_33ee9be55b163b": {
+      "targetKey": "monster_fallingstar_mudid",
+      "difficulty": "dreamlike"
+    },
+    "ACH_BOSS_fe862ed098ba2a": {
+      "targetKey": "monster_fallingstar_mudid",
+      "difficulty": "fixed"
+    },
+    "ACH_BOSS_bbfce414c754a7": {
+      "targetKey": "monster_frostking_whiteantler",
+      "difficulty": "ordinary"
+    },
+    "ACH_BOSS_b8e180c041b8a0": {
+      "targetKey": "monster_frostking_whiteantler",
+      "difficulty": "powerful"
+    },
+    "ACH_BOSS_836b67361bc6a7": {
+      "targetKey": "monster_frostking_whiteantler",
+      "difficulty": "heroic"
+    },
+    "ACH_BOSS_f9b47365a1a473": {
+      "targetKey": "monster_frostking_whiteantler",
+      "difficulty": "infernal"
+    },
+    "ACH_BOSS_c6ae60ef561c5e": {
+      "targetKey": "monster_frostking_whiteantler",
+      "difficulty": "abyssal"
+    },
+    "ACH_BOSS_7c6336207c299b": {
+      "targetKey": "monster_frostking_whiteantler",
+      "difficulty": "crimson"
+    },
+    "ACH_BOSS_c7ec08865c1c67": {
+      "targetKey": "monster_frostking_whiteantler",
+      "difficulty": "corrupted"
+    },
+    "ACH_BOSS_01413bc67c41dc": {
+      "targetKey": "monster_frostking_whiteantler",
+      "difficulty": "holy"
+    },
+    "ACH_BOSS_6203cd9c1efab9": {
+      "targetKey": "monster_frostking_whiteantler",
+      "difficulty": "golden"
+    },
+    "ACH_BOSS_2b80dde00c59fa": {
+      "targetKey": "monster_frostking_whiteantler",
+      "difficulty": "brilliant"
+    },
+    "ACH_BOSS_bdac184f437ee4": {
+      "targetKey": "monster_frostking_whiteantler",
+      "difficulty": "dreamlike"
+    },
+    "ACH_BOSS_f3e241c3ab0b67": {
+      "targetKey": "monster_frostking_whiteantler",
+      "difficulty": "fixed"
+    },
+    "ACH_BOSS_aa71c03a204073": {
+      "targetKey": "monster_askr_stormroc",
+      "difficulty": "ordinary"
+    },
+    "ACH_BOSS_f59e5f806c75ca": {
+      "targetKey": "monster_askr_stormroc",
+      "difficulty": "powerful"
+    },
+    "ACH_BOSS_71804a7b0ccc27": {
+      "targetKey": "monster_askr_stormroc",
+      "difficulty": "heroic"
+    },
+    "ACH_BOSS_c447c23744c4d9": {
+      "targetKey": "monster_askr_stormroc",
+      "difficulty": "infernal"
+    },
+    "ACH_BOSS_8382956124506e": {
+      "targetKey": "monster_askr_stormroc",
+      "difficulty": "abyssal"
+    },
+    "ACH_BOSS_39797cb3e1860c": {
+      "targetKey": "monster_askr_stormroc",
+      "difficulty": "crimson"
+    },
+    "ACH_BOSS_fb672dddac36b5": {
+      "targetKey": "monster_askr_stormroc",
+      "difficulty": "corrupted"
+    },
+    "ACH_BOSS_0ee8629cb90689": {
+      "targetKey": "monster_askr_stormroc",
+      "difficulty": "holy"
+    },
+    "ACH_BOSS_adeb519d3c816f": {
+      "targetKey": "monster_askr_stormroc",
+      "difficulty": "golden"
+    },
+    "ACH_BOSS_f17c7eea822cef": {
+      "targetKey": "monster_askr_stormroc",
+      "difficulty": "brilliant"
+    },
+    "ACH_BOSS_44741ddc27d46c": {
+      "targetKey": "monster_askr_stormroc",
+      "difficulty": "dreamlike"
+    },
+    "ACH_BOSS_d5df04c0975d26": {
+      "targetKey": "monster_askr_stormroc",
+      "difficulty": "fixed"
+    },
+    "ACH_BOSS_ccf4a3f33a5f01": {
+      "targetKey": "monster_seles_eclipse_watcher",
+      "difficulty": "ordinary"
+    },
+    "ACH_BOSS_f9a6ab63cb0ebf": {
+      "targetKey": "monster_seles_eclipse_watcher",
+      "difficulty": "powerful"
+    },
+    "ACH_BOSS_b5224d65135e77": {
+      "targetKey": "monster_seles_eclipse_watcher",
+      "difficulty": "heroic"
+    },
+    "ACH_BOSS_f431fd8f167cc6": {
+      "targetKey": "monster_seles_eclipse_watcher",
+      "difficulty": "infernal"
+    },
+    "ACH_BOSS_bdb361cc1d06fe": {
+      "targetKey": "monster_seles_eclipse_watcher",
+      "difficulty": "abyssal"
+    },
+    "ACH_BOSS_c77f5da65b158e": {
+      "targetKey": "monster_seles_eclipse_watcher",
+      "difficulty": "crimson"
+    },
+    "ACH_BOSS_ddc9b04dd881ec": {
+      "targetKey": "monster_seles_eclipse_watcher",
+      "difficulty": "corrupted"
+    },
+    "ACH_BOSS_7eeec0b97b3362": {
+      "targetKey": "monster_seles_eclipse_watcher",
+      "difficulty": "holy"
+    },
+    "ACH_BOSS_5e0b156fa95dc1": {
+      "targetKey": "monster_seles_eclipse_watcher",
+      "difficulty": "golden"
+    },
+    "ACH_BOSS_274b622d3a4a98": {
+      "targetKey": "monster_seles_eclipse_watcher",
+      "difficulty": "brilliant"
+    },
+    "ACH_BOSS_139d99408725a1": {
+      "targetKey": "monster_seles_eclipse_watcher",
+      "difficulty": "dreamlike"
+    },
+    "ACH_BOSS_0ada3f0b66bdab": {
+      "targetKey": "monster_seles_eclipse_watcher",
+      "difficulty": "fixed"
+    }
+  }
+}

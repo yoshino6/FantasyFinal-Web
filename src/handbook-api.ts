@@ -33,16 +33,16 @@ export const achievementRewards = () => get<AchievementRewards>('/handbook/achie
 export const openAchievementBox = (boxKey: string, requestId: string, quantity: number) =>
   post<BoxOpenResult>(`/handbook/achievements/rewards/${encodeURIComponent(boxKey)}/open`, { requestId, quantity });
 
-export type CodexEntry = { id: number; code?: string; name: string; category: string; detailId: string };
+export type CodexEntry = { id: number; code?: string; name: string; category: string; rarity: string | null; detailId: string };
 export type CodexPage = Page<CodexEntry> & {
-  kind: CodexKind; category: string; keyword: string; kinds: readonly CodexKind[];
-  categories: { label: string; value: string }[]; pageSize: number; scope: 'discovered_only';
+  kind: CodexKind; category: string; rarity: string; keyword: string; kinds: readonly CodexKind[];
+  categories: { label: string; value: string }[]; rarities: readonly string[]; total: number; pageSize: number; scope: 'discovered_only';
 };
 export type CodexDetail = {
   kind: CodexKind; detailId: string; detail: Record<string, unknown>; actions: [];
 };
-export const codex = (kind: CodexKind, category = '全部', page = 1, keyword = '') =>
-  get<CodexPage>(`/handbook/codex?${query({ kind, category, page, keyword })}`);
+export const codex = (kind: CodexKind, category = '全部', page = 1, keyword = '', rarity = '全部', pageSize = 5) =>
+  get<CodexPage>(`/handbook/codex?${query({ kind, category, page, keyword, rarity, pageSize })}`);
 export const codexDetail = (kind: CodexKind, id: string) =>
   get<CodexDetail>(`/handbook/codex/${encodeURIComponent(kind)}/${encodeURIComponent(id)}`);
 
